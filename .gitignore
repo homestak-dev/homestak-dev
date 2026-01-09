@@ -1,0 +1,9 @@
+# Child repos managed by gita
+.claude/
+.github/
+ansible/
+bootstrap/
+iac-driver/
+packer/
+site-config/
+tofu/
