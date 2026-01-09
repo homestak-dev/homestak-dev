@@ -109,19 +109,9 @@ Move Unreleased content to a new version header:
 - Fix bar issue (#124)
 ```
 
-### Phase 3: Tags
+### Phase 3: Validation
 
-Create and push tags in dependency order:
-
-```bash
-# For each repo
-git tag -a v0.X -m "Release v0.X"
-git push origin v0.X
-```
-
-### Phase 4: Validation
-
-Run integration tests before creating releases:
+Run integration tests before tagging to ensure the release is sound:
 
 ```bash
 # Full nested-pve roundtrip (~8 min on father)
@@ -139,6 +129,16 @@ Run integration tests before creating releases:
 **Attach report to release issue as proof.** Reports are generated in `iac-driver/reports/`:
 - `YYYYMMDD-HHMMSS.passed.md` - Human-readable summary
 - `YYYYMMDD-HHMMSS.passed.json` - Machine-readable details
+
+### Phase 4: Tags
+
+Create and push tags in dependency order:
+
+```bash
+# For each repo
+git tag -a v0.X -m "Release v0.X"
+git push origin v0.X
+```
 
 ### Phase 5: Packer Images
 
@@ -424,6 +424,10 @@ Planning for vX.Y release.
 - [ ] packer
 - [ ] iac-driver
 
+### Validation (before tagging)
+- [ ] Integration test passed (vm-roundtrip or nested-pve-roundtrip)
+- [ ] Test report attached to this issue
+
 ### Tags & Releases
 - [ ] .github vX.Y
 - [ ] .claude vX.Y
@@ -506,6 +510,13 @@ git push origin :refs/tags/v0.5.0-rc1
 Assets remain attached to the release through the tag change.
 
 ## Lessons Learned
+
+### v0.12
+- **Validate before tagging** - Run integration tests (Phase 3) before creating tags (Phase 4). Tags should represent validated code. Reordered phases in this release.
+- **Use PRs for significant doc changes** - Create PRs for documentation restructuring, CLAUDE.md rewrites, and similar changes. Direct commits acceptable for CHANGELOG alignment and minor fixes.
+- **Plan discussions surface design decisions** - Thorough planning discussion (e.g., CLAUDE.md consolidation approach, issue migration strategy) prevents rework during execution.
+- **Issue migration timing** - Don't execute issue migration during planning phase. Keep it in execution phase to maintain clear boundaries.
+- **Makefile setup target needed** - Contributors need a simpler onboarding path. Created homestak-dev#17 for `make setup` target.
 
 ### v0.11
 - **Checkpoint before release execution** - After integration tests pass, explicitly pause to review RELEASE.md and the release issue checkboxes before creating tags/releases. The validation phase is part of the sprint, not the release execution. Without this checkpoint, steps get skipped in the rush to complete.
