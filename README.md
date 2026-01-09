@@ -11,10 +11,27 @@ For end-user documentation, see the [organization profile](https://github.com/ho
 git clone https://github.com/homestak-dev/homestak-dev.git
 cd homestak-dev
 
-# Full workspace setup (clones repos, installs deps, configures hooks)
+# Full workspace setup
 make setup
+```
 
-# Verify setup
+This clones all child repos, registers them with gita, checks dependencies, and configures git hooks for secrets management.
+
+If dependencies are missing, you'll see:
+```
+Checking dependencies...
+  gita:       OK
+  packer:     MISSING
+  shellcheck: MISSING
+  ...
+
+Missing dependencies: packer shellcheck
+Run: sudo make install-deps-all
+```
+
+Install missing dependencies and verify:
+```bash
+sudo make install-deps-all
 gita ll
 ```
 
@@ -36,7 +53,15 @@ homestak-dev/              # This repo (workspace parent)
 
 This workspace uses [gita](https://github.com/nosarthur/gita) to manage multiple repos.
 
-### Common Commands
+### Makefile Targets
+
+| Target | Description |
+|--------|-------------|
+| `make setup` | Full workspace setup (clone, register, check deps, configure hooks) |
+| `make check-deps` | Check if all dependencies are installed |
+| `make install-deps-all` | Install dependencies across all repos (requires sudo) |
+
+### Gita Commands
 
 | Command | Description |
 |---------|-------------|
