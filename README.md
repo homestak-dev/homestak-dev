@@ -11,16 +11,8 @@ For end-user documentation, see the [organization profile](https://github.com/ho
 git clone https://github.com/homestak-dev/homestak-dev.git
 cd homestak-dev
 
-# Install dependencies (gita)
-make install-deps
-
-# Clone all child repos
-for repo in .github .claude ansible bootstrap iac-driver packer site-config tofu; do
-  git clone https://github.com/homestak-dev/$repo.git
-done
-
-# Register repos with gita
-gita add .github .claude ansible bootstrap iac-driver packer site-config tofu
+# Full workspace setup (clones repos, installs deps, configures hooks)
+make setup
 
 # Verify setup
 gita ll
@@ -52,24 +44,6 @@ This workspace uses [gita](https://github.com/nosarthur/gita) to manage multiple
 | `gita fetch` | Fetch all repos |
 | `gita pull` | Pull all repos |
 | `gita shell <cmd>` | Run command in all repos |
-
-### Custom Commands
-
-Configure in `~/.config/gita/cmds.json`:
-
-```json
-{
-  "lint": {"cmd": "make lint", "shell": true, "allow_all": true},
-  "test": {"cmd": "make test", "shell": true, "allow_all": true},
-  "build": {"cmd": "make build", "shell": true, "allow_all": true}
-}
-```
-
-Then use:
-```bash
-gita lint   # Run make lint in all repos
-gita test   # Run make test in all repos
-```
 
 ## Documentation
 

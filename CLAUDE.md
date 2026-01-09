@@ -76,13 +76,15 @@ This workspace uses **gita** to manage multiple repos.
 | `gita shell <cmd>` | Run shell command in all repos |
 | `gita super <repo> <git-cmd>` | Run git command in specific repo |
 
-### Custom Commands
+### Cross-Repo Operations
 
-| Command | Description |
-|---------|-------------|
-| `gita lint` | Run `make lint` in all repos |
-| `gita test` | Run `make test` in all repos |
-| `gita build` | Run `make build` in all repos |
+Use `gita shell` to run commands across all repos:
+
+```bash
+gita shell make lint          # Run make lint in all repos
+gita shell make test          # Run make test in all repos
+gita shell make install-deps  # Install deps in all repos
+```
 
 ## Claude Code Skills
 
