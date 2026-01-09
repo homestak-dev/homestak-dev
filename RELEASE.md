@@ -48,6 +48,15 @@ This ensures each release benefits from accumulated process improvements, especi
 - [ ] CHANGELOGs current (all repos)
 - [ ] Packer build smoke test on designated build host
 
+```bash
+# Tag validation - ensure no existing tags for target version
+VERSION=0.X  # Set to target version
+for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
+  echo "=== $repo ==="
+  gh api repos/homestak-dev/$repo/git/refs/tags/v${VERSION} 2>/dev/null && echo "WARNING: tag exists!" || echo "OK: no tag"
+done
+```
+
 #### CLAUDE.md Review (per .github#5)
 
 Verify each repo's CLAUDE.md reflects current architecture:
