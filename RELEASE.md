@@ -1,0 +1,536 @@
+# Release Methodology
+
+Standard process for homestak releases across all repositories.
+
+## Repository Dependency Order
+
+Releases must follow this order (downstream depends on upstream):
+
+**Meta repositories** (release process, documentation):
+1. **.github** - Organization templates and PR defaults
+2. **.claude** - Claude Code configuration and skills
+3. **homestak-dev** - Workspace parent, release methodology, CLAUDE.md
+
+**Core repositories** (functional dependencies):
+4. **site-config** - Configuration and secrets
+5. **tofu** - VM provisioning modules
+6. **ansible** - Host configuration playbooks
+7. **bootstrap** - Installation and CLI
+8. **packer** - Custom images (requires build host)
+9. **iac-driver** - Orchestration (depends on all above)
+
+**Unified versioning:** All repos get the same version tag on each release, even if unchanged. This simplifies tracking - "homestak v0.8" means all repos at v0.8.
+
+## Release Phases
+
+### Phase 0: Release Plan Refresh
+
+**When:** Execute when transitioning from "Planning" to "In Progress" - not during initial planning.
+
+Before starting release work, ensure prerequisites are met and the plan is current:
+
+- [ ] Verify prerequisite releases are complete (tags exist, issues closed)
+- [ ] Compare release plan against RELEASE.md template
+- [ ] Update Pre-flight, CLAUDE.md Review, CHANGELOGs, Tags & Releases, and Post-Release sections to match current RELEASE.md
+- [ ] Add any new checklist items from lessons learned
+
+This ensures each release benefits from accumulated process improvements, especially if time has passed since the plan was created.
+
+### Phase 1: Pre-flight
+
+- [ ] Git fetch on all repos (avoid rebase surprises)
+- [ ] All PRs merged to main branches
+- [ ] Working trees clean (`git status` on all repos)
+- [ ] No existing tags for target version
+- [ ] CLAUDE.md files reflect current state (see below)
+- [ ] Organization README current (`.github/profile/README.md`)
+- [ ] RELEASE.md current (`homestak-dev/RELEASE.md`)
+- [ ] CHANGELOGs current (all repos)
+- [ ] Packer build smoke test on designated build host
+
+#### CLAUDE.md Review (per .github#5)
+
+Verify each repo's CLAUDE.md reflects current architecture:
+
+**Meta repos:**
+- [ ] .github - org templates, PR defaults
+- [ ] .claude - skills, settings
+- [ ] homestak-dev - workspace structure, documentation index
+
+**Core repos:**
+- [ ] site-config - schema, defaults, file structure
+- [ ] iac-driver - scenarios, actions, ConfigResolver
+- [ ] tofu - modules, variables, workflow
+- [ ] packer - templates, build workflow
+- [ ] ansible - playbooks, roles, collections
+- [ ] bootstrap - CLI, installation
+
+```bash
+# Quick status check
+for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
+  echo "=== $repo ==="
+  cd ~/homestak-dev/$repo
+  git status --short
+  git tag -l "v0.*" | tail -3
+done
+```
+
+### Phase 2: CHANGELOGs
+
+Update CHANGELOGs in dependency order.
+
+#### Development Workflow
+
+During development, add entries under an `## Unreleased` section:
+
+```markdown
+## Unreleased
+
+### Features
+- Add foo capability (#123)
+
+### Bug Fixes
+- Fix bar issue (#124)
+```
+
+#### At Release Time
+
+Move Unreleased content to a new version header:
+
+```markdown
+## Unreleased
+
+## vX.Y - YYYY-MM-DD
+
+### Features
+- Add foo capability (#123)
+
+### Bug Fixes
+- Fix bar issue (#124)
+```
+
+### Phase 3: Tags
+
+Create and push tags in dependency order:
+
+```bash
+# For each repo
+git tag -a v0.X -m "Release v0.X"
+git push origin v0.X
+```
+
+### Phase 4: Validation
+
+Run integration tests before creating releases:
+
+```bash
+# Full nested-pve roundtrip (~8 min on father)
+./run.sh --scenario nested-pve-roundtrip --host father
+
+# Or constructor + destructor separately with context persistence
+./run.sh --scenario nested-pve-constructor --host father -C /tmp/nested-pve.ctx
+# ... verify inner PVE, check test VM ...
+./run.sh --scenario nested-pve-destructor --host father -C /tmp/nested-pve.ctx
+
+# Quick validation: vm-roundtrip (~2 min)
+./run.sh --scenario vm-roundtrip --host father
+```
+
+**Attach report to release issue as proof.** Reports are generated in `iac-driver/reports/`:
+- `YYYYMMDD-HHMMSS.passed.md` - Human-readable summary
+- `YYYYMMDD-HHMMSS.passed.json` - Machine-readable details
+
+### Phase 5: Packer Images
+
+Build images on a host with QEMU/KVM support:
+
+```bash
+# Prerequisites (one-time on build host)
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/main/install.sh | bash
+homestak install packer
+
+# Build and fetch images
+cd ~/homestak-dev/iac-driver
+./run.sh --scenario packer-build-fetch --remote <build-host-ip>
+
+# Images downloaded to /tmp/packer-images/
+```
+
+**Build hosts:** father, mother (any PVE host with `homestak install packer`)
+
+**Dev workflow:** Use `packer-sync-build-fetch` to test local packer changes before committing.
+
+#### Image Versioning and `latest` Tag
+
+For unified versioning, **every release includes packer images** attached to the version release, and `latest` is updated to point to the new version. This ensures "homestak v0.X" is complete and self-contained.
+
+**If images were rebuilt this release:**
+```bash
+# Build and fetch new images
+./run.sh --scenario packer-build-fetch --remote <build-host-ip>
+```
+
+**If images unchanged (reuse from previous release):**
+```bash
+# Fetch from current latest
+mkdir -p /tmp/packer-images && cd /tmp/packer-images
+gh release download latest --repo homestak-dev/packer --pattern '*.qcow2'
+```
+
+**Then update `latest` tag and release:**
+```bash
+# Update latest tag to point to new release
+cd ~/homestak-dev/packer
+git tag -f latest v0.X
+git push origin latest --force
+
+# Delete and recreate latest release with same assets
+gh release delete latest --repo homestak-dev/packer --yes
+gh release create latest --prerelease \
+  --title "Latest Images" \
+  --notes "Rolling release - points to v0.X" \
+  --repo homestak-dev/packer \
+  /tmp/packer-images/debian-12-custom.qcow2 \
+  /tmp/packer-images/debian-13-custom.qcow2
+```
+
+See packer#5 for the `latest` tag convention details.
+
+**Override:** Pin to specific version with `--packer-release v0.X` or `site.yaml`.
+
+### Phase 6: GitHub Releases
+
+Create releases in dependency order. **Use `--prerelease` flag until v1.0.**
+
+```bash
+# Source-only repos
+gh release create v0.X --prerelease --title "v0.X" --notes "See CHANGELOG.md" --repo homestak-dev/<repo>
+
+# Packer (with image assets)
+gh release create v0.X --prerelease \
+  --title "v0.X" \
+  --notes "See CHANGELOG.md" \
+  --repo homestak-dev/packer \
+  /tmp/packer-images/debian-12-custom.qcow2 \
+  /tmp/packer-images/debian-13-custom.qcow2
+```
+
+#### Packer Image Checklist
+
+Verify all images are uploaded to the packer release:
+
+- [ ] debian-12-custom.qcow2
+- [ ] debian-13-custom.qcow2
+- [ ] debian-13-pve.qcow2 (or split parts if >2GB)
+
+**Note:** Images >2GB must be split due to GitHub limits. See Lessons Learned.
+
+### Phase 7: Verification
+
+```bash
+for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
+  echo "=== $repo ==="
+  gh release view v0.X --repo homestak-dev/$repo --json tagName,assets --jq '{tag: .tagName, assets: (.assets | length)}'
+done
+```
+
+Expected: All repos have releases, packer has 3+ assets.
+
+#### Post-Release Smoke Test
+
+Verify the released artifacts work from a fresh perspective:
+
+```bash
+# Test bootstrap installation (on a clean system or container)
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/v0.X/install.sh | bash
+
+# Verify version
+homestak --version  # Should show v0.X
+```
+
+This catches packaging issues before users encounter them.
+
+### Phase 8: After Action Report (same day)
+
+**Complete immediately after release while details are fresh.** Delaying AAR/retro results in lost insights.
+
+Document on the release issue:
+
+| Section | Content |
+|---------|---------|
+| Planned vs Actual | Timeline comparison |
+| Deviations | What changed and why |
+| Issues Discovered | Problems found during release |
+| Artifacts Delivered | Final release inventory |
+| Validation Report | Attach integration test report (markdown) |
+
+**Attach the integration test report** from `iac-driver/reports/YYYYMMDD-HHMMSS.passed.md` as a code block in the AAR comment. This provides permanent proof of validation.
+
+### Phase 9: Retrospective (same day)
+
+Document on the release issue:
+
+| Section | Content |
+|---------|---------|
+| What Worked Well | Keep doing these |
+| What Could Improve | Process improvements |
+| Suggestions | Specific ideas for next release |
+| Open Questions | Decisions deferred |
+| Follow-up Issues | Create issues for discoveries |
+
+**Important:** Create GitHub issues for any problems discovered during the release. Link them in the retrospective comment and consider them for the next release scope.
+
+#### Codify Lessons Learned
+
+After the retrospective, update this RELEASE.md with any process improvements:
+- New phases or steps discovered
+- Commands or patterns that should be documented
+- Gotchas to avoid in future releases
+
+Commit with message: `Update RELEASE.md with vX.Y lessons learned`
+
+### Phase 10: Housekeeping (periodic)
+
+Clean up local development environment:
+
+```bash
+# Delete merged local branches (run in each repo)
+git branch --merged | grep -v master | xargs git branch -d
+
+# Prune stale remote tracking refs
+git remote prune origin
+
+# Quick status check across all repos
+for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
+  echo "=== $repo ===" && cd ~/homestak-dev/$repo && git status --short && git branch
+done
+```
+
+This prevents accumulation of stale branches from merged PRs.
+
+## Scope Management
+
+### Scope Freeze
+
+Once a release transitions from "Planning" to "In Progress":
+
+- **No new features** - New scope goes to the next release
+- **Bug fixes only** - Critical issues discovered during release may be addressed
+- **Document deferrals** - Add deferred items to "Deferred to Future Release" section
+
+This prevents scope creep and keeps releases focused and predictable.
+
+### Mid-Release Discoveries
+
+If you discover issues during release work:
+
+1. **Critical blocker** - Fix it, document in AAR
+2. **Important but not blocking** - Create issue, add to next release plan
+3. **Nice to have** - Create issue, add to backlog
+
+### Hotfix Process
+
+For critical bugs requiring immediate release:
+
+1. Create fix on main/master branch
+2. Increment patch version (v0.9 → v0.9.1) if needed
+3. Update CHANGELOG with hotfix entry
+4. Run abbreviated validation (simple-vm-roundtrip)
+5. Tag and release affected repo(s) only
+6. Hotfixes do NOT require full release train
+
+## Version Numbering
+
+**Pre-release:** `v0.X` (current phase)
+- Simple major.minor versioning (e.g., v0.8, v0.9, v0.10)
+- No patch numbers or release candidates while pre-release
+- Add `-rc1`, `-rc2` or `.1`, `.2` only if actually needed
+- No backward compatibility guarantees
+- Delete/recreate tags acceptable for pre-releases
+
+**Stable:** `v1.0+` (future)
+- Semantic versioning with patch numbers
+- Backward compatibility expectations
+- No tag recreation
+
+## Release Issue Template
+
+Each release should have a coordination issue in `homestak-dev` repo.
+
+**Issue naming convention:** Use format `vX.Y Release Planning - Theme`
+
+Examples:
+- `v0.10 Release Planning - Housekeeping`
+- `v0.11 Release Planning - Code Quality`
+- `v0.20 Release Planning - Recursive Nested PVE`
+
+**Checkbox maintenance:** Check off items as phases complete to track progress visually. This provides a clear record of completion and helps identify any missed steps.
+
+```markdown
+## Summary
+Planning for vX.Y release.
+
+## Scope
+### repo-name
+- [ ] Feature/fix description (#issue)
+
+## Validation
+- [ ] Integration test results
+- [ ] Manual verification
+
+## Deferred to Future Release
+- repo#N - Description
+
+## Release Checklist
+
+### Phase 0: Release Plan Refresh
+- [ ] Verify prerequisite releases are complete (tags exist, issues closed)
+- [ ] Compare release plan against RELEASE.md template
+- [ ] Update checklists to match current methodology
+
+### Pre-flight
+- [ ] Git fetch on all repos (avoid rebase surprises)
+- [ ] All PRs merged to master
+- [ ] Working trees clean (`git status` on all repos)
+- [ ] No existing tags for target version
+- [ ] CLAUDE.md files reflect current state (see below)
+- [ ] Organization README current (`.github/profile/README.md`)
+- [ ] RELEASE.md current (`homestak-dev/RELEASE.md`)
+- [ ] CHANGELOGs current (all repos)
+- [ ] Packer build smoke test (if images changed)
+
+### CLAUDE.md Review
+**Meta repos:**
+- [ ] .github - org templates, PR defaults
+- [ ] .claude - skills, settings
+- [ ] homestak-dev - workspace structure, documentation index
+
+**Core repos:**
+- [ ] site-config - schema, defaults, file structure
+- [ ] iac-driver - scenarios, actions, ConfigResolver
+- [ ] tofu - modules, variables, workflow
+- [ ] packer - templates, build workflow
+- [ ] ansible - playbooks, roles, collections
+- [ ] bootstrap - CLI, installation
+
+### CHANGELOGs
+- [ ] .github
+- [ ] .claude
+- [ ] homestak-dev
+- [ ] site-config
+- [ ] tofu
+- [ ] ansible
+- [ ] bootstrap
+- [ ] packer
+- [ ] iac-driver
+
+### Tags & Releases
+- [ ] .github vX.Y
+- [ ] .claude vX.Y
+- [ ] homestak-dev vX.Y
+- [ ] site-config vX.Y
+- [ ] tofu vX.Y
+- [ ] ansible vX.Y
+- [ ] bootstrap vX.Y
+- [ ] packer vX.Y
+- [ ] iac-driver vX.Y
+
+### Packer Images
+- [ ] debian-12-custom.qcow2
+- [ ] debian-13-custom.qcow2
+- [ ] debian-13-pve.qcow2 (or split parts)
+
+### Verification
+- [ ] All repos have releases
+- [ ] Packer has 3+ image assets
+- [ ] Post-release smoke test (bootstrap install)
+
+### Post-Release (same day - do not defer)
+- [ ] After Action Report
+- [ ] Retrospective
+- [ ] Update RELEASE.md with lessons learned
+- [ ] Close release issue
+
+---
+**Started:** YYYY-MM-DD HH:MM
+**Completed:** YYYY-MM-DD HH:MM
+**Status:** Planning | In Progress | Complete
+```
+
+## Path to Stable
+
+Before graduating from pre-release to v1.0.0:
+
+- [ ] User-facing documentation (beyond CLAUDE.md)
+- [ ] CI/CD pipeline for automated integration tests
+- [ ] All "known issues" resolved or documented
+- [ ] Core workflows fully working
+- [ ] Security audit (secrets, SSH, API tokens)
+- [ ] Bootstrap UX polished
+
+## References
+
+**Historical releases** (issues in .github repo):
+- [v0.6 Release](https://github.com/homestak-dev/.github/issues/4) - First release using this methodology
+- [v0.7 Release](https://github.com/homestak-dev/.github/issues/6) - Gateway fix, state storage move, E2E validation
+- [v0.8 Release](https://github.com/homestak-dev/.github/issues/11) - CLI robustness, `latest` packer release tag
+- [v0.9 Release](https://github.com/homestak-dev/.github/issues/14) - Scenario annotations, --timeout, unit tests, CLAUDE.md audit
+- [v0.10 Release](https://github.com/homestak-dev/.github/issues/18) - Housekeeping, CI/CD Phase 1, repository settings harmonization
+- [v0.11 Release](https://github.com/homestak-dev/.github/issues/21) - Code quality, static analysis, test coverage, security audit
+
+**Current releases** (issues in homestak-dev repo):
+- v0.12+ release issues will be tracked in [homestak-dev/homestak-dev](https://github.com/homestak-dev/homestak-dev/issues)
+
+## Recipes
+
+### Renaming a Release
+
+To rename a release (e.g., `v0.5.0-rc1` → `v0.5`) without re-uploading assets:
+
+```bash
+# 1. Get the commit SHA for the old tag
+git show-ref --tags | grep v0.5.0-rc1
+
+# 2. Create new tag pointing to same commit
+git tag v0.5 <commit-sha>
+git push origin v0.5
+
+# 3. Edit release to use new tag
+gh release edit v0.5.0-rc1 --repo homestak-dev/<repo> --tag v0.5 --title "v0.5"
+
+# 4. Delete old tag
+git tag -d v0.5.0-rc1
+git push origin :refs/tags/v0.5.0-rc1
+```
+
+Assets remain attached to the release through the tag change.
+
+## Lessons Learned
+
+### v0.11
+- **Checkpoint before release execution** - After integration tests pass, explicitly pause to review RELEASE.md and the release issue checkboxes before creating tags/releases. The validation phase is part of the sprint, not the release execution. Without this checkpoint, steps get skipped in the rush to complete.
+- **Update checkboxes as you go** - Check off items in the release issue as work progresses, not post-hoc. This provides real-time visibility and prevents skipped steps.
+- **Distinguish "sprint" from "release"** - A sprint includes code changes, PRs, and validation. The release is the separate act of tagging and publishing. Conflating them leads to skipped release steps.
+- **Check for existing tags** - Before creating tags, verify they don't already exist across all repos. Created .github#26 for automation.
+- **Use `--prerelease` flag** - Until v1.0, all releases should use `--prerelease` per the methodology.
+- **Context loss requires re-reading** - When AI context is exhausted mid-release, re-read RELEASE.md before continuing. The summarized context may lose procedural details.
+- **Branch protection friction** - PRs required `--admin` flag due to branch protection. Created .github#27 to evaluate options.
+
+### v0.10
+- **Scenario name consistency matters** - `simple-vm-roundtrip` was incorrect in multiple places (RELEASE.md, issue #15, profile README). Fixed during release.
+- **Document destructive actions** - vm-destructor has no confirmation prompt. Added caution to examples, created iac-driver#65.
+- **Packer image reuse workflow** - When reusing images, must download from `latest` then re-upload to new release. Consider streamlining.
+- **Post-scope polish is scope creep** - Added third-party acknowledgments and improved examples during "completed" release. Consider scope freeze earlier.
+- **Release plan naming convention** - Inconsistent naming discovered (.github#25). Standardize on `vX.Y Release Planning - Theme`.
+
+### v0.9
+- **Thorough CLAUDE.md verification pays off** - Found 6 documentation errors during release. Consider making this a standard release phase rather than optional.
+- **Generate scenario tables from code** - Manually maintaining phase counts leads to drift. Consider `--list-scenarios --json` for automation.
+- **Integration test is not optional** - Skipping nested-pve-roundtrip before release is risky. Make it a hard blocker.
+- **Fetch before release work** - Run `git fetch` on all repos before starting release to avoid rebase surprises.
+- **Explicitly verify all image uploads** - debian-13-pve was omitted initially. Add image checklist to release process.
+- **GitHub 2GB release asset limit** - Large images (>2GB) must be split: `split -b 1900M image.qcow2 image.qcow2.part`, users reassemble with `cat image.qcow2.part* > image.qcow2`. Document in release notes.
+- **Review organization README** - `.github/profile/README.md` was updated retroactively to fix terminology. Added to pre-flight checklist.
+
+### v0.8
+- **Complete AAR/retro immediately** - Deferred post-release tasks result in lost context. Block on these before starting next release work.
