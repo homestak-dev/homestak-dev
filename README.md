@@ -11,8 +11,8 @@ For end-user documentation, see the [organization profile](https://github.com/ho
 git clone https://github.com/homestak-dev/homestak-dev.git
 cd homestak-dev
 
-# Install gita (polyrepo manager)
-pipx install gita
+# Install dependencies (gita)
+make install-deps
 
 # Clone all child repos
 for repo in .github .claude ansible bootstrap iac-driver packer site-config tofu; do

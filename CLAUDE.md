@@ -121,7 +121,6 @@ Consistent terminology across all repos:
 ## Conventions
 
 - **VM IDs**: 5-digit (10000+ dev, 20000+ k8s, 99900+ integration test)
-- **MAC prefix**: BC:24:11:*
 - **Networks**: dev 10.10.10.0/24, k8s 10.10.20.0/24, management 10.0.12.0/24
 - **Hostnames**: `{cluster}{instance}` (dev1, kubeadm1, router)
 - **Environments**: dev (permissive) vs prod (hardened)
@@ -180,12 +179,6 @@ This pattern enables any Debian host to become a build/deploy host without manua
 | [RELEASE.md](RELEASE.md) | Release methodology |
 | [REPO-SETTINGS.md](REPO-SETTINGS.md) | Repository configuration standards |
 | [CLAUDE-GUIDELINES.md](CLAUDE-GUIDELINES.md) | Documentation standards |
-
-### Operational Insights
-
-| File | Purpose |
-|------|---------|
-| [iac-driver/docs/lessons-learned-*.md](iac-driver/docs/) | Post-incident learnings |
 
 ## Release Process
 
