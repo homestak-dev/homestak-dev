@@ -62,6 +62,47 @@ Enable these security features:
 gh api repos/homestak-dev/REPO_NAME/vulnerability-alerts -X PUT
 ```
 
+### Issue Labels
+
+#### Default Labels (GitHub)
+
+GitHub provides these labels by default on new repositories:
+
+| Label | Color | Description |
+|-------|-------|-------------|
+| `bug` | `#d73a4a` | Something isn't working |
+| `documentation` | `#0075ca` | Improvements or additions to documentation |
+| `duplicate` | `#cfd3d7` | This issue or pull request already exists |
+| `enhancement` | `#a2eeef` | New feature or request |
+| `good first issue` | `#7057ff` | Good for newcomers |
+| `help wanted` | `#008672` | Extra attention is needed |
+| `invalid` | `#e4e669` | This doesn't seem right |
+| `question` | `#d876e3` | Further information is requested |
+| `wontfix` | `#ffffff` | This will not be worked on |
+
+#### Custom Labels
+
+In addition to GitHub's defaults, these custom labels are used across homestak-dev repositories:
+
+| Label | Color | Description |
+|-------|-------|-------------|
+| `epic` | `#3B0A80` | Epic issue tracking multiple sub-tasks |
+| `refactor` | `#FEF2C0` | Code refactoring or cleanup |
+| `release` | `#0E8A16` | Release planning and coordination |
+| `testing` | `#BFD4F2` | Test coverage or testing infrastructure |
+| `security` | `#D93F0B` | Security-related issues |
+| `breaking-change` | `#B60205` | Changes requiring migration or version bump |
+
+**CLI to create labels:**
+```bash
+gh label create epic --repo homestak-dev/REPO_NAME --description "Epic issue tracking multiple sub-tasks" --color 3B0A80
+gh label create refactor --repo homestak-dev/REPO_NAME --description "Code refactoring or cleanup" --color FEF2C0
+gh label create release --repo homestak-dev/REPO_NAME --description "Release planning and coordination" --color 0E8A16
+gh label create testing --repo homestak-dev/REPO_NAME --description "Test coverage or testing infrastructure" --color BFD4F2
+gh label create security --repo homestak-dev/REPO_NAME --description "Security-related issues" --color D93F0B
+gh label create breaking-change --repo homestak-dev/REPO_NAME --description "Changes requiring migration or version bump" --color B60205
+```
+
 ## Required Files
 
 | File | Purpose |
