@@ -21,6 +21,8 @@ Releases must follow this order (downstream depends on upstream):
 
 **Unified versioning:** All repos get the same version tag on each release, even if unchanged. This simplifies tracking - "homestak v0.8" means all repos at v0.8.
 
+**Packer images required:** Every packer release must include images, even if templates are unchanged. Copy images from the previous release if no rebuild is needed. An empty packer release breaks the unified versioning promise - users should be able to download any version and have working images.
+
 ## Sprint Planning
 
 Before starting release execution, complete sprint planning to ensure scope is well-defined and implementation approach is validated.
@@ -323,6 +325,8 @@ This catches packaging issues before users encounter them.
 
 **Complete immediately after release while details are fresh.** Delaying AAR/retro results in lost insights.
 
+**DO NOT close the release issue until AAR and Retrospective are complete.** These are required deliverables, not optional documentation.
+
 Document on the release issue:
 
 | Section | Content |
@@ -581,6 +585,11 @@ git push origin :refs/tags/v0.5.0-rc1
 Assets remain attached to the release through the tag change.
 
 ## Lessons Learned
+
+### v0.15
+- **AAR/Retro are required, not optional** - Release was initially closed without AAR and Retrospective. These are required deliverables that capture lessons learned. Do not close the release issue until both are complete.
+- **Packer images required for unified release** - Empty packer releases break the unified versioning promise. If templates are unchanged, copy images from the previous release. Created #45 to automate this.
+- **GitHub Actions may auto-create releases** - Packer has a workflow that creates a release on tag push. The publish idempotency fix (#41) correctly handled this by skipping the existing release.
 
 ### v0.14
 - **Release CLI available** - Use `scripts/release.sh` for automated release workflow (init, preflight, validate, tag, publish, verify). Manual steps remain documented as fallback.
