@@ -66,6 +66,40 @@ validate_run_scenario() {
     return $exit_code
 }
 
+validate_run_remote() {
+    local remote_host="$1"
+    local scenario="$2"
+    local host="$3"
+    local verbose="${4:-false}"
+
+    local verbose_flag=""
+    if [[ "$verbose" == "true" ]]; then
+        verbose_flag="--verbose"
+    fi
+
+    # Build the remote command
+    local remote_cmd="cd ~/homestak-dev && ./scripts/release.sh validate --scenario ${scenario} --host ${host} ${verbose_flag}"
+
+    log_info "Running validation on ${remote_host}..."
+    log_info "Remote command: ${remote_cmd}"
+    audit_cmd "ssh ${remote_host} '${remote_cmd}'" "ssh"
+
+    # Run on remote and capture exit code
+    set +e
+    ssh "${remote_host}" "${remote_cmd}"
+    local exit_code=$?
+    set -e
+
+    # Copy reports back
+    local report_dir="${IAC_DRIVER_DIR}/reports"
+    mkdir -p "$report_dir"
+
+    log_info "Copying reports from ${remote_host}..."
+    scp -q "${remote_host}:~/homestak-dev/iac-driver/reports/*.md" "${report_dir}/" 2>/dev/null || true
+
+    return $exit_code
+}
+
 # -----------------------------------------------------------------------------
 # Main Validation Runner
 # -----------------------------------------------------------------------------
@@ -75,6 +109,7 @@ run_validation() {
     local host="${2:-$DEFAULT_HOST}"
     local skip="${3:-false}"
     local verbose="${4:-false}"
+    local remote_host="${5:-}"
 
     # Handle skip
     if [[ "$skip" == "true" ]]; then
@@ -90,8 +125,8 @@ run_validation() {
         return 0
     fi
 
-    # Check iac-driver exists
-    if ! validate_check_iac_driver; then
+    # Check iac-driver exists (only for local execution)
+    if [[ -z "$remote_host" ]] && ! validate_check_iac_driver; then
         return 1
     fi
 
@@ -102,16 +137,25 @@ run_validation() {
     echo ""
     echo "  Scenario: ${scenario}"
     echo "  Host:     ${host}"
+    if [[ -n "$remote_host" ]]; then
+        echo "  Remote:   ${remote_host}"
+    fi
     echo ""
 
     # Record start time to find new reports
     local start_time
     start_time=$(date +%s)
 
-    # Run the scenario
+    # Run the scenario (remote or local)
     local scenario_passed=false
-    if validate_run_scenario "$scenario" "$host" "$verbose"; then
-        scenario_passed=true
+    if [[ -n "$remote_host" ]]; then
+        if validate_run_remote "$remote_host" "$scenario" "$host" "$verbose"; then
+            scenario_passed=true
+        fi
+    else
+        if validate_run_scenario "$scenario" "$host" "$verbose"; then
+            scenario_passed=true
+        fi
     fi
 
     # Find the report generated during this run

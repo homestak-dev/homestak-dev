@@ -37,17 +37,24 @@ verify_packer_assets() {
     assets=$(gh release view "v${version}" --repo "homestak-dev/packer" --json assets --jq '.assets[].name' 2>/dev/null)
 
     local found=()
+    local found_split=()
     local missing=()
 
     for expected in "${EXPECTED_PACKER_ASSETS[@]}"; do
+        # Check for exact match
         if echo "$assets" | grep -q "^${expected}$"; then
             found+=("$expected")
+        # Check for split files pattern (e.g., file.qcow2.partaa, file.qcow2.partab)
+        elif echo "$assets" | grep -q "^${expected}\.part"; then
+            found+=("$expected")
+            found_split+=("$expected")
         else
             missing+=("$expected")
         fi
     done
 
-    echo "${#found[@]}:${#missing[@]}"
+    # Return found:missing:split counts
+    echo "${#found[@]}:${#missing[@]}:${#found_split[@]}"
 }
 
 # -----------------------------------------------------------------------------
@@ -76,7 +83,9 @@ run_verify() {
     local asset_check
     asset_check=$(verify_packer_assets "$version")
     local found_count="${asset_check%%:*}"
-    local missing_count="${asset_check##*:}"
+    local rest="${asset_check#*:}"
+    local missing_count="${rest%%:*}"
+    local split_count="${rest##*:}"
 
     if [[ "$missing_count" -gt 0 ]]; then
         all_passed=false
@@ -106,7 +115,8 @@ run_verify() {
   "releases": ${repos_json},
   "packer_assets": {
     "found": ${found_count},
-    "expected": ${#EXPECTED_PACKER_ASSETS[@]}
+    "expected": ${#EXPECTED_PACKER_ASSETS[@]},
+    "split": ${split_count}
   }
 }
 EOF
@@ -134,15 +144,36 @@ EOF
 
         echo ""
         echo "Packer Assets:"
+        local assets
+        assets=$(gh release view "v${version}" --repo "homestak-dev/packer" --json assets --jq '.assets[].name' 2>/dev/null)
+
         if [[ "$found_count" -eq "${#EXPECTED_PACKER_ASSETS[@]}" ]]; then
-            echo -e "  ${GREEN}✓${NC} All ${#EXPECTED_PACKER_ASSETS[@]} expected assets found"
+            if [[ "$split_count" -gt 0 ]]; then
+                echo -e "  ${GREEN}✓${NC} All ${#EXPECTED_PACKER_ASSETS[@]} expected assets found (${split_count} split)"
+            else
+                echo -e "  ${GREEN}✓${NC} All ${#EXPECTED_PACKER_ASSETS[@]} expected assets found"
+            fi
+            # Show details for each asset
+            for expected in "${EXPECTED_PACKER_ASSETS[@]}"; do
+                if echo "$assets" | grep -q "^${expected}$"; then
+                    echo -e "    ${GREEN}✓${NC} $expected"
+                elif echo "$assets" | grep -q "^${expected}\.part"; then
+                    local parts
+                    parts=$(echo "$assets" | grep "^${expected}\.part" | wc -l)
+                    echo -e "    ${GREEN}✓${NC} $expected (${parts} parts)"
+                fi
+            done
         else
             echo -e "  ${YELLOW}⚠${NC} Found ${found_count}/${#EXPECTED_PACKER_ASSETS[@]} expected assets"
-            # List what's missing
-            local assets
-            assets=$(gh release view "v${version}" --repo "homestak-dev/packer" --json assets --jq '.assets[].name' 2>/dev/null)
+            # Show status for each expected asset
             for expected in "${EXPECTED_PACKER_ASSETS[@]}"; do
-                if ! echo "$assets" | grep -q "^${expected}$"; then
+                if echo "$assets" | grep -q "^${expected}$"; then
+                    echo -e "    ${GREEN}✓${NC} $expected"
+                elif echo "$assets" | grep -q "^${expected}\.part"; then
+                    local parts
+                    parts=$(echo "$assets" | grep "^${expected}\.part" | wc -l)
+                    echo -e "    ${GREEN}✓${NC} $expected (${parts} parts)"
+                else
                     echo -e "    ${RED}✗${NC} Missing: $expected"
                 fi
             done
