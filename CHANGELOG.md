@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v0.15] - 2026-01-10
+
+### Theme: CLI Hardening
+
+Addresses dogfooding issues found during v0.14 release execution.
+
+### Added
+- `--remote HOST` flag to validate command for running validation on remote PVE host via SSH (#39)
+
+### Fixed
+- Preflight now checks for `site-config/secrets.yaml` before validation (#40)
+- Publish command now skips existing releases instead of failing (#41)
+- Verify command recognizes split packer image files (.partaa, .partab) (#42)
+
+### Related Issues
+- Closes #39 (Add --remote flag to validate command)
+- Closes #40 (Add secrets decryption check to preflight)
+- Closes #41 (Handle existing releases in publish command)
+- Closes #42 (Update verify.sh to handle split packer images)
+
 ## [v0.14] - 2026-01-10
 
 ### Theme: Release Automation Phase 1
