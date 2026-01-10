@@ -21,6 +21,49 @@ Releases must follow this order (downstream depends on upstream):
 
 **Unified versioning:** All repos get the same version tag on each release, even if unchanged. This simplifies tracking - "homestak v0.8" means all repos at v0.8.
 
+## Sprint Planning
+
+Before starting release execution, complete sprint planning to ensure scope is well-defined and implementation approach is validated.
+
+### Step 1: Scope Agreement
+
+- Review candidate issues for the release
+- Prioritize based on value, dependencies, and risk
+- Agree on what's in-scope vs deferred
+- Consider release size (prefer smaller, focused releases)
+
+### Step 2: Create Release Plan Draft
+
+Create a GitHub issue using the Release Issue Template:
+
+- Title: `vX.Y Release Planning - Theme`
+- Capture agreed scope with issue references
+- Note deferred items and rationale
+- Set status to "Planning"
+
+### Step 3: Issue-Level Planning
+
+For each in-scope issue, document:
+
+| Aspect | Content |
+|--------|---------|
+| Requirements | Acceptance criteria, constraints |
+| Design | Technical approach, alternatives considered |
+| Implementation | Files to modify, sequence |
+| Testing | How to verify, test scenarios |
+| Documentation | CLAUDE.md, CHANGELOG, other docs |
+
+Attach planning details to each issue as a comment before implementation.
+
+### Step 4: Update Release Plan
+
+Roll up issue-level planning into the release plan issue:
+
+- Add implementation order/dependencies
+- Identify critical path items
+- Note any risks or open questions
+- Update status to "In Progress" when starting execution
+
 ## Release Phases
 
 ### Phase 0: Release Plan Refresh
