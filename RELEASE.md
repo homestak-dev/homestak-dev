@@ -42,6 +42,7 @@ This ensures each release benefits from accumulated process improvements, especi
 - [ ] All PRs merged to main branches
 - [ ] Working trees clean (`git status` on all repos)
 - [ ] No existing tags for target version
+- [ ] Site-config secrets decrypted (`site-config/secrets.yaml` exists)
 - [ ] CLAUDE.md files reflect current state (see below)
 - [ ] Organization README current (`.github/profile/README.md`)
 - [ ] RELEASE.md current (`homestak-dev/RELEASE.md`)
@@ -120,10 +121,24 @@ Move Unreleased content to a new version header:
 
 ### Phase 3: Validation
 
-Run integration tests before tagging to ensure the release is sound:
+Run integration tests before tagging to ensure the release is sound.
 
+**Using release CLI (v0.14+, recommended):**
 ```bash
+# Ensure secrets are decrypted first
+cd site-config && make decrypt && cd ..
+
+# Run validation (requires PVE host access)
+./scripts/release.sh validate --scenario vm-roundtrip --host father
+```
+
+**Manual validation:**
+```bash
+# Ensure secrets are decrypted
+cd site-config && make decrypt && cd ..
+
 # Full nested-pve roundtrip (~8 min on father)
+cd iac-driver
 ./run.sh --scenario nested-pve-roundtrip --host father
 
 # Or constructor + destructor separately with context persistence
@@ -134,6 +149,8 @@ Run integration tests before tagging to ensure the release is sound:
 # Quick validation: vm-roundtrip (~2 min)
 ./run.sh --scenario vm-roundtrip --host father
 ```
+
+**Note:** Validation requires PVE API access. Run on a PVE host (father/mother) or ensure credentials are exported.
 
 **Attach report to release issue as proof.** Reports are generated in `iac-driver/reports/`:
 - `YYYYMMDD-HHMMSS.passed.md` - Human-readable summary
@@ -402,6 +419,7 @@ Planning for vX.Y release.
 - [ ] All PRs merged to master
 - [ ] Working trees clean (`git status` on all repos)
 - [ ] No existing tags for target version
+- [ ] Site-config secrets decrypted (`site-config/secrets.yaml` exists)
 - [ ] CLAUDE.md files reflect current state (see below)
 - [ ] Organization README current (`.github/profile/README.md`)
 - [ ] RELEASE.md current (`homestak-dev/RELEASE.md`)
@@ -434,7 +452,8 @@ Planning for vX.Y release.
 - [ ] iac-driver
 
 ### Validation (before tagging)
-- [ ] Integration test passed (vm-roundtrip or nested-pve-roundtrip)
+- [ ] Site-config secrets decrypted
+- [ ] Integration test passed (`release.sh validate` or manual iac-driver)
 - [ ] Test report attached to this issue
 
 ### Tags & Releases
@@ -519,6 +538,15 @@ git push origin :refs/tags/v0.5.0-rc1
 Assets remain attached to the release through the tag change.
 
 ## Lessons Learned
+
+### v0.14
+- **Release CLI available** - Use `scripts/release.sh` for automated release workflow (init, preflight, validate, tag, publish, verify). Manual steps remain documented as fallback.
+- **Validation requires PVE API access** - Run validation on a PVE host (father/mother) or ensure site-config secrets are decrypted and credentials exported. `cd site-config && make decrypt` before validation.
+- **Secrets must be decrypted before validation** - Preflight passes but validation fails without decrypted secrets. Added secrets check to preflight checklist.
+- **Design-first for complex features** - When implementing complex features, pause to write implementation spec before coding. Caught yq/jq decision early in v0.14.
+- **Dogfooding validates design** - Using release CLI for its own release found 5 real issues not caught in synthetic testing.
+- **gh release create race condition** - May report "tag already exists" error but release was created. Check release existence before failing.
+- **Split files not verified** - verify.sh expects exact filenames but large images are split. Verification shows 2/3 assets when 4 are present.
 
 ### v0.13
 - **Create formal test plans for risky changes** - When fixing lint violations or other changes that touch many files, write a test plan documenting coverage before proceeding. Integration tests alone may not cover all modified code paths.
