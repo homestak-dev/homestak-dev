@@ -43,6 +43,9 @@ This is a polyrepo workspace managed with [gita](https://github.com/nosarthur/gi
 homestak-dev/              # This repo (workspace parent)
 ├── .claude/               # Claude Code configuration and skills
 ├── .github/               # GitHub org config (PR templates, CI)
+├── scripts/               # Release automation CLI
+│   ├── release.sh         # Main CLI entry point
+│   └── lib/               # Modular library functions
 ├── ansible/               # Playbooks for host configuration
 ├── bootstrap/             # Entry point - curl|bash installer, homestak CLI
 ├── iac-driver/            # Orchestration engine - scenario-based workflows
@@ -178,6 +181,51 @@ homestak install ansible   # Ansible + collections
 
 This pattern enables any Debian host to become a build/deploy host without manual setup.
 
+## Release Automation CLI (v0.14+)
+
+The `scripts/release.sh` CLI automates multi-repo release operations.
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `init --version X.Y` | Initialize release state |
+| `status` | Show release progress |
+| `preflight` | Check repos ready (clean, no tags, CHANGELOGs) |
+| `validate` | Run iac-driver integration tests |
+| `tag --dry-run` | Preview tag creation |
+| `tag --execute` | Create and push tags |
+| `publish --dry-run` | Preview release creation |
+| `publish --execute` | Create GitHub releases |
+| `verify` | Verify all releases exist |
+| `audit` | Show timestamped action log |
+
+### Release Workflow
+
+```bash
+./scripts/release.sh init --version 0.14
+./scripts/release.sh preflight
+./scripts/release.sh validate --scenario vm-roundtrip --host father
+./scripts/release.sh tag --dry-run
+./scripts/release.sh tag --execute
+./scripts/release.sh publish --execute
+./scripts/release.sh verify
+```
+
+### State Files
+
+| File | Purpose |
+|------|---------|
+| `.release-state.json` | Release progress tracking (gitignored) |
+| `.release-audit.log` | Timestamped action log (gitignored) |
+
+### Safety Features
+
+- **Dry-run mode**: Preview commands before execution
+- **Validation gates**: Require integration tests before tagging
+- **Rollback**: Automatic cleanup on tag creation failure
+- **Dependency order**: Tags/releases created in correct order
+
 ## Documentation Index
 
 ### AI Context (CLAUDE.md)
@@ -208,6 +256,8 @@ See [RELEASE.md](RELEASE.md) for the release methodology, including:
 - Repository dependency order
 - 10-phase release workflow
 - After action reports and retrospectives
+
+**Automated releases (v0.14+):** Use `scripts/release.sh` CLI - see [Release Automation CLI](#release-automation-cli-v014) section above.
 
 ## License
 

@@ -4,6 +4,48 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v0.14] - 2026-01-10
+
+### Theme: Release Automation Phase 1
+
+This release introduces the release automation CLI (`scripts/release.sh`) to streamline multi-repo release operations. The CLI automates pre-flight checks, validation, tag creation, GitHub release publishing, and post-release verification.
+
+### Added
+- `scripts/release.sh` - Release automation CLI with commands:
+  - `init` - Initialize release state for a version
+  - `status` - Show current release progress
+  - `preflight` - Check all repos are ready (clean working trees, no existing tags)
+  - `validate` - Run iac-driver integration tests
+  - `tag` - Create git tags with dry-run and rollback support
+  - `publish` - Create GitHub releases with packer image uploads
+  - `verify` - Verify all releases exist with markdown summary
+  - `audit` - Show timestamped action log
+- `scripts/lib/` - Modular library structure:
+  - `state.sh` - JSON state management with jq
+  - `audit.sh` - Timestamped action logging
+  - `preflight.sh` - Pre-release checks
+  - `validate.sh` - iac-driver integration
+  - `tag.sh` - Tag creation with rollback
+  - `publish.sh` - GitHub release publishing
+  - `verify.sh` - Post-release verification
+- `.gitignore` - Added `.release-state.json` and `.release-audit.log`
+- CLAUDE.md - Added Release Automation CLI section
+
+### Safety Features
+- Dry-run mode for tag and publish operations
+- Validation gates requiring integration tests before tagging
+- Automatic rollback on tag creation failure
+- Dependency-ordered operations across all 9 repos
+
+### Related Issues
+- Closes #21 (State Management)
+- Closes #22 (Pre-flight Implementation)
+- Closes #23 (Validation Integration)
+- Closes #24 (Tag Creation)
+- Closes #25 (Release Publishing)
+- Closes #26 (Verification)
+- Closes #27 (Audit Logging)
+
 ## [v0.13] - 2026-01-10
 
 ### Theme: Site-Config as Single Source of Truth
