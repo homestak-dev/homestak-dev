@@ -99,6 +99,26 @@ gita shell make install-deps  # Install deps in all repos
 3. **Opinionated defaults** - Sensible choices for homelab (SDN, cloud-init, security profiles)
 4. **Testable infrastructure** - Nested PVE integration testing validates the full stack
 
+## Configuration Flow (v0.13+)
+
+site-config is the single source of truth:
+
+```
+site-config/
+├── site.yaml       # Site-wide defaults (timezone, packages)
+├── postures/       # Security postures (dev, prod, local)
+├── envs/           # Deployment topologies with posture FK
+└── secrets.yaml    # API tokens, SSH keys, passwords
+        │
+        ▼
+ConfigResolver (iac-driver)
+        │
+        ├── resolve_env()          → tfvars.json  → tofu
+        └── resolve_ansible_vars() → ansible-vars → ansible
+```
+
+This eliminates configuration drift between components - all settings flow from site-config.
+
 ## Design Principles
 
 - **Do it right** - Prefer proper solutions over quick workarounds. If a task is worth doing, invest in the reusable, maintainable approach rather than one-off hacks. Today's shortcut becomes tomorrow's technical debt.
