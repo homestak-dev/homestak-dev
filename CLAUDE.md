@@ -54,16 +54,16 @@ homestak-dev/              # This repo (workspace parent)
 └── tofu/                  # OpenTofu modules for VM provisioning
 ```
 
-Each component has its own `CLAUDE.md` with detailed context:
+Each component has its own `CLAUDE.md` with detailed context (auto-loaded via imports):
 
-| Component | Focus |
-|-----------|-------|
-| [ansible/CLAUDE.md](ansible/CLAUDE.md) | Playbooks, roles, inventory, execution models |
-| [bootstrap/CLAUDE.md](bootstrap/CLAUDE.md) | Installation, homestak CLI, dependency management |
-| [iac-driver/CLAUDE.md](iac-driver/CLAUDE.md) | Scenarios, actions, integration testing |
-| [packer/CLAUDE.md](packer/CLAUDE.md) | Templates, build workflow, image optimization |
-| [site-config/CLAUDE.md](site-config/CLAUDE.md) | Secrets encryption, SOPS/age, host credentials |
-| [tofu/CLAUDE.md](tofu/CLAUDE.md) | Modules, environments, configuration inheritance |
+@.claude/CLAUDE.md
+@.github/CLAUDE.md
+@ansible/CLAUDE.md
+@bootstrap/CLAUDE.md
+@iac-driver/CLAUDE.md
+@packer/CLAUDE.md
+@site-config/CLAUDE.md
+@tofu/CLAUDE.md
 
 ## Workspace Management
 
