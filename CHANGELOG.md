@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- CLAUDE.md now uses @imports to auto-load sub-project CLAUDE.md files at session start (#46)
+
 ## [v0.15] - 2026-01-10
 
 ### Theme: CLI Hardening
