@@ -105,6 +105,16 @@ preflight_check_gh_auth() {
     fi
 }
 
+preflight_check_secrets() {
+    local secrets_file="${WORKSPACE_DIR}/site-config/secrets.yaml"
+
+    if [[ ! -f "$secrets_file" ]]; then
+        echo "missing"
+    else
+        echo "decrypted"
+    fi
+}
+
 # -----------------------------------------------------------------------------
 # Main Pre-flight Runner
 # -----------------------------------------------------------------------------
@@ -126,6 +136,18 @@ run_preflight() {
         if [[ "$json_output" != "true" ]]; then
             log_error "GitHub CLI not authenticated"
             log_error "Run: gh auth login"
+        fi
+        all_passed=false
+    fi
+
+    # Check secrets decryption
+    local secrets_status
+    secrets_status=$(preflight_check_secrets)
+
+    if [[ "$secrets_status" == "missing" ]]; then
+        if [[ "$json_output" != "true" ]]; then
+            log_error "Site-config secrets not decrypted"
+            log_error "Run: cd site-config && make decrypt"
         fi
         all_passed=false
     fi
@@ -177,6 +199,7 @@ run_preflight() {
   "version": "${version}",
   "passed": ${all_passed},
   "gh_user": "${gh_user}",
+  "secrets": "${secrets_status}",
   "repos": ${repos_json}
 }
 EOF
@@ -250,6 +273,14 @@ EOF
             echo -e "  ${GREEN}✓${NC} gh CLI authenticated as ${gh_user}"
         else
             echo -e "  ${RED}✗${NC} gh CLI not authenticated"
+        fi
+
+        echo ""
+        echo "Secrets:"
+        if [[ "$secrets_status" == "decrypted" ]]; then
+            echo -e "  ${GREEN}✓${NC} site-config/secrets.yaml present"
+        else
+            echo -e "  ${RED}✗${NC} site-config/secrets.yaml missing (run: cd site-config && make decrypt)"
         fi
 
         echo ""

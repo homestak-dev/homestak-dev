@@ -79,6 +79,17 @@ publish_create_single() {
     local version="$2"
     local dry_run="${3:-true}"
 
+    # Check if release already exists
+    if gh release view "v${version}" --repo "homestak-dev/${repo}" &>/dev/null; then
+        if [[ "$dry_run" == "true" ]]; then
+            echo "    (release v${version} already exists, would skip)"
+        else
+            log_warn "Release v${version} already exists in ${repo}, skipping"
+            state_set_repo_field "$repo" "release" "done"
+        fi
+        return 0
+    fi
+
     local prerelease_flag=""
     if publish_is_prerelease "$version"; then
         prerelease_flag="--prerelease"

@@ -304,6 +304,7 @@ cmd_validate() {
     local host="father"
     local skip=false
     local verbose=false
+    local remote=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -313,6 +314,10 @@ cmd_validate() {
                 ;;
             --host)
                 host="$2"
+                shift 2
+                ;;
+            --remote)
+                remote="$2"
                 shift 2
                 ;;
             --skip)
@@ -337,7 +342,7 @@ cmd_validate() {
 
     # Run validation
     local validation_passed=false
-    if run_validation "$scenario" "$host" "$skip" "$verbose"; then
+    if run_validation "$scenario" "$host" "$skip" "$verbose" "$remote"; then
         validation_passed=true
     fi
 
@@ -577,6 +582,7 @@ Options:
   --force            Override validation gate requirement
   --rollback         Rollback tags/releases on failure
   --skip             Skip validation (emergency releases only)
+  --remote HOST      Run validation on remote host via SSH
   --lines N          Number of audit log lines to show (default: 20)
 
 Examples:
@@ -584,6 +590,7 @@ Examples:
   release.sh status
   release.sh preflight
   release.sh validate --scenario vm-roundtrip --host father
+  release.sh validate --scenario vm-roundtrip --host father --remote father
   release.sh validate --skip
   release.sh tag --dry-run
   release.sh tag --execute
