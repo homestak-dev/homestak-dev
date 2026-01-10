@@ -1,0 +1,652 @@
+#!/usr/bin/env bash
+#
+# release.sh - homestak-dev release automation CLI
+#
+# Usage:
+#   release.sh init --version X.Y
+#   release.sh status
+#   release.sh preflight
+#   release.sh validate --scenario <name> --host <host>
+#   release.sh tag [--dry-run|--execute]
+#   release.sh publish [--dry-run|--execute]
+#   release.sh verify
+#   release.sh audit [--lines N]
+#
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Configuration
+# -----------------------------------------------------------------------------
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_DIR="$(dirname "$SCRIPT_DIR")"
+STATE_FILE="${WORKSPACE_DIR}/.release-state.json"
+AUDIT_LOG="${WORKSPACE_DIR}/.release-audit.log"
+
+# Export for sourced scripts
+export SCRIPT_DIR WORKSPACE_DIR STATE_FILE AUDIT_LOG
+
+# -----------------------------------------------------------------------------
+# Colors and Logging
+# -----------------------------------------------------------------------------
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $*"
+}
+
+log_success() {
+    echo -e "${GREEN}[OK]${NC} $*"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $*"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $*" >&2
+}
+
+timestamp() {
+    date -u +"%Y-%m-%dT%H:%M:%SZ"
+}
+
+# Export logging functions for sourced scripts
+export -f log_info log_success log_warn log_error timestamp
+
+# -----------------------------------------------------------------------------
+# Source Libraries
+# -----------------------------------------------------------------------------
+
+source "${SCRIPT_DIR}/lib/audit.sh"
+source "${SCRIPT_DIR}/lib/state.sh"
+source "${SCRIPT_DIR}/lib/preflight.sh"
+source "${SCRIPT_DIR}/lib/validate.sh"
+source "${SCRIPT_DIR}/lib/tag.sh"
+source "${SCRIPT_DIR}/lib/publish.sh"
+source "${SCRIPT_DIR}/lib/verify.sh"
+
+# -----------------------------------------------------------------------------
+# Dependency Check
+# -----------------------------------------------------------------------------
+
+check_dependencies() {
+    local missing=()
+
+    for cmd in git gh jq; do
+        if ! command -v "$cmd" &>/dev/null; then
+            missing+=("$cmd")
+        fi
+    done
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        log_error "Missing required tools: ${missing[*]}"
+        log_error "Install with: sudo apt install ${missing[*]}"
+        exit 2
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Commands
+# -----------------------------------------------------------------------------
+
+cmd_init() {
+    local version=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --version)
+                version="$2"
+                shift 2
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    if [[ -z "$version" ]]; then
+        log_error "Version required: release.sh init --version X.Y"
+        exit 1
+    fi
+
+    # Check if state already exists
+    if state_exists; then
+        local existing_version existing_status
+        existing_version=$(state_get_version)
+        existing_status=$(state_get_status)
+
+        if [[ "$existing_status" == "in_progress" ]]; then
+            log_error "Release v${existing_version} is already in progress"
+            log_error "Use 'release.sh status' to check progress"
+            log_error "Or remove ${STATE_FILE} to start fresh"
+            exit 1
+        fi
+
+        log_warn "Previous release state found (v${existing_version}, status: ${existing_status})"
+        read -p "Overwrite? [y/N] " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            log_info "Aborted"
+            exit 0
+        fi
+    fi
+
+    # Initialize state and audit log
+    state_init "$version"
+    audit_init "$version"
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "  Release v${version} initialized"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+    echo "Next steps:"
+    echo "  1. release.sh preflight"
+    echo "  2. Update CHANGELOGs"
+    echo "  3. release.sh validate --scenario vm-roundtrip --host father"
+    echo "  4. release.sh tag --dry-run"
+    echo "  5. release.sh tag --execute"
+    echo "  6. release.sh publish --execute"
+    echo "  7. release.sh verify"
+    echo ""
+}
+
+cmd_status() {
+    if ! state_exists; then
+        log_info "No release in progress"
+        log_info "Start with: release.sh init --version X.Y"
+        exit 0
+    fi
+
+    if ! state_validate; then
+        log_error "State file is corrupted"
+        exit 3
+    fi
+
+    local version status started_at
+    version=$(state_get_version)
+    status=$(state_get_status)
+    started_at=$(state_read '.release.started_at')
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "  Release v${version} - Status: ${status}"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+    echo "Started: ${started_at}"
+    echo ""
+    echo "Phases:"
+    for phase in preflight validation tags releases verification; do
+        local phase_status
+        phase_status=$(state_get_phase_status "$phase")
+        case "$phase_status" in
+            complete)
+                echo -e "  ${GREEN}✓${NC} ${phase}"
+                ;;
+            in_progress)
+                echo -e "  ${YELLOW}●${NC} ${phase} (in progress)"
+                ;;
+            failed)
+                echo -e "  ${RED}✗${NC} ${phase} (failed)"
+                ;;
+            *)
+                echo -e "  ○ ${phase}"
+                ;;
+        esac
+    done
+
+    echo ""
+    echo "Repos:"
+    for repo in "${REPOS[@]}"; do
+        local tag_status release_status
+        tag_status=$(state_get_repo_field "$repo" "tag")
+        release_status=$(state_get_repo_field "$repo" "release")
+
+        local tag_icon release_icon
+        case "$tag_status" in
+            done) tag_icon="${GREEN}✓${NC}" ;;
+            pending) tag_icon="○" ;;
+            *) tag_icon="${RED}?${NC}" ;;
+        esac
+        case "$release_status" in
+            done) release_icon="${GREEN}✓${NC}" ;;
+            pending) release_icon="○" ;;
+            *) release_icon="${RED}?${NC}" ;;
+        esac
+
+        printf "  %-15s tag: %b  release: %b\n" "$repo" "$tag_icon" "$release_icon"
+    done
+    echo ""
+}
+
+cmd_audit() {
+    local lines=20
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --lines)
+                lines="$2"
+                shift 2
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    audit_show "$lines"
+}
+
+cmd_preflight() {
+    local json_output=false
+    local version=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --json)
+                json_output=true
+                shift
+                ;;
+            --version)
+                version="$2"
+                shift 2
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Get version from state if not provided
+    if [[ -z "$version" ]]; then
+        if state_exists && state_validate; then
+            version=$(state_get_version)
+        else
+            log_error "No version specified and no release in progress"
+            log_error "Use: release.sh preflight --version X.Y"
+            log_error "Or: release.sh init --version X.Y"
+            exit 1
+        fi
+    fi
+
+    # Update state
+    if state_exists; then
+        state_set_phase_status "preflight" "in_progress"
+    fi
+
+    # Run checks
+    if run_preflight "$version" "$json_output"; then
+        if state_exists; then
+            state_set_phase_status "preflight" "complete"
+        fi
+        exit 0
+    else
+        if state_exists; then
+            state_set_phase_status "preflight" "failed"
+        fi
+        exit 4
+    fi
+}
+
+cmd_validate() {
+    local scenario="vm-roundtrip"
+    local host="father"
+    local skip=false
+    local verbose=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --scenario)
+                scenario="$2"
+                shift 2
+                ;;
+            --host)
+                host="$2"
+                shift 2
+                ;;
+            --skip)
+                skip=true
+                shift
+                ;;
+            --verbose|-v)
+                verbose=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Update state
+    if state_exists; then
+        state_set_phase_status "validation" "in_progress"
+    fi
+
+    # Run validation
+    local validation_passed=false
+    if run_validation "$scenario" "$host" "$skip" "$verbose"; then
+        validation_passed=true
+    fi
+
+    # Store report path in state (regardless of pass/fail)
+    if state_exists && [[ -n "$VALIDATION_REPORT" ]]; then
+        state_write ".phases.validation.report" "$VALIDATION_REPORT"
+    fi
+
+    # Update phase status
+    if [[ "$validation_passed" == "true" ]]; then
+        if state_exists; then
+            state_set_phase_status "validation" "complete"
+        fi
+        exit 0
+    else
+        if state_exists; then
+            state_set_phase_status "validation" "failed"
+        fi
+        exit 5
+    fi
+}
+
+cmd_tag() {
+    local dry_run=true
+    local force=false
+    local rollback=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                dry_run=true
+                shift
+                ;;
+            --execute)
+                dry_run=false
+                shift
+                ;;
+            --force)
+                force=true
+                shift
+                ;;
+            --rollback)
+                rollback=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Require release in progress
+    if ! state_exists; then
+        log_error "No release in progress"
+        log_error "Start with: release.sh init --version X.Y"
+        exit 1
+    fi
+
+    if ! state_validate; then
+        log_error "State file is corrupted"
+        exit 3
+    fi
+
+    local version
+    version=$(state_get_version)
+
+    # Handle rollback
+    if [[ "$rollback" == "true" ]]; then
+        state_set_phase_status "tags" "in_progress"
+        if run_tag_rollback "$version"; then
+            state_set_phase_status "tags" "rolled_back"
+            audit_log "ROLLBACK" "human" "Tags v${version} rolled back"
+            exit 0
+        else
+            state_set_phase_status "tags" "failed"
+            exit 6
+        fi
+    fi
+
+    # Update state
+    state_set_phase_status "tags" "in_progress"
+
+    # Run tag creation
+    if run_tag "$version" "$dry_run" "$force"; then
+        if [[ "$dry_run" == "false" ]]; then
+            state_set_phase_status "tags" "complete"
+            audit_log "TAG" "cli" "Tags v${version} created in ${#REPOS[@]} repos"
+        fi
+        exit 0
+    else
+        if [[ "$dry_run" == "false" ]]; then
+            state_set_phase_status "tags" "failed"
+        fi
+        exit 6
+    fi
+}
+
+cmd_publish() {
+    local dry_run=true
+    local force=false
+    local images_dir=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                dry_run=true
+                shift
+                ;;
+            --execute)
+                dry_run=false
+                shift
+                ;;
+            --force)
+                force=true
+                shift
+                ;;
+            --images)
+                images_dir="$2"
+                shift 2
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Require release in progress
+    if ! state_exists; then
+        log_error "No release in progress"
+        log_error "Start with: release.sh init --version X.Y"
+        exit 1
+    fi
+
+    if ! state_validate; then
+        log_error "State file is corrupted"
+        exit 3
+    fi
+
+    local version
+    version=$(state_get_version)
+
+    # Update state
+    state_set_phase_status "releases" "in_progress"
+
+    # Run publish
+    if run_publish "$version" "$dry_run" "$force" "$images_dir"; then
+        if [[ "$dry_run" == "false" ]]; then
+            state_set_phase_status "releases" "complete"
+            audit_log "PUBLISH" "cli" "Releases v${version} created in ${#REPOS[@]} repos"
+        fi
+        exit 0
+    else
+        if [[ "$dry_run" == "false" ]]; then
+            state_set_phase_status "releases" "failed"
+        fi
+        exit 7
+    fi
+}
+
+cmd_verify() {
+    local json_output=false
+    local version=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --json)
+                json_output=true
+                shift
+                ;;
+            --version)
+                version="$2"
+                shift 2
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Get version from state if not provided
+    if [[ -z "$version" ]]; then
+        if state_exists && state_validate; then
+            version=$(state_get_version)
+        else
+            log_error "No version specified and no release in progress"
+            log_error "Use: release.sh verify --version X.Y"
+            exit 1
+        fi
+    fi
+
+    # Update state if release in progress
+    if state_exists; then
+        state_set_phase_status "verification" "in_progress"
+    fi
+
+    # Run verification
+    if run_verify "$version" "$json_output"; then
+        if state_exists; then
+            state_set_phase_status "verification" "complete"
+            state_set_status "complete"
+            audit_log "VERIFY" "cli" "Release v${version} verified successfully"
+            audit_done "$version"
+        fi
+        exit 0
+    else
+        if state_exists; then
+            state_set_phase_status "verification" "failed"
+        fi
+        exit 8
+    fi
+}
+
+cmd_help() {
+    cat << 'EOF'
+release.sh - homestak-dev release automation CLI
+
+Usage:
+  release.sh <command> [options]
+
+Commands:
+  init        Initialize a new release
+  status      Show current release status
+  preflight   Run pre-flight checks
+  validate    Run integration tests
+  tag         Create git tags
+  publish     Create GitHub releases
+  verify      Verify release artifacts
+  audit       Show audit log
+
+Options:
+  --version X.Y      Release version (required for init)
+  --dry-run          Show what would be done without executing
+  --execute          Execute the operation
+  --force            Override validation gate requirement
+  --rollback         Rollback tags/releases on failure
+  --skip             Skip validation (emergency releases only)
+  --lines N          Number of audit log lines to show (default: 20)
+
+Examples:
+  release.sh init --version 0.14
+  release.sh status
+  release.sh preflight
+  release.sh validate --scenario vm-roundtrip --host father
+  release.sh validate --skip
+  release.sh tag --dry-run
+  release.sh tag --execute
+  release.sh tag --execute --force
+  release.sh tag --rollback
+  release.sh audit --lines 50
+
+State Files:
+  .release-state.json   Release progress state
+  .release-audit.log    Timestamped action log
+EOF
+}
+
+# -----------------------------------------------------------------------------
+# Main
+# -----------------------------------------------------------------------------
+
+main() {
+    check_dependencies
+
+    if [[ $# -eq 0 ]]; then
+        cmd_help
+        exit 0
+    fi
+
+    local command="$1"
+    shift
+
+    case "$command" in
+        init)
+            cmd_init "$@"
+            ;;
+        status)
+            cmd_status "$@"
+            ;;
+        audit)
+            cmd_audit "$@"
+            ;;
+        preflight)
+            cmd_preflight "$@"
+            ;;
+        validate)
+            cmd_validate "$@"
+            ;;
+        tag)
+            cmd_tag "$@"
+            ;;
+        publish)
+            cmd_publish "$@"
+            ;;
+        verify)
+            cmd_verify "$@"
+            ;;
+        help|--help|-h)
+            cmd_help
+            ;;
+        *)
+            log_error "Unknown command: $command"
+            echo ""
+            cmd_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

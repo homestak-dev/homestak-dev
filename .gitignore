@@ -7,3 +7,7 @@ iac-driver/
 packer/
 site-config/
 tofu/
+
+# Release CLI state files
+.release-state.json
+.release-audit.log
