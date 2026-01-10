@@ -88,6 +88,7 @@ In addition to GitHub's defaults, these custom labels are used across homestak-d
 |-------|-------|-------------|
 | `epic` | `#3B0A80` | Epic issue tracking multiple sub-tasks |
 | `refactor` | `#FEF2C0` | Code refactoring or cleanup |
+| `release` | `#0E8A16` | Release planning and coordination |
 | `testing` | `#BFD4F2` | Test coverage or testing infrastructure |
 | `security` | `#D93F0B` | Security-related issues |
 | `breaking-change` | `#B60205` | Changes requiring migration or version bump |
@@ -96,6 +97,7 @@ In addition to GitHub's defaults, these custom labels are used across homestak-d
 ```bash
 gh label create epic --repo homestak-dev/REPO_NAME --description "Epic issue tracking multiple sub-tasks" --color 3B0A80
 gh label create refactor --repo homestak-dev/REPO_NAME --description "Code refactoring or cleanup" --color FEF2C0
+gh label create release --repo homestak-dev/REPO_NAME --description "Release planning and coordination" --color 0E8A16
 gh label create testing --repo homestak-dev/REPO_NAME --description "Test coverage or testing infrastructure" --color BFD4F2
 gh label create security --repo homestak-dev/REPO_NAME --description "Security-related issues" --color D93F0B
 gh label create breaking-change --repo homestak-dev/REPO_NAME --description "Changes requiring migration or version bump" --color B60205
