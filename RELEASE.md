@@ -520,6 +520,13 @@ Assets remain attached to the release through the tag change.
 
 ## Lessons Learned
 
+### v0.13
+- **Create formal test plans for risky changes** - When fixing lint violations or other changes that touch many files, write a test plan documenting coverage before proceeding. Integration tests alone may not cover all modified code paths.
+- **Context window compaction causes directory confusion** - Long sessions with many context compactions can lead to "wrong directory" errors during multi-repo operations. Consider a dedicated release agent for future releases to reduce context-related mistakes.
+- **Unified versioning requires explicit tracking** - Tag ALL repos even when unchanged. Without explicit checklist tracking, repos like packer get skipped. The release issue checklist must enumerate all 9 repos.
+- **ansible-lint cleanup belongs in sprint scope** - 209 lint violations were discovered during v0.13 PR review. Clean these proactively during development sprints, not at release time.
+- **Test before announcing completion** - User feedback "have you proved that the ansible roles still work?" caught a gap. Always validate functional correctness after significant refactoring.
+
 ### v0.12
 - **Validate before tagging** - Run integration tests (Phase 3) before creating tags (Phase 4). Tags should represent validated code. Reordered phases in this release.
 - **Use PRs for significant doc changes** - Create PRs for documentation restructuring, CLAUDE.md rewrites, and similar changes. Direct commits acceptable for CHANGELOG alignment and minor fixes.
