@@ -21,12 +21,14 @@ verify_release_exists() {
     local version="$2"
 
     local release_info
-    release_info=$(gh release view "v${version}" --repo "homestak-dev/${repo}" --json tagName,createdAt 2>/dev/null)
+    release_info=$(gh release view "v${version}" --repo "homestak-dev/${repo}" --json tagName,isDraft 2>/dev/null)
 
-    if [[ -n "$release_info" ]]; then
-        echo "exists"
-    else
+    if [[ -z "$release_info" ]]; then
         echo "missing"
+    elif echo "$release_info" | grep -q '"isDraft":true'; then
+        echo "draft"
+    else
+        echo "exists"
     fi
 }
 
@@ -69,12 +71,16 @@ run_verify() {
     local release_results=()
     local asset_results=()
 
-    # Check releases exist
+    # Check releases exist and are not drafts
+    local has_drafts=false
     for repo in "${REPOS[@]}"; do
         local status
         status=$(verify_release_exists "$repo" "$version")
         release_results+=("$repo:$status")
-        if [[ "$status" != "exists" ]]; then
+        if [[ "$status" == "draft" ]]; then
+            has_drafts=true
+            all_passed=false
+        elif [[ "$status" != "exists" ]]; then
             all_passed=false
         fi
     done
@@ -136,6 +142,8 @@ EOF
             local icon
             if [[ "$status" == "exists" ]]; then
                 icon="${GREEN}✓${NC}"
+            elif [[ "$status" == "draft" ]]; then
+                icon="${YELLOW}⚠${NC}"
             else
                 icon="${RED}✗${NC}"
             fi
@@ -186,7 +194,11 @@ EOF
             echo "  All ${#REPOS[@]} releases exist, ${#EXPECTED_PACKER_ASSETS[@]} packer assets present"
         else
             echo -e "  RESULT: ${RED}FAIL${NC}"
-            echo "  Some releases or assets are missing"
+            if [[ "$has_drafts" == "true" ]]; then
+                echo "  Some releases are still drafts (run: release.sh publish --finalize)"
+            else
+                echo "  Some releases or assets are missing"
+            fi
         fi
         echo "═══════════════════════════════════════════════════════════════"
         echo ""
@@ -202,7 +214,11 @@ EOF
             local repo="${result%%:*}"
             local status="${result##*:}"
             local icon="✅"
-            [[ "$status" != "exists" ]] && icon="❌"
+            if [[ "$status" == "draft" ]]; then
+                icon="⚠️ draft"
+            elif [[ "$status" != "exists" ]]; then
+                icon="❌"
+            fi
             echo "| ${repo} | ${icon} |"
         done
         echo ""
