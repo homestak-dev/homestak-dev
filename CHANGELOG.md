@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v0.16] - 2026-01-11
+
 ### Changed
 - CLAUDE.md now uses @imports to auto-load sub-project CLAUDE.md files at session start (#46)
 
