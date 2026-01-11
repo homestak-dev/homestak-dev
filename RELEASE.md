@@ -586,6 +586,9 @@ Assets remain attached to the release through the tag change.
 
 ## Lessons Learned
 
+### v0.17
+- **Never discard uncommitted changes without asking** - During release, Claude discarded an intentional CHANGELOG entry (provider bump to 0.92.0) assuming it was stray. Always ask the user before discarding uncommitted changes - they may be intentional work from a previous session.
+
 ### v0.16
 - **Tag collision requires manual reset** - When tags exist at older commits, `release.sh tag` fails. Manual deletion required across all 9 repos. Created #49 for `--reset` flag.
 - **Verify `latest` packer release completeness** - The `latest` release was missing debian-13-pve. Always verify all expected assets before copying to new release. Created #50 for automation.
