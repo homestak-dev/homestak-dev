@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v0.17] - 2026-01-11
+
+### Added
+- release.sh: Draft release detection in verify command (#52)
+  - `verify_release_exists()` returns "draft" status when `isDraft:true`
+  - Verification fails if any releases are drafts
+  - Displays draft status with warning icon
+- release.sh: Auto-finalize draft releases in publish command (#52)
+  - `publish_create_single()` finalizes drafts instead of skipping
+
 ## [v0.16] - 2026-01-11
 
 ### Changed
