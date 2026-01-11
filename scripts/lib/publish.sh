@@ -80,14 +80,37 @@ publish_create_single() {
     local dry_run="${3:-true}"
 
     # Check if release already exists
-    if gh release view "v${version}" --repo "homestak-dev/${repo}" &>/dev/null; then
-        if [[ "$dry_run" == "true" ]]; then
-            echo "    (release v${version} already exists, would skip)"
+    local release_info
+    release_info=$(gh release view "v${version}" --repo "homestak-dev/${repo}" --json isDraft 2>/dev/null || true)
+
+    if [[ -n "$release_info" ]]; then
+        # Release exists - check if it's a draft
+        if echo "$release_info" | grep -q '"isDraft":true'; then
+            # Finalize the draft release
+            local finalize_cmd="gh release edit v${version} --repo homestak-dev/${repo} --draft=false"
+            if [[ "$dry_run" == "true" ]]; then
+                echo "    (draft release v${version} exists, would finalize)"
+                echo "    ${finalize_cmd}"
+            else
+                log_info "Finalizing draft release v${version} in ${repo}"
+                audit_cmd "$finalize_cmd" "gh"
+                if ! eval "$finalize_cmd"; then
+                    log_error "Failed to finalize draft release in $repo"
+                    return 1
+                fi
+                state_set_repo_field "$repo" "release" "done"
+            fi
+            return 0
         else
-            log_warn "Release v${version} already exists in ${repo}, skipping"
-            state_set_repo_field "$repo" "release" "done"
+            # Already published
+            if [[ "$dry_run" == "true" ]]; then
+                echo "    (release v${version} already exists, would skip)"
+            else
+                log_info "Release v${version} already exists in ${repo}, skipping"
+                state_set_repo_field "$repo" "release" "done"
+            fi
+            return 0
         fi
-        return 0
     fi
 
     local prerelease_flag=""
