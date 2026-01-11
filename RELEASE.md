@@ -586,6 +586,13 @@ Assets remain attached to the release through the tag change.
 
 ## Lessons Learned
 
+### v0.16
+- **Tag collision requires manual reset** - When tags exist at older commits, `release.sh tag` fails. Manual deletion required across all 9 repos. Created #49 for `--reset` flag.
+- **Verify `latest` packer release completeness** - The `latest` release was missing debian-13-pve. Always verify all expected assets before copying to new release. Created #50 for automation.
+- **Tag inventory check before closing** - No verification that all repos are tagged before closing release issue. Created #48 for this check.
+- **Unified versioning requires constant awareness** - Easy to slip into "single-repo release" thinking. The rule is clear in RELEASE.md but requires active attention during execution.
+- **CHANGELOG updates should be batched** - Update all 9 CHANGELOGs together before tagging, not incrementally during implementation.
+
 ### v0.15
 - **AAR/Retro are required, not optional** - Release was initially closed without AAR and Retrospective. These are required deliverables that capture lessons learned. Do not close the release issue until both are complete.
 - **Packer images required for unified release** - Empty packer releases break the unified versioning promise. If templates are unchanged, copy images from the previous release. Created #45 to automate this.
