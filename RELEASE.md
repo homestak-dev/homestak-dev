@@ -293,6 +293,7 @@ Verify all images are uploaded to the packer release:
 - [ ] debian-12-custom.qcow2
 - [ ] debian-13-custom.qcow2
 - [ ] debian-13-pve.qcow2 (or split parts if >2GB)
+- [ ] SHA256SUMS
 
 **Note:** Images >2GB must be split due to GitHub limits. See Lessons Learned.
 
@@ -305,7 +306,7 @@ for repo in .github .claude homestak-dev site-config tofu ansible bootstrap pack
 done
 ```
 
-Expected: All repos have releases, packer has 3+ assets.
+Expected: All repos have releases, packer has 4 assets (3 images + checksums).
 
 #### Post-Release Smoke Test
 
@@ -518,10 +519,11 @@ Planning for vX.Y release.
 - [ ] debian-12-custom.qcow2
 - [ ] debian-13-custom.qcow2
 - [ ] debian-13-pve.qcow2 (or split parts)
+- [ ] SHA256SUMS
 
 ### Verification
 - [ ] All repos have releases
-- [ ] Packer has 3+ image assets
+- [ ] Packer has 4 image assets (3 images + checksums)
 - [ ] Post-release smoke test (bootstrap install)
 
 ### Post-Release (same day - do not defer)
@@ -585,6 +587,16 @@ git push origin :refs/tags/v0.5.0-rc1
 Assets remain attached to the release through the tag change.
 
 ## Lessons Learned
+
+### v0.18
+- **Test the actual CLI flow end-to-end** - `packer --copy` was tested in isolation but not via `release.sh packer --copy`. Four hotfixes required during release execution. Created #61 for `release.sh selftest` command.
+- **Verify external tool behavior, don't assume** - `gh release list --json` doesn't exist; assumed it did based on other `gh` commands. Always test against actual CLI behavior.
+- **Bootstrap ≠ validation-ready** - A bootstrapped host needs additional setup (node config, packer images, API token) before validation. Created #63 to document prerequisites.
+- **Provider upgrades need cache clearing** - When tofu lockfiles are updated, stale provider caches in `iac-driver/.states/*/data/providers/` cause version conflicts. Created #64 for preflight check.
+- **Feature prerequisites propagate** - When copying assets from a release that predates a feature (SHA256SUMS), the artifacts won't exist. `packer --copy` should generate SHA256SUMS. Created #62.
+- **Workspace path handling** - `verify.sh` looked for `homestak-dev/homestak-dev` instead of recognizing workspace root. Edge cases in multi-repo tooling need explicit handling.
+- **Hotfixes acceptable in v0.x** - For pre-1.0 releases, fixing bugs during release execution is reasonable. Post-1.0, more rigorous pre-release testing required.
+- **Real-time AAR comments valuable** - Capturing issues as GitHub comments during release made final AAR easy to compile.
 
 ### v0.17
 - **Never discard uncommitted changes without asking** - During release, Claude discarded an intentional CHANGELOG entry (provider bump to 0.92.0) assuming it was stray. Always ask the user before discarding uncommitted changes - they may be intentional work from a previous session.
