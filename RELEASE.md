@@ -201,6 +201,50 @@ cd iac-driver
 - `YYYYMMDD-HHMMSS.passed.md` - Human-readable summary
 - `YYYYMMDD-HHMMSS.passed.json` - Machine-readable details
 
+#### Validation Host Prerequisites
+
+A "bootstrapped" host is not automatically validation-ready. The following prerequisites must be in place before running validation scenarios.
+
+| Prerequisite | Description | Setup Command |
+|--------------|-------------|---------------|
+| **Node configuration** | `site-config/nodes/{hostname}.yaml` must exist with API endpoint and datastore | `cd site-config && make node-config` |
+| **API token** | Token for this host in `site-config/secrets.yaml` under `api_tokens.{hostname}` | `pveum user token add root@pam homestak --privsep 0` then add to secrets.yaml |
+| **Secrets decrypted** | `site-config/secrets.yaml` must be decrypted | `cd site-config && make decrypt` |
+| **Packer images** | Images published to local PVE storage (`/var/lib/vz/template/iso/`) | `cd packer && ./publish.sh` or download from release |
+| **SSH access** | SSH key access to the validation host | Standard SSH setup |
+| **Nested virtualization** | For nested-pve scenarios, nested virt must be enabled | Check: `cat /sys/module/kvm_intel/parameters/nested` |
+
+**Quick check for validation readiness:**
+
+```bash
+# On the validation host
+HOST=$(hostname)
+
+# 1. Check node config exists
+ls site-config/nodes/${HOST}.yaml 2>/dev/null || echo "MISSING: node config"
+
+# 2. Check API token exists (requires decrypted secrets)
+grep -q "api_tokens:" site-config/secrets.yaml && \
+  grep -q "${HOST}:" site-config/secrets.yaml && \
+  echo "OK: API token found" || echo "MISSING: API token"
+
+# 3. Check packer images
+ls /var/lib/vz/template/iso/debian-*-custom.img 2>/dev/null || echo "MISSING: packer images"
+
+# 4. Check nested virtualization
+cat /sys/module/kvm_intel/parameters/nested | grep -q Y && \
+  echo "OK: nested virt enabled" || echo "WARNING: nested virt disabled"
+```
+
+**Common issues:**
+
+| Issue | Solution |
+|-------|----------|
+| `API token not found` | Generate token with `pveum`, add to secrets.yaml, run `make encrypt` |
+| `node config missing` | Run `make node-config` on the PVE host |
+| `packer images missing` | Run `./publish.sh` or download from packer release |
+| `tofu provider version conflict` | Clear stale provider cache: `rm -rf iac-driver/.states/*/data/providers/` |
+
 ### Phase 4: Tags
 
 Create and push tags in dependency order:
