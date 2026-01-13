@@ -606,7 +606,7 @@ cmd_packer() {
 
         copy)
             local source
-            source=$(packer_get_latest_release)
+            source=$(packer_get_latest_release "$version")
 
             if [[ -z "$source" ]]; then
                 log_error "No previous release with images found"
@@ -902,7 +902,7 @@ cmd_full() {
                 else
                     echo "No template changes - copying images from previous release..."
                     local source
-                    source=$(packer_get_latest_release)
+                    source=$(packer_get_latest_release "$version")
                     if [[ -n "$source" ]]; then
                         if ! packer_copy_images_local "$version" "$source" "false"; then
                             log_warn "Failed to copy packer images"
