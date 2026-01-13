@@ -47,10 +47,25 @@ packer_templates_changed() {
 }
 
 packer_get_latest_release() {
-    # Get the latest packer release that has image assets
-    local releases
-    releases=$(gh release list --repo homestak-dev/packer --limit 10 --json tagName,assets -q '.[] | select(.assets | length > 0) | .tagName' 2>/dev/null | head -1)
-    echo "$releases"
+    # Get the latest packer release that has image assets (excluding current version)
+    local current_version="$1"
+    local tags
+    tags=$(gh release list --repo homestak-dev/packer --limit 10 | awk '{print $1}')
+
+    for tag in $tags; do
+        # Skip current version and 'latest' tag
+        [[ "$tag" == "v${current_version}" ]] && continue
+        [[ "$tag" == "latest" ]] && continue
+
+        # Check if this release has assets
+        local asset_count
+        asset_count=$(gh release view "$tag" --repo homestak-dev/packer --json assets --jq '.assets | length' 2>/dev/null)
+        if [[ "$asset_count" -gt 0 ]]; then
+            echo "$tag"
+            return 0
+        fi
+    done
+    echo ""
 }
 
 packer_dispatch_copy_images() {
@@ -59,7 +74,7 @@ packer_dispatch_copy_images() {
     local dry_run="${3:-true}"
 
     if [[ -z "$source_release" ]]; then
-        source_release=$(packer_get_latest_release)
+        source_release=$(packer_get_latest_release "$version")
     fi
 
     if [[ -z "$source_release" ]]; then
@@ -101,7 +116,7 @@ packer_copy_images_local() {
     local dry_run="${3:-true}"
 
     if [[ -z "$source_release" ]]; then
-        source_release=$(packer_get_latest_release)
+        source_release=$(packer_get_latest_release "$version")
     fi
 
     if [[ -z "$source_release" ]]; then
