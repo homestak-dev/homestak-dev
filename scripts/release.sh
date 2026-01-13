@@ -962,30 +962,34 @@ cmd_selftest() {
 
     local passed=0
     local failed=0
-    local test_state_file="${WORKSPACE_DIR}/.release-selftest-state.json"
-    local test_audit_log="${WORKSPACE_DIR}/.release-selftest-audit.log"
+
+    # Use exported variables for cleanup trap (local vars not accessible in trap)
+    export SELFTEST_STATE_FILE="${WORKSPACE_DIR}/.release-selftest-state.json"
+    export SELFTEST_AUDIT_LOG="${WORKSPACE_DIR}/.release-selftest-audit.log"
+    export SELFTEST_HAD_STATE=false
 
     # Backup real state if exists
-    local had_real_state=false
     if [[ -f "$STATE_FILE" ]]; then
-        had_real_state=true
+        SELFTEST_HAD_STATE=true
         mv "$STATE_FILE" "${STATE_FILE}.bak"
     fi
     if [[ -f "$AUDIT_LOG" ]]; then
         mv "$AUDIT_LOG" "${AUDIT_LOG}.bak"
     fi
 
-    # Cleanup function
+    # Cleanup function (uses exported variables)
     cleanup_selftest() {
-        rm -f "$test_state_file" "$test_audit_log"
-        rm -f "$STATE_FILE" "$AUDIT_LOG"
+        rm -f "$SELFTEST_STATE_FILE" "$SELFTEST_AUDIT_LOG" 2>/dev/null || true
+        rm -f "$STATE_FILE" "$AUDIT_LOG" 2>/dev/null || true
         # Restore real state
-        if [[ "$had_real_state" == "true" && -f "${STATE_FILE}.bak" ]]; then
+        if [[ "$SELFTEST_HAD_STATE" == "true" && -f "${STATE_FILE}.bak" ]]; then
             mv "${STATE_FILE}.bak" "$STATE_FILE"
         fi
         if [[ -f "${AUDIT_LOG}.bak" ]]; then
             mv "${AUDIT_LOG}.bak" "$AUDIT_LOG"
         fi
+        # Clean up exports
+        unset SELFTEST_STATE_FILE SELFTEST_AUDIT_LOG SELFTEST_HAD_STATE 2>/dev/null || true
     }
     trap cleanup_selftest EXIT
 
@@ -1012,14 +1016,14 @@ cmd_selftest() {
 
         if [[ $exit_code -eq 0 ]]; then
             echo -e "${GREEN}PASS${NC}"
-            ((passed++))
+            ((++passed))
             return 0
         else
             echo -e "${RED}FAIL${NC} (exit code: $exit_code)"
             if [[ "$verbose" != "true" && -n "$output" ]]; then
                 echo "$output" | head -5 | sed 's/^/      /'
             fi
-            ((failed++))
+            ((++failed))
             return 1
         fi
     }
@@ -1040,7 +1044,7 @@ cmd_selftest() {
     echo -n "  Testing preflight (parse)... "
     if "$0" preflight --version "$test_version" 2>&1 | grep -q "Preflight\|PREFLIGHT\|exists"; then
         echo -e "${GREEN}PASS${NC}"
-        ((passed++))
+        ((++passed))
     else
         echo -e "${YELLOW}SKIP${NC} (preflight runs against real repos)"
         # Don't count as failure
@@ -1059,7 +1063,7 @@ cmd_selftest() {
     echo -n "  Testing verify... "
     if "$0" verify --version "$test_version" 2>&1 | grep -qE "Release|release|VERIFY"; then
         echo -e "${GREEN}PASS${NC} (command executed)"
-        ((passed++))
+        ((++passed))
     else
         echo -e "${YELLOW}SKIP${NC} (verify runs against real releases)"
     fi
