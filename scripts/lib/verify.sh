@@ -10,10 +10,56 @@ EXPECTED_PACKER_ASSETS=(
     "debian-12-custom.qcow2"
     "debian-13-custom.qcow2"
     "debian-13-pve.qcow2"
+    "SHA256SUMS"
 )
 
 # -----------------------------------------------------------------------------
-# Verification Functions
+# Tag Verification Functions
+# -----------------------------------------------------------------------------
+
+verify_tag_exists() {
+    local repo="$1"
+    local version="$2"
+
+    # Check if tag exists on remote
+    if git -C "${WORKSPACE_DIR}/${repo}" ls-remote --tags origin "refs/tags/v${version}" 2>/dev/null | grep -q "v${version}"; then
+        echo "exists"
+    else
+        echo "missing"
+    fi
+}
+
+verify_tags() {
+    local version="$1"
+
+    local missing=()
+    local found=()
+
+    for repo in "${REPOS[@]}"; do
+        local repo_dir="${WORKSPACE_DIR}/${repo}"
+
+        # Check if repo exists locally
+        if [[ ! -d "$repo_dir" ]]; then
+            missing+=("$repo (not cloned)")
+            continue
+        fi
+
+        local status
+        status=$(verify_tag_exists "$repo" "$version")
+
+        if [[ "$status" == "exists" ]]; then
+            found+=("$repo")
+        else
+            missing+=("$repo")
+        fi
+    done
+
+    # Return found:missing counts and missing list
+    echo "${#found[@]}:${#missing[@]}:${missing[*]}"
+}
+
+# -----------------------------------------------------------------------------
+# Release Verification Functions
 # -----------------------------------------------------------------------------
 
 verify_release_exists() {
@@ -68,8 +114,21 @@ run_verify() {
     local json_output="${2:-false}"
 
     local all_passed=true
+    local tag_results=()
     local release_results=()
     local asset_results=()
+
+    # Check tags exist
+    local tag_check
+    tag_check=$(verify_tags "$version")
+    local tag_found="${tag_check%%:*}"
+    local tag_rest="${tag_check#*:}"
+    local tag_missing_count="${tag_rest%%:*}"
+    local tag_missing_list="${tag_rest#*:}"
+
+    if [[ "$tag_missing_count" -gt 0 ]]; then
+        all_passed=false
+    fi
 
     # Check releases exist and are not drafts
     local has_drafts=false
@@ -118,6 +177,11 @@ run_verify() {
 {
   "version": "${version}",
   "passed": ${all_passed},
+  "tags": {
+    "found": ${tag_found},
+    "expected": ${#REPOS[@]},
+    "missing": "${tag_missing_list}"
+  },
   "releases": ${repos_json},
   "packer_assets": {
     "found": ${found_count},
@@ -132,6 +196,16 @@ EOF
         echo "═══════════════════════════════════════════════════════════════"
         echo "  VERIFICATION: v${version}"
         echo "═══════════════════════════════════════════════════════════════"
+        echo ""
+
+        # Show tag inventory
+        echo "Git Tags:"
+        if [[ "$tag_missing_count" -eq 0 ]]; then
+            echo -e "  ${GREEN}✓${NC} All ${#REPOS[@]} repos have tag v${version}"
+        else
+            echo -e "  ${YELLOW}⚠${NC} ${tag_found}/${#REPOS[@]} repos have tag v${version}"
+            echo "  Missing: ${tag_missing_list}"
+        fi
         echo ""
 
         echo "GitHub Releases:"
@@ -191,12 +265,15 @@ EOF
         echo "═══════════════════════════════════════════════════════════════"
         if [[ "$all_passed" == "true" ]]; then
             echo -e "  RESULT: ${GREEN}PASS${NC}"
-            echo "  All ${#REPOS[@]} releases exist, ${#EXPECTED_PACKER_ASSETS[@]} packer assets present"
+            echo "  All ${#REPOS[@]} tags, ${#REPOS[@]} releases, ${#EXPECTED_PACKER_ASSETS[@]} packer assets present"
         else
             echo -e "  RESULT: ${RED}FAIL${NC}"
+            if [[ "$tag_missing_count" -gt 0 ]]; then
+                echo "  Missing tags: ${tag_missing_list}"
+            fi
             if [[ "$has_drafts" == "true" ]]; then
                 echo "  Some releases are still drafts (run: release.sh publish --finalize)"
-            else
+            elif [[ "$tag_missing_count" -eq 0 ]]; then
                 echo "  Some releases or assets are missing"
             fi
         fi
@@ -207,6 +284,11 @@ EOF
         echo "Release Issue Summary (copy/paste):"
         echo "---"
         echo "### Verification Results"
+        echo ""
+        echo "**Git Tags:** ${tag_found}/${#REPOS[@]} present"
+        if [[ "$tag_missing_count" -gt 0 ]]; then
+            echo "Missing: ${tag_missing_list}"
+        fi
         echo ""
         echo "| Repo | Release |"
         echo "|------|---------|"
