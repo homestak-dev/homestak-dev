@@ -369,6 +369,8 @@ cmd_tag() {
     local dry_run=true
     local force=false
     local rollback=false
+    local reset=false
+    local reset_repo=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -387,6 +389,15 @@ cmd_tag() {
             --rollback)
                 rollback=true
                 shift
+                ;;
+            --reset)
+                reset=true
+                shift
+                ;;
+            --reset-repo)
+                reset=true
+                reset_repo="$2"
+                shift 2
                 ;;
             *)
                 log_error "Unknown option: $1"
@@ -419,6 +430,22 @@ cmd_tag() {
             exit 0
         else
             state_set_phase_status "tags" "failed"
+            exit 6
+        fi
+    fi
+
+    # Handle reset
+    if [[ "$reset" == "true" ]]; then
+        state_set_phase_status "tags" "in_progress"
+        if run_tag_reset "$version" "$dry_run" "$reset_repo"; then
+            if [[ "$dry_run" == "false" ]]; then
+                state_set_phase_status "tags" "complete"
+            fi
+            exit 0
+        else
+            if [[ "$dry_run" == "false" ]]; then
+                state_set_phase_status "tags" "failed"
+            fi
             exit 6
         fi
     fi
@@ -504,6 +531,121 @@ cmd_publish() {
     fi
 }
 
+cmd_packer() {
+    local action="check"
+    local dry_run=true
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --check)
+                action="check"
+                shift
+                ;;
+            --copy)
+                action="copy"
+                shift
+                ;;
+            --dry-run)
+                dry_run=true
+                shift
+                ;;
+            --execute)
+                dry_run=false
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Require release in progress
+    if ! state_exists; then
+        log_error "No release in progress"
+        log_error "Start with: release.sh init --version X.Y"
+        exit 1
+    fi
+
+    if ! state_validate; then
+        log_error "State file is corrupted"
+        exit 3
+    fi
+
+    local version
+    version=$(state_get_version)
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "  PACKER IMAGES: v${version}"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+
+    case "$action" in
+        check)
+            echo "Checking for template changes..."
+            local changed
+            changed=$(packer_templates_changed "$version")
+            echo ""
+
+            if [[ "$changed" == "true" ]]; then
+                echo -e "${YELLOW}Templates have changed.${NC}"
+                echo "Options:"
+                echo "  1. Build new images: cd packer && ./build.sh"
+                echo "  2. Skip images for this release (not recommended)"
+                echo ""
+                echo "After building, upload with:"
+                echo "  release.sh publish --images /path/to/images"
+            else
+                echo -e "${GREEN}No template changes.${NC}"
+                echo "Images can be copied from previous release:"
+                echo "  release.sh packer --copy --dry-run"
+                echo "  release.sh packer --copy --execute"
+            fi
+            ;;
+
+        copy)
+            local source
+            source=$(packer_get_latest_release)
+
+            if [[ -z "$source" ]]; then
+                log_error "No previous release with images found"
+                exit 1
+            fi
+
+            echo "Source release: $source"
+            echo "Target release: v${version}"
+            echo ""
+
+            if [[ "$dry_run" == "true" ]]; then
+                echo "Commands that would be executed:"
+                echo ""
+                packer_copy_images_local "$version" "$source" "true"
+                echo ""
+                echo "═══════════════════════════════════════════════════════════════"
+                echo "  DRY-RUN COMPLETE - No changes made"
+                echo "  Run with --execute to copy images"
+                echo "═══════════════════════════════════════════════════════════════"
+            else
+                if packer_copy_images_local "$version" "$source" "false"; then
+                    echo ""
+                    echo "═══════════════════════════════════════════════════════════════"
+                    echo -e "  RESULT: ${GREEN}SUCCESS${NC}"
+                    echo "  Images copied from $source to v${version}"
+                    echo "═══════════════════════════════════════════════════════════════"
+                    audit_log "PACKER_COPY" "cli" "Images copied from $source to v${version}"
+                else
+                    echo ""
+                    log_error "Failed to copy images"
+                    exit 1
+                fi
+            fi
+            ;;
+    esac
+
+    echo ""
+}
+
 cmd_verify() {
     local json_output=false
     local version=""
@@ -558,6 +700,243 @@ cmd_verify() {
     fi
 }
 
+cmd_full() {
+    local host="father"
+    local scenario="vm-roundtrip"
+    local skip_validate=false
+    local dry_run=true
+    local images_dir=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --host)
+                host="$2"
+                shift 2
+                ;;
+            --scenario)
+                scenario="$2"
+                shift 2
+                ;;
+            --skip-validate)
+                skip_validate=true
+                shift
+                ;;
+            --images)
+                images_dir="$2"
+                shift 2
+                ;;
+            --dry-run)
+                dry_run=true
+                shift
+                ;;
+            --execute)
+                dry_run=false
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Require release in progress
+    if ! state_exists; then
+        log_error "No release in progress"
+        log_error "Start with: release.sh init --version X.Y"
+        exit 1
+    fi
+
+    if ! state_validate; then
+        log_error "State file is corrupted"
+        exit 3
+    fi
+
+    local version
+    version=$(state_get_version)
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "  FULL RELEASE: v${version}"
+    if [[ "$dry_run" == "true" ]]; then
+        echo "  Mode: DRY-RUN (preview only)"
+    else
+        echo "  Mode: EXECUTE"
+    fi
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+
+    local phases=()
+    local phase_status
+
+    # Build phase list based on current state
+    phase_status=$(state_get_phase_status "preflight")
+    if [[ "$phase_status" != "complete" ]]; then
+        phases+=("preflight")
+    fi
+
+    if [[ "$skip_validate" != "true" ]]; then
+        phase_status=$(state_get_phase_status "validation")
+        if [[ "$phase_status" != "complete" ]]; then
+            phases+=("validate")
+        fi
+    fi
+
+    phase_status=$(state_get_phase_status "tags")
+    if [[ "$phase_status" != "complete" ]]; then
+        phases+=("tag")
+    fi
+
+    phase_status=$(state_get_phase_status "releases")
+    if [[ "$phase_status" != "complete" ]]; then
+        phases+=("publish")
+    fi
+
+    # Always check packer if releases will be created
+    if [[ " ${phases[*]} " =~ " publish " ]]; then
+        phases+=("packer")
+    fi
+
+    phase_status=$(state_get_phase_status "verification")
+    if [[ "$phase_status" != "complete" ]]; then
+        phases+=("verify")
+    fi
+
+    if [[ ${#phases[@]} -eq 0 ]]; then
+        log_success "Release v${version} is already complete"
+        return 0
+    fi
+
+    echo "Phases to execute:"
+    for phase in "${phases[@]}"; do
+        echo "  - $phase"
+    done
+    echo ""
+
+    if [[ "$dry_run" == "true" ]]; then
+        echo "═══════════════════════════════════════════════════════════════"
+        echo "  DRY-RUN COMPLETE"
+        echo "  Run with --execute to perform the full release"
+        echo "═══════════════════════════════════════════════════════════════"
+        echo ""
+        return 0
+    fi
+
+    # Confirmation prompt
+    echo "═══════════════════════════════════════════════════════════════"
+    echo -e "  ${YELLOW}WARNING: This will execute a full release${NC}"
+    echo "  Version: v${version}"
+    echo "  Phases: ${phases[*]}"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+    read -p "Type 'yes' to proceed, or Ctrl+C to abort: " -r
+    if [[ "$REPLY" != "yes" ]]; then
+        log_info "Aborted by user"
+        return 1
+    fi
+    echo ""
+
+    # Execute each phase
+    for phase in "${phases[@]}"; do
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "  PHASE: $phase"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+
+        case "$phase" in
+            preflight)
+                if ! run_preflight "$version" "false"; then
+                    log_error "Preflight failed"
+                    return 1
+                fi
+                state_set_phase_status "preflight" "complete"
+                ;;
+
+            validate)
+                if ! run_validation "$scenario" "$host" "false" "false" ""; then
+                    log_error "Validation failed"
+                    return 1
+                fi
+                state_set_phase_status "validation" "complete"
+                ;;
+
+            tag)
+                if ! run_tag "$version" "false" "false"; then
+                    log_error "Tag creation failed"
+                    return 1
+                fi
+                state_set_phase_status "tags" "complete"
+                audit_log "TAG" "cli" "Tags v${version} created in ${#REPOS[@]} repos"
+                ;;
+
+            publish)
+                if ! run_publish "$version" "false" "false" "$images_dir"; then
+                    log_error "Publish failed"
+                    return 1
+                fi
+                state_set_phase_status "releases" "complete"
+                audit_log "PUBLISH" "cli" "Releases v${version} created in ${#REPOS[@]} repos"
+                ;;
+
+            packer)
+                # Check if templates changed
+                local changed
+                changed=$(packer_templates_changed "$version")
+
+                if [[ "$changed" == "true" ]]; then
+                    echo -e "${YELLOW}Packer templates have changed.${NC}"
+                    if [[ -n "$images_dir" ]]; then
+                        echo "Using provided images from: $images_dir"
+                        # Images will be uploaded during publish
+                    else
+                        echo "No --images directory specified."
+                        echo "Either build images or skip packer asset upload."
+                        echo ""
+                        read -p "Skip packer images for this release? [y/N] " -r
+                        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                            log_error "Aborted - please build images first"
+                            return 1
+                        fi
+                    fi
+                else
+                    echo "No template changes - copying images from previous release..."
+                    local source
+                    source=$(packer_get_latest_release)
+                    if [[ -n "$source" ]]; then
+                        if ! packer_copy_images_local "$version" "$source" "false"; then
+                            log_warn "Failed to copy packer images"
+                        fi
+                    else
+                        log_warn "No previous release with images found"
+                    fi
+                fi
+                ;;
+
+            verify)
+                if ! run_verify "$version" "false"; then
+                    log_warn "Verification found issues (continuing)"
+                fi
+                state_set_phase_status "verification" "complete"
+                state_set_status "complete"
+                audit_log "VERIFY" "cli" "Release v${version} verified"
+                audit_done "$version"
+                ;;
+        esac
+
+        echo -e "${GREEN}Phase $phase completed${NC}"
+    done
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo -e "  RESULT: ${GREEN}SUCCESS${NC}"
+    echo "  Release v${version} completed"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+
+    return 0
+}
+
 cmd_help() {
     cat << 'EOF'
 release.sh - homestak-dev release automation CLI
@@ -572,7 +951,9 @@ Commands:
   validate    Run integration tests
   tag         Create git tags
   publish     Create GitHub releases
+  packer      Handle packer image automation
   verify      Verify release artifacts
+  full        Execute complete release workflow
   audit       Show audit log
 
 Options:
@@ -581,6 +962,8 @@ Options:
   --execute          Execute the operation
   --force            Override validation gate requirement
   --rollback         Rollback tags/releases on failure
+  --reset            Reset tags to HEAD (delete and recreate, v0.x only)
+  --reset-repo REPO  Reset tag for single repo only
   --skip             Skip validation (emergency releases only)
   --remote HOST      Run validation on remote host via SSH
   --lines N          Number of audit log lines to show (default: 20)
@@ -596,6 +979,15 @@ Examples:
   release.sh tag --execute
   release.sh tag --execute --force
   release.sh tag --rollback
+  release.sh tag --reset --dry-run
+  release.sh tag --reset --execute
+  release.sh tag --reset-repo packer --execute
+  release.sh packer --check
+  release.sh packer --copy --dry-run
+  release.sh packer --copy --execute
+  release.sh full --dry-run
+  release.sh full --execute --host father
+  release.sh full --execute --skip-validate
   release.sh audit --lines 50
 
 State Files:
@@ -641,8 +1033,14 @@ main() {
         publish)
             cmd_publish "$@"
             ;;
+        packer)
+            cmd_packer "$@"
+            ;;
         verify)
             cmd_verify "$@"
+            ;;
+        full)
+            cmd_full "$@"
             ;;
         help|--help|-h)
             cmd_help

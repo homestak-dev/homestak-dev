@@ -13,6 +13,148 @@ PACKER_IMAGES=(
 )
 
 # -----------------------------------------------------------------------------
+# Packer Template Change Detection
+# -----------------------------------------------------------------------------
+
+packer_templates_changed() {
+    local version="$1"
+    local packer_dir="${WORKSPACE_DIR}/packer"
+
+    # If no previous release, templates are "changed"
+    local latest_tag
+    latest_tag=$(git -C "$packer_dir" describe --tags --abbrev=0 2>/dev/null || echo "")
+
+    if [[ -z "$latest_tag" ]]; then
+        log_info "No previous packer release found, templates considered changed"
+        echo "true"
+        return
+    fi
+
+    # Compare template files between latest tag and HEAD
+    local changed_files
+    changed_files=$(git -C "$packer_dir" diff --name-only "$latest_tag" HEAD -- templates/ scripts/ cloud-init/ 2>/dev/null || echo "")
+
+    if [[ -n "$changed_files" ]]; then
+        log_info "Packer templates changed since $latest_tag:"
+        echo "$changed_files" | while read -r file; do
+            log_info "  - $file"
+        done
+        echo "true"
+    else
+        log_info "No packer template changes since $latest_tag"
+        echo "false"
+    fi
+}
+
+packer_get_latest_release() {
+    # Get the latest packer release that has image assets
+    local releases
+    releases=$(gh release list --repo homestak-dev/packer --limit 10 --json tagName,assets -q '.[] | select(.assets | length > 0) | .tagName' 2>/dev/null | head -1)
+    echo "$releases"
+}
+
+packer_dispatch_copy_images() {
+    local version="$1"
+    local source_release="$2"
+    local dry_run="${3:-true}"
+
+    if [[ -z "$source_release" ]]; then
+        source_release=$(packer_get_latest_release)
+    fi
+
+    if [[ -z "$source_release" ]]; then
+        log_error "No source release found with image assets"
+        return 1
+    fi
+
+    log_info "Copying images from $source_release to v${version}"
+
+    local workflow="copy-images.yml"
+    local cmd="gh workflow run $workflow --repo homestak-dev/packer -f source_release=$source_release -f target_release=v${version}"
+
+    if [[ "$dry_run" == "true" ]]; then
+        echo "    ${cmd}"
+        return 0
+    fi
+
+    # Check if workflow exists
+    if ! gh workflow list --repo homestak-dev/packer --json name -q '.[].name' 2>/dev/null | grep -q "Copy Images"; then
+        log_warn "Workflow '$workflow' not found in packer repo"
+        log_info "Images must be copied manually or workflow created"
+        return 1
+    fi
+
+    # Dispatch the workflow
+    audit_cmd "$cmd" "gh"
+    if ! eval "$cmd"; then
+        log_error "Failed to dispatch copy-images workflow"
+        return 1
+    fi
+
+    log_success "Workflow dispatched. Monitor at: https://github.com/homestak-dev/packer/actions"
+    return 0
+}
+
+packer_copy_images_local() {
+    local version="$1"
+    local source_release="$2"
+    local dry_run="${3:-true}"
+
+    if [[ -z "$source_release" ]]; then
+        source_release=$(packer_get_latest_release)
+    fi
+
+    if [[ -z "$source_release" ]]; then
+        log_error "No source release found with image assets"
+        return 1
+    fi
+
+    log_info "Copying images from $source_release to v${version} locally"
+
+    # Create temp directory for images
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    trap "rm -rf $tmp_dir" EXIT
+
+    # Download assets from source release
+    local assets
+    assets=$(gh release view "$source_release" --repo homestak-dev/packer --json assets --jq '.assets[].name' 2>/dev/null)
+
+    if [[ -z "$assets" ]]; then
+        log_error "No assets found in source release $source_release"
+        return 1
+    fi
+
+    for asset in $assets; do
+        local download_cmd="gh release download $source_release --repo homestak-dev/packer --pattern \"$asset\" --dir \"$tmp_dir\""
+        local upload_cmd="gh release upload v${version} \"${tmp_dir}/${asset}\" --repo homestak-dev/packer --clobber"
+
+        if [[ "$dry_run" == "true" ]]; then
+            echo "    ${download_cmd}"
+            echo "    ${upload_cmd}"
+        else
+            log_info "Downloading $asset..."
+            if ! eval "$download_cmd"; then
+                log_error "Failed to download $asset"
+                return 1
+            fi
+
+            log_info "Uploading $asset..."
+            if ! eval "$upload_cmd"; then
+                log_error "Failed to upload $asset"
+                return 1
+            fi
+        fi
+    done
+
+    if [[ "$dry_run" != "true" ]]; then
+        log_success "Images copied from $source_release to v${version}"
+    fi
+
+    return 0
+}
+
+# -----------------------------------------------------------------------------
 # Publish Pre-conditions
 # -----------------------------------------------------------------------------
 
