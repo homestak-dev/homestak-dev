@@ -21,8 +21,16 @@ verify_tag_exists() {
     local repo="$1"
     local version="$2"
 
+    # homestak-dev IS the workspace, not a subdirectory
+    local repo_dir
+    if [[ "$repo" == "homestak-dev" ]]; then
+        repo_dir="${WORKSPACE_DIR}"
+    else
+        repo_dir="${WORKSPACE_DIR}/${repo}"
+    fi
+
     # Check if tag exists on remote
-    if git -C "${WORKSPACE_DIR}/${repo}" ls-remote --tags origin "refs/tags/v${version}" 2>/dev/null | grep -q "v${version}"; then
+    if git -C "$repo_dir" ls-remote --tags origin "refs/tags/v${version}" 2>/dev/null | grep -q "v${version}"; then
         echo "exists"
     else
         echo "missing"
@@ -36,7 +44,13 @@ verify_tags() {
     local found=()
 
     for repo in "${REPOS[@]}"; do
-        local repo_dir="${WORKSPACE_DIR}/${repo}"
+        local repo_dir
+        # homestak-dev IS the workspace, not a subdirectory
+        if [[ "$repo" == "homestak-dev" ]]; then
+            repo_dir="${WORKSPACE_DIR}"
+        else
+            repo_dir="${WORKSPACE_DIR}/${repo}"
+        fi
 
         # Check if repo exists locally
         if [[ ! -d "$repo_dir" ]]; then
