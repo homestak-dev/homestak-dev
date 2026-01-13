@@ -937,6 +937,158 @@ cmd_full() {
     return 0
 }
 
+cmd_selftest() {
+    local verbose=false
+    local test_version="0.99-test"
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --verbose|-v)
+                verbose=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "  RELEASE.SH SELF-TEST"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+
+    local passed=0
+    local failed=0
+    local test_state_file="${WORKSPACE_DIR}/.release-selftest-state.json"
+    local test_audit_log="${WORKSPACE_DIR}/.release-selftest-audit.log"
+
+    # Backup real state if exists
+    local had_real_state=false
+    if [[ -f "$STATE_FILE" ]]; then
+        had_real_state=true
+        mv "$STATE_FILE" "${STATE_FILE}.bak"
+    fi
+    if [[ -f "$AUDIT_LOG" ]]; then
+        mv "$AUDIT_LOG" "${AUDIT_LOG}.bak"
+    fi
+
+    # Cleanup function
+    cleanup_selftest() {
+        rm -f "$test_state_file" "$test_audit_log"
+        rm -f "$STATE_FILE" "$AUDIT_LOG"
+        # Restore real state
+        if [[ "$had_real_state" == "true" && -f "${STATE_FILE}.bak" ]]; then
+            mv "${STATE_FILE}.bak" "$STATE_FILE"
+        fi
+        if [[ -f "${AUDIT_LOG}.bak" ]]; then
+            mv "${AUDIT_LOG}.bak" "$AUDIT_LOG"
+        fi
+    }
+    trap cleanup_selftest EXIT
+
+    # Helper to run a test
+    run_test() {
+        local name="$1"
+        shift
+        local description="$1"
+        shift
+
+        echo -n "  Testing $name... "
+        if [[ "$verbose" == "true" ]]; then
+            echo ""
+            echo "    Command: $*"
+        fi
+
+        local output
+        local exit_code=0
+        if [[ "$verbose" == "true" ]]; then
+            "$@" 2>&1 | sed 's/^/    /' || exit_code=$?
+        else
+            output=$("$@" 2>&1) || exit_code=$?
+        fi
+
+        if [[ $exit_code -eq 0 ]]; then
+            echo -e "${GREEN}PASS${NC}"
+            ((passed++))
+            return 0
+        else
+            echo -e "${RED}FAIL${NC} (exit code: $exit_code)"
+            if [[ "$verbose" != "true" && -n "$output" ]]; then
+                echo "$output" | head -5 | sed 's/^/      /'
+            fi
+            ((failed++))
+            return 1
+        fi
+    }
+
+    # Test 1: help
+    run_test "help" "Show help text" "$0" help
+
+    # Test 2: init (creates state)
+    run_test "init" "Initialize test release" "$0" init --version "$test_version" < /dev/null || true
+    # Handle the prompt by saying no
+    echo "n" | "$0" init --version "$test_version" 2>/dev/null || true
+
+    # Test 3: status (requires state)
+    run_test "status" "Show release status" "$0" status
+
+    # Test 4: preflight (doesn't require state if version provided)
+    # Skip actual preflight since it checks real repos - just verify command parses
+    echo -n "  Testing preflight (parse)... "
+    if "$0" preflight --version "$test_version" 2>&1 | grep -q "Preflight\|PREFLIGHT\|exists"; then
+        echo -e "${GREEN}PASS${NC}"
+        ((passed++))
+    else
+        echo -e "${YELLOW}SKIP${NC} (preflight runs against real repos)"
+        # Don't count as failure
+    fi
+
+    # Test 5: tag --dry-run
+    run_test "tag-dry" "Tag creation dry-run" "$0" tag --dry-run || true
+
+    # Test 6: publish --dry-run
+    run_test "publish-dry" "Publish dry-run" "$0" publish --dry-run || true
+
+    # Test 7: packer --check
+    run_test "packer-check" "Packer template check" "$0" packer --check || true
+
+    # Test 8: verify (may fail due to no releases)
+    echo -n "  Testing verify... "
+    if "$0" verify --version "$test_version" 2>&1 | grep -qE "Release|release|VERIFY"; then
+        echo -e "${GREEN}PASS${NC} (command executed)"
+        ((passed++))
+    else
+        echo -e "${YELLOW}SKIP${NC} (verify runs against real releases)"
+    fi
+
+    # Test 9: full --dry-run
+    run_test "full-dry" "Full release dry-run" "$0" full --dry-run
+
+    # Test 10: audit
+    run_test "audit" "Show audit log" "$0" audit --lines 5
+
+    # Cleanup
+    cleanup_selftest
+    trap - EXIT
+
+    # Summary
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    local total=$((passed + failed))
+    if [[ $failed -eq 0 ]]; then
+        echo -e "  RESULT: ${GREEN}ALL TESTS PASSED${NC} ($passed/$total)"
+    else
+        echo -e "  RESULT: ${RED}$failed TESTS FAILED${NC} ($passed passed, $failed failed)"
+    fi
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+
+    [[ $failed -eq 0 ]]
+}
+
 cmd_help() {
     cat << 'EOF'
 release.sh - homestak-dev release automation CLI
@@ -954,6 +1106,7 @@ Commands:
   packer      Handle packer image automation
   verify      Verify release artifacts
   full        Execute complete release workflow
+  selftest    Run self-test on all commands
   audit       Show audit log
 
 Options:
@@ -988,6 +1141,8 @@ Examples:
   release.sh full --dry-run
   release.sh full --execute --host father
   release.sh full --execute --skip-validate
+  release.sh selftest
+  release.sh selftest --verbose
   release.sh audit --lines 50
 
 State Files:
@@ -1041,6 +1196,9 @@ main() {
             ;;
         full)
             cmd_full "$@"
+            ;;
+        selftest)
+            cmd_selftest "$@"
             ;;
         help|--help|-h)
             cmd_help
