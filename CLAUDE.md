@@ -195,21 +195,32 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 | `validate` | Run iac-driver integration tests |
 | `tag --dry-run` | Preview tag creation |
 | `tag --execute` | Create and push tags |
+| `tag --reset` | Reset tags to HEAD (v0.x only) |
 | `publish --dry-run` | Preview release creation |
 | `publish --execute` | Create GitHub releases |
-| `verify` | Verify all releases exist |
+| `packer --check` | Check for template changes |
+| `packer --copy` | Copy images from previous release |
+| `full --dry-run` | Preview complete release workflow |
+| `full --execute` | Execute end-to-end release |
+| `verify` | Verify all releases exist (tags + releases + packer assets) |
 | `audit` | Show timestamped action log |
 
 ### Release Workflow
 
 ```bash
-./scripts/release.sh init --version 0.14
+# Manual workflow
+./scripts/release.sh init --version 0.18
 ./scripts/release.sh preflight
 ./scripts/release.sh validate --scenario vm-roundtrip --host father
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute
 ./scripts/release.sh publish --execute
+./scripts/release.sh packer --copy --execute
 ./scripts/release.sh verify
+
+# Or use full command for end-to-end automation
+./scripts/release.sh full --dry-run
+./scripts/release.sh full --execute --host father
 ```
 
 ### State Files
