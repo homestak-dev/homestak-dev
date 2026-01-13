@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v0.18] - 2026-01-13
+
+### Theme: Release Tooling Completion
+
+Completes the release automation CLI with end-to-end workflow support and improved verification.
+
+### Added
+- `release.sh full` command for end-to-end release automation (#34)
+  - Orchestrates: preflight → validate → tag → publish → packer → verify
+  - Resumable via state phase tracking
+  - Supports `--skip-validate` for emergency releases
+- Tag inventory check in `release.sh verify` (#48)
+  - Shows missing tags before closing release
+  - Integrated into verification output
+- Tag reset capability in `release.sh tag` (#49)
+  - `--reset` flag deletes and recreates tags at HEAD
+  - `--reset-repo` for single repo operations
+  - Safety check: only allowed for v0.x pre-releases
+- Packer image automation in `release.sh` (#56)
+  - `packer --check` detects template changes via git diff
+  - `packer --copy` copies images from previous release
+  - GitHub Actions workflow for cross-release image copying
+
+### Cross-Repo Changes
+
+**packer v0.18:**
+- Add SHA256 checksums to image releases (#22)
+- Add `checksums.sh` script for generate/verify/show
+- Add `.github/workflows/copy-images.yml` for release automation
+
+**iac-driver v0.18:**
+- Add `--dry-run` mode for scenario preview (#40)
+
 ## [v0.17] - 2026-01-11
 
 ### Added
