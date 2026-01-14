@@ -66,6 +66,26 @@ Roll up issue-level planning into the release plan issue:
 - Note any risks or open questions
 - Update status to "In Progress" when starting execution
 
+### PR Validation Requirements
+
+Certain changes require validation testing **before merge**, not just code review:
+
+| Change Type | Required Validation |
+|-------------|---------------------|
+| Packer template changes | Build image, run `vm-roundtrip` or `nested-pve-roundtrip` |
+| Boot/startup optimizations | Measure actual timing before and after |
+| Cloud-init modifications | Full VM lifecycle test (provision → boot → verify) |
+| Tofu module changes | `vm-roundtrip` on target environment |
+| Ansible role changes | Run playbook on test VM, verify behavior |
+| iac-driver action changes | Scenario that exercises the action |
+
+**Process:**
+1. PR description must include validation results
+2. Attach timing data for performance-related changes
+3. If validation reveals issues, fix before merge (not during release)
+
+**Rationale:** v0.19 shipped untested optimizations that broke networking. Validation at PR time catches issues early; validation at release time creates pressure to ship broken code.
+
 ## Release Phases
 
 ### Phase 0: Release Plan Refresh
@@ -631,6 +651,13 @@ git push origin :refs/tags/v0.5.0-rc1
 Assets remain attached to the release through the tag change.
 
 ## Lessons Learned
+
+### v0.19
+- **Validate optimizations before merging** - packer#13 shipped boot time "optimizations" that were never tested. The bootcmd→runcmd change broke networking entirely. Optimizations require validation testing as part of PR scope, not just code review.
+- **CHANGELOG updates belong in PRs, not release** - Multiple CHANGELOGs needed mid-release fixes (iac-driver missing section, packer "Fixed" vs "Investigated"). Each PR should update the relevant CHANGELOG as part of the change.
+- **Use stable markers for detection, not service status** - EnsurePVEAction checked `pveproxy` status immediately after SSH, but the service wasn't running yet. Checking the marker file (`/etc/pve-packages-preinstalled`) is more reliable than racing against service startup.
+- **Follow process to the end** - Posted AAR to RELEASE.md instead of the release issue. Fatigue at end of release leads to shortcuts. The process exists for a reason.
+- **"Stability" release that needed multiple fixes is a miss** - Ironic that a release themed "Stability & Validation" required mid-release fixes. Having validation tools isn't enough - must use them consistently before merge.
 
 ### v0.18
 - **Test the actual CLI flow end-to-end** - `packer --copy` was tested in isolation but not via `release.sh packer --copy`. Four hotfixes required during release execution. Created #61 for `release.sh selftest` command.
