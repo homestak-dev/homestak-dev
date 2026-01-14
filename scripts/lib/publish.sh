@@ -72,6 +72,8 @@ packer_dispatch_copy_images() {
     local version="$1"
     local source_release="$2"
     local dry_run="${3:-true}"
+    local wait="${4:-false}"
+    local timeout="${5:-600}"  # 10 minutes default
 
     if [[ -z "$source_release" ]]; then
         source_release=$(packer_get_latest_release "$version")
@@ -106,8 +108,65 @@ packer_dispatch_copy_images() {
         return 1
     fi
 
-    log_success "Workflow dispatched. Monitor at: https://github.com/homestak-dev/packer/actions"
-    return 0
+    log_success "Workflow dispatched"
+
+    if [[ "$wait" != "true" ]]; then
+        log_info "Monitor at: https://github.com/homestak-dev/packer/actions"
+        return 0
+    fi
+
+    # Wait for workflow completion
+    log_info "Waiting for workflow to complete (timeout: ${timeout}s)..."
+
+    local start_time=$SECONDS
+    local run_id=""
+
+    # Wait a moment for the run to appear
+    sleep 3
+
+    # Find the most recent run of the workflow
+    while [[ -z "$run_id" && $((SECONDS - start_time)) -lt 30 ]]; do
+        run_id=$(gh run list --repo homestak-dev/packer --workflow "$workflow" \
+            --json databaseId,status,createdAt \
+            --jq 'sort_by(.createdAt) | reverse | .[0].databaseId' 2>/dev/null)
+        if [[ -z "$run_id" ]]; then
+            sleep 2
+        fi
+    done
+
+    if [[ -z "$run_id" ]]; then
+        log_error "Could not find workflow run"
+        return 1
+    fi
+
+    log_info "Workflow run ID: $run_id"
+
+    # Poll for completion
+    while [[ $((SECONDS - start_time)) -lt $timeout ]]; do
+        local status conclusion
+        status=$(gh run view "$run_id" --repo homestak-dev/packer --json status --jq '.status' 2>/dev/null)
+        conclusion=$(gh run view "$run_id" --repo homestak-dev/packer --json conclusion --jq '.conclusion' 2>/dev/null)
+
+        if [[ "$status" == "completed" ]]; then
+            if [[ "$conclusion" == "success" ]]; then
+                log_success "Workflow completed successfully"
+                return 0
+            else
+                log_error "Workflow failed with conclusion: $conclusion"
+                log_error "View details: gh run view $run_id --repo homestak-dev/packer"
+                return 1
+            fi
+        fi
+
+        local elapsed=$((SECONDS - start_time))
+        echo -ne "\r  Status: $status (${elapsed}s elapsed)    "
+        sleep 5
+    done
+
+    echo ""
+    log_error "Workflow timed out after ${timeout}s"
+    log_error "Check status: gh run view $run_id --repo homestak-dev/packer"
+    return 1
 }
 
 packer_copy_images_local() {

@@ -559,6 +559,9 @@ cmd_packer() {
     local dry_run=true
     local version=""
     local source=""
+    local use_workflow=false
+    local wait_workflow=true
+    local timeout=600
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -584,6 +587,18 @@ cmd_packer() {
                 ;;
             --source)
                 source="$2"
+                shift 2
+                ;;
+            --workflow)
+                use_workflow=true
+                shift
+                ;;
+            --no-wait)
+                wait_workflow=false
+                shift
+                ;;
+            --timeout)
+                timeout="$2"
                 shift 2
                 ;;
             *)
@@ -648,19 +663,39 @@ cmd_packer() {
 
             echo "Source release: $source"
             echo "Target release: v${version}"
+            if [[ "$use_workflow" == "true" ]]; then
+                echo "Method: GitHub Actions workflow"
+            else
+                echo "Method: Local (gh CLI)"
+            fi
             echo ""
 
             if [[ "$dry_run" == "true" ]]; then
                 echo "Commands that would be executed:"
                 echo ""
-                packer_copy_images_local "$version" "$source" "true"
+                if [[ "$use_workflow" == "true" ]]; then
+                    packer_dispatch_copy_images "$version" "$source" "true"
+                else
+                    packer_copy_images_local "$version" "$source" "true"
+                fi
                 echo ""
                 echo "═══════════════════════════════════════════════════════════════"
                 echo "  DRY-RUN COMPLETE - No changes made"
                 echo "  Run with --execute to copy images"
                 echo "═══════════════════════════════════════════════════════════════"
             else
-                if packer_copy_images_local "$version" "$source" "false"; then
+                local copy_result=0
+                if [[ "$use_workflow" == "true" ]]; then
+                    if ! packer_dispatch_copy_images "$version" "$source" "false" "$wait_workflow" "$timeout"; then
+                        copy_result=1
+                    fi
+                else
+                    if ! packer_copy_images_local "$version" "$source" "false"; then
+                        copy_result=1
+                    fi
+                fi
+
+                if [[ "$copy_result" -eq 0 ]]; then
                     echo ""
                     echo "═══════════════════════════════════════════════════════════════"
                     echo -e "  RESULT: ${GREEN}SUCCESS${NC}"
@@ -1165,6 +1200,9 @@ Options:
   --skip             Skip validation (emergency releases only)
   --remote HOST      Run validation on remote host via SSH
   --host HOST        Check host readiness (preflight only, repeatable)
+  --workflow         Use GitHub Actions workflow for packer copy (vs local)
+  --no-wait          Don't wait for workflow completion (packer only)
+  --timeout N        Workflow wait timeout in seconds (default: 600)
   --lines N          Number of audit log lines to show (default: 20)
 
 Examples:
@@ -1188,6 +1226,8 @@ Examples:
   release.sh packer --copy --dry-run
   release.sh packer --copy --execute
   release.sh packer --copy --version 0.20 --source v0.19
+  release.sh packer --copy --workflow --execute
+  release.sh packer --copy --workflow --no-wait --execute
   release.sh full --dry-run
   release.sh full --execute --host father
   release.sh full --execute --skip-validate
