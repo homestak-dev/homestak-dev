@@ -72,6 +72,8 @@ packer_dispatch_copy_images() {
     local version="$1"
     local source_release="$2"
     local dry_run="${3:-true}"
+    local wait="${4:-false}"
+    local timeout="${5:-600}"  # 10 minutes default
 
     if [[ -z "$source_release" ]]; then
         source_release=$(packer_get_latest_release "$version")
@@ -106,8 +108,65 @@ packer_dispatch_copy_images() {
         return 1
     fi
 
-    log_success "Workflow dispatched. Monitor at: https://github.com/homestak-dev/packer/actions"
-    return 0
+    log_success "Workflow dispatched"
+
+    if [[ "$wait" != "true" ]]; then
+        log_info "Monitor at: https://github.com/homestak-dev/packer/actions"
+        return 0
+    fi
+
+    # Wait for workflow completion
+    log_info "Waiting for workflow to complete (timeout: ${timeout}s)..."
+
+    local start_time=$SECONDS
+    local run_id=""
+
+    # Wait a moment for the run to appear
+    sleep 3
+
+    # Find the most recent run of the workflow
+    while [[ -z "$run_id" && $((SECONDS - start_time)) -lt 30 ]]; do
+        run_id=$(gh run list --repo homestak-dev/packer --workflow "$workflow" \
+            --json databaseId,status,createdAt \
+            --jq 'sort_by(.createdAt) | reverse | .[0].databaseId' 2>/dev/null)
+        if [[ -z "$run_id" ]]; then
+            sleep 2
+        fi
+    done
+
+    if [[ -z "$run_id" ]]; then
+        log_error "Could not find workflow run"
+        return 1
+    fi
+
+    log_info "Workflow run ID: $run_id"
+
+    # Poll for completion
+    while [[ $((SECONDS - start_time)) -lt $timeout ]]; do
+        local status conclusion
+        status=$(gh run view "$run_id" --repo homestak-dev/packer --json status --jq '.status' 2>/dev/null)
+        conclusion=$(gh run view "$run_id" --repo homestak-dev/packer --json conclusion --jq '.conclusion' 2>/dev/null)
+
+        if [[ "$status" == "completed" ]]; then
+            if [[ "$conclusion" == "success" ]]; then
+                log_success "Workflow completed successfully"
+                return 0
+            else
+                log_error "Workflow failed with conclusion: $conclusion"
+                log_error "View details: gh run view $run_id --repo homestak-dev/packer"
+                return 1
+            fi
+        fi
+
+        local elapsed=$((SECONDS - start_time))
+        echo -ne "\r  Status: $status (${elapsed}s elapsed)    "
+        sleep 5
+    done
+
+    echo ""
+    log_error "Workflow timed out after ${timeout}s"
+    log_error "Check status: gh run view $run_id --repo homestak-dev/packer"
+    return 1
 }
 
 packer_copy_images_local() {
@@ -384,6 +443,44 @@ publish_upload_packer_images() {
     return 0
 }
 
+publish_ensure_packer_assets() {
+    local version="$1"
+    local dry_run="${2:-true}"
+
+    # Check if packer release has any assets
+    local asset_count
+    asset_count=$(gh release view "v${version}" --repo homestak-dev/packer --json assets --jq '.assets | length' 2>/dev/null || echo "0")
+
+    if [[ "$asset_count" -gt 0 ]]; then
+        log_info "Packer release already has $asset_count asset(s), skipping auto-copy"
+        return 0
+    fi
+
+    log_info "Packer release has no assets, copying from previous release..."
+
+    # Find source release
+    local source_release
+    source_release=$(packer_get_latest_release "$version")
+
+    if [[ -z "$source_release" ]]; then
+        log_warn "No previous release with assets found - packer release will have no images"
+        log_warn "Build images with: cd packer && ./build.sh"
+        log_warn "Then upload with: release.sh publish --images /path/to/images"
+        return 0  # Not a fatal error
+    fi
+
+    # Copy images using existing function
+    if packer_copy_images_local "$version" "$source_release" "$dry_run"; then
+        if [[ "$dry_run" != "true" ]]; then
+            log_success "Packer images copied from $source_release"
+        fi
+        return 0
+    else
+        log_warn "Failed to copy packer images - manual upload may be required"
+        return 0  # Not a fatal error
+    fi
+}
+
 publish_update_latest() {
     local version="$1"
     local dry_run="${2:-true}"
@@ -472,6 +569,10 @@ run_publish() {
         echo "  - Upload packer images"
         echo "  - Update 'latest' tag in packer"
         ((cmd_count+=2))
+    else
+        echo "  - Ensure packer release has images (auto-copy if needed)"
+        echo "  - Update 'latest' tag in packer"
+        ((cmd_count+=2))
     fi
     echo ""
     echo "Total: ${cmd_count} operations"
@@ -489,6 +590,13 @@ run_publish() {
         if [[ -n "$images_dir" ]]; then
             echo "  packer images:"
             publish_upload_packer_images "$version" "$images_dir" "true"
+            echo ""
+            echo "  latest tag:"
+            publish_update_latest "$version" "true"
+            echo ""
+        else
+            echo "  packer auto-ensure:"
+            echo "    (Would check if packer release has assets, copy from previous release if not)"
             echo ""
             echo "  latest tag:"
             publish_update_latest "$version" "true"
@@ -535,7 +643,7 @@ run_publish() {
         return 1
     fi
 
-    # Upload packer images if specified
+    # Upload packer images if specified, otherwise ensure assets exist
     if [[ -n "$images_dir" ]]; then
         echo ""
         echo "Uploading packer images..."
@@ -543,6 +651,15 @@ run_publish() {
             log_error "Failed to upload packer images"
             return 1
         fi
+
+        echo ""
+        echo "Updating latest tag..."
+        publish_update_latest "$version" "false"
+    else
+        # Auto-ensure packer has images (copy from previous release if needed)
+        echo ""
+        echo "Ensuring packer release has images..."
+        publish_ensure_packer_assets "$version" "false"
 
         echo ""
         echo "Updating latest tag..."

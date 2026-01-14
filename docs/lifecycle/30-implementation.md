@@ -48,8 +48,16 @@ Implement changes following:
 - Write or update unit tests for changed code
 - Achieve coverage appropriate to change risk
 - Tests must pass locally before proceeding
+- **Attach test results to the originating issue** as a comment
 
 **Test file conventions:** Follow repository patterns (e.g., `test_*.py`, `*.test.js`)
+
+**Test results reporting:** After tests pass, post a comment on the issue with:
+- Test command run
+- Summary of results (passed/failed counts)
+- Any relevant output or coverage metrics
+
+This creates an audit trail and demonstrates that testing was completed.
 
 ### 4. Code Documentation
 
@@ -133,6 +141,7 @@ Before proceeding to Validation:
 - [ ] Branch created with appropriate naming
 - [ ] Code changes implement acceptance criteria
 - [ ] Unit tests written/updated and passing
+- [ ] Test results attached to originating issue
 - [ ] Code documentation updated
 - [ ] CHANGELOG entry added in this PR
 - [ ] Commits follow message format

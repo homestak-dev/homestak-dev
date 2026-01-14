@@ -191,17 +191,222 @@ preflight_clear_provider_cache() {
 }
 
 # -----------------------------------------------------------------------------
+# Host Readiness Checks
+# -----------------------------------------------------------------------------
+
+preflight_check_host_node_config() {
+    local host="$1"
+    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
+
+    if [[ -f "$node_file" ]]; then
+        echo "exists"
+    else
+        echo "missing"
+    fi
+}
+
+preflight_check_host_ssh() {
+    local host="$1"
+    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
+
+    # Get IP from node config
+    local ip=""
+    if [[ -f "$node_file" ]]; then
+        # Try to extract IP from api_endpoint or ip field
+        ip=$(grep -E "^ip:" "$node_file" 2>/dev/null | sed 's/ip:[[:space:]]*//' | tr -d '"' | tr -d "'")
+        if [[ -z "$ip" ]]; then
+            # Try to extract from api_endpoint
+            ip=$(grep -E "^api_endpoint:" "$node_file" 2>/dev/null | sed 's|.*https://\([^:]*\):.*|\1|')
+        fi
+    fi
+
+    if [[ -z "$ip" ]]; then
+        echo "no_ip"
+        return
+    fi
+
+    # Test SSH connectivity with timeout
+    if ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no "root@${ip}" "echo ok" &>/dev/null; then
+        echo "ok"
+    else
+        echo "failed:${ip}"
+    fi
+}
+
+preflight_check_host_api() {
+    local host="$1"
+    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
+    local secrets_file="${WORKSPACE_DIR}/site-config/secrets.yaml"
+
+    # Get API endpoint from node config
+    local api_endpoint=""
+    if [[ -f "$node_file" ]]; then
+        api_endpoint=$(grep -E "^api_endpoint:" "$node_file" 2>/dev/null | sed 's/api_endpoint:[[:space:]]*//' | tr -d '"' | tr -d "'")
+    fi
+
+    if [[ -z "$api_endpoint" ]]; then
+        echo "no_endpoint"
+        return
+    fi
+
+    # Get token key from node config (strip comments and whitespace)
+    local token_key=""
+    if [[ -f "$node_file" ]]; then
+        token_key=$(grep -E "^api_token:" "$node_file" 2>/dev/null | sed 's/api_token:[[:space:]]*//' | sed 's/[[:space:]]*#.*//' | tr -d '"' | tr -d "'" | xargs)
+    fi
+
+    if [[ -z "$token_key" ]]; then
+        echo "no_token_key"
+        return
+    fi
+
+    # Get actual token from secrets
+    local api_token=""
+    if [[ -f "$secrets_file" ]]; then
+        # Look for api_tokens.<token_key> in secrets.yaml
+        api_token=$(grep -A1 "^api_tokens:" "$secrets_file" 2>/dev/null | grep -E "^[[:space:]]+${token_key}:" | sed 's/.*:[[:space:]]*//' | tr -d '"' | tr -d "'")
+        if [[ -z "$api_token" ]]; then
+            # Try alternate YAML format
+            api_token=$(python3 -c "import yaml; f=open('$secrets_file'); d=yaml.safe_load(f); print(d.get('api_tokens',{}).get('$token_key',''))" 2>/dev/null)
+        fi
+    fi
+
+    if [[ -z "$api_token" ]]; then
+        echo "no_token"
+        return
+    fi
+
+    # Test API connectivity
+    local api_url="${api_endpoint}/api2/json/version"
+    local response
+    response=$(curl -sk -o /dev/null -w "%{http_code}" \
+        -H "Authorization: PVEAPIToken=${api_token}" \
+        "$api_url" 2>/dev/null)
+
+    if [[ "$response" == "200" ]]; then
+        echo "ok"
+    else
+        echo "failed:${response}"
+    fi
+}
+
+preflight_check_host_images() {
+    local host="$1"
+    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
+
+    # Get IP from node config
+    local ip=""
+    if [[ -f "$node_file" ]]; then
+        ip=$(grep -E "^ip:" "$node_file" 2>/dev/null | sed 's/ip:[[:space:]]*//' | tr -d '"' | tr -d "'")
+        if [[ -z "$ip" ]]; then
+            ip=$(grep -E "^api_endpoint:" "$node_file" 2>/dev/null | sed 's|.*https://\([^:]*\):.*|\1|')
+        fi
+    fi
+
+    if [[ -z "$ip" ]]; then
+        echo "no_ip"
+        return
+    fi
+
+    # Check for packer images on host
+    local images
+    images=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no "root@${ip}" \
+        "ls -1 /var/lib/vz/template/iso/*.img 2>/dev/null | wc -l" 2>/dev/null)
+
+    if [[ -z "$images" ]]; then
+        echo "ssh_failed"
+    elif [[ "$images" -eq 0 ]]; then
+        echo "none"
+    else
+        echo "ok:${images}"
+    fi
+}
+
+preflight_check_host_nested_virt() {
+    local host="$1"
+    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
+
+    # Get IP from node config
+    local ip=""
+    if [[ -f "$node_file" ]]; then
+        ip=$(grep -E "^ip:" "$node_file" 2>/dev/null | sed 's/ip:[[:space:]]*//' | tr -d '"' | tr -d "'")
+        if [[ -z "$ip" ]]; then
+            ip=$(grep -E "^api_endpoint:" "$node_file" 2>/dev/null | sed 's|.*https://\([^:]*\):.*|\1|')
+        fi
+    fi
+
+    if [[ -z "$ip" ]]; then
+        echo "no_ip"
+        return
+    fi
+
+    # Check nested virtualization
+    local nested
+    nested=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no "root@${ip}" \
+        "cat /sys/module/kvm_intel/parameters/nested 2>/dev/null || cat /sys/module/kvm_amd/parameters/nested 2>/dev/null || echo 'N'" 2>/dev/null)
+
+    if [[ "$nested" == "Y" || "$nested" == "1" ]]; then
+        echo "enabled"
+    else
+        echo "disabled"
+    fi
+}
+
+run_host_checks() {
+    local host="$1"
+
+    local node_status ssh_status api_status images_status nested_status
+    local all_passed=true
+
+    # Run checks
+    node_status=$(preflight_check_host_node_config "$host")
+    if [[ "$node_status" != "exists" ]]; then
+        all_passed=false
+        ssh_status="skipped"
+        api_status="skipped"
+        images_status="skipped"
+        nested_status="skipped"
+    else
+        ssh_status=$(preflight_check_host_ssh "$host")
+        api_status=$(preflight_check_host_api "$host")
+
+        if [[ "$ssh_status" == "ok" ]]; then
+            images_status=$(preflight_check_host_images "$host")
+            nested_status=$(preflight_check_host_nested_virt "$host")
+        else
+            all_passed=false
+            images_status="skipped"
+            nested_status="skipped"
+        fi
+
+        if [[ "$api_status" != "ok" ]]; then
+            all_passed=false
+        fi
+        if [[ "$images_status" != ok:* && "$images_status" != "skipped" ]]; then
+            all_passed=false
+        fi
+        # Nested virt is optional - don't fail on it
+    fi
+
+    # Return results as pipe-delimited string
+    echo "${node_status}|${ssh_status}|${api_status}|${images_status}|${nested_status}|${all_passed}"
+}
+
+# -----------------------------------------------------------------------------
 # Main Pre-flight Runner
 # -----------------------------------------------------------------------------
 
 run_preflight() {
     local version="$1"
     local json_output="${2:-false}"
+    shift 2
+    local hosts=("$@")
 
     local all_passed=true
     local repo_results=()
     local tag_results=()
     local changelog_results=()
+    local host_results=()
 
     # Check gh authentication first
     local gh_user
@@ -251,6 +456,19 @@ run_preflight() {
             all_passed=false
         fi
         # Missing changelog is a warning, not a failure
+    done
+
+    # Run host checks if specified
+    for host in "${hosts[@]}"; do
+        local result
+        result=$(run_host_checks "$host")
+        host_results+=("$host:$result")
+
+        # Check if host passed
+        local host_passed="${result##*|}"
+        if [[ "$host_passed" != "true" ]]; then
+            all_passed=false
+        fi
     done
 
     # Output results
@@ -421,10 +639,110 @@ EOF
                 ;;
         esac
 
-        echo ""
+        # Display host check results if any hosts were specified
+        if [[ ${#host_results[@]} -gt 0 ]]; then
+            echo ""
+            echo "Host Readiness:"
+            for result in "${host_results[@]}"; do
+                local host="${result%%:*}"
+                local checks="${result#*:}"
+
+                # Parse pipe-delimited results
+                IFS='|' read -r node_status ssh_status api_status images_status nested_status host_passed <<< "$checks"
+
+                echo "  Host: ${host}"
+
+                # Node config
+                if [[ "$node_status" == "exists" ]]; then
+                    echo -e "    ${GREEN}✓${NC} Node config exists"
+                else
+                    echo -e "    ${RED}✗${NC} Node config missing (site-config/nodes/${host}.yaml)"
+                fi
+
+                # SSH
+                case "$ssh_status" in
+                    ok)
+                        echo -e "    ${GREEN}✓${NC} SSH connectivity"
+                        ;;
+                    skipped)
+                        echo -e "    ${YELLOW}○${NC} SSH skipped (no node config)"
+                        ;;
+                    no_ip)
+                        echo -e "    ${RED}✗${NC} SSH: cannot determine IP from node config"
+                        ;;
+                    failed:*)
+                        local ip="${ssh_status#failed:}"
+                        echo -e "    ${RED}✗${NC} SSH failed to ${ip}"
+                        ;;
+                esac
+
+                # API
+                case "$api_status" in
+                    ok)
+                        echo -e "    ${GREEN}✓${NC} API token valid"
+                        ;;
+                    skipped)
+                        echo -e "    ${YELLOW}○${NC} API skipped (no node config)"
+                        ;;
+                    no_endpoint)
+                        echo -e "    ${RED}✗${NC} API: no endpoint in node config"
+                        ;;
+                    no_token_key)
+                        echo -e "    ${RED}✗${NC} API: no token key in node config"
+                        ;;
+                    no_token)
+                        echo -e "    ${RED}✗${NC} API: token not found in secrets.yaml"
+                        ;;
+                    failed:*)
+                        local code="${api_status#failed:}"
+                        echo -e "    ${RED}✗${NC} API request failed (HTTP ${code})"
+                        ;;
+                esac
+
+                # Packer images
+                case "$images_status" in
+                    ok:*)
+                        local count="${images_status#ok:}"
+                        echo -e "    ${GREEN}✓${NC} Packer images present (${count} found)"
+                        ;;
+                    skipped)
+                        echo -e "    ${YELLOW}○${NC} Images skipped (SSH failed)"
+                        ;;
+                    none)
+                        echo -e "    ${RED}✗${NC} No packer images in /var/lib/vz/template/iso/"
+                        ;;
+                    ssh_failed)
+                        echo -e "    ${YELLOW}○${NC} Images check skipped (SSH failed)"
+                        ;;
+                    no_ip)
+                        echo -e "    ${YELLOW}○${NC} Images check skipped (no IP)"
+                        ;;
+                esac
+
+                # Nested virtualization (optional - warning only)
+                case "$nested_status" in
+                    enabled)
+                        echo -e "    ${GREEN}✓${NC} Nested virtualization enabled"
+                        ;;
+                    disabled)
+                        echo -e "    ${YELLOW}⚠${NC} Nested virtualization disabled (optional)"
+                        ;;
+                    skipped|no_ip)
+                        echo -e "    ${YELLOW}○${NC} Nested virt check skipped"
+                        ;;
+                esac
+
+                echo ""
+            done
+        fi
+
         echo "═══════════════════════════════════════════════════════════════"
         if [[ "$all_passed" == "true" ]]; then
-            echo -e "  RESULT: ${GREEN}PASS${NC} (${#REPOS[@]}/${#REPOS[@]} repos ready)"
+            if [[ ${#host_results[@]} -gt 0 ]]; then
+                echo -e "  RESULT: ${GREEN}PASS${NC} (${#REPOS[@]}/${#REPOS[@]} repos, ${#host_results[@]} host(s) ready)"
+            else
+                echo -e "  RESULT: ${GREEN}PASS${NC} (${#REPOS[@]}/${#REPOS[@]} repos ready)"
+            fi
         else
             echo -e "  RESULT: ${RED}FAIL${NC} (resolve issues above)"
         fi

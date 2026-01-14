@@ -2,7 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] - v0.20
+
+### Theme: Release Automation
+
+### Added
+- `release.sh preflight --host` for validation host readiness checks (#65)
+  - Validates API token, node config, packer images, nested virtualization
+  - Supports multiple hosts: `--host father --host mother`
+- `release.sh packer --version/--source` flags for explicit version control (#50)
+  - `--version` specifies target release version
+  - `--source` specifies source release for `--copy` operations
+- Auto-ensure packer images exist on `release.sh publish` (#45)
+  - Checks for required images before publishing
+  - Offers to copy from previous release if missing
+- `release.sh packer --workflow` for GHA-based image copy (#56)
+  - Triggers copy-images workflow instead of local gh commands
+  - `--no-wait` for async, `--timeout` for custom wait duration
+- Release issue auto-update integration (#35)
+  - `--issue` flag on `init` to track release issue
+  - Posts status comments after each phase completes
+
+### Cross-Repo Changes
+
+**packer v0.20:**
+- Per-template cleanup scripts (#11)
+  - Refactored cleanup into modular `cleanup-common.sh` + per-template overrides
+  - PVE-specific cleanup for enterprise repo removal and network fix
+- Version details in image names (#8)
+  - Images renamed: `debian-13-custom.qcow2` → `deb13.3-custom.qcow2`
+  - Backward-compatible symlinks maintained
+- Enhanced copy-images workflow with validation and latest tag update (#56)
+
+**iac-driver v0.20:**
+- Refactored packer scenarios to use build.sh wrapper
+  - Ensures version detection and cleanup scripts run during scenario builds
+
+---
+
+## [v0.19] - 2026-01-14
 
 ### Theme: Stabilization
 

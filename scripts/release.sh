@@ -99,11 +99,16 @@ check_dependencies() {
 
 cmd_init() {
     local version=""
+    local issue=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --version)
                 version="$2"
+                shift 2
+                ;;
+            --issue)
+                issue="$2"
                 shift 2
                 ;;
             *)
@@ -141,12 +146,15 @@ cmd_init() {
     fi
 
     # Initialize state and audit log
-    state_init "$version"
+    state_init "$version" "$issue"
     audit_init "$version"
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
     echo "  Release v${version} initialized"
+    if [[ -n "$issue" ]]; then
+        echo "  Tracking issue: #${issue}"
+    fi
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
     echo "Next steps:"
@@ -172,14 +180,18 @@ cmd_status() {
         exit 3
     fi
 
-    local version status started_at
+    local version status started_at issue
     version=$(state_get_version)
     status=$(state_get_status)
     started_at=$(state_read '.release.started_at')
+    issue=$(state_get_issue)
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
     echo "  Release v${version} - Status: ${status}"
+    if [[ -n "$issue" ]]; then
+        echo "  Tracking: https://github.com/homestak-dev/homestak-dev/issues/${issue}"
+    fi
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
     echo "Started: ${started_at}"
@@ -250,6 +262,7 @@ cmd_audit() {
 cmd_preflight() {
     local json_output=false
     local version=""
+    local hosts=()
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -259,6 +272,10 @@ cmd_preflight() {
                 ;;
             --version)
                 version="$2"
+                shift 2
+                ;;
+            --host)
+                hosts+=("$2")
                 shift 2
                 ;;
             *)
@@ -286,14 +303,16 @@ cmd_preflight() {
     fi
 
     # Run checks
-    if run_preflight "$version" "$json_output"; then
+    if run_preflight "$version" "$json_output" "${hosts[@]}"; then
         if state_exists; then
             state_set_phase_status "preflight" "complete"
+            issue_update_preflight "passed"
         fi
         exit 0
     else
         if state_exists; then
             state_set_phase_status "preflight" "failed"
+            issue_update_preflight "failed"
         fi
         exit 4
     fi
@@ -355,6 +374,7 @@ cmd_validate() {
     if [[ "$validation_passed" == "true" ]]; then
         if state_exists; then
             state_set_phase_status "validation" "complete"
+            issue_update_validation "$scenario" "$host" "${VALIDATION_REPORT:-}"
         fi
         exit 0
     else
@@ -440,6 +460,7 @@ cmd_tag() {
         if run_tag_reset "$version" "$dry_run" "$reset_repo"; then
             if [[ "$dry_run" == "false" ]]; then
                 state_set_phase_status "tags" "complete"
+                issue_update_tags "$version"
             fi
             exit 0
         else
@@ -458,6 +479,7 @@ cmd_tag() {
         if [[ "$dry_run" == "false" ]]; then
             state_set_phase_status "tags" "complete"
             audit_log "TAG" "cli" "Tags v${version} created in ${#REPOS[@]} repos"
+            issue_update_tags "$version"
         fi
         exit 0
     else
@@ -521,6 +543,7 @@ cmd_publish() {
         if [[ "$dry_run" == "false" ]]; then
             state_set_phase_status "releases" "complete"
             audit_log "PUBLISH" "cli" "Releases v${version} created in ${#REPOS[@]} repos"
+            issue_update_releases "$version"
         fi
         exit 0
     else
@@ -534,6 +557,11 @@ cmd_publish() {
 cmd_packer() {
     local action="check"
     local dry_run=true
+    local version=""
+    local source=""
+    local use_workflow=false
+    local wait_workflow=true
+    local timeout=600
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -553,6 +581,26 @@ cmd_packer() {
                 dry_run=false
                 shift
                 ;;
+            --version)
+                version="$2"
+                shift 2
+                ;;
+            --source)
+                source="$2"
+                shift 2
+                ;;
+            --workflow)
+                use_workflow=true
+                shift
+                ;;
+            --no-wait)
+                wait_workflow=false
+                shift
+                ;;
+            --timeout)
+                timeout="$2"
+                shift 2
+                ;;
             *)
                 log_error "Unknown option: $1"
                 exit 1
@@ -560,20 +608,17 @@ cmd_packer() {
         esac
     done
 
-    # Require release in progress
-    if ! state_exists; then
-        log_error "No release in progress"
-        log_error "Start with: release.sh init --version X.Y"
-        exit 1
+    # Get version from state if not provided
+    if [[ -z "$version" ]]; then
+        if state_exists && state_validate; then
+            version=$(state_get_version)
+        else
+            log_error "No version specified and no release in progress"
+            log_error "Use: release.sh packer --copy --version X.Y"
+            log_error "Or: release.sh init --version X.Y"
+            exit 1
+        fi
     fi
-
-    if ! state_validate; then
-        log_error "State file is corrupted"
-        exit 3
-    fi
-
-    local version
-    version=$(state_get_version)
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
@@ -605,29 +650,52 @@ cmd_packer() {
             ;;
 
         copy)
-            local source
-            source=$(packer_get_latest_release "$version")
+            # Use provided source or find latest with images
+            if [[ -z "$source" ]]; then
+                source=$(packer_get_latest_release "$version")
+            fi
 
             if [[ -z "$source" ]]; then
                 log_error "No previous release with images found"
+                log_error "Specify source with: --source v0.19"
                 exit 1
             fi
 
             echo "Source release: $source"
             echo "Target release: v${version}"
+            if [[ "$use_workflow" == "true" ]]; then
+                echo "Method: GitHub Actions workflow"
+            else
+                echo "Method: Local (gh CLI)"
+            fi
             echo ""
 
             if [[ "$dry_run" == "true" ]]; then
                 echo "Commands that would be executed:"
                 echo ""
-                packer_copy_images_local "$version" "$source" "true"
+                if [[ "$use_workflow" == "true" ]]; then
+                    packer_dispatch_copy_images "$version" "$source" "true"
+                else
+                    packer_copy_images_local "$version" "$source" "true"
+                fi
                 echo ""
                 echo "═══════════════════════════════════════════════════════════════"
                 echo "  DRY-RUN COMPLETE - No changes made"
                 echo "  Run with --execute to copy images"
                 echo "═══════════════════════════════════════════════════════════════"
             else
-                if packer_copy_images_local "$version" "$source" "false"; then
+                local copy_result=0
+                if [[ "$use_workflow" == "true" ]]; then
+                    if ! packer_dispatch_copy_images "$version" "$source" "false" "$wait_workflow" "$timeout"; then
+                        copy_result=1
+                    fi
+                else
+                    if ! packer_copy_images_local "$version" "$source" "false"; then
+                        copy_result=1
+                    fi
+                fi
+
+                if [[ "$copy_result" -eq 0 ]]; then
                     echo ""
                     echo "═══════════════════════════════════════════════════════════════"
                     echo -e "  RESULT: ${GREEN}SUCCESS${NC}"
@@ -690,11 +758,13 @@ cmd_verify() {
             state_set_status "complete"
             audit_log "VERIFY" "cli" "Release v${version} verified successfully"
             audit_done "$version"
+            issue_update_verification "$version" "passed"
         fi
         exit 0
     else
         if state_exists; then
             state_set_phase_status "verification" "failed"
+            issue_update_verification "$version" "failed"
         fi
         exit 8
     fi
@@ -851,6 +921,7 @@ cmd_full() {
                     return 1
                 fi
                 state_set_phase_status "preflight" "complete"
+                issue_update_preflight "passed"
                 ;;
 
             validate)
@@ -859,6 +930,7 @@ cmd_full() {
                     return 1
                 fi
                 state_set_phase_status "validation" "complete"
+                issue_update_validation "$scenario" "$host" ""
                 ;;
 
             tag)
@@ -868,6 +940,7 @@ cmd_full() {
                 fi
                 state_set_phase_status "tags" "complete"
                 audit_log "TAG" "cli" "Tags v${version} created in ${#REPOS[@]} repos"
+                issue_update_tags "$version"
                 ;;
 
             publish)
@@ -877,6 +950,7 @@ cmd_full() {
                 fi
                 state_set_phase_status "releases" "complete"
                 audit_log "PUBLISH" "cli" "Releases v${version} created in ${#REPOS[@]} repos"
+                issue_update_releases "$version"
                 ;;
 
             packer)
@@ -921,6 +995,7 @@ cmd_full() {
                 state_set_status "complete"
                 audit_log "VERIFY" "cli" "Release v${version} verified"
                 audit_done "$version"
+                issue_update_verification "$version" "passed"
                 ;;
         esac
 
@@ -1115,6 +1190,7 @@ Commands:
 
 Options:
   --version X.Y      Release version (required for init)
+  --issue N          GitHub issue to track release progress (init only)
   --dry-run          Show what would be done without executing
   --execute          Execute the operation
   --force            Override validation gate requirement
@@ -1123,12 +1199,19 @@ Options:
   --reset-repo REPO  Reset tag for single repo only
   --skip             Skip validation (emergency releases only)
   --remote HOST      Run validation on remote host via SSH
+  --host HOST        Check host readiness (preflight only, repeatable)
+  --workflow         Use GitHub Actions workflow for packer copy (vs local)
+  --no-wait          Don't wait for workflow completion (packer only)
+  --timeout N        Workflow wait timeout in seconds (default: 600)
   --lines N          Number of audit log lines to show (default: 20)
 
 Examples:
   release.sh init --version 0.14
+  release.sh init --version 0.20 --issue 72
   release.sh status
   release.sh preflight
+  release.sh preflight --host father
+  release.sh preflight --host father --host mother
   release.sh validate --scenario vm-roundtrip --host father
   release.sh validate --scenario vm-roundtrip --host father --remote father
   release.sh validate --skip
@@ -1142,6 +1225,9 @@ Examples:
   release.sh packer --check
   release.sh packer --copy --dry-run
   release.sh packer --copy --execute
+  release.sh packer --copy --version 0.20 --source v0.19
+  release.sh packer --copy --workflow --execute
+  release.sh packer --copy --workflow --no-wait --execute
   release.sh full --dry-run
   release.sh full --execute --host father
   release.sh full --execute --skip-validate

@@ -107,6 +107,26 @@ state_set_status() {
     state_write '.release.status' "$status"
 }
 
+state_get_issue() {
+    local issue
+    issue=$(state_read '.release.issue')
+    # Return empty if null or "null"
+    if [[ "$issue" == "null" || -z "$issue" ]]; then
+        echo ""
+    else
+        echo "$issue"
+    fi
+}
+
+state_set_issue() {
+    local issue="$1"
+    if [[ -n "$issue" ]]; then
+        state_write_raw '.release.issue' "$issue"
+    else
+        state_write_raw '.release.issue' "null"
+    fi
+}
+
 state_get_phase_status() {
     local phase="$1"
     state_read ".phases.${phase}.status"
@@ -158,6 +178,7 @@ state_set_repo_field() {
 
 state_init() {
     local version="$1"
+    local issue="${2:-}"
     local ts
     ts=$(timestamp)
 
@@ -174,6 +195,12 @@ state_init() {
     done
     repos_json+="}"
 
+    # Issue as JSON value (number or null)
+    local issue_json="null"
+    if [[ -n "$issue" ]]; then
+        issue_json="$issue"
+    fi
+
     # Create state file
     cat > "$STATE_FILE" << EOF
 {
@@ -182,7 +209,8 @@ state_init() {
     "version": "${version}",
     "status": "in_progress",
     "started_at": "${ts}",
-    "completed_at": null
+    "completed_at": null,
+    "issue": ${issue_json}
   },
   "phases": {
     "preflight": {
@@ -217,4 +245,117 @@ state_init() {
 EOF
 
     log_success "State file initialized for v${version}"
+    if [[ -n "$issue" ]]; then
+        log_info "Tracking release issue: #${issue}"
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Issue Updates
+# -----------------------------------------------------------------------------
+
+post_issue_update() {
+    # Post a comment to the release tracking issue
+    # Usage: post_issue_update "Phase Name" "message body"
+    local phase="$1"
+    local body="$2"
+
+    local issue
+    issue=$(state_get_issue)
+
+    if [[ -z "$issue" ]]; then
+        # No issue configured, skip silently
+        return 0
+    fi
+
+    local version
+    version=$(state_get_version)
+
+    # Build comment with header
+    local comment="## Phase Complete: ${phase}
+
+${body}
+
+---
+*Posted by release.sh v${version}*"
+
+    # Post to GitHub issue
+    if ! gh issue comment "$issue" --repo homestak-dev/homestak-dev --body "$comment" &>/dev/null; then
+        log_warn "Failed to post update to issue #${issue}"
+        return 1
+    fi
+
+    log_info "Posted update to issue #${issue}"
+    return 0
+}
+
+# Phase-specific update generators
+issue_update_preflight() {
+    local status="$1"  # passed or failed
+    local body="Preflight checks **${status}**.
+
+All repositories verified:
+- Clean working directories
+- No existing tags
+- CHANGELOGs updated"
+
+    post_issue_update "Preflight" "$body"
+}
+
+issue_update_validation() {
+    local scenario="$1"
+    local host="$2"
+    local report_path="$3"
+
+    local body="Integration validation **passed**.
+
+| Property | Value |
+|----------|-------|
+| Scenario | \`${scenario}\` |
+| Host | \`${host}\` |"
+
+    if [[ -n "$report_path" ]]; then
+        body+="
+| Report | \`${report_path}\` |"
+    fi
+
+    post_issue_update "Validation" "$body"
+}
+
+issue_update_tags() {
+    local version="$1"
+
+    # Build repo list
+    local repo_list=""
+    for repo in "${REPOS[@]}"; do
+        repo_list+="
+- ${repo} ✓"
+    done
+
+    local body="v${version} tags pushed to all ${#REPOS[@]} repos.
+
+**Repos tagged:**${repo_list}"
+
+    post_issue_update "Tags" "$body"
+}
+
+issue_update_releases() {
+    local version="$1"
+
+    local body="GitHub releases created for v${version}.
+
+All ${#REPOS[@]} repositories have releases published."
+
+    post_issue_update "Releases" "$body"
+}
+
+issue_update_verification() {
+    local version="$1"
+    local status="$2"  # passed or failed
+
+    local body="Release verification **${status}**.
+
+All tags, releases, and packer assets verified for v${version}."
+
+    post_issue_update "Verification" "$body"
 }
