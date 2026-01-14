@@ -267,15 +267,36 @@ Use the [AAR Template](../templates/aar.md) to document:
 
 After the retrospective, update this document with any process improvements. Commit with message: `Update 60-release.md with vX.Y lessons learned`
 
-### Phase 10: Housekeeping (periodic)
+### Phase 10: Housekeeping (each sprint)
+
+Branch cleanup should be performed at the end of each sprint, not just periodically.
 
 ```bash
-# Delete merged local branches (run in each repo)
-git branch --merged | grep -v master | xargs git branch -d
+# For each repo, clean up branches
+for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
+  echo "=== $repo ==="
+  cd ~/homestak-dev/$repo
 
-# Prune stale remote tracking refs
-git remote prune origin
+  # Delete merged local branches
+  git branch --merged | grep -v master | xargs -r git branch -d
+
+  # Prune stale remote tracking refs
+  git remote prune origin
+
+  # Check for unmerged branches (squash/rebase may leave "ahead" branches)
+  for branch in $(git branch -r | grep -v HEAD | grep -v master); do
+    if [[ -n "$(git diff master..$branch 2>/dev/null)" ]]; then
+      echo "UNMERGED: $branch"
+    fi
+  done
+
+  cd -
+done
 ```
+
+**Note:** Branches may show as "ahead" by commit count even when content was merged via squash/rebase. Use `git diff` to verify actual unmerged content before deleting.
+
+**Repository setting:** Enable "Automatically delete head branches" in GitHub repo settings to auto-cleanup after PR merge.
 
 ## Scope Management
 

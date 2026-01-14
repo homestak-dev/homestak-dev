@@ -1,12 +1,18 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.19. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.20. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.20
+
+- **Branch cleanup needed after squash/rebase merges** - Branches may show as "ahead" by commit count even when content was merged via squash/rebase. Use `git diff master..branch` to verify actual unmerged content, not just commit history. Delete branches immediately after PR merge.
+- **Options inconsistent with process should be flagged** - When presenting options to the user, any option that deviates from established process (e.g., lifecycle docs) should be clearly marked as such. Don't offer "push direct to master" as an equal option alongside "create PR" when process requires PRs.
+- **Configure auto-delete for PR branches** - Enable repository settings to auto-delete branches after PR merge to prevent stale branch accumulation across repos.
 
 ## v0.19
 
@@ -100,12 +106,17 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Options inconsistent with process should be flagged (v0.20)
 - CHANGELOG updates belong in PRs, not release (v0.19)
 - Follow process to the end (v0.19)
 - AAR/Retro are required, not optional (v0.15)
 - Complete AAR/retro immediately (v0.8)
 - Checkpoint before release execution (v0.11)
 - Update checkboxes as you go (v0.11)
+
+### Branch Management
+- Branch cleanup needed after squash/rebase merges (v0.20)
+- Configure auto-delete for PR branches (v0.20)
 
 ### Multi-Repo Coordination
 - Unified versioning requires constant awareness (v0.16)
