@@ -235,6 +235,20 @@ curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/v0.X/install
 homestak --version  # Should show v0.X
 ```
 
+#### Scope Issue Verification
+
+Before closing the release issue, verify all scope issues are closed:
+
+```bash
+# Check release issue for scope list, then verify each is closed
+gh issue view <release-issue> --repo homestak-dev/homestak-dev
+
+# Close any that were missed (e.g., direct pushes bypass PR auto-close)
+gh issue close <issue-num> --repo homestak-dev/<repo> --comment "Implemented in vX.Y"
+```
+
+**Note:** Issues should primarily be closed via PR merge using "Closes #XX" in the PR description. This verification step catches cases where auto-close didn't occur.
+
 ### Phase 8: After Action Report
 
 **Complete immediately after release while details are fresh.** Do not close the release issue until AAR is complete.
