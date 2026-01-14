@@ -11,6 +11,11 @@ All notable changes to this project will be documented in this file.
   - Exercises all commands in dry-run mode
   - Catches bugs before release (like v0.18's `gh release list --json` issue)
   - Supports `--verbose` for detailed output
+- `release.sh packer --copy` now generates SHA256SUMS (#62)
+  - Downloads images from source release
+  - Generates fresh SHA256SUMS after copy
+  - Uploads images + SHA256SUMS to target release
+  - Works even if source release predates checksum feature (v0.17)
 
 ## [v0.18] - 2026-01-13
 

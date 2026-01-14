@@ -131,39 +131,70 @@ packer_copy_images_local() {
     tmp_dir=$(mktemp -d)
     trap "rm -rf $tmp_dir" EXIT
 
-    # Download assets from source release
+    # Download assets from source release (only images, not SHA256SUMS - we regenerate it)
     local assets
-    assets=$(gh release view "$source_release" --repo homestak-dev/packer --json assets --jq '.assets[].name' 2>/dev/null)
+    assets=$(gh release view "$source_release" --repo homestak-dev/packer --json assets --jq '.assets[].name' 2>/dev/null | grep -v SHA256SUMS)
 
     if [[ -z "$assets" ]]; then
         log_error "No assets found in source release $source_release"
         return 1
     fi
 
+    # Download images
     for asset in $assets; do
         local download_cmd="gh release download $source_release --repo homestak-dev/packer --pattern \"$asset\" --dir \"$tmp_dir\""
-        local upload_cmd="gh release upload v${version} \"${tmp_dir}/${asset}\" --repo homestak-dev/packer --clobber"
 
         if [[ "$dry_run" == "true" ]]; then
             echo "    ${download_cmd}"
-            echo "    ${upload_cmd}"
         else
             log_info "Downloading $asset..."
             if ! eval "$download_cmd"; then
                 log_error "Failed to download $asset"
                 return 1
             fi
+        fi
+    done
 
-            log_info "Uploading $asset..."
+    # Generate fresh SHA256SUMS (don't assume source has it - v0.17 predates feature)
+    local sha_cmd="cd \"$tmp_dir\" && sha256sum *.qcow2 > SHA256SUMS 2>/dev/null || true"
+    if [[ "$dry_run" == "true" ]]; then
+        echo "    ${sha_cmd}"
+    else
+        log_info "Generating SHA256SUMS..."
+        if ! eval "$sha_cmd"; then
+            log_warn "Failed to generate SHA256SUMS (no qcow2 files?)"
+        fi
+    fi
+
+    # Upload all files including generated SHA256SUMS
+    local upload_files
+    if [[ "$dry_run" == "true" ]]; then
+        # In dry-run, list expected files
+        upload_files="$assets SHA256SUMS"
+    else
+        # In execute mode, list actual files
+        upload_files=$(ls "$tmp_dir")
+    fi
+
+    for file in $upload_files; do
+        local upload_cmd="gh release upload v${version} \"${tmp_dir}/${file}\" --repo homestak-dev/packer --clobber"
+
+        if [[ "$dry_run" == "true" ]]; then
+            echo "    ${upload_cmd}"
+        else
+            # Skip if file doesn't exist (for dry-run files list)
+            [[ ! -f "${tmp_dir}/${file}" ]] && continue
+
+            log_info "Uploading $file..."
             if ! eval "$upload_cmd"; then
-                log_error "Failed to upload $asset"
+                log_error "Failed to upload $file"
                 return 1
             fi
         fi
     done
 
     if [[ "$dry_run" != "true" ]]; then
-        log_success "Images copied from $source_release to v${version}"
+        log_success "Images copied from $source_release to v${version} (SHA256SUMS regenerated)"
     fi
 
     return 0
