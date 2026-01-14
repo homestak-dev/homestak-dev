@@ -99,11 +99,16 @@ check_dependencies() {
 
 cmd_init() {
     local version=""
+    local issue=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --version)
                 version="$2"
+                shift 2
+                ;;
+            --issue)
+                issue="$2"
                 shift 2
                 ;;
             *)
@@ -141,12 +146,15 @@ cmd_init() {
     fi
 
     # Initialize state and audit log
-    state_init "$version"
+    state_init "$version" "$issue"
     audit_init "$version"
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
     echo "  Release v${version} initialized"
+    if [[ -n "$issue" ]]; then
+        echo "  Tracking issue: #${issue}"
+    fi
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
     echo "Next steps:"
@@ -172,14 +180,18 @@ cmd_status() {
         exit 3
     fi
 
-    local version status started_at
+    local version status started_at issue
     version=$(state_get_version)
     status=$(state_get_status)
     started_at=$(state_read '.release.started_at')
+    issue=$(state_get_issue)
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
     echo "  Release v${version} - Status: ${status}"
+    if [[ -n "$issue" ]]; then
+        echo "  Tracking: https://github.com/homestak-dev/homestak-dev/issues/${issue}"
+    fi
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
     echo "Started: ${started_at}"
@@ -294,11 +306,13 @@ cmd_preflight() {
     if run_preflight "$version" "$json_output" "${hosts[@]}"; then
         if state_exists; then
             state_set_phase_status "preflight" "complete"
+            issue_update_preflight "passed"
         fi
         exit 0
     else
         if state_exists; then
             state_set_phase_status "preflight" "failed"
+            issue_update_preflight "failed"
         fi
         exit 4
     fi
@@ -360,6 +374,7 @@ cmd_validate() {
     if [[ "$validation_passed" == "true" ]]; then
         if state_exists; then
             state_set_phase_status "validation" "complete"
+            issue_update_validation "$scenario" "$host" "${VALIDATION_REPORT:-}"
         fi
         exit 0
     else
@@ -445,6 +460,7 @@ cmd_tag() {
         if run_tag_reset "$version" "$dry_run" "$reset_repo"; then
             if [[ "$dry_run" == "false" ]]; then
                 state_set_phase_status "tags" "complete"
+                issue_update_tags "$version"
             fi
             exit 0
         else
@@ -463,6 +479,7 @@ cmd_tag() {
         if [[ "$dry_run" == "false" ]]; then
             state_set_phase_status "tags" "complete"
             audit_log "TAG" "cli" "Tags v${version} created in ${#REPOS[@]} repos"
+            issue_update_tags "$version"
         fi
         exit 0
     else
@@ -526,6 +543,7 @@ cmd_publish() {
         if [[ "$dry_run" == "false" ]]; then
             state_set_phase_status "releases" "complete"
             audit_log "PUBLISH" "cli" "Releases v${version} created in ${#REPOS[@]} repos"
+            issue_update_releases "$version"
         fi
         exit 0
     else
@@ -705,11 +723,13 @@ cmd_verify() {
             state_set_status "complete"
             audit_log "VERIFY" "cli" "Release v${version} verified successfully"
             audit_done "$version"
+            issue_update_verification "$version" "passed"
         fi
         exit 0
     else
         if state_exists; then
             state_set_phase_status "verification" "failed"
+            issue_update_verification "$version" "failed"
         fi
         exit 8
     fi
@@ -866,6 +886,7 @@ cmd_full() {
                     return 1
                 fi
                 state_set_phase_status "preflight" "complete"
+                issue_update_preflight "passed"
                 ;;
 
             validate)
@@ -874,6 +895,7 @@ cmd_full() {
                     return 1
                 fi
                 state_set_phase_status "validation" "complete"
+                issue_update_validation "$scenario" "$host" ""
                 ;;
 
             tag)
@@ -883,6 +905,7 @@ cmd_full() {
                 fi
                 state_set_phase_status "tags" "complete"
                 audit_log "TAG" "cli" "Tags v${version} created in ${#REPOS[@]} repos"
+                issue_update_tags "$version"
                 ;;
 
             publish)
@@ -892,6 +915,7 @@ cmd_full() {
                 fi
                 state_set_phase_status "releases" "complete"
                 audit_log "PUBLISH" "cli" "Releases v${version} created in ${#REPOS[@]} repos"
+                issue_update_releases "$version"
                 ;;
 
             packer)
@@ -936,6 +960,7 @@ cmd_full() {
                 state_set_status "complete"
                 audit_log "VERIFY" "cli" "Release v${version} verified"
                 audit_done "$version"
+                issue_update_verification "$version" "passed"
                 ;;
         esac
 
@@ -1130,6 +1155,7 @@ Commands:
 
 Options:
   --version X.Y      Release version (required for init)
+  --issue N          GitHub issue to track release progress (init only)
   --dry-run          Show what would be done without executing
   --execute          Execute the operation
   --force            Override validation gate requirement
@@ -1143,6 +1169,7 @@ Options:
 
 Examples:
   release.sh init --version 0.14
+  release.sh init --version 0.20 --issue 72
   release.sh status
   release.sh preflight
   release.sh preflight --host father
