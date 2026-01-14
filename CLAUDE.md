@@ -283,6 +283,7 @@ Reusable templates in [docs/templates/](docs/templates/):
 
 | File | Purpose |
 |------|---------|
+| [docs/ISSUE-GUIDELINES.md](docs/ISSUE-GUIDELINES.md) | Issue creation and labeling standards |
 | [docs/CLAUDE-GUIDELINES.md](docs/CLAUDE-GUIDELINES.md) | CLAUDE.md documentation standards |
 | [docs/REPO-SETTINGS.md](docs/REPO-SETTINGS.md) | Repository configuration standards |
 
@@ -294,6 +295,17 @@ See [docs/lifecycle/60-release.md](docs/lifecycle/60-release.md) for the release
 - After action reports and retrospectives
 
 **Automated releases (v0.14+):** Use `scripts/release.sh` CLI - see [Release Automation CLI](#release-automation-cli-v014) section above.
+
+## Issue Management
+
+When creating GitHub issues, follow [docs/ISSUE-GUIDELINES.md](docs/ISSUE-GUIDELINES.md):
+
+- **Title format:** `<Verb> <what>` (e.g., "Add --dry-run flag", "Fix timeout error")
+- **Work type label:** Apply exactly one of `bug`, `enhancement`, or `epic`
+- **Modifier labels:** Add `documentation`, `refactor`, `testing`, `security`, `breaking-change` as applicable
+- **Description:** Include context (why), acceptance criteria (what done looks like), and constraints
+
+For label definitions and examples, see the full guide.
 
 ## License
 

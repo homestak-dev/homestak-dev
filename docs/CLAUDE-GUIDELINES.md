@@ -181,6 +181,6 @@ When reviewing or submitting PRs, consider:
 
 ## Maintenance
 
-CLAUDE.md accuracy is verified during each release (see RELEASE.md Phase 1: Pre-flight). This ensures documentation doesn't drift too far from reality.
+CLAUDE.md accuracy is verified during each release (see [60-release.md](lifecycle/60-release.md) Phase 1: Pre-flight). This ensures documentation doesn't drift too far from reality.
 
 For questions about these guidelines, see .github#5.
