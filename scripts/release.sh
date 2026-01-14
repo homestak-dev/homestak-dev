@@ -539,6 +539,8 @@ cmd_publish() {
 cmd_packer() {
     local action="check"
     local dry_run=true
+    local version=""
+    local source=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -558,6 +560,14 @@ cmd_packer() {
                 dry_run=false
                 shift
                 ;;
+            --version)
+                version="$2"
+                shift 2
+                ;;
+            --source)
+                source="$2"
+                shift 2
+                ;;
             *)
                 log_error "Unknown option: $1"
                 exit 1
@@ -565,20 +575,17 @@ cmd_packer() {
         esac
     done
 
-    # Require release in progress
-    if ! state_exists; then
-        log_error "No release in progress"
-        log_error "Start with: release.sh init --version X.Y"
-        exit 1
+    # Get version from state if not provided
+    if [[ -z "$version" ]]; then
+        if state_exists && state_validate; then
+            version=$(state_get_version)
+        else
+            log_error "No version specified and no release in progress"
+            log_error "Use: release.sh packer --copy --version X.Y"
+            log_error "Or: release.sh init --version X.Y"
+            exit 1
+        fi
     fi
-
-    if ! state_validate; then
-        log_error "State file is corrupted"
-        exit 3
-    fi
-
-    local version
-    version=$(state_get_version)
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
@@ -610,11 +617,14 @@ cmd_packer() {
             ;;
 
         copy)
-            local source
-            source=$(packer_get_latest_release "$version")
+            # Use provided source or find latest with images
+            if [[ -z "$source" ]]; then
+                source=$(packer_get_latest_release "$version")
+            fi
 
             if [[ -z "$source" ]]; then
                 log_error "No previous release with images found"
+                log_error "Specify source with: --source v0.19"
                 exit 1
             fi
 
@@ -1150,6 +1160,7 @@ Examples:
   release.sh packer --check
   release.sh packer --copy --dry-run
   release.sh packer --copy --execute
+  release.sh packer --copy --version 0.20 --source v0.19
   release.sh full --dry-run
   release.sh full --execute --host father
   release.sh full --execute --skip-validate
