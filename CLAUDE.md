@@ -130,6 +130,7 @@ This eliminates configuration drift between components - all settings flow from 
 - **Idempotent operations** - Safe to run multiple times
 - **Secrets in code, encrypted** - SOPS + age in site-config repo, git hooks for auto-encrypt/decrypt
 - **Component independence** - Each repo installs its own dependencies via `make install-deps`
+- **Process consistency** - When presenting options to the user, flag any option that deviates from established processes (lifecycle docs, RELEASE.md). Do not present process-inconsistent options as equal alternatives without noting the inconsistency.
 
 ## Terminology
 
