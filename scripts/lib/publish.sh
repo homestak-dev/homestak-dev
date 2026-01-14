@@ -384,6 +384,44 @@ publish_upload_packer_images() {
     return 0
 }
 
+publish_ensure_packer_assets() {
+    local version="$1"
+    local dry_run="${2:-true}"
+
+    # Check if packer release has any assets
+    local asset_count
+    asset_count=$(gh release view "v${version}" --repo homestak-dev/packer --json assets --jq '.assets | length' 2>/dev/null || echo "0")
+
+    if [[ "$asset_count" -gt 0 ]]; then
+        log_info "Packer release already has $asset_count asset(s), skipping auto-copy"
+        return 0
+    fi
+
+    log_info "Packer release has no assets, copying from previous release..."
+
+    # Find source release
+    local source_release
+    source_release=$(packer_get_latest_release "$version")
+
+    if [[ -z "$source_release" ]]; then
+        log_warn "No previous release with assets found - packer release will have no images"
+        log_warn "Build images with: cd packer && ./build.sh"
+        log_warn "Then upload with: release.sh publish --images /path/to/images"
+        return 0  # Not a fatal error
+    fi
+
+    # Copy images using existing function
+    if packer_copy_images_local "$version" "$source_release" "$dry_run"; then
+        if [[ "$dry_run" != "true" ]]; then
+            log_success "Packer images copied from $source_release"
+        fi
+        return 0
+    else
+        log_warn "Failed to copy packer images - manual upload may be required"
+        return 0  # Not a fatal error
+    fi
+}
+
 publish_update_latest() {
     local version="$1"
     local dry_run="${2:-true}"
@@ -472,6 +510,10 @@ run_publish() {
         echo "  - Upload packer images"
         echo "  - Update 'latest' tag in packer"
         ((cmd_count+=2))
+    else
+        echo "  - Ensure packer release has images (auto-copy if needed)"
+        echo "  - Update 'latest' tag in packer"
+        ((cmd_count+=2))
     fi
     echo ""
     echo "Total: ${cmd_count} operations"
@@ -489,6 +531,13 @@ run_publish() {
         if [[ -n "$images_dir" ]]; then
             echo "  packer images:"
             publish_upload_packer_images "$version" "$images_dir" "true"
+            echo ""
+            echo "  latest tag:"
+            publish_update_latest "$version" "true"
+            echo ""
+        else
+            echo "  packer auto-ensure:"
+            echo "    (Would check if packer release has assets, copy from previous release if not)"
             echo ""
             echo "  latest tag:"
             publish_update_latest "$version" "true"
@@ -535,7 +584,7 @@ run_publish() {
         return 1
     fi
 
-    # Upload packer images if specified
+    # Upload packer images if specified, otherwise ensure assets exist
     if [[ -n "$images_dir" ]]; then
         echo ""
         echo "Uploading packer images..."
@@ -543,6 +592,15 @@ run_publish() {
             log_error "Failed to upload packer images"
             return 1
         fi
+
+        echo ""
+        echo "Updating latest tag..."
+        publish_update_latest "$version" "false"
+    else
+        # Auto-ensure packer has images (copy from previous release if needed)
+        echo ""
+        echo "Ensuring packer release has images..."
+        publish_ensure_packer_assets "$version" "false"
 
         echo ""
         echo "Updating latest tag..."
