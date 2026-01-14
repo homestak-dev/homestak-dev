@@ -17,6 +17,12 @@ All notable changes to this project will be documented in this file.
   - Uploads images + SHA256SUMS to target release
   - Works even if source release predates checksum feature (v0.17)
 
+### Documentation
+- Add validation host prerequisites section to RELEASE.md (#63)
+  - Documents what makes a host "validation-ready" beyond bootstrap
+  - Includes quick check script and common issues table
+  - Prerequisites: node config, API token, packer images, nested virt
+
 ## [v0.18] - 2026-01-13
 
 ### Theme: Release Tooling Completion
