@@ -16,12 +16,29 @@ All notable changes to this project will be documented in this file.
   - Generates fresh SHA256SUMS after copy
   - Uploads images + SHA256SUMS to target release
   - Works even if source release predates checksum feature (v0.17)
+- Provider cache check in `release.sh preflight` (#64)
+  - Detects stale provider caches vs lockfile version
+  - Reports mismatches with clear remediation steps
 
 ### Documentation
 - Add validation host prerequisites section to RELEASE.md (#63)
   - Documents what makes a host "validation-ready" beyond bootstrap
   - Includes quick check script and common issues table
   - Prerequisites: node config, API token, packer images, nested virt
+
+### Cross-Repo Changes
+
+**iac-driver v0.19:**
+- Add API token validation via `--validate-only` flag (#31)
+- Add host availability check with SSH reachability test (#32)
+- Enhance `--local` flag with auto-config from hostname (#26)
+
+**packer v0.19:**
+- Investigate guest agent delay on debian-13-pve image (#13)
+  - Tested optimizations found ineffective; no code changes
+
+**site-config v0.19:**
+- Add `hosts/.gitkeep` to track directory structure (#16)
 
 ## [v0.18] - 2026-01-13
 
