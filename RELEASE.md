@@ -707,3 +707,79 @@ Assets remain attached to the release through the tag change.
 
 ### v0.8
 - **Complete AAR/retro immediately** - Deferred post-release tasks result in lost context. Block on these before starting next release work.
+
+## v0.19 After Action Report
+
+**Release Date:** 2026-01-14
+**Duration:** ~3 hours (including investigation and fixes)
+**Validation:** nested-pve-roundtrip on father
+
+### What Was Released
+
+**homestak-dev:**
+- `release.sh selftest` command (#61)
+- `packer --copy` SHA256SUMS generation (#62)
+- Validation host prerequisites documentation (#63)
+- Provider cache check in preflight (#64)
+
+**iac-driver:**
+- API token validation via `--validate-only` (#31)
+- Host availability check with SSH reachability (#32)
+- `--local` flag auto-config from hostname (#26)
+- Fix: EnsurePVEAction detects pre-installed PVE image
+
+**packer:**
+- Investigated guest agent boot delay (#13) - no improvement found
+
+**site-config:**
+- Add `hosts/.gitkeep` (#16)
+
+### Issues Encountered
+
+1. **packer#13 optimization broke networking**
+   - bootcmd→runcmd change prevented network from starting
+   - Resolution: Reverted to bootcmd, removed ineffective optimizations
+   - Lesson: Always include validation testing in optimization scope
+
+2. **EnsurePVEAction didn't detect pre-installed image**
+   - Checked pveproxy status before it was running
+   - Resolution: Added marker file check (`/etc/pve-packages-preinstalled`)
+   - Lesson: Use stable markers, not service status for detection
+
+3. **CHANGELOG entries needed mid-release**
+   - iac-driver missing v0.19 section
+   - packer CHANGELOG had wrong "Fixed" vs "Investigated"
+   - Resolution: Fixed during release process
+
+### Metrics
+
+| Metric | Value |
+|--------|-------|
+| Repos released | 9 |
+| Issues closed | 8 |
+| PRs merged | 6 |
+| nested-pve-roundtrip time | 307.6s |
+
+---
+
+## v0.19 Retrospective
+
+### What Went Well
+
+1. **release.sh selftest caught issues** - The new selftest command validated CLI behavior
+2. **Quick iteration on fixes** - Found and fixed EnsurePVEAction issue during validation
+3. **Provider cache check** - New preflight check prevents stale cache issues
+4. **packer --copy with SHA256SUMS** - Seamless image copying for no-change releases
+
+### What Could Be Improved
+
+1. **Optimization validation** - packer#13 shipped without testing; need validation gate
+2. **CHANGELOG discipline** - Should update CHANGELOG as part of each PR, not during release
+3. **Branch hygiene** - Some repos left on deleted feature branches after PR merge
+
+### Action Items for v0.20
+
+- [ ] Add CHANGELOG check to PR template
+- [ ] Consider automated validation for packer template changes
+- [ ] Add branch cleanup to post-merge workflow
+
