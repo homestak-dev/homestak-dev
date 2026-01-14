@@ -253,17 +253,42 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 | [site-config/CLAUDE.md](site-config/CLAUDE.md) | Config schema, secrets |
 | [tofu/CLAUDE.md](tofu/CLAUDE.md) | Modules, environments |
 
-### Process Documentation
+### Development Lifecycle
+
+6-phase development process in [docs/lifecycle/](docs/lifecycle/):
 
 | File | Purpose |
 |------|---------|
-| [RELEASE.md](RELEASE.md) | Release methodology |
-| [REPO-SETTINGS.md](REPO-SETTINGS.md) | Repository configuration standards |
-| [CLAUDE-GUIDELINES.md](CLAUDE-GUIDELINES.md) | Documentation standards |
+| [00-overview.md](docs/lifecycle/00-overview.md) | Work types, phase matrix, multi-repo structure |
+| [10-planning.md](docs/lifecycle/10-planning.md) | Sprint scoping and backlog formation |
+| [20-design.md](docs/lifecycle/20-design.md) | Pre-implementation design and validation planning |
+| [30-implementation.md](docs/lifecycle/30-implementation.md) | Development, testing, CHANGELOG updates |
+| [40-validation.md](docs/lifecycle/40-validation.md) | Integration testing requirements |
+| [50-merge.md](docs/lifecycle/50-merge.md) | PR process and documentation updates |
+| [60-release.md](docs/lifecycle/60-release.md) | Release coordination, tagging, retrospectives |
+| [65-lessons-learned.md](docs/lifecycle/65-lessons-learned.md) | Accumulated release insights (v0.8-v0.19) |
+
+### Templates
+
+Reusable templates in [docs/templates/](docs/templates/):
+
+| File | Purpose |
+|------|---------|
+| [aar.md](docs/templates/aar.md) | After Action Report template |
+| [retrospective.md](docs/templates/retrospective.md) | Sprint retrospective template |
+| [release-issue.md](docs/templates/release-issue.md) | Release planning issue template |
+| [design-summary.md](docs/templates/design-summary.md) | Design documentation templates |
+
+### Other Documentation
+
+| File | Purpose |
+|------|---------|
+| [docs/CLAUDE-GUIDELINES.md](docs/CLAUDE-GUIDELINES.md) | CLAUDE.md documentation standards |
+| [docs/REPO-SETTINGS.md](docs/REPO-SETTINGS.md) | Repository configuration standards |
 
 ## Release Process
 
-See [RELEASE.md](RELEASE.md) for the release methodology, including:
+See [docs/lifecycle/60-release.md](docs/lifecycle/60-release.md) for the release methodology, including:
 - Repository dependency order
 - 10-phase release workflow
 - After action reports and retrospectives
