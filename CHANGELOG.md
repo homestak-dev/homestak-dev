@@ -21,6 +21,12 @@ All notable changes to this project will be documented in this file.
   - Reports mismatches with clear remediation steps
 
 ### Documentation
+- Restructure development lifecycle documentation (#66)
+  - Add `docs/lifecycle/` with 6-phase development process (planning → release)
+  - Add `docs/templates/` with reusable AAR, retrospective, and issue templates
+  - Move CLAUDE-GUIDELINES.md and REPO-SETTINGS.md to `docs/`
+  - Consolidate PLANNING.md, FEATURE.md, RELEASE.md into lifecycle docs
+  - Preserve all lessons learned from v0.8-v0.19 in 60-release.md
 - Add validation host prerequisites section to RELEASE.md (#63)
   - Documents what makes a host "validation-ready" beyond bootstrap
   - Includes quick check script and common issues table

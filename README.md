@@ -75,9 +75,10 @@ This workspace uses [gita](https://github.com/nosarthur/gita) to manage multiple
 | File | Purpose |
 |------|---------|
 | [CLAUDE.md](CLAUDE.md) | Architecture, conventions, development guide |
-| [RELEASE.md](RELEASE.md) | Release methodology |
-| [REPO-SETTINGS.md](REPO-SETTINGS.md) | Repository configuration standards |
-| [CLAUDE-GUIDELINES.md](CLAUDE-GUIDELINES.md) | Documentation standards |
+| [docs/lifecycle/](docs/lifecycle/) | 6-phase development lifecycle |
+| [docs/REPO-SETTINGS.md](docs/REPO-SETTINGS.md) | Repository configuration standards |
+| [docs/CLAUDE-GUIDELINES.md](docs/CLAUDE-GUIDELINES.md) | Documentation standards |
+| [docs/ISSUE-GUIDELINES.md](docs/ISSUE-GUIDELINES.md) | Issue creation and labeling standards |
 
 ## Claude Code Skills
 
