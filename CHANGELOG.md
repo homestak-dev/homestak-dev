@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Theme: Stabilization
+
+### Added
+- `release.sh selftest` command for CLI validation (#61)
+  - Exercises all commands in dry-run mode
+  - Catches bugs before release (like v0.18's `gh release list --json` issue)
+  - Supports `--verbose` for detailed output
+
 ## [v0.18] - 2026-01-13
 
 ### Theme: Release Tooling Completion
