@@ -250,6 +250,7 @@ cmd_audit() {
 cmd_preflight() {
     local json_output=false
     local version=""
+    local hosts=()
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -259,6 +260,10 @@ cmd_preflight() {
                 ;;
             --version)
                 version="$2"
+                shift 2
+                ;;
+            --host)
+                hosts+=("$2")
                 shift 2
                 ;;
             *)
@@ -286,7 +291,7 @@ cmd_preflight() {
     fi
 
     # Run checks
-    if run_preflight "$version" "$json_output"; then
+    if run_preflight "$version" "$json_output" "${hosts[@]}"; then
         if state_exists; then
             state_set_phase_status "preflight" "complete"
         fi
@@ -1123,12 +1128,15 @@ Options:
   --reset-repo REPO  Reset tag for single repo only
   --skip             Skip validation (emergency releases only)
   --remote HOST      Run validation on remote host via SSH
+  --host HOST        Check host readiness (preflight only, repeatable)
   --lines N          Number of audit log lines to show (default: 20)
 
 Examples:
   release.sh init --version 0.14
   release.sh status
   release.sh preflight
+  release.sh preflight --host father
+  release.sh preflight --host father --host mother
   release.sh validate --scenario vm-roundtrip --host father
   release.sh validate --scenario vm-roundtrip --host father --remote father
   release.sh validate --skip
