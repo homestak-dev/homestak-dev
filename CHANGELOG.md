@@ -15,6 +15,13 @@ All notable changes to this project will be documented in this file.
   - Changed workflow existence check to use correct `gh workflow list` output format
   - Removed unsupported `--json` flag from workflow list command
 
+### Documentation
+- Adopt latest-centric packer image distribution (#83)
+  - `latest` is now the primary image source; versioned releases typically have no images
+  - Updated `docs/lifecycle/60-release.md` Phase 5 with Option A (skip) / Option B (rebuild) paths
+  - Updated verification expectations and release checklists
+  - Added `packer_release: latest` note to site-config/CLAUDE.md
+
 ### Cross-Repo Changes
 
 **packer v0.22:**

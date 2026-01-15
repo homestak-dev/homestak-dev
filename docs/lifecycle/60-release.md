@@ -27,7 +27,7 @@ Releases must follow this order (downstream depends on upstream):
 
 **Unified versioning:** All repos get the same version tag on each release, even if unchanged. This simplifies tracking - "homestak v0.18" means all repos at v0.18.
 
-**Packer images required:** Every packer release must include images, even if templates are unchanged. Copy images from the previous release if no rebuild is needed.
+**Packer images:** `latest` is the primary image source; automation defaults to `packer_release: latest`. Versioned releases only include images when templates actually change. See [Phase 5](#phase-5-packer-images) for details.
 
 ## Version Numbering
 
@@ -154,37 +154,69 @@ git push origin v0.X
 
 ### Phase 5: Packer Images
 
-Build images on a host with QEMU/KVM support:
+**Latest-centric approach:** The `latest` release is the primary source for packer images. Versioned releases (v0.22, v0.23) typically have NO image assets - they're tag-only releases that inherit images from `latest`.
+
+**When to rebuild images:**
+- Packer template changes (new packages, cloud-init fixes)
+- Base Debian image updates (12.x → 12.y point release)
+- Security fixes in image content
+- New image variants added
+
+**When to skip rebuild:**
+- Documentation-only changes
+- Build script refactoring (unless it affects output)
+- CHANGELOG updates
+- Releases where templates haven't changed
+
+#### Option A: Images NOT Changed (default)
+
+Most releases skip image handling entirely:
 
 ```bash
-# Build and fetch images
+# No packer image steps needed
+# Automation uses: packer_release: latest (default)
+# latest already points to correct images
+```
+
+Add note to release description: "Images: See `latest` release"
+
+#### Option B: Images Changed (rebuild required)
+
+When templates or base images change, rebuild and update `latest`:
+
+```bash
+# Build images on a host with QEMU/KVM support
 cd ~/homestak-dev/iac-driver
 ./run.sh --scenario packer-build-fetch --remote <build-host-ip>
 
 # Images downloaded to /tmp/packer-images/
 ```
 
-**If images unchanged (reuse from previous release):**
+**Update `latest` release (via release CLI):**
 ```bash
-mkdir -p /tmp/packer-images && cd /tmp/packer-images
-gh release download latest --repo homestak-dev/packer --pattern '*.qcow2'
+./scripts/release.sh packer --copy --source v0.X --execute
+
+# Or via GHA workflow
+./scripts/release.sh packer --workflow --source v0.X
 ```
 
-**Update `latest` tag:**
+**Manual update:**
 ```bash
 cd ~/homestak-dev/packer
 git tag -f latest v0.X
 git push origin latest --force
 
-# Recreate latest release
+# Recreate latest release with new images
 gh release delete latest --repo homestak-dev/packer --yes
 gh release create latest --prerelease \
   --title "Latest Images" \
-  --notes "Rolling release - points to v0.X" \
+  --notes "Points to v0.X" \
   --repo homestak-dev/packer \
-  /tmp/packer-images/debian-12-custom.qcow2 \
-  /tmp/packer-images/debian-13-custom.qcow2
+  /tmp/packer-images/*.qcow2 \
+  /tmp/packer-images/*.sha256
 ```
+
+Add note to release description: "Images: Included (rebuilt for <reason>)"
 
 ### Phase 6: GitHub Releases
 
@@ -197,22 +229,18 @@ Create releases in dependency order. **Use `--prerelease` flag until v1.0.**
 
 # Or manually
 gh release create v0.X --prerelease --title "v0.X" --notes "See CHANGELOG.md" --repo homestak-dev/<repo>
-
-# Packer (with image assets)
-gh release create v0.X --prerelease \
-  --title "v0.X" \
-  --notes "See CHANGELOG.md" \
-  --repo homestak-dev/packer \
-  /tmp/packer-images/debian-12-custom.qcow2 \
-  /tmp/packer-images/debian-13-custom.qcow2
 ```
 
-#### Packer Image Checklist
+**Packer release notes:** Indicate image status in release description:
+- If images NOT changed: "Images: See `latest` release"
+- If images changed: "Images: Included (rebuilt for <reason>)"
 
-- [ ] debian-12-custom.qcow2
-- [ ] debian-13-custom.qcow2
-- [ ] debian-13-pve.qcow2 (or split parts if >2GB)
-- [ ] SHA256SUMS
+#### Packer Image Checklist (only when rebuilding)
+
+When `latest` is being updated with new images:
+- [ ] debian-12-custom.qcow2 + .sha256
+- [ ] debian-13-custom.qcow2 + .sha256
+- [ ] debian-13-pve.qcow2 + .sha256 (or split parts if >2GB)
 
 **Note:** Images >2GB must be split due to GitHub limits.
 
@@ -228,7 +256,9 @@ for repo in .github .claude homestak-dev site-config tofu ansible bootstrap pack
 done
 ```
 
-Expected: All repos have releases, packer has 4 assets (3 images + checksums).
+Expected: All repos have releases. Packer assets depend on whether images were rebuilt:
+- Images NOT changed: 0 assets (tag-only release)
+- Images changed: 6 assets (3 images + 3 checksums)
 
 #### Post-Release Smoke Test
 
@@ -439,8 +469,7 @@ See [65-lessons-learned.md](65-lessons-learned.md) for accumulated insights from
 - [ ] Version numbers determined
 - [ ] All repos tagged
 - [ ] GitHub releases created
-- [ ] Packer assets uploaded (images + checksums)
-- [ ] `latest` tag updated
+- [ ] Packer images handled (see Phase 5 - usually skip, update `latest` if changed)
 - [ ] Post-release smoke test passed
 - [ ] After Action Report completed
 - [ ] Retrospective completed
