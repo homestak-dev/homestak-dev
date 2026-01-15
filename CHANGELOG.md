@@ -9,6 +9,13 @@ All notable changes to this project will be documented in this file.
   - Passes through to iac-driver's `--packer-release` option
   - Enables validation with specific packer release when `latest` tag points to draft
 
+### Improved
+- Release issue tracking visibility throughout release process (#77)
+  - `release.sh init` shows tip to link release issue if not provided
+  - `release.sh status` shows yellow warning when no issue is linked
+  - Add release issue checkpoint to lifecycle docs (Phase 1: Pre-flight)
+  - Add directive to CLAUDE.md about identifying release issue at session start
+
 ---
 
 ## [v0.20] - 2026-01-15
