@@ -10,6 +10,20 @@ All notable changes to this project will be documented in this file.
   - Excludes legacy `SHA256SUMS` (consolidated format, deprecated)
   - Aligns with packer build.sh which generates per-image checksums
 
+### Fixed
+- Fix `release.sh packer --workflow` gh CLI syntax (.github#30)
+  - Changed workflow existence check to use correct `gh workflow list` output format
+  - Removed unsupported `--json` flag from workflow list command
+
+### Cross-Repo Changes
+
+**packer v0.22:**
+- Fix copy-images workflow to support `latest` as target (.github#30)
+  - Relaxed validation to accept `latest` OR `vX.Y` format
+  - Auto-create `latest` release if it doesn't exist
+  - Fix `force` parameter type in tag update API call (use `-F` for boolean)
+  - Improved error messages and debugging output
+
 ---
 
 ## [v0.21] - 2026-01-15

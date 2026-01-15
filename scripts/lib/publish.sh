@@ -94,8 +94,8 @@ packer_dispatch_copy_images() {
         return 0
     fi
 
-    # Check if workflow exists
-    if ! gh workflow list --repo homestak-dev/packer --json name -q '.[].name' 2>/dev/null | grep -q "Copy Images"; then
+    # Check if workflow exists (gh workflow list outputs: NAME STATUS ID)
+    if ! gh workflow list --repo homestak-dev/packer 2>/dev/null | grep -q "^Copy Images"; then
         log_warn "Workflow '$workflow' not found in packer repo"
         log_info "Images must be copied manually or workflow created"
         return 1
