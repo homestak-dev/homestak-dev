@@ -57,6 +57,9 @@ Before starting release work:
 
 ### Phase 1: Pre-flight
 
+- [ ] **Identify release tracking issue** (e.g., homestak-dev#XX)
+  - Look for open issues titled "vX.Y Release Planning" or labeled `release`
+  - Include `--issue XX` when running `release.sh init`
 - [ ] Git fetch on all repos (avoid rebase surprises)
 - [ ] All PRs merged to main branches
 - [ ] Working trees clean (`git status` on all repos)

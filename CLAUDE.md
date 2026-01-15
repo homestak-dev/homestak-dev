@@ -224,6 +224,10 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 ./scripts/release.sh full --execute --host father
 ```
 
+### Release Issue Tracking
+
+**Important:** When executing a release, always identify the release tracking issue at session start. Use `gh issue list --label release` or check for open issues titled "vX.Y Release Planning". Include `--issue N` when running `release.sh init` to link the release state to the tracking issue.
+
 ### State Files
 
 | File | Purpose |

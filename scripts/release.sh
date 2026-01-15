@@ -154,6 +154,9 @@ cmd_init() {
     echo "  Release v${version} initialized"
     if [[ -n "$issue" ]]; then
         echo "  Tracking issue: #${issue}"
+    else
+        echo -e "  ${YELLOW}Tip: Link a release issue with --issue N${NC}"
+        echo "  Look for: gh issue list --label release"
     fi
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
@@ -191,6 +194,8 @@ cmd_status() {
     echo "  Release v${version} - Status: ${status}"
     if [[ -n "$issue" ]]; then
         echo "  Tracking: https://github.com/homestak-dev/homestak-dev/issues/${issue}"
+    else
+        echo -e "  Tracking: ${YELLOW}(no issue linked)${NC}"
     fi
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
