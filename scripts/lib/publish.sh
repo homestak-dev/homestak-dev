@@ -190,16 +190,28 @@ packer_copy_images_local() {
     tmp_dir=$(mktemp -d)
     trap "rm -rf $tmp_dir" EXIT
 
-    # Download assets from source release (only images, not SHA256SUMS - we regenerate it)
+    # Download assets from source release
+    # Include images (.qcow2) and per-image checksums (.sha256)
+    # Exclude legacy SHA256SUMS (consolidated format, deprecated)
     local assets
-    assets=$(gh release view "$source_release" --repo homestak-dev/packer --json assets --jq '.assets[].name' 2>/dev/null | grep -v SHA256SUMS)
+    assets=$(gh release view "$source_release" --repo homestak-dev/packer --json assets --jq '.assets[].name' 2>/dev/null | grep -v '^SHA256SUMS$')
 
     if [[ -z "$assets" ]]; then
         log_error "No assets found in source release $source_release"
         return 1
     fi
 
-    # Download images
+    # Separate images and checksums for logging
+    local images checksums
+    images=$(echo "$assets" | grep '\.qcow2$' || true)
+    checksums=$(echo "$assets" | grep '\.sha256$' || true)
+
+    if [[ -z "$images" ]]; then
+        log_error "No image files found in source release $source_release"
+        return 1
+    fi
+
+    # Download all assets (images + checksums)
     for asset in $assets; do
         local download_cmd="gh release download $source_release --repo homestak-dev/packer --pattern \"$asset\" --dir \"$tmp_dir\""
 
@@ -214,24 +226,12 @@ packer_copy_images_local() {
         fi
     done
 
-    # Generate fresh SHA256SUMS (don't assume source has it - v0.17 predates feature)
-    local sha_cmd="cd \"$tmp_dir\" && sha256sum *.qcow2 > SHA256SUMS 2>/dev/null || true"
-    if [[ "$dry_run" == "true" ]]; then
-        echo "    ${sha_cmd}"
-    else
-        log_info "Generating SHA256SUMS..."
-        if ! eval "$sha_cmd"; then
-            log_warn "Failed to generate SHA256SUMS (no qcow2 files?)"
-        fi
-    fi
-
-    # Upload all files including generated SHA256SUMS
+    # Upload all downloaded files (images + per-image checksums)
+    # Note: We no longer generate SHA256SUMS - using per-image .sha256 files instead
     local upload_files
     if [[ "$dry_run" == "true" ]]; then
-        # In dry-run, list expected files
-        upload_files="$assets SHA256SUMS"
+        upload_files="$assets"
     else
-        # In execute mode, list actual files
         upload_files=$(ls "$tmp_dir")
     fi
 
@@ -241,7 +241,6 @@ packer_copy_images_local() {
         if [[ "$dry_run" == "true" ]]; then
             echo "    ${upload_cmd}"
         else
-            # Skip if file doesn't exist (for dry-run files list)
             [[ ! -f "${tmp_dir}/${file}" ]] && continue
 
             log_info "Uploading $file..."
@@ -253,7 +252,10 @@ packer_copy_images_local() {
     done
 
     if [[ "$dry_run" != "true" ]]; then
-        log_success "Images copied from $source_release to v${version} (SHA256SUMS regenerated)"
+        local img_count checksum_count
+        img_count=$(echo "$images" | wc -w)
+        checksum_count=$(ls "$tmp_dir"/*.sha256 2>/dev/null | wc -l || echo "0")
+        log_success "Copied $img_count images + $checksum_count checksums from $source_release to v${version}"
     fi
 
     return 0

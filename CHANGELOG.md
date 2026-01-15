@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - v0.21
+## [Unreleased] - v0.22
+
+### Changed
+- `release.sh packer --copy` now uses per-image `.sha256` checksums (packer#29)
+  - Downloads `.qcow2` images and accompanying `.sha256` files from source release
+  - Excludes legacy `SHA256SUMS` (consolidated format, deprecated)
+  - Aligns with packer build.sh which generates per-image checksums
+
+---
+
+## [v0.21] - 2026-01-15
 
 ### Added
 - `release.sh validate --packer-release` flag for specifying packer image version (#74)
