@@ -2,7 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - v0.22
+## [Unreleased]
+
+## [v0.22] - 2026-01-15
 
 ### Changed
 - `release.sh packer --copy` now uses per-image `.sha256` checksums (packer#29)
