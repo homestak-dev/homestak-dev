@@ -155,11 +155,23 @@ EOF
 gh api repos/homestak-dev/NEW_REPO/vulnerability-alerts -X PUT
 ```
 
+### Pull Requests
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| Auto-delete head branches | Enabled | Prevents stale branch accumulation (v0.21+) |
+
+**CLI to enable:**
+```bash
+gh api -X PATCH repos/homestak-dev/REPO_NAME -f delete_branch_on_merge=true
+```
+
 ## Current Repository Settings
 
-As of v0.10, all repos are configured with:
+As of v0.21, all repos are configured with:
 - Branch protection requiring 1 review
 - Wiki disabled
 - Vulnerability alerts enabled
+- Auto-delete head branches enabled
 - Apache 2.0 license
 - Standard topics (homelab, infrastructure-as-code, proxmox + repo-specific)
