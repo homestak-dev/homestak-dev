@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - v0.20
+## [Unreleased] - v0.21
+
+### Added
+- `release.sh validate --packer-release` flag for specifying packer image version (#74)
+  - Passes through to iac-driver's `--packer-release` option
+  - Enables validation with specific packer release when `latest` tag points to draft
+
+---
+
+## [v0.20] - 2026-01-15
 
 ### Theme: Release Automation
 

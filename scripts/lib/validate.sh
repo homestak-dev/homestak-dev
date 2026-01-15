@@ -47,10 +47,14 @@ validate_run_scenario() {
     local scenario="$1"
     local host="$2"
     local verbose="${3:-false}"
+    local packer_release="${4:-}"
 
     local cmd="${IAC_DRIVER_DIR}/run.sh --scenario ${scenario} --host ${host}"
     if [[ "$verbose" == "true" ]]; then
         cmd+=" --verbose"
+    fi
+    if [[ -n "$packer_release" ]]; then
+        cmd+=" --packer-release ${packer_release}"
     fi
 
     log_info "Running: $cmd"
@@ -71,14 +75,20 @@ validate_run_remote() {
     local scenario="$2"
     local host="$3"
     local verbose="${4:-false}"
+    local packer_release="${5:-}"
 
     local verbose_flag=""
     if [[ "$verbose" == "true" ]]; then
         verbose_flag="--verbose"
     fi
 
+    local packer_release_flag=""
+    if [[ -n "$packer_release" ]]; then
+        packer_release_flag="--packer-release ${packer_release}"
+    fi
+
     # Build the remote command
-    local remote_cmd="cd ~/homestak-dev && ./scripts/release.sh validate --scenario ${scenario} --host ${host} ${verbose_flag}"
+    local remote_cmd="cd ~/homestak-dev && ./scripts/release.sh validate --scenario ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
 
     log_info "Running validation on ${remote_host}..."
     log_info "Remote command: ${remote_cmd}"
@@ -110,6 +120,7 @@ run_validation() {
     local skip="${3:-false}"
     local verbose="${4:-false}"
     local remote_host="${5:-}"
+    local packer_release="${6:-}"
 
     # Handle skip
     if [[ "$skip" == "true" ]]; then
@@ -149,11 +160,11 @@ run_validation() {
     # Run the scenario (remote or local)
     local scenario_passed=false
     if [[ -n "$remote_host" ]]; then
-        if validate_run_remote "$remote_host" "$scenario" "$host" "$verbose"; then
+        if validate_run_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release"; then
             scenario_passed=true
         fi
     else
-        if validate_run_scenario "$scenario" "$host" "$verbose"; then
+        if validate_run_scenario "$scenario" "$host" "$verbose" "$packer_release"; then
             scenario_passed=true
         fi
     fi
