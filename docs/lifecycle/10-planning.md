@@ -85,7 +85,32 @@ For each in-scope issue, document planning details:
 
 Attach planning details to each issue as a comment before implementation. See [20-design.md](20-design.md) for detailed design guidance and templates.
 
-### 9. Update Release Plan
+### 9. Branch/Merge Strategy
+
+For sprints with multiple issues touching the same repo, analyze potential conflicts to minimize rework:
+
+1. **Identify file overlap** - Which issues touch the same files?
+2. **Detect restructure/refactor issues** - These affect many files and should typically go first
+3. **Sequence to minimize rework** - Do restructures before enhancements that touch restructured files
+4. **Plan checkpoints** - Identify merge points to reduce long-lived branches
+5. **Consider combined PRs** - Issues touching same files may benefit from single PR
+
+**Example conflict analysis:**
+
+| Issue | Files Affected | Conflicts With |
+|-------|----------------|----------------|
+| #19 (restructure) | templates/*, scripts/* | #6, #27 |
+| #6 (SSH keys) | templates/*.pkr.hcl | #19 |
+| #27 (AppArmor) | templates/*.pkr.hcl | #19 |
+
+**Checkpoint strategy:**
+- Phase 1: Quick wins (no conflicts) → merge
+- Phase 2: Restructure → merge
+- Phase 3: Dependent changes on new structure → merge
+
+This analysis prevents scenarios where a restructure invalidates work done on the old structure.
+
+### 10. Update Release Plan
 
 Roll up issue-level planning into the release plan issue:
 
@@ -130,5 +155,6 @@ A "bootstrapped" host is not automatically validation-ready. Prerequisites:
 - [ ] Acceptance criteria identified for each item
 - [ ] Effort estimates assigned
 - [ ] Dependencies mapped
+- [ ] Branch/merge strategy analyzed (if multi-issue sprint)
 - [ ] Issue-level planning documented
 - [ ] Sprint backlog reviewed and approved by human
