@@ -11,3 +11,4 @@ tofu/
 # Release CLI state files
 .release-state.json
 .release-audit.log
+.vscode/
