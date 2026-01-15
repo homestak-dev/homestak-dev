@@ -1,12 +1,19 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.20. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.21. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.21
+
+- **Cross-repo ripple effects from restructuring** - Packer's per-template directory change (#19) broke ansible's nested-pve role which expected the old path structure. When restructuring one repo, test the full chain of dependent repos before release.
+- **`latest` release requires manual handling** - release.sh adds "v" prefix (causing "vlatest"), and GHA workflow validation rejects non-vX.Y targets. The `latest` packer release must be updated manually after each release.
+- **Run benchmarks during release** - Executing homestak-dev#75 during v0.21 release provided actionable data immediately. Infrastructure is already set up, context is fresh, and results inform the current release decision.
+- **Validation as hard gate confirmed** - v0.21 caught two bugs (packer#32, ansible role) during validation phase before any tags were created. Reinforces v0.12 lesson: always validate before tagging.
 
 ## v0.20
 
@@ -98,6 +105,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.20. Each lesson was codi
 For quick reference, lessons grouped by theme:
 
 ### Validation & Testing
+- Validation as hard gate confirmed (v0.21)
 - Validate optimizations before merging (v0.19)
 - Test the actual CLI flow end-to-end (v0.18)
 - Verify external tool behavior, don't assume (v0.18)
@@ -106,6 +114,7 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Run benchmarks during release (v0.21)
 - Options inconsistent with process should be flagged (v0.20)
 - CHANGELOG updates belong in PRs, not release (v0.19)
 - Follow process to the end (v0.19)
@@ -119,12 +128,14 @@ For quick reference, lessons grouped by theme:
 - Configure auto-delete for PR branches (v0.20)
 
 ### Multi-Repo Coordination
+- Cross-repo ripple effects from restructuring (v0.21)
 - Unified versioning requires constant awareness (v0.16)
 - Unified versioning requires explicit tracking (v0.13)
 - Tag inventory check before closing (v0.16)
 - Packer images required for unified release (v0.15)
 
 ### Technical Gotchas
+- `latest` release requires manual handling (v0.21)
 - Use stable markers for detection, not service status (v0.19)
 - Provider upgrades need cache clearing (v0.18)
 - Feature prerequisites propagate (v0.18)
