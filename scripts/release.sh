@@ -5,6 +5,7 @@
 # Usage:
 #   release.sh init --version X.Y
 #   release.sh status
+#   release.sh resume
 #   release.sh preflight
 #   release.sh validate --scenario <name> --host <host>
 #   release.sh tag [--dry-run|--execute]
@@ -20,9 +21,9 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_DIR="$(dirname "$SCRIPT_DIR")"
-STATE_FILE="${WORKSPACE_DIR}/.release-state.json"
-AUDIT_LOG="${WORKSPACE_DIR}/.release-audit.log"
+WORKSPACE_DIR="${WORKSPACE_DIR:-$(dirname "$SCRIPT_DIR")}"
+STATE_FILE="${STATE_FILE:-${WORKSPACE_DIR}/.release-state.json}"
+AUDIT_LOG="${AUDIT_LOG:-${WORKSPACE_DIR}/.release-audit.log}"
 
 # Export for sourced scripts
 export SCRIPT_DIR WORKSPACE_DIR STATE_FILE AUDIT_LOG
@@ -262,6 +263,140 @@ cmd_audit() {
     done
 
     audit_show "$lines"
+}
+
+cmd_resume() {
+    # AI-friendly context recovery for session resumption
+    if ! state_exists; then
+        echo "## Release Session Recovery"
+        echo ""
+        echo "**Status:** No release in progress"
+        echo ""
+        echo "### Next Steps"
+        echo "1. Run \`release.sh init --version X.Y\` to start a new release"
+        exit 0
+    fi
+
+    if ! state_validate; then
+        echo "## Release Session Recovery"
+        echo ""
+        echo "**Status:** ERROR - State file corrupted"
+        echo ""
+        echo "### Next Steps"
+        echo "1. Check \`.release-state.json\` for corruption"
+        echo "2. Remove file and run \`release.sh init\` to start fresh"
+        exit 3
+    fi
+
+    local version status started_at issue
+    version=$(state_get_version)
+    status=$(state_get_status)
+    started_at=$(state_read '.release.started_at')
+    issue=$(state_get_issue)
+
+    echo "## Release Session Recovery"
+    echo ""
+    echo "**Version:** v${version}"
+    if [[ -n "$issue" ]]; then
+        echo "**Issue:** homestak-dev#${issue}"
+    else
+        echo "**Issue:** (none linked)"
+    fi
+    echo "**Status:** ${status}"
+    echo "**Started:** ${started_at}"
+    echo ""
+
+    # Phase status table
+    echo "### Phase Status"
+    echo ""
+    echo "| Phase | Status | Completed |"
+    echo "|-------|--------|-----------|"
+    for phase in preflight validation tags releases verification; do
+        local phase_status completed_at
+        phase_status=$(state_get_phase_status "$phase")
+        completed_at=$(state_read ".phases.${phase}.completed_at")
+        [[ "$completed_at" == "null" ]] && completed_at="-"
+        echo "| ${phase} | ${phase_status} | ${completed_at} |"
+    done
+    echo ""
+
+    # Repo status table
+    echo "### Repo Status"
+    echo ""
+    echo "| Repo | Tag | Release |"
+    echo "|------|-----|---------|"
+    for repo in "${REPOS[@]}"; do
+        local tag_status release_status
+        tag_status=$(state_get_repo_field "$repo" "tag")
+        release_status=$(state_get_repo_field "$repo" "release")
+        echo "| ${repo} | ${tag_status} | ${release_status} |"
+    done
+    echo ""
+
+    # Recent audit log entries
+    echo "### Recent Actions"
+    echo ""
+    if [[ -f "$AUDIT_LOG" ]]; then
+        echo '```'
+        tail -n 10 "$AUDIT_LOG"
+        echo '```'
+    else
+        echo "(no audit log found)"
+    fi
+    echo ""
+
+    # Determine next steps based on current state
+    echo "### Next Steps"
+    echo ""
+    local next_phase=""
+    for phase in preflight validation tags releases verification; do
+        local phase_status
+        phase_status=$(state_get_phase_status "$phase")
+        if [[ "$phase_status" != "complete" ]]; then
+            next_phase="$phase"
+            break
+        fi
+    done
+
+    case "$next_phase" in
+        preflight)
+            echo "1. Run \`release.sh preflight\` to check repos"
+            echo "2. Fix any issues found"
+            echo "3. Run \`release.sh validate --scenario vm-roundtrip --host <host>\`"
+            ;;
+        validation)
+            echo "1. Run \`release.sh validate --scenario vm-roundtrip --host <host>\`"
+            echo "2. Attach validation report to release issue"
+            echo "3. Run \`release.sh tag --dry-run\` to preview tags"
+            ;;
+        tags)
+            echo "1. Run \`release.sh tag --dry-run\` to preview tags"
+            echo "2. Run \`release.sh tag --execute\` to create tags"
+            echo "3. Run \`release.sh publish --dry-run\` to preview releases"
+            ;;
+        releases)
+            echo "1. Run \`release.sh publish --dry-run\` to preview releases"
+            echo "2. Run \`release.sh publish --execute\` to create releases"
+            echo "3. Run \`release.sh verify\` to check completion"
+            ;;
+        verification)
+            echo "1. Run \`release.sh verify\` to check all releases"
+            echo "2. Complete AAR and Retrospective"
+            echo "3. Close release issue"
+            ;;
+        "")
+            if [[ "$status" == "complete" ]]; then
+                echo "Release v${version} is complete."
+                echo ""
+                echo "Post-release tasks:"
+                echo "1. Complete AAR and Retrospective (if not done)"
+                echo "2. Close release issue"
+                echo "3. Run \`release.sh init --version X.Y\` for next release"
+            else
+                echo "All phases complete. Run \`release.sh status\` for details."
+            fi
+            ;;
+    esac
 }
 
 cmd_preflight() {
@@ -504,6 +639,7 @@ cmd_publish() {
     local dry_run=true
     local force=false
     local images_dir=""
+    local workflow="local"  # Default to local for safety
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -521,6 +657,14 @@ cmd_publish() {
                 ;;
             --images)
                 images_dir="$2"
+                shift 2
+                ;;
+            --workflow)
+                workflow="$2"
+                if [[ "$workflow" != "github" && "$workflow" != "local" ]]; then
+                    log_error "Invalid --workflow value: $workflow (must be 'github' or 'local')"
+                    exit 1
+                fi
                 shift 2
                 ;;
             *)
@@ -549,7 +693,7 @@ cmd_publish() {
     state_set_phase_status "releases" "in_progress"
 
     # Run publish
-    if run_publish "$version" "$dry_run" "$force" "$images_dir"; then
+    if run_publish "$version" "$dry_run" "$force" "$images_dir" "$workflow"; then
         if [[ "$dry_run" == "false" ]]; then
             state_set_phase_status "releases" "complete"
             audit_log "PUBLISH" "cli" "Releases v${version} created in ${#REPOS[@]} repos"
@@ -1324,6 +1468,7 @@ Usage:
 Commands:
   init        Initialize a new release
   status      Show current release status
+  resume      Show AI-friendly recovery context (markdown output)
   preflight   Run pre-flight checks
   validate    Run integration tests
   tag         Create git tags
@@ -1348,7 +1493,7 @@ Options:
   --remote HOST      Run validation on remote host via SSH
   --packer-release   Packer release tag for image downloads (validate only)
   --host HOST        Check host readiness (preflight only, repeatable)
-  --workflow         Use GitHub Actions workflow for packer copy (vs local)
+  --workflow MODE    Packer image copy method: 'github' (GHA, fast) or 'local' (download/upload)
   --no-wait          Don't wait for workflow completion (packer only)
   --timeout N        Workflow wait timeout in seconds (default: 600)
   --lines N          Number of audit log lines to show (default: 20)
@@ -1372,6 +1517,9 @@ Examples:
   release.sh tag --reset --dry-run
   release.sh tag --reset --execute
   release.sh tag --reset-repo packer --execute
+  release.sh publish --execute
+  release.sh publish --execute --workflow github
+  release.sh publish --execute --workflow local
   release.sh packer --check
   release.sh packer --copy --dry-run
   release.sh packer --copy --execute
@@ -1417,6 +1565,9 @@ main() {
             ;;
         audit)
             cmd_audit "$@"
+            ;;
+        resume)
+            cmd_resume "$@"
             ;;
         preflight)
             cmd_preflight "$@"

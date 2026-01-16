@@ -1,6 +1,6 @@
 # homestak-dev workspace Makefile
 
-.PHONY: help install-deps setup check-deps install-deps-all
+.PHONY: help install-deps setup check-deps install-deps-all test lint
 
 help:
 	@echo "homestak-dev - polyrepo workspace"
@@ -10,6 +10,8 @@ help:
 	@echo "  make check-deps       - Check if all dependencies are installed"
 	@echo "  make install-deps     - Install workspace dependencies (gita)"
 	@echo "  make install-deps-all - Install all repo dependencies (requires sudo)"
+	@echo "  make test             - Run release.sh bats tests"
+	@echo "  make lint             - Run shellcheck on release.sh"
 	@echo ""
 	@echo "Gita Commands:"
 	@echo "  gita ll                      - Show status of all repos"
@@ -30,6 +32,7 @@ check-deps:
 	@echo "Checking dependencies..."
 	@missing=""; \
 	command -v gita >/dev/null 2>&1 && echo "  gita:       OK" || { echo "  gita:       MISSING"; missing="$$missing gita"; }; \
+	command -v bats >/dev/null 2>&1 && echo "  bats:       OK" || { echo "  bats:       MISSING"; missing="$$missing bats"; }; \
 	command -v packer >/dev/null 2>&1 && echo "  packer:     OK" || { echo "  packer:     MISSING"; missing="$$missing packer"; }; \
 	command -v shellcheck >/dev/null 2>&1 && echo "  shellcheck: OK" || { echo "  shellcheck: MISSING"; missing="$$missing shellcheck"; }; \
 	command -v tofu >/dev/null 2>&1 && echo "  tofu:       OK" || { echo "  tofu:       MISSING"; missing="$$missing tofu"; }; \
@@ -63,3 +66,17 @@ setup: install-deps
 	@cd site-config && make setup
 	@echo ""
 	@echo "Setup complete. Run 'gita ll' to verify."
+
+# -----------------------------------------------------------------------------
+# Testing
+# -----------------------------------------------------------------------------
+
+test:
+	@command -v bats >/dev/null 2>&1 || { echo "Error: bats not installed. Run: sudo apt install bats"; exit 1; }
+	@echo "Running release.sh tests..."
+	@bats test/
+
+lint:
+	@command -v shellcheck >/dev/null 2>&1 || { echo "Error: shellcheck not installed"; exit 1; }
+	@echo "Running shellcheck on release.sh..."
+	@shellcheck scripts/release.sh scripts/lib/*.sh

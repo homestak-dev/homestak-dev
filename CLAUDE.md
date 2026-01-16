@@ -238,6 +238,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 |---------|-------------|
 | `init --version X.Y` | Initialize release state |
 | `status` | Show release progress |
+| `resume` | Show AI-friendly recovery context (markdown) |
 | `preflight` | Check repos ready (clean, no tags, CHANGELOGs) |
 | `validate` | Run iac-driver integration tests |
 | `tag --dry-run` | Preview tag creation |
@@ -245,6 +246,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 | `tag --reset` | Reset tags to HEAD (v0.x only) |
 | `publish --dry-run` | Preview release creation |
 | `publish --execute` | Create GitHub releases |
+| `publish --workflow` | Specify packer copy method (github\|local) |
 | `packer --check` | Check for template changes |
 | `packer --copy` | Copy images from previous release |
 | `full --dry-run` | Preview complete release workflow |
@@ -288,6 +290,50 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 - **Validation gates**: Require integration tests before tagging
 - **Rollback**: Automatic cleanup on tag creation failure
 - **Dependency order**: Tags/releases created in correct order
+
+### Testing
+
+The release CLI has bats test coverage:
+
+```bash
+make test    # Run release.sh bats tests
+make lint    # Run shellcheck on release.sh
+```
+
+Test structure:
+- `test/test_helper/common.bash` - Shared setup, mocks, assertions
+- `test/state.bats` - State file operations
+- `test/cli.bats` - CLI command routing
+
+CI runs tests on push/PR to master via `.github/workflows/ci.yml`.
+
+### Release Session Recovery
+
+When resuming a release after context loss (session timeout, context compaction), use the `resume` command for AI-friendly context:
+
+```bash
+# Get markdown-formatted recovery context (recommended for AI)
+./scripts/release.sh resume
+
+# Check current release progress (human-readable)
+./scripts/release.sh status
+
+# View timestamped action history
+./scripts/release.sh audit
+```
+
+The `resume` command outputs:
+- Version, issue, status, started timestamp
+- Phase status table with completion timestamps
+- Repo status table (tag/release per repo)
+- Recent audit log entries (last 10)
+- Next steps based on current state
+
+**State files:**
+- `.release-state.json` - Phase completion status, repo tag/release status
+- `.release-audit.log` - Chronological action log with timestamps
+
+**Best practice:** Complete releases in a single session when possible. Multi-session releases risk state confusion and repeated/skipped work.
 
 ## Documentation Index
 

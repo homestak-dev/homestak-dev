@@ -43,6 +43,32 @@ Releases must follow this order (downstream depends on upstream):
 - Backward compatibility expectations
 - No tag recreation
 
+## Multi-Session Releases
+
+**Best practice:** Complete releases in a single session when possible. Context loss during multi-session releases has caused confusion in v0.13 and v0.24.
+
+**If a release spans multiple sessions:**
+
+1. **Post phase completion comments** - After completing each phase, add a comment to the release issue:
+   ```
+   ✅ Phase N: [Phase Name] complete
+   - Key actions taken
+   - Any issues encountered
+   ```
+
+2. **Recovery commands** - When resuming after context loss:
+   ```bash
+   ./scripts/release.sh resume   # AI-friendly markdown context (recommended)
+   ./scripts/release.sh status   # Human-readable status
+   ./scripts/release.sh audit    # Timestamped action log
+   ```
+
+3. **State files** - Review these to understand progress:
+   - `.release-state.json` - Phase completion status
+   - `.release-audit.log` - Chronological action history
+
+See also: [Release Session Recovery](../../CLAUDE.md#release-session-recovery) in CLAUDE.md.
+
 ## Release Phases
 
 ### Phase 0: Release Plan Refresh
