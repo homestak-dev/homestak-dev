@@ -312,7 +312,9 @@ Use the [AAR Template](../templates/aar.md) to document:
 
 #### Codify Lessons Learned
 
-After the retrospective, update this document with any process improvements. Commit with message: `Update 60-release.md with vX.Y lessons learned`
+After the retrospective, update `docs/lifecycle/65-lessons-learned.md` with any process improvements. Commit with message: `Update 65-lessons-learned.md with vX.Y lessons`
+
+**Close the release issue only after lessons are codified and committed.** The release issue is the record of completion - closing it signals all phases are done.
 
 ### Phase 10: Housekeeping (each sprint)
 
