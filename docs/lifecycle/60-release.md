@@ -57,6 +57,9 @@ Before starting release work:
 
 ### Phase 1: Pre-flight
 
+> **CHECKPOINT: Phase 0 Complete**
+> Before proceeding, verify: Release plan reviewed, checklists current, no prerequisite releases pending.
+
 - [ ] **Identify release tracking issue** (e.g., homestak-dev#XX)
   - Look for open issues titled "vX.Y Release Planning" or labeled `release`
   - Include `--issue XX` when running `release.sh init`
@@ -98,6 +101,9 @@ Verify each repo's CLAUDE.md reflects current architecture:
 
 ### Phase 2: CHANGELOGs
 
+> **CHECKPOINT: Phase 1 Complete**
+> Before proceeding, verify: All pre-flight checks pass, working trees clean, no existing tags for target version.
+
 Update CHANGELOGs in dependency order. Move `## Unreleased` content to versioned header:
 
 ```markdown
@@ -113,6 +119,9 @@ Update CHANGELOGs in dependency order. Move `## Unreleased` content to versioned
 ```
 
 ### Phase 3: Validation
+
+> **CHECKPOINT: Phase 2 Complete**
+> Before proceeding, verify: All CHANGELOGs updated with version header and date.
 
 Run integration tests before tagging to ensure the release is sound.
 
@@ -140,6 +149,9 @@ cd iac-driver
 
 ### Phase 4: Tags
 
+> **CHECKPOINT: Phase 3 Complete**
+> Before proceeding, verify: Integration tests passed, validation report attached to release issue.
+
 Create and push tags in dependency order:
 
 ```bash
@@ -153,6 +165,9 @@ git push origin v0.X
 ```
 
 ### Phase 5: Packer Images
+
+> **CHECKPOINT: Phase 4 Complete**
+> Before proceeding, verify: All repos tagged, tags pushed to origin.
 
 **Latest-centric approach:** The `latest` release is the primary source for packer images. Versioned releases (v0.22, v0.23) typically have NO image assets - they're tag-only releases that inherit images from `latest`.
 
@@ -220,6 +235,9 @@ Add note to release description: "Images: Included (rebuilt for <reason>)"
 
 ### Phase 6: GitHub Releases
 
+> **CHECKPOINT: Phase 5 Complete**
+> Before proceeding, verify: Packer images handled (skipped or rebuilt per decision above).
+
 Create releases in dependency order. **Use `--prerelease` flag until v1.0.**
 
 ```bash
@@ -245,6 +263,9 @@ When `latest` is being updated with new images:
 **Note:** Images >2GB must be split due to GitHub limits.
 
 ### Phase 7: Verification
+
+> **CHECKPOINT: Phase 6 Complete**
+> Before proceeding, verify: All GitHub releases created in dependency order.
 
 ```bash
 ./scripts/release.sh verify
@@ -284,6 +305,9 @@ gh issue close <issue-num> --repo homestak-dev/<repo> --comment "Implemented in 
 
 ### Phase 8: After Action Report
 
+> **CHECKPOINT: Phase 7 Complete**
+> Before proceeding, verify: All releases verified, post-release smoke test passed, scope issues closed.
+
 **Complete immediately after release while details are fresh.** Do not close the release issue until AAR is complete.
 
 Use the [AAR Template](../templates/aar.md) to document:
@@ -297,6 +321,9 @@ Use the [AAR Template](../templates/aar.md) to document:
 | Validation Report | Attach integration test report |
 
 ### Phase 9: Retrospective
+
+> **CHECKPOINT: Phase 8 Complete**
+> Before proceeding, verify: AAR completed and posted to release issue.
 
 **Complete same day as release.** Use the [Retrospective Template](../templates/retrospective.md) to document:
 
@@ -317,6 +344,9 @@ After the retrospective, update `docs/lifecycle/65-lessons-learned.md` with any 
 **Close the release issue only after lessons are codified and committed.** The release issue is the record of completion - closing it signals all phases are done.
 
 ### Phase 10: Housekeeping (each sprint)
+
+> **CHECKPOINT: Phase 9 Complete**
+> Before proceeding, verify: Retrospective completed, lessons learned codified, release issue closed.
 
 Branch cleanup should be performed at the end of each sprint, not just periodically.
 

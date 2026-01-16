@@ -132,6 +132,33 @@ This eliminates configuration drift between components - all settings flow from 
 - **Component independence** - Each repo installs its own dependencies via `make install-deps`
 - **Process consistency** - When presenting options to the user, flag any option that deviates from established processes (lifecycle docs, RELEASE.md). Do not present process-inconsistent options as equal alternatives without noting the inconsistency.
 
+## Process Discipline
+
+When assisting with development, follow the lifecycle process defined in `docs/lifecycle/`:
+
+### Phase Sequence is Mandatory
+
+1. **Never skip phases** - Each phase has a purpose. Do not suggest "let's skip design" or "we can do planning later."
+2. **Checkpoints require verification** - At each checkpoint in `60-release.md`, pause for human confirmation before proceeding.
+3. **Design before implementation** - Features require full design; enhancements need lightweight design. Only bug fixes with clear root causes may skip design.
+
+### Behavioral Guidelines
+
+| Do | Don't |
+|----|-------|
+| Follow the order in lifecycle docs | Suggest reordering phases for convenience |
+| Ask clarifying questions during design | Assume requirements during implementation |
+| Flag process deviations explicitly | Present shortcuts as equal alternatives |
+| Reference specific lifecycle sections | Make up process steps |
+| Respect user's specified order | Impose a different implementation sequence |
+
+### Destructive Operations
+
+For operations that cannot be easily undone:
+- Require explicit `--force` flag for overwriting existing resources
+- Default to error rather than silent overwrite
+- Provide `--dry-run` preview when available
+
 ## Terminology
 
 Consistent terminology across all repos:
@@ -204,6 +231,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 | `full --dry-run` | Preview complete release workflow |
 | `full --execute` | Execute end-to-end release |
 | `verify` | Verify all releases exist (tags + releases + packer assets) |
+| `sunset --below-version X.Y` | Delete releases below version (preserves tags) |
 | `audit` | Show timestamped action log |
 
 ### Release Workflow

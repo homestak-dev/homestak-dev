@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Add checkpoint markers to release phases in `docs/lifecycle/60-release.md` (#90)
+  - Explicit verification prompts at each phase transition
+  - Visible blockquote format for easy scanning
+- Add Process Discipline section to `CLAUDE.md` (#90)
+  - AI behavioral guidance for lifecycle adherence
+  - Phase sequence, checkpoint verification, and design requirements
+  - Destructive operations policy (--force flags, --dry-run)
+- Add `release.sh sunset` command to delete legacy releases (#91)
+  - `--below-version X.Y` specifies version threshold
+  - Deletes GitHub releases while preserving git tags
+  - Preserves packer's `latest` release
+  - Supports `--dry-run` and `--execute` modes
+
+### Fixed
+- Fix `release.sh verify` to check `latest` for packer images (#88)
+  - Images now checked in `latest` release (latest-centric approach)
+  - Updated expected assets: per-image `.sha256` files instead of `SHA256SUMS`
+  - Output clearly indicates assets are from 'latest' release
+
 ## [v0.22] - 2026-01-15
 
 ### Changed

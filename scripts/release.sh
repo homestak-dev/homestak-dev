@@ -1022,6 +1022,139 @@ cmd_full() {
     return 0
 }
 
+cmd_sunset() {
+    local below_version=""
+    local dry_run=true
+    local yes_flag=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --below-version)
+                below_version="$2"
+                shift 2
+                ;;
+            --dry-run)
+                dry_run=true
+                shift
+                ;;
+            --execute)
+                dry_run=false
+                shift
+                ;;
+            --yes|-y)
+                yes_flag=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    if [[ -z "$below_version" ]]; then
+        log_error "Version required: release.sh sunset --below-version X.Y"
+        exit 1
+    fi
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "  SUNSET RELEASES BELOW v${below_version}"
+    if [[ "$dry_run" == "true" ]]; then
+        echo "  Mode: DRY-RUN (preview only)"
+    else
+        echo "  Mode: EXECUTE"
+    fi
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+
+    # Parse version for comparison (e.g., "0.20" -> 20 for v0.x series)
+    local below_minor
+    below_minor=$(echo "$below_version" | sed 's/^0\.//')
+
+    local total_deleted=0
+    local repos_with_deletions=()
+
+    for repo in "${REPOS[@]}"; do
+        echo "=== $repo ==="
+
+        # Get all releases for this repo (use tab delimiter for correct parsing)
+        local releases
+        releases=$(gh release list --repo "homestak-dev/$repo" --limit 100 2>/dev/null | awk -F'\t' '{print $3}' || echo "")
+
+        if [[ -z "$releases" ]]; then
+            echo "  No releases found"
+            echo ""
+            continue
+        fi
+
+        local to_delete=()
+        while IFS= read -r tag; do
+            # Skip empty lines
+            [[ -z "$tag" ]] && continue
+
+            # Skip 'latest' (special packer release)
+            if [[ "$tag" == "latest" ]]; then
+                echo "  Keeping: $tag (special release)"
+                continue
+            fi
+
+            # Parse version: v0.X -> extract X
+            local version_num
+            if [[ "$tag" =~ ^v0\.([0-9]+) ]]; then
+                version_num="${BASH_REMATCH[1]}"
+
+                if [[ "$version_num" -lt "$below_minor" ]]; then
+                    to_delete+=("$tag")
+                else
+                    echo "  Keeping: $tag (>= v${below_version})"
+                fi
+            else
+                echo "  Keeping: $tag (non-standard version)"
+            fi
+        done <<< "$releases"
+
+        if [[ ${#to_delete[@]} -gt 0 ]]; then
+            repos_with_deletions+=("$repo")
+            for tag in "${to_delete[@]}"; do
+                if [[ "$dry_run" == "true" ]]; then
+                    echo -e "  ${YELLOW}Would delete:${NC} $tag"
+                else
+                    echo -e "  ${RED}Deleting:${NC} $tag"
+                    if gh release delete "$tag" --repo "homestak-dev/$repo" --yes 2>/dev/null; then
+                        ((++total_deleted))
+                    else
+                        log_warn "Failed to delete $tag from $repo"
+                    fi
+                fi
+            done
+        else
+            echo "  No releases to delete"
+        fi
+        echo ""
+    done
+
+    # Summary
+    echo "═══════════════════════════════════════════════════════════════"
+    if [[ "$dry_run" == "true" ]]; then
+        echo "  DRY-RUN COMPLETE"
+        echo "  Repos with releases to delete: ${#repos_with_deletions[@]}"
+        if [[ ${#repos_with_deletions[@]} -gt 0 ]]; then
+            echo "  Affected repos: ${repos_with_deletions[*]}"
+        fi
+        echo ""
+        echo "  Run with --execute to delete releases"
+        echo "  Git tags will be preserved"
+    else
+        echo -e "  RESULT: ${GREEN}SUCCESS${NC}"
+        echo "  Deleted: $total_deleted releases"
+        echo "  Git tags preserved (use 'git tag' to verify)"
+        audit_log "SUNSET" "cli" "Deleted $total_deleted releases below v${below_version}"
+    fi
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+}
+
 cmd_selftest() {
     local verbose=false
     local test_version="0.99-test"
@@ -1159,6 +1292,9 @@ cmd_selftest() {
     # Test 10: audit
     run_test "audit" "Show audit log" "$0" audit --lines 5
 
+    # Test 11: sunset --dry-run
+    run_test "sunset-dry" "Sunset dry-run" "$0" sunset --below-version 0.20 --dry-run
+
     # Cleanup
     cleanup_selftest
     trap - EXIT
@@ -1195,6 +1331,7 @@ Commands:
   packer      Handle packer image automation
   verify      Verify release artifacts
   full        Execute complete release workflow
+  sunset      Delete old releases (preserves git tags)
   selftest    Run self-test on all commands
   audit       Show audit log
 
@@ -1215,6 +1352,7 @@ Options:
   --no-wait          Don't wait for workflow completion (packer only)
   --timeout N        Workflow wait timeout in seconds (default: 600)
   --lines N          Number of audit log lines to show (default: 20)
+  --below-version    Delete releases below this version (sunset only)
 
 Examples:
   release.sh init --version 0.14
@@ -1245,6 +1383,8 @@ Examples:
   release.sh full --execute --skip-validate
   release.sh selftest
   release.sh selftest --verbose
+  release.sh sunset --below-version 0.20 --dry-run
+  release.sh sunset --below-version 0.20 --execute
   release.sh audit --lines 50
 
 State Files:
@@ -1301,6 +1441,9 @@ main() {
             ;;
         selftest)
             cmd_selftest "$@"
+            ;;
+        sunset)
+            cmd_sunset "$@"
             ;;
         help|--help|-h)
             cmd_help
