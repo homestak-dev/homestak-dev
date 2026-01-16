@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.25] - 2026-01-16
+
+### Theme: Release CLI Improvements
+
+### Added
+- `release.sh resume` command for AI-friendly session recovery (#101)
+  - Outputs markdown-formatted context: version, issue, phase/repo status tables
+  - Shows recent audit log entries and suggested next steps
+  - Handles edge cases: no release, corrupted state, completed release
+- `release.sh publish --workflow` option for packer image handling (#99)
+  - `--workflow github` uses GHA copy-images.yml (fast, server-side)
+  - `--workflow local` uses local download/upload (default for safety)
+  - Auto-fallback to local if github workflow fails
+- Bats test framework for release.sh (#97)
+  - `test/test_helper/common.bash` - shared setup, mocks, assertions
+  - `test/state.bats` - state file operations (27 tests)
+  - `test/cli.bats` - CLI command routing (15 tests)
+  - `make test` and `make lint` targets in Makefile
+- Multi-session release guidance (#98)
+  - CLAUDE.md: expanded Release Session Recovery section
+  - 60-release.md: Multi-Session Releases guidance with phase comments
+
+### Changed
+- `release.sh` now honors `STATE_FILE` env var for test isolation
+- `bats` added to `make check-deps` dependency list
+
 ## [v0.24] - 2026-01-16
 
 ### Added
