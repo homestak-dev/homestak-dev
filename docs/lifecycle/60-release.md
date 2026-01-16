@@ -334,7 +334,7 @@ gh issue close <issue-num> --repo homestak-dev/<repo> --comment "Implemented in 
 > **CHECKPOINT: Phase 7 Complete**
 > Before proceeding, verify: All releases verified, post-release smoke test passed, scope issues closed.
 
-**Complete immediately after release while details are fresh.** Do not close the release issue until AAR is complete.
+**Complete immediately after release while details are fresh.** Do not close the release issue yet - Phases 9 and 10 remain.
 
 Use the [AAR Template](../templates/aar.md) to document:
 
