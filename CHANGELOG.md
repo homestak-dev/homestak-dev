@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v0.24] - 2026-01-16
+
+### Added
+- v0.24 "Bootstrap DX" release - improved developer experience for bootstrap workflow
+  - Extract CLI to standalone `homestak.sh` with FHS-compliant paths (bootstrap#14)
+  - Add bats unit tests for CLI (bootstrap#15)
+  - Enhance `homestak update` with --dry-run, --version, --stash (bootstrap#13)
+  - Add comprehensive preflight checks (iac-driver#97)
 
 ## [v0.23] - 2026-01-16
 
