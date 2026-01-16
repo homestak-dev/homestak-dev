@@ -1,12 +1,20 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.21. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.22. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.22
+
+- **Always use `--prerelease` for v0.x releases** - Early releases (v0.7-v0.13) were created without `--prerelease`, causing GitHub's "Latest Release" badge to show stale versions. Required retroactive fix of 27 releases.
+- **Update release tooling when patterns change** - release.sh verify assumed versioned packer releases have assets, but latest-centric approach puts images only in `latest`. Tooling must evolve with process changes.
+- **Wait for explicit user confirmation** - AI assistant acted on a recommendation without user confirmation. When presenting options, always wait for explicit selection before executing.
+- **Audit historical release metadata periodically** - Prerelease flags, release notes, and asset attachments can drift from intended state over time.
+- **Check for open PRs before tagging** - site-config#35 was missed during merge phase and required post-release tag reset. Run `gh pr list --state open` across all repos before creating tags.
 
 ## v0.21
 
@@ -114,6 +122,8 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Wait for explicit user confirmation (v0.22)
+- Check for open PRs before tagging (v0.22)
 - Run benchmarks during release (v0.21)
 - Options inconsistent with process should be flagged (v0.20)
 - CHANGELOG updates belong in PRs, not release (v0.19)
@@ -135,6 +145,9 @@ For quick reference, lessons grouped by theme:
 - Packer images required for unified release (v0.15)
 
 ### Technical Gotchas
+- Always use `--prerelease` for v0.x releases (v0.22)
+- Update release tooling when patterns change (v0.22)
+- Audit historical release metadata periodically (v0.22)
 - `latest` release requires manual handling (v0.21)
 - Use stable markers for detection, not service status (v0.19)
 - Provider upgrades need cache clearing (v0.18)
