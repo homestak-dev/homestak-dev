@@ -5,12 +5,15 @@
 # Verifies all releases exist and packer assets are uploaded
 #
 
-# Expected packer assets
+# Expected packer assets (in 'latest' release)
+# Note: Images live in 'latest' release; versioned releases are typically tag-only
 EXPECTED_PACKER_ASSETS=(
     "debian-12-custom.qcow2"
+    "debian-12-custom.qcow2.sha256"
     "debian-13-custom.qcow2"
+    "debian-13-custom.qcow2.sha256"
     "debian-13-pve.qcow2"
-    "SHA256SUMS"
+    "debian-13-pve.qcow2.sha256"
 )
 
 # -----------------------------------------------------------------------------
@@ -95,8 +98,10 @@ verify_release_exists() {
 verify_packer_assets() {
     local version="$1"
 
+    # Check 'latest' release for packer assets (latest-centric approach)
+    # Versioned releases are typically tag-only; images live in 'latest'
     local assets
-    assets=$(gh release view "v${version}" --repo "homestak-dev/packer" --json assets --jq '.assets[].name' 2>/dev/null)
+    assets=$(gh release view "latest" --repo "homestak-dev/packer" --json assets --jq '.assets[].name' 2>/dev/null)
 
     local found=()
     local found_split=()
@@ -239,15 +244,15 @@ EOF
         done
 
         echo ""
-        echo "Packer Assets:"
+        echo "Packer Assets (from 'latest' release):"
         local assets
-        assets=$(gh release view "v${version}" --repo "homestak-dev/packer" --json assets --jq '.assets[].name' 2>/dev/null)
+        assets=$(gh release view "latest" --repo "homestak-dev/packer" --json assets --jq '.assets[].name' 2>/dev/null)
 
         if [[ "$found_count" -eq "${#EXPECTED_PACKER_ASSETS[@]}" ]]; then
             if [[ "$split_count" -gt 0 ]]; then
-                echo -e "  ${GREEN}✓${NC} All ${#EXPECTED_PACKER_ASSETS[@]} expected assets found (${split_count} split)"
+                echo -e "  ${GREEN}✓${NC} All ${#EXPECTED_PACKER_ASSETS[@]} expected assets found in 'latest' (${split_count} split)"
             else
-                echo -e "  ${GREEN}✓${NC} All ${#EXPECTED_PACKER_ASSETS[@]} expected assets found"
+                echo -e "  ${GREEN}✓${NC} All ${#EXPECTED_PACKER_ASSETS[@]} expected assets found in 'latest'"
             fi
             # Show details for each asset
             for expected in "${EXPECTED_PACKER_ASSETS[@]}"; do
@@ -260,7 +265,7 @@ EOF
                 fi
             done
         else
-            echo -e "  ${YELLOW}⚠${NC} Found ${found_count}/${#EXPECTED_PACKER_ASSETS[@]} expected assets"
+            echo -e "  ${YELLOW}⚠${NC} Found ${found_count}/${#EXPECTED_PACKER_ASSETS[@]} expected assets in 'latest'"
             # Show status for each expected asset
             for expected in "${EXPECTED_PACKER_ASSETS[@]}"; do
                 if echo "$assets" | grep -q "^${expected}$"; then
@@ -279,7 +284,8 @@ EOF
         echo "═══════════════════════════════════════════════════════════════"
         if [[ "$all_passed" == "true" ]]; then
             echo -e "  RESULT: ${GREEN}PASS${NC}"
-            echo "  All ${#REPOS[@]} tags, ${#REPOS[@]} releases, ${#EXPECTED_PACKER_ASSETS[@]} packer assets present"
+            echo "  All ${#REPOS[@]} tags, ${#REPOS[@]} releases present"
+            echo "  Packer: ${#EXPECTED_PACKER_ASSETS[@]} assets in 'latest' release"
         else
             echo -e "  RESULT: ${RED}FAIL${NC}"
             if [[ "$tag_missing_count" -gt 0 ]]; then
@@ -318,7 +324,7 @@ EOF
             echo "| ${repo} | ${icon} |"
         done
         echo ""
-        echo "**Packer Assets:** ${found_count}/${#EXPECTED_PACKER_ASSETS[@]} present"
+        echo "**Packer Assets (in 'latest'):** ${found_count}/${#EXPECTED_PACKER_ASSETS[@]} present"
         echo "---"
         echo ""
     fi
