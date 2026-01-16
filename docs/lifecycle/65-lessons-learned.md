@@ -1,12 +1,16 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.22. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.23. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.23
+
+- **Diagnosing a bug is not permission to fix it** - When user asked "what's going on with release verify?", the correct response was diagnosis + proposed fix + wait for approval. Instead, jumped straight from diagnosis to editing code and pushing to master. Ironic given this release added "Process Discipline" guidelines to CLAUDE.md. The fix was correct; the process was not. Always pause after proposing a fix and ask "should I implement this?" before touching code.
 
 ## v0.22
 
