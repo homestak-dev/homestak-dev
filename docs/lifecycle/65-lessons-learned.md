@@ -1,12 +1,17 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.23. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.24. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.24
+
+- **Initialize release state before validation** - Ran nested-pve-roundtrip before `release.sh init`, so validation status wasn't tracked. Tag command failed with "Validation not complete (status: pending)" despite test passing. Always run `release.sh init --version X.Y` before `release.sh validate`, or the validation results won't be recorded in the release state.
+- **Session continuations lose release context** - Context compaction during multi-session releases causes confusion about what's done vs pending. The release.sh audit log (`.release-audit.log`) and status command help recover state, but it's better to complete releases in a single session when possible.
 
 ## v0.23
 
@@ -126,6 +131,7 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Initialize release state before validation (v0.24)
 - Wait for explicit user confirmation (v0.22)
 - Check for open PRs before tagging (v0.22)
 - Run benchmarks during release (v0.21)
@@ -165,6 +171,7 @@ For quick reference, lessons grouped by theme:
 - Dogfooding validates design (v0.14)
 
 ### Human Factors
+- Session continuations lose release context (v0.24)
 - Never discard uncommitted changes without asking (v0.17)
 - Context window compaction causes confusion (v0.13)
 - Fatigue at end of release leads to shortcuts (v0.19)
