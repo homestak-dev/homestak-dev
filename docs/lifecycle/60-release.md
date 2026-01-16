@@ -377,6 +377,30 @@ done
 
 **Repository setting:** Enable "Automatically delete head branches" in GitHub repo settings to auto-cleanup after PR merge.
 
+### Release Sunset (periodic)
+
+Legacy releases accumulate over time. Periodically clean up old releases to reduce clutter while preserving recent history.
+
+**Retention policy:** Keep 3 most recent releases (currently v0.21+).
+
+**When to run:** Periodically (every few releases), not after each release.
+
+```bash
+# Preview what would be deleted
+./scripts/release.sh sunset --below-version 0.21 --dry-run
+
+# Execute deletion (deletes GitHub releases, preserves git tags)
+./scripts/release.sh sunset --below-version 0.21 --execute
+```
+
+**What sunset does:**
+- Deletes GitHub releases below the specified version across all 9 repos
+- Preserves git tags (history remains intact)
+- Preserves packer's `latest` release (contains current images)
+- Reports count of deleted releases per repo
+
+**Adjusting threshold:** Increment `--below-version` as new releases accumulate. With 3-release retention, after releasing v0.24, sunset threshold would move to v0.22.
+
 ## Scope Management
 
 ### Scope Freeze
