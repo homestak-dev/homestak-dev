@@ -448,6 +448,7 @@ publish_upload_packer_images() {
 publish_ensure_packer_assets() {
     local version="$1"
     local dry_run="${2:-true}"
+    local workflow="${3:-local}"
 
     # Check if packer release has any assets
     local asset_count
@@ -459,6 +460,7 @@ publish_ensure_packer_assets() {
     fi
 
     log_info "Packer release has no assets, copying from previous release..."
+    log_info "Using workflow: ${workflow}"
 
     # Find source release
     local source_release
@@ -471,10 +473,25 @@ publish_ensure_packer_assets() {
         return 0  # Not a fatal error
     fi
 
-    # Copy images using existing function
+    # Copy images using specified workflow
+    local copy_result
+    if [[ "$workflow" == "github" ]]; then
+        # Use GHA workflow (server-side, faster)
+        if packer_dispatch_copy_images "$version" "$source_release" "$dry_run" "true" "600"; then
+            if [[ "$dry_run" != "true" ]]; then
+                log_success "Packer images copied from $source_release via GHA workflow"
+            fi
+            return 0
+        else
+            log_warn "GHA workflow failed - falling back to local copy"
+            # Fall through to local copy
+        fi
+    fi
+
+    # Use local copy (default or fallback)
     if packer_copy_images_local "$version" "$source_release" "$dry_run"; then
         if [[ "$dry_run" != "true" ]]; then
-            log_success "Packer images copied from $source_release"
+            log_success "Packer images copied from $source_release locally"
         fi
         return 0
     else
@@ -563,6 +580,7 @@ run_publish() {
     local dry_run="${2:-true}"
     local force="${3:-false}"
     local images_dir="${4:-}"
+    local workflow="${5:-local}"
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
@@ -572,6 +590,7 @@ run_publish() {
     else
         echo "  Mode: EXECUTE"
     fi
+    echo "  Packer workflow: ${workflow}"
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
 
@@ -611,7 +630,11 @@ run_publish() {
         echo "  - Update 'latest' tag in packer"
         ((cmd_count+=2))
     else
-        echo "  - Ensure packer release has images (auto-copy if needed)"
+        if [[ "$workflow" == "github" ]]; then
+            echo "  - Ensure packer release has images (via GHA workflow - fast)"
+        else
+            echo "  - Ensure packer release has images (via local copy - ~13GB transfer)"
+        fi
         echo "  - Update 'latest' tag in packer"
         ((cmd_count+=2))
     fi
@@ -636,7 +659,12 @@ run_publish() {
             publish_update_latest "$version" "true"
             echo ""
         else
-            echo "  packer auto-ensure:"
+            echo "  packer auto-ensure (workflow: ${workflow}):"
+            if [[ "$workflow" == "github" ]]; then
+                echo "    (Would use GHA workflow copy-images.yml - server-side, fast)"
+            else
+                echo "    (Would use local download/upload - ~13GB transfer)"
+            fi
             echo "    (Would check if packer release has assets, copy from previous release if not)"
             echo ""
             echo "  latest tag:"
@@ -699,8 +727,8 @@ run_publish() {
     else
         # Auto-ensure packer has images (copy from previous release if needed)
         echo ""
-        echo "Ensuring packer release has images..."
-        publish_ensure_packer_assets "$version" "false"
+        echo "Ensuring packer release has images (workflow: ${workflow})..."
+        publish_ensure_packer_assets "$version" "false" "$workflow"
 
         echo ""
         echo "Updating latest tag..."
