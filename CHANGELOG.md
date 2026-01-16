@@ -4,12 +4,6 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Fixed
-- Fix `release.sh publish` to sync assets to `latest` release
-  - `publish_update_latest()` now copies images from versioned release to `latest`
-  - Generates missing `.sha256` checksums during sync
-  - Ensures `verify` passes after `publish` (closes the publish→verify gap)
-
 ## [v0.23] - 2026-01-16
 
 ### Added
@@ -31,6 +25,10 @@ All notable changes to this project will be documented in this file.
   - Images now checked in `latest` release (latest-centric approach)
   - Updated expected assets: per-image `.sha256` files instead of `SHA256SUMS`
   - Output clearly indicates assets are from 'latest' release
+- Fix `release.sh publish` to sync assets to `latest` release (#94, unplanned)
+  - `publish_update_latest()` now copies images from versioned release to `latest`
+  - Generates missing `.sha256` checksums during sync
+  - Ensures `verify` passes after `publish` (closes the publish→verify gap)
 
 ## [v0.22] - 2026-01-15
 
