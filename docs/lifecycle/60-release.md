@@ -267,9 +267,9 @@ Add note to release description: "Images: Included (rebuilt for <reason>)"
 Create releases in dependency order. **Use `--prerelease` flag until v1.0.**
 
 ```bash
-# Using release CLI
+# Using release CLI (--workflow github uses server-side copy, ~2min vs local ~30min)
 ./scripts/release.sh publish --dry-run
-./scripts/release.sh publish --execute
+./scripts/release.sh publish --execute --workflow github
 
 # Or manually
 gh release create v0.X --prerelease --title "v0.X" --notes "See CHANGELOG.md" --repo homestak-dev/<repo>
@@ -462,7 +462,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 | `tag --execute` | Create and push tags |
 | `tag --reset` | Reset tags to HEAD (v0.x only) |
 | `publish --dry-run` | Preview release creation |
-| `publish --execute` | Create GitHub releases |
+| `publish --execute --workflow github` | Create GitHub releases (fast server-side image copy) |
 | `packer --check` | Check for template changes |
 | `packer --copy` | Copy images from previous release |
 | `full --dry-run` | Preview complete release workflow |
@@ -478,7 +478,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 ./scripts/release.sh validate --scenario vm-roundtrip --host father
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute
-./scripts/release.sh publish --execute
+./scripts/release.sh publish --execute --workflow github
 ./scripts/release.sh packer --copy --execute
 ./scripts/release.sh verify
 
