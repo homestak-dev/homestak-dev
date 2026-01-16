@@ -1292,6 +1292,9 @@ cmd_selftest() {
     # Test 10: audit
     run_test "audit" "Show audit log" "$0" audit --lines 5
 
+    # Test 11: sunset --dry-run
+    run_test "sunset-dry" "Sunset dry-run" "$0" sunset --below-version 0.20 --dry-run
+
     # Cleanup
     cleanup_selftest
     trap - EXIT
