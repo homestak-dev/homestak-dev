@@ -320,35 +320,14 @@ Use the [AAR Template](../templates/aar.md) to document:
 | Artifacts Delivered | Final release inventory |
 | Validation Report | Attach integration test report |
 
-### Phase 9: Retrospective
+### Phase 9: Housekeeping
 
 > **CHECKPOINT: Phase 8 Complete**
 > Before proceeding, verify: AAR completed and posted to release issue.
 
-**Complete same day as release.** Use the [Retrospective Template](../templates/retrospective.md) to document:
+Branch cleanup should be performed while release context is fresh, so any issues discovered can be captured in the retrospective.
 
-| Section | Content |
-|---------|---------|
-| What Worked Well | Keep doing these |
-| What Could Improve | Process improvements |
-| Suggestions | Specific ideas for next release |
-| Open Questions | Decisions deferred |
-| Follow-up Issues | Create issues for discoveries |
-
-**Important:** Create GitHub issues for any problems discovered. Link them in the retrospective.
-
-#### Codify Lessons Learned
-
-After the retrospective, update `docs/lifecycle/65-lessons-learned.md` with any process improvements. Commit with message: `Update 65-lessons-learned.md with vX.Y lessons`
-
-**Close the release issue only after lessons are codified and committed.** The release issue is the record of completion - closing it signals all phases are done.
-
-### Phase 10: Housekeeping (each sprint)
-
-> **CHECKPOINT: Phase 9 Complete**
-> Before proceeding, verify: Retrospective completed, lessons learned codified, release issue closed.
-
-Branch cleanup should be performed at the end of each sprint, not just periodically.
+**Note:** Housekeeping was moved before Retrospective in v0.24 to ensure branch cleanup issues are captured before closing the release.
 
 ```bash
 # For each repo, clean up branches
@@ -376,6 +355,29 @@ done
 **Note:** Branches may show as "ahead" by commit count even when content was merged via squash/rebase. Use `git diff` to verify actual unmerged content before deleting.
 
 **Repository setting:** Enable "Automatically delete head branches" in GitHub repo settings to auto-cleanup after PR merge.
+
+### Phase 10: Retrospective
+
+> **CHECKPOINT: Phase 9 Complete**
+> Before proceeding, verify: Housekeeping completed, stale branches cleaned up.
+
+**Complete same day as release.** Use the [Retrospective Template](../templates/retrospective.md) to document:
+
+| Section | Content |
+|---------|---------|
+| What Worked Well | Keep doing these |
+| What Could Improve | Process improvements |
+| Suggestions | Specific ideas for next release |
+| Open Questions | Decisions deferred |
+| Follow-up Issues | Create issues for discoveries |
+
+**Important:** Create GitHub issues for any problems discovered. Link them in the retrospective.
+
+#### Codify Lessons Learned
+
+After the retrospective, update `docs/lifecycle/65-lessons-learned.md` with any process improvements. Commit with message: `Update 65-lessons-learned.md with vX.Y lessons`
+
+**Close the release issue only after lessons are codified and committed.** The release issue is the record of completion - closing it signals all phases are done.
 
 ### Release Sunset (periodic)
 
@@ -528,6 +530,7 @@ See [65-lessons-learned.md](65-lessons-learned.md) for accumulated insights from
 - [ ] Packer images handled (see Phase 5 - usually skip, update `latest` if changed)
 - [ ] Post-release smoke test passed
 - [ ] After Action Report completed
+- [ ] Housekeeping (branch cleanup) completed
 - [ ] Retrospective completed
 - [ ] Lessons learned codified
 - [ ] Release issue closed

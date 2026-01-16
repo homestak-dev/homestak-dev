@@ -12,6 +12,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.24. Each lesson was codi
 
 - **Initialize release state before validation** - Ran nested-pve-roundtrip before `release.sh init`, so validation status wasn't tracked. Tag command failed with "Validation not complete (status: pending)" despite test passing. Always run `release.sh init --version X.Y` before `release.sh validate`, or the validation results won't be recorded in the release state.
 - **Session continuations lose release context** - Context compaction during multi-session releases causes confusion about what's done vs pending. The release.sh audit log (`.release-audit.log`) and status command help recover state, but it's better to complete releases in a single session when possible.
+- **Housekeeping before Retrospective** - Branch cleanup should happen before the retrospective so any issues discovered during cleanup can be captured. Reordered phases: Phase 9 is now Housekeeping, Phase 10 is now Retrospective (which closes the release issue).
 
 ## v0.23
 
@@ -131,6 +132,7 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Housekeeping before Retrospective (v0.24)
 - Initialize release state before validation (v0.24)
 - Wait for explicit user confirmation (v0.22)
 - Check for open PRs before tagging (v0.22)
