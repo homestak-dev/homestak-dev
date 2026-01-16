@@ -1,12 +1,18 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.24. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.25. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.25
+
+- **Always use `--workflow github` for publish** - The `publish --execute` command defaults to `--workflow local` which triggers a slow ~13GB download/upload for packer images. Always specify `--workflow github` to use the server-side GHA workflow (~2min vs ~30min). This was the first release to use the new `--workflow` option (implemented in #99).
+- **Don't close release issue until checklist complete** - Prematurely closed release issue #100 after AAR, forgetting Phases 9 (Housekeeping) and 10 (Retrospective). Had to reopen and complete remaining phases. Follow the full checklist in 60-release.md.
+- **Bats tests need isolated state** - Release.sh tests initially ran against real workspace state files. Fixed by honoring `STATE_FILE` env var to enable test isolation without modifying production state.
 
 ## v0.24
 
