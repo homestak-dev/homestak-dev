@@ -13,6 +13,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.25. Each lesson was codi
 - **Always use `--workflow github` for publish** - The `publish --execute` command defaults to `--workflow local` which triggers a slow ~13GB download/upload for packer images. Always specify `--workflow github` to use the server-side GHA workflow (~2min vs ~30min). This was the first release to use the new `--workflow` option (implemented in #99).
 - **Don't close release issue until checklist complete** - Prematurely closed release issue #100 after AAR, forgetting Phases 9 (Housekeeping) and 10 (Retrospective). Had to reopen and complete remaining phases. Follow the full checklist in 60-release.md.
 - **Bats tests need isolated state** - Release.sh tests initially ran against real workspace state files. Fixed by honoring `STATE_FILE` env var to enable test isolation without modifying production state.
+- **Use the tools you build** - Implemented context loss mitigation (#98) but didn't use `release.sh resume` or `status` to verify all phases were complete before closing the release issue. The tools only help if you use them.
 
 ## v0.24
 
