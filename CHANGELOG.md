@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- Fix `release.sh publish` to sync assets to `latest` release
+  - `publish_update_latest()` now copies images from versioned release to `latest`
+  - Generates missing `.sha256` checksums during sync
+  - Ensures `verify` passes after `publish` (closes the publish→verify gap)
+
+## [v0.23] - 2026-01-16
+
 ### Added
 - Add checkpoint markers to release phases in `docs/lifecycle/60-release.md` (#90)
   - Explicit verification prompts at each phase transition

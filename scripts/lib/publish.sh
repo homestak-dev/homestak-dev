@@ -496,6 +496,7 @@ publish_update_latest() {
         echo "    ${delete_cmd} (if exists)"
         echo "    ${delete_tag_cmd} (if exists)"
         echo "    ${create_cmd}"
+        echo "    (copy assets from v${version} to latest)"
         return 0
     fi
 
@@ -510,8 +511,46 @@ publish_update_latest() {
     audit_cmd "$create_cmd" "gh"
     if ! eval "$create_cmd"; then
         log_warn "Could not create latest release (may need manual update)"
+        return 0
     fi
 
+    # Copy assets from versioned release to latest
+    local tmp_dir="/tmp/packer-latest-sync"
+    rm -rf "$tmp_dir"
+    mkdir -p "$tmp_dir"
+
+    log_info "Copying assets from v${version} to latest..."
+
+    # Download assets from versioned release
+    if gh release download "v${version}" --repo homestak-dev/packer --dir "$tmp_dir" --pattern "*.qcow2*" 2>/dev/null; then
+        # Generate checksums if missing
+        for img in "$tmp_dir"/*.qcow2; do
+            [[ -f "$img" ]] || continue
+            local base=$(basename "$img")
+            if [[ ! -f "$tmp_dir/${base}.sha256" ]]; then
+                sha256sum "$img" | awk '{print $1}' > "$tmp_dir/${base}.sha256"
+            fi
+        done
+
+        # Handle split files - generate checksum for reassembled image
+        if [[ -f "$tmp_dir/debian-13-pve.qcow2.partaa" && ! -f "$tmp_dir/debian-13-pve.qcow2.sha256" ]]; then
+            cat "$tmp_dir"/debian-13-pve.qcow2.part* > "$tmp_dir/debian-13-pve-reassembled.qcow2"
+            sha256sum "$tmp_dir/debian-13-pve-reassembled.qcow2" | awk '{print $1}' > "$tmp_dir/debian-13-pve.qcow2.sha256"
+            rm -f "$tmp_dir/debian-13-pve-reassembled.qcow2"
+        fi
+
+        # Upload to latest
+        local assets=("$tmp_dir"/*.qcow2 "$tmp_dir"/*.qcow2.part* "$tmp_dir"/*.sha256)
+        for asset in "${assets[@]}"; do
+            [[ -f "$asset" ]] || continue
+            gh release upload latest "$asset" --repo homestak-dev/packer --clobber 2>/dev/null || true
+        done
+        log_success "Assets synced to latest release"
+    else
+        log_warn "No assets in v${version} to copy to latest"
+    fi
+
+    rm -rf "$tmp_dir"
     return 0
 }
 
