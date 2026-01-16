@@ -199,7 +199,7 @@ The `bootstrap` repo provides capability installation via `homestak install <mod
 
 ```bash
 # Initial setup (on any Debian host)
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | bash
 
 # Add capabilities as needed
 homestak install packer    # QEMU, packer, templates
@@ -208,6 +208,25 @@ homestak install ansible   # Ansible + collections
 ```
 
 This pattern enables any Debian host to become a build/deploy host without manual setup.
+
+### Installation Paths (FHS-compliant, v0.24+)
+
+```
+/usr/local/
+├── bin/
+│   └── homestak → ../lib/homestak/bootstrap/homestak.sh
+├── etc/
+│   └── homestak/           # site-config (configuration)
+└── lib/
+    └── homestak/           # code repos
+        ├── bootstrap/
+        ├── ansible/
+        ├── iac-driver/
+        ├── tofu/
+        └── packer/         # (optional)
+```
+
+Legacy installations at `/opt/homestak/` remain supported via CLI fallback.
 
 ## Release Automation CLI (v0.14+)
 
