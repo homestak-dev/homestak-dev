@@ -14,6 +14,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.27. Each lesson was codi
 - **CLI-only releases can skip validation** - When changes are limited to release tooling with no infrastructure impact, use `--force` to skip the validation gate. The selftest provides sufficient coverage for CLI changes.
 - **Require explicit workflow choice** - Forcing users to specify `--workflow github` or `--workflow local` prevents accidental slow local transfers. The error message guides toward the recommended option.
 - **Fix selftest before next release** - The `tag-dry` and `publish-dry` tests fail due to phase precondition requirements in test state. This technical debt should be addressed to maintain test coverage.
+- **Passive checklists don't prevent skipped phases** - Even with a reminder in verify output AND a checklist in close output, the retrospective was skipped. Displaying reminders isn't enough; consider requiring explicit acknowledgment or blocking close until all phases are marked complete.
 
 ## v0.26
 
@@ -152,6 +153,7 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Passive checklists don't prevent skipped phases (v0.27)
 - CLI-only releases can skip validation (v0.27)
 - Same mistake twice = needs automation (v0.26)
 - Verify release issue is open before AAR (v0.26)
