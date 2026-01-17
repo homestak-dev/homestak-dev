@@ -1,12 +1,19 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.26. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.27. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.27
+
+- **Use `tag --yes` for non-interactive execution** - The new `--yes` flag eliminates the need to pipe "yes" to stdin. Use `tag --execute --yes` for automated/scripted releases. This supersedes the v0.26 workaround.
+- **CLI-only releases can skip validation** - When changes are limited to release tooling with no infrastructure impact, use `--force` to skip the validation gate. The selftest provides sufficient coverage for CLI changes.
+- **Require explicit workflow choice** - Forcing users to specify `--workflow github` or `--workflow local` prevents accidental slow local transfers. The error message guides toward the recommended option.
+- **Fix selftest before next release** - The `tag-dry` and `publish-dry` tests fail due to phase precondition requirements in test state. This technical debt should be addressed to maintain test coverage.
 
 ## v0.26
 
@@ -145,6 +152,7 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- CLI-only releases can skip validation (v0.27)
 - Same mistake twice = needs automation (v0.26)
 - Verify release issue is open before AAR (v0.26)
 - Housekeeping before Retrospective (v0.24)
@@ -172,7 +180,8 @@ For quick reference, lessons grouped by theme:
 - Packer images required for unified release (v0.15)
 
 ### Technical Gotchas
-- Pipe "yes" for non-interactive tag execution (v0.26)
+- Use `tag --yes` for non-interactive execution (v0.27, supersedes v0.26)
+- Require explicit workflow choice (v0.27)
 - Always use `--prerelease` for v0.x releases (v0.22)
 - Update release tooling when patterns change (v0.22)
 - Audit historical release metadata periodically (v0.22)
