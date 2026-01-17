@@ -1,12 +1,18 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.25. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.26. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.26
+
+- **Pipe "yes" for non-interactive tag execution** - `echo "yes" | ./scripts/release.sh tag --execute` bypasses confirmation when running non-interactively. The tag command lacks a `--yes` flag, so piping to stdin is the workaround.
+- **Verify release issue is open before AAR** - Check issue status before posting AAR; premature closure happened in both v0.25 and v0.26. The release issue should remain open until Phase 10 (Retrospective) is complete and lessons are codified.
+- **Same mistake twice = needs automation** - When the same process error happens in consecutive releases, it's a signal that the process needs a guardrail (automation, checklist item, or tooling change), not just documentation.
 
 ## v0.25
 
@@ -139,6 +145,8 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Same mistake twice = needs automation (v0.26)
+- Verify release issue is open before AAR (v0.26)
 - Housekeeping before Retrospective (v0.24)
 - Initialize release state before validation (v0.24)
 - Wait for explicit user confirmation (v0.22)
@@ -164,6 +172,7 @@ For quick reference, lessons grouped by theme:
 - Packer images required for unified release (v0.15)
 
 ### Technical Gotchas
+- Pipe "yes" for non-interactive tag execution (v0.26)
 - Always use `--prerelease` for v0.x releases (v0.22)
 - Update release tooling when patterns change (v0.22)
 - Audit historical release metadata periodically (v0.22)
