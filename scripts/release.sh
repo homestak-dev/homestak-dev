@@ -73,6 +73,7 @@ source "${SCRIPT_DIR}/lib/validate.sh"
 source "${SCRIPT_DIR}/lib/tag.sh"
 source "${SCRIPT_DIR}/lib/publish.sh"
 source "${SCRIPT_DIR}/lib/verify.sh"
+source "${SCRIPT_DIR}/lib/close.sh"
 
 # -----------------------------------------------------------------------------
 # Dependency Check
@@ -536,6 +537,7 @@ cmd_tag() {
     local rollback=false
     local reset=false
     local reset_repo=""
+    local yes_flag=false
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -563,6 +565,10 @@ cmd_tag() {
                 reset=true
                 reset_repo="$2"
                 shift 2
+                ;;
+            --yes|-y)
+                yes_flag=true
+                shift
                 ;;
             *)
                 log_error "Unknown option: $1"
@@ -620,7 +626,7 @@ cmd_tag() {
     state_set_phase_status "tags" "in_progress"
 
     # Run tag creation
-    if run_tag "$version" "$dry_run" "$force"; then
+    if run_tag "$version" "$dry_run" "$force" "$yes_flag"; then
         if [[ "$dry_run" == "false" ]]; then
             state_set_phase_status "tags" "complete"
             audit_log "TAG" "cli" "Tags v${version} created in ${#REPOS[@]} repos"
@@ -639,7 +645,7 @@ cmd_publish() {
     local dry_run=true
     local force=false
     local images_dir=""
-    local workflow="local"  # Default to local for safety
+    local workflow=""  # No default - require explicit choice
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -673,6 +679,12 @@ cmd_publish() {
                 ;;
         esac
     done
+
+    # Require --workflow for --execute mode
+    if [[ "$dry_run" == "false" && -z "$workflow" ]]; then
+        log_error "--workflow required: specify --workflow github (fast, recommended) or --workflow local"
+        exit 1
+    fi
 
     # Require release in progress
     if ! state_exists; then
@@ -921,6 +933,59 @@ cmd_verify() {
             issue_update_verification "$version" "failed"
         fi
         exit 8
+    fi
+}
+
+cmd_close() {
+    local dry_run=true
+    local force=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                dry_run=true
+                shift
+                ;;
+            --execute)
+                dry_run=false
+                shift
+                ;;
+            --force)
+                force=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Require release in progress
+    if ! state_exists; then
+        log_error "No release in progress"
+        log_error "Start with: release.sh init --version X.Y"
+        exit 1
+    fi
+
+    if ! state_validate; then
+        log_error "State file is corrupted"
+        exit 3
+    fi
+
+    local version issue started_at
+    version=$(state_get_version)
+    issue=$(state_get_issue)
+    started_at=$(state_read '.release.started_at')
+
+    # Run close
+    if run_close "$version" "$issue" "$dry_run" "$force" "$started_at"; then
+        if [[ "$dry_run" == "false" ]]; then
+            audit_log "CLOSE" "cli" "Release v${version} closed"
+        fi
+        exit 0
+    else
+        exit 9
     fi
 }
 
@@ -1475,6 +1540,7 @@ Commands:
   publish     Create GitHub releases
   packer      Handle packer image automation
   verify      Verify release artifacts
+  close       Close release (validate phases, post summary, close issue)
   full        Execute complete release workflow
   sunset      Delete old releases (preserves git tags)
   selftest    Run self-test on all commands
@@ -1489,11 +1555,12 @@ Options:
   --rollback         Rollback tags/releases on failure
   --reset            Reset tags to HEAD (delete and recreate, v0.x only)
   --reset-repo REPO  Reset tag for single repo only
+  --yes, -y          Skip confirmation prompt (tag command only)
   --skip             Skip validation (emergency releases only)
   --remote HOST      Run validation on remote host via SSH
   --packer-release   Packer release tag for image downloads (validate only)
   --host HOST        Check host readiness (preflight only, repeatable)
-  --workflow MODE    Packer image copy method: 'github' (GHA, fast) or 'local' (download/upload)
+  --workflow MODE    Packer image copy method: 'github' (fast, recommended) or 'local' (required for --execute)
   --no-wait          Don't wait for workflow completion (packer only)
   --timeout N        Workflow wait timeout in seconds (default: 600)
   --lines N          Number of audit log lines to show (default: 20)
@@ -1512,20 +1579,24 @@ Examples:
   release.sh validate --skip
   release.sh tag --dry-run
   release.sh tag --execute
+  release.sh tag --execute --yes                   # Skip confirmation prompt
   release.sh tag --execute --force
   release.sh tag --rollback
   release.sh tag --reset --dry-run
   release.sh tag --reset --execute
   release.sh tag --reset-repo packer --execute
-  release.sh publish --execute
-  release.sh publish --execute --workflow github
-  release.sh publish --execute --workflow local
+  release.sh publish --dry-run
+  release.sh publish --execute --workflow github   # Fast, recommended
+  release.sh publish --execute --workflow local    # Slow, downloads ~13GB
   release.sh packer --check
   release.sh packer --copy --dry-run
   release.sh packer --copy --execute
   release.sh packer --copy --version 0.20 --source v0.19
   release.sh packer --copy --workflow --execute
   release.sh packer --copy --workflow --no-wait --execute
+  release.sh close --dry-run
+  release.sh close --execute
+  release.sh close --execute --force             # Skip phase validation
   release.sh full --dry-run
   release.sh full --execute --host father
   release.sh full --execute --skip-validate
@@ -1586,6 +1657,9 @@ main() {
             ;;
         verify)
             cmd_verify "$@"
+            ;;
+        close)
+            cmd_close "$@"
             ;;
         full)
             cmd_full "$@"

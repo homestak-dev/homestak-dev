@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+## v0.27 - 2026-01-17
+
+### Theme: Release CLI UX Improvements
+
+### Added
+- `release.sh close` command to finalize releases (#106)
+  - Validates all tracked phases complete before closing
+  - Posts summary comment to release issue
+  - Closes release issue and cleans up state files
+  - `--force` flag to skip phase validation
+- `release.sh tag --yes` flag to skip confirmation prompt (#106)
+  - Enables non-interactive tag execution
+  - Short form: `-y`
+- Reminder in `release.sh verify` output (#106)
+  - Shows remaining phases after verification
+  - Prevents premature release issue closure
+
+### Changed
+- `release.sh publish --execute` now requires explicit `--workflow` flag (#104)
+  - No default workflow - must specify `--workflow github` or `--workflow local`
+  - Error message guides user toward recommended option
+  - `--dry-run` still works without flag for previewing
+
 ## v0.26 - 2026-01-17
 
 - Release alignment with homestak v0.26

@@ -205,6 +205,7 @@ run_tag() {
     local version="$1"
     local dry_run="${2:-true}"
     local force="${3:-false}"
+    local yes_flag="${4:-false}"
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
@@ -267,17 +268,19 @@ run_tag() {
         return 0
     fi
 
-    # Confirmation prompt for execute mode
-    echo "═══════════════════════════════════════════════════════════════"
-    echo -e "  ${YELLOW}WARNING: This will create and push tags to all repos${NC}"
-    echo "═══════════════════════════════════════════════════════════════"
-    echo ""
-    read -p "Type 'yes' to proceed, or Ctrl+C to abort: " -r
-    if [[ "$REPLY" != "yes" ]]; then
-        log_info "Aborted by user"
-        return 1
+    # Confirmation prompt for execute mode (skip if --yes flag)
+    if [[ "$yes_flag" != "true" ]]; then
+        echo "═══════════════════════════════════════════════════════════════"
+        echo -e "  ${YELLOW}WARNING: This will create and push tags to all repos${NC}"
+        echo "═══════════════════════════════════════════════════════════════"
+        echo ""
+        read -p "Type 'yes' to proceed, or Ctrl+C to abort: " -r
+        if [[ "$REPLY" != "yes" ]]; then
+            log_info "Aborted by user"
+            return 1
+        fi
+        echo ""
     fi
-    echo ""
 
     # Execute tag creation
     local created_repos=()

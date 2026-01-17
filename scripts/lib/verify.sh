@@ -327,6 +327,11 @@ EOF
         echo "**Packer Assets (in 'latest'):** ${found_count}/${#EXPECTED_PACKER_ASSETS[@]} present"
         echo "---"
         echo ""
+
+        # Reminder about release issue lifecycle
+        echo -e "${YELLOW}Note:${NC} Release issue should remain open until Phase 10 (Retrospective) is complete."
+        echo "      Phases remaining after verify: AAR → Housekeeping → Retrospective → Close"
+        echo ""
     fi
 
     if [[ "$all_passed" == "true" ]]; then
