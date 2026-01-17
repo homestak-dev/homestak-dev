@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.26 - 2026-01-17
+
+- Release alignment with homestak v0.26
+
 All notable changes to this project will be documented in this file.
 
 ## [v0.25] - 2026-01-16
