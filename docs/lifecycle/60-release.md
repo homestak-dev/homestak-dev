@@ -403,7 +403,7 @@ done
 
 After the retrospective, update `docs/lifecycle/65-lessons-learned.md` with any process improvements. Commit with message: `Update 65-lessons-learned.md with vX.Y lessons`
 
-**Close the release issue only after lessons are codified and committed.** The release issue is the record of completion - closing it signals all phases are done.
+**Close the release issue only after lessons are codified and committed.** Use `release.sh close --execute` to post a summary comment, close the issue, and clean up state files. The release issue is the record of completion - closing it signals all phases are done.
 
 ### Release Sunset (periodic)
 

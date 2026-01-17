@@ -242,16 +242,16 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 | `preflight` | Check repos ready (clean, no tags, CHANGELOGs) |
 | `validate` | Run iac-driver integration tests |
 | `tag --dry-run` | Preview tag creation |
-| `tag --execute` | Create and push tags |
+| `tag --execute [--yes]` | Create and push tags (--yes skips confirmation) |
 | `tag --reset` | Reset tags to HEAD (v0.x only) |
 | `publish --dry-run` | Preview release creation |
-| `publish --execute` | Create GitHub releases |
-| `publish --workflow` | Specify packer copy method (github\|local) |
+| `publish --execute --workflow` | Create GitHub releases (--workflow required) |
 | `packer --check` | Check for template changes |
 | `packer --copy` | Copy images from previous release |
 | `full --dry-run` | Preview complete release workflow |
 | `full --execute` | Execute end-to-end release |
 | `verify` | Verify all releases exist (tags + releases + packer assets) |
+| `close [--force]` | Close release issue and clean up state |
 | `sunset --below-version X.Y` | Delete releases below version (preserves tags) |
 | `audit` | Show timestamped action log |
 
@@ -263,10 +263,11 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 ./scripts/release.sh preflight
 ./scripts/release.sh validate --scenario vm-roundtrip --host father
 ./scripts/release.sh tag --dry-run
-./scripts/release.sh tag --execute
-./scripts/release.sh publish --execute
-./scripts/release.sh packer --copy --execute
+./scripts/release.sh tag --execute --yes
+./scripts/release.sh publish --execute --workflow github
 ./scripts/release.sh verify
+# ... complete AAR, housekeeping, retrospective ...
+./scripts/release.sh close --execute
 
 # Or use full command for end-to-end automation
 ./scripts/release.sh full --dry-run
