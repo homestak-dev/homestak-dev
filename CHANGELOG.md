@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## v0.29 - 2026-01-18
+
+### Theme: Stage Validation
+
+### Added
+- `release.sh validate --stage` flag for installed CLI validation (#112)
+  - Runs `homestak scenario` via installed CLI instead of dev checkout
+  - Validates full bootstrap installation path
+  - Requires sudo for FHS paths
+  - Works with `--remote` for SSH execution
+
+### Fixed
+- bootstrap#21: site-init corrupts secrets.yaml indentation (documented, fix pending)
+
+## v0.28 - 2026-01-18
+
+- Release alignment with homestak v0.28
+
 ## v0.27 - 2026-01-17
 
 ### Theme: Release CLI UX Improvements
