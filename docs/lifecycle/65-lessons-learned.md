@@ -14,6 +14,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.29. Each lesson was codi
 - **Legacy path migration requires fresh bootstrap** - Hosts with `/opt/homestak/` (pre-v0.26) need complete removal and re-bootstrap to get FHS paths with correct ownership. `rm -rf /opt/homestak && curl ... | sudo bash` is the cleanest fix.
 - **Clean temp files between validation runs** - Leftover `/tmp/*.tfvars.json` files from previous runs can cause permission errors if ownership differs. Consider using unique temp file names or cleaning up after runs.
 - **YAML manipulation in shell scripts is fragile** - The site-init SSH key injection broke YAML indentation. Use proper YAML libraries (Python yaml module) for modifications instead of sed/echo appends.
+- **Closing before retrospective: third occurrence** - Same process error as v0.25 and v0.26. The `close` command's reminder checklist isn't preventing this. Need to either block close until retrospective is posted, or require `--force` to close without retrospective.
 
 ## v0.28
 
@@ -167,6 +168,7 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Closing before retrospective: third occurrence (v0.29)
 - Passive checklists don't prevent skipped phases (v0.27)
 - CLI-only releases can skip validation (v0.27)
 - Same mistake twice = needs automation (v0.26)
