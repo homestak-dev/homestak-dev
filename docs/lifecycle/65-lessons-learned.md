@@ -8,6 +8,11 @@ Accumulated insights from homestak-dev releases v0.8-v0.29. Each lesson was codi
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
 
+## v0.30
+
+- **Create release planning issue FIRST** - The release issue must be created at the start of Phase 1 (Pre-flight), not retroactively after release completion. The issue is the tracking hub for the entire release: it receives status updates, hosts the AAR, and documents deviations. Without it from the start, phase tracking via `--issue N` doesn't work, and AAR has no home. This is fundamental to the lifecycle process.
+- **AI assistants skip implicit steps** - Claude proceeded with `release.sh init` without creating the release issue because the plan summary didn't explicitly list "create release issue" as a step. Lesson: critical process steps that seem obvious to humans need explicit mention in plans, especially when delegating to AI.
+
 ## v0.29
 
 - **FHS installations require sudo for scenarios** - Bootstrap installs to `/usr/local/lib/homestak/` as root, so `homestak scenario` and `homestak playbook` commands need sudo. Document this requirement prominently.
