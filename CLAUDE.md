@@ -240,7 +240,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 | `status` | Show release progress |
 | `resume` | Show AI-friendly recovery context (markdown) |
 | `preflight` | Check repos ready (clean, no tags, CHANGELOGs) |
-| `validate` | Run iac-driver integration tests |
+| `validate [--stage]` | Run iac-driver integration tests (--stage uses installed CLI) |
 | `tag --dry-run` | Preview tag creation |
 | `tag --execute [--yes]` | Create and push tags (--yes skips confirmation) |
 | `tag --reset` | Reset tags to HEAD (v0.x only) |
@@ -262,6 +262,8 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 ./scripts/release.sh init --version 0.18
 ./scripts/release.sh preflight
 ./scripts/release.sh validate --scenario vm-roundtrip --host father
+# Or use --stage to validate via installed CLI (requires bootstrap on remote)
+./scripts/release.sh validate --stage --remote father
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute --yes
 ./scripts/release.sh publish --execute --workflow github
