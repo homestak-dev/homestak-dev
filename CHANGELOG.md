@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Theme: Developer Experience and Reliability
+
+### Added
+- `release.sh retrospective` command to mark retrospective phase complete (#109)
+  - Blocks `close` until retrospective is done (use `--force` to override)
+  - Prevents premature release closure (pattern from v0.25, v0.26, v0.29)
+- `release.sh publish --yes` flag to skip confirmation prompt (#109)
+- `release.sh close --yes` flag to skip confirmation prompt (#109)
+
+### Fixed
+- Fix selftest failures for tag-dry and publish-dry tests (#108)
+  - Skip tests when repos have uncommitted changes
+  - Skip publish-dry when tags don't exist for test version
+
 ## v0.29 - 2026-01-18
 
 ### Theme: Stage Validation

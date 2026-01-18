@@ -581,6 +581,7 @@ run_publish() {
     local force="${3:-false}"
     local images_dir="${4:-}"
     local workflow="${5:-local}"
+    local yes_flag="${6:-false}"
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
@@ -680,17 +681,19 @@ run_publish() {
         return 0
     fi
 
-    # Confirmation prompt for execute mode
-    echo "═══════════════════════════════════════════════════════════════"
-    echo -e "  ${YELLOW}WARNING: This will create GitHub releases for all repos${NC}"
-    echo "═══════════════════════════════════════════════════════════════"
-    echo ""
-    read -p "Type 'yes' to proceed, or Ctrl+C to abort: " -r
-    if [[ "$REPLY" != "yes" ]]; then
-        log_info "Aborted by user"
-        return 1
+    # Confirmation prompt for execute mode (skip with --yes)
+    if [[ "$yes_flag" != "true" ]]; then
+        echo "═══════════════════════════════════════════════════════════════"
+        echo -e "  ${YELLOW}WARNING: This will create GitHub releases for all repos${NC}"
+        echo "═══════════════════════════════════════════════════════════════"
+        echo ""
+        read -p "Type 'yes' to proceed, or Ctrl+C to abort: " -r
+        if [[ "$REPLY" != "yes" ]]; then
+            log_info "Aborted by user"
+            return 1
+        fi
+        echo ""
     fi
-    echo ""
 
     # Execute release creation
     local failed=false

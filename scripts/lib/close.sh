@@ -11,6 +11,7 @@
 
 close_check_phases() {
     local errors=()
+    local warnings=()
 
     # Check all tracked phases are complete
     for phase in preflight validation tags releases verification; do
@@ -21,10 +22,28 @@ close_check_phases() {
         fi
     done
 
+    # Check retrospective separately (soft check - warning only)
+    local retro_status
+    retro_status=$(state_get_phase_status "retrospective")
+    if [[ "$retro_status" != "complete" ]]; then
+        warnings+=("Phase 'retrospective' not complete (status: ${retro_status})")
+    fi
+
     if [[ ${#errors[@]} -gt 0 ]]; then
         for err in "${errors[@]}"; do
             echo -e "  ${RED}✗${NC} $err"
         done
+        return 1
+    fi
+
+    if [[ ${#warnings[@]} -gt 0 ]]; then
+        for warn in "${warnings[@]}"; do
+            echo -e "  ${YELLOW}⚠${NC} $warn"
+        done
+        echo ""
+        echo -e "  ${YELLOW}Retrospective not complete.${NC}"
+        echo "  Mark complete: release.sh retrospective --done"
+        echo "  Or skip with: release.sh close --force"
         return 1
     fi
 
@@ -116,6 +135,7 @@ run_close() {
     local dry_run="${3:-true}"
     local force="${4:-false}"
     local started_at="$5"
+    local yes_flag="${6:-false}"
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
@@ -177,17 +197,19 @@ run_close() {
         return 0
     fi
 
-    # Confirmation prompt
-    echo "═══════════════════════════════════════════════════════════════"
-    echo -e "  ${YELLOW}This will close the release issue and clean up state${NC}"
-    echo "═══════════════════════════════════════════════════════════════"
-    echo ""
-    read -p "Type 'yes' to proceed, or Ctrl+C to abort: " -r
-    if [[ "$REPLY" != "yes" ]]; then
-        log_info "Aborted by user"
-        return 1
+    # Confirmation prompt (skip with --yes)
+    if [[ "$yes_flag" != "true" ]]; then
+        echo "═══════════════════════════════════════════════════════════════"
+        echo -e "  ${YELLOW}This will close the release issue and clean up state${NC}"
+        echo "═══════════════════════════════════════════════════════════════"
+        echo ""
+        read -p "Type 'yes' to proceed, or Ctrl+C to abort: " -r
+        if [[ "$REPLY" != "yes" ]]; then
+            log_info "Aborted by user"
+            return 1
+        fi
+        echo ""
     fi
-    echo ""
 
     # Post and close
     if ! close_post_and_close "$issue" "$summary" "false"; then
