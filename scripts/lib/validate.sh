@@ -4,11 +4,19 @@
 #
 # Runs integration tests via iac-driver and captures reports
 #
+# Execution modes:
+#   dev (default) - runs ./iac-driver/run.sh from dev checkout
+#   stage         - runs via installed 'homestak scenario' CLI
+#
 
 # Default values
 IAC_DRIVER_DIR="${WORKSPACE_DIR}/iac-driver"
 DEFAULT_SCENARIO="vm-roundtrip"
 DEFAULT_HOST="father"
+
+# FHS paths for stage mode
+HOMESTAK_CLI="/usr/local/bin/homestak"
+HOMESTAK_IAC_DRIVER="/usr/local/lib/homestak/iac-driver"
 
 # -----------------------------------------------------------------------------
 # Validation Functions
@@ -111,6 +119,87 @@ validate_run_remote() {
 }
 
 # -----------------------------------------------------------------------------
+# Stage Mode Functions (validate via installed CLI)
+# -----------------------------------------------------------------------------
+
+validate_check_homestak_cli() {
+    if [[ ! -x "$HOMESTAK_CLI" ]]; then
+        log_error "homestak CLI not found at ${HOMESTAK_CLI}"
+        log_error "Stage mode requires bootstrap installation"
+        log_error "Use --remote <host> to run on a bootstrapped host"
+        return 1
+    fi
+    return 0
+}
+
+validate_run_stage_local() {
+    local scenario="$1"
+    local host="$2"
+    local verbose="${3:-false}"
+    local packer_release="${4:-}"
+
+    # Build the command (sudo required for FHS paths)
+    local cmd="sudo ${HOMESTAK_CLI} scenario ${scenario} --host ${host}"
+    if [[ "$verbose" == "true" ]]; then
+        cmd+=" --verbose"
+    fi
+    if [[ -n "$packer_release" ]]; then
+        cmd+=" --packer-release ${packer_release}"
+    fi
+
+    log_info "Running (stage): $cmd"
+    audit_cmd "$cmd" "homestak"
+
+    # Run scenario and capture exit code
+    set +e
+    eval "$cmd"
+    local exit_code=$?
+    set -e
+
+    return $exit_code
+}
+
+validate_run_stage_remote() {
+    local remote_host="$1"
+    local scenario="$2"
+    local host="$3"
+    local verbose="${4:-false}"
+    local packer_release="${5:-}"
+
+    local verbose_flag=""
+    if [[ "$verbose" == "true" ]]; then
+        verbose_flag="--verbose"
+    fi
+
+    local packer_release_flag=""
+    if [[ -n "$packer_release" ]]; then
+        packer_release_flag="--packer-release ${packer_release}"
+    fi
+
+    # Build the remote command - uses homestak CLI (sudo required for FHS paths)
+    local remote_cmd="sudo homestak scenario ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
+
+    log_info "Running stage validation on ${remote_host}..."
+    log_info "Remote command: ${remote_cmd}"
+    audit_cmd "ssh ${remote_host} '${remote_cmd}'" "ssh"
+
+    # Run on remote and capture exit code
+    set +e
+    ssh "${remote_host}" "${remote_cmd}"
+    local exit_code=$?
+    set -e
+
+    # Copy reports back from FHS location
+    local report_dir="${IAC_DRIVER_DIR}/reports"
+    mkdir -p "$report_dir"
+
+    log_info "Copying reports from ${remote_host} (FHS path)..."
+    scp -q "${remote_host}:${HOMESTAK_IAC_DRIVER}/reports/*.md" "${report_dir}/" 2>/dev/null || true
+
+    return $exit_code
+}
+
+# -----------------------------------------------------------------------------
 # Main Validation Runner
 # -----------------------------------------------------------------------------
 
@@ -121,6 +210,7 @@ run_validation() {
     local verbose="${4:-false}"
     local remote_host="${5:-}"
     local packer_release="${6:-}"
+    local stage="${7:-false}"
 
     # Handle skip
     if [[ "$skip" == "true" ]]; then
@@ -136,9 +226,19 @@ run_validation() {
         return 0
     fi
 
-    # Check iac-driver exists (only for local execution)
-    if [[ -z "$remote_host" ]] && ! validate_check_iac_driver; then
-        return 1
+    # Determine mode and check prerequisites
+    local mode="dev"
+    if [[ "$stage" == "true" ]]; then
+        mode="stage"
+        # Stage mode: check homestak CLI exists (local) or trust remote has it
+        if [[ -z "$remote_host" ]] && ! validate_check_homestak_cli; then
+            return 1
+        fi
+    else
+        # Dev mode: check iac-driver exists (only for local execution)
+        if [[ -z "$remote_host" ]] && ! validate_check_iac_driver; then
+            return 1
+        fi
     fi
 
     echo ""
@@ -148,6 +248,7 @@ run_validation() {
     echo ""
     echo "  Scenario: ${scenario}"
     echo "  Host:     ${host}"
+    echo "  Mode:     ${mode}"
     if [[ -n "$remote_host" ]]; then
         echo "  Remote:   ${remote_host}"
     fi
@@ -157,15 +258,29 @@ run_validation() {
     local start_time
     start_time=$(date +%s)
 
-    # Run the scenario (remote or local)
+    # Run the scenario based on mode
     local scenario_passed=false
-    if [[ -n "$remote_host" ]]; then
-        if validate_run_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release"; then
-            scenario_passed=true
+    if [[ "$stage" == "true" ]]; then
+        # Stage mode: use homestak CLI
+        if [[ -n "$remote_host" ]]; then
+            if validate_run_stage_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release"; then
+                scenario_passed=true
+            fi
+        else
+            if validate_run_stage_local "$scenario" "$host" "$verbose" "$packer_release"; then
+                scenario_passed=true
+            fi
         fi
     else
-        if validate_run_scenario "$scenario" "$host" "$verbose" "$packer_release"; then
-            scenario_passed=true
+        # Dev mode: use iac-driver directly
+        if [[ -n "$remote_host" ]]; then
+            if validate_run_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release"; then
+                scenario_passed=true
+            fi
+        else
+            if validate_run_scenario "$scenario" "$host" "$verbose" "$packer_release"; then
+                scenario_passed=true
+            fi
         fi
     fi
 

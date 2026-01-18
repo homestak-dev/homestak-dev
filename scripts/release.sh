@@ -466,6 +466,7 @@ cmd_validate() {
     local verbose=false
     local remote=""
     local packer_release=""
+    local stage=false
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -489,6 +490,10 @@ cmd_validate() {
                 skip=true
                 shift
                 ;;
+            --stage)
+                stage=true
+                shift
+                ;;
             --verbose|-v)
                 verbose=true
                 shift
@@ -507,7 +512,7 @@ cmd_validate() {
 
     # Run validation
     local validation_passed=false
-    if run_validation "$scenario" "$host" "$skip" "$verbose" "$remote" "$packer_release"; then
+    if run_validation "$scenario" "$host" "$skip" "$verbose" "$remote" "$packer_release" "$stage"; then
         validation_passed=true
     fi
 
@@ -1557,6 +1562,7 @@ Options:
   --reset-repo REPO  Reset tag for single repo only
   --yes, -y          Skip confirmation prompt (tag command only)
   --skip             Skip validation (emergency releases only)
+  --stage            Run via 'homestak scenario' CLI instead of ./run.sh (stage mode)
   --remote HOST      Run validation on remote host via SSH
   --packer-release   Packer release tag for image downloads (validate only)
   --host HOST        Check host readiness (preflight only, repeatable)
@@ -1576,6 +1582,7 @@ Examples:
   release.sh validate --scenario vm-roundtrip --host father
   release.sh validate --scenario vm-roundtrip --host father --remote father
   release.sh validate --scenario nested-pve-roundtrip --host father --packer-release v0.19
+  release.sh validate --stage --remote father              # Stage mode via homestak CLI
   release.sh validate --skip
   release.sh tag --dry-run
   release.sh tag --execute
