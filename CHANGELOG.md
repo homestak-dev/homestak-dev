@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- Require `--issue N` for `release.sh init` (#114)
+  - Release issue is now required by default
+  - Use `--no-issue` for hotfix releases without tracking issue
+  - Preflight warns if no issue is linked
+
 ## v0.30 - 2026-01-18
 
 ### Theme: Developer Experience and Reliability

@@ -236,7 +236,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 
 | Command | Description |
 |---------|-------------|
-| `init --version X.Y` | Initialize release state |
+| `init --version X.Y --issue N` | Initialize release state (issue required) |
 | `status` | Show release progress |
 | `resume` | Show AI-friendly recovery context (markdown) |
 | `preflight` | Check repos ready (clean, no tags, CHANGELOGs) |
@@ -260,7 +260,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 
 ```bash
 # Manual workflow
-./scripts/release.sh init --version 0.18
+./scripts/release.sh init --version 0.31 --issue 115
 ./scripts/release.sh preflight
 ./scripts/release.sh validate --scenario vm-roundtrip --host father
 # Or use --stage to validate via installed CLI (requires bootstrap on remote)

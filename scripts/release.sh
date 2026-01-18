@@ -102,6 +102,7 @@ check_dependencies() {
 cmd_init() {
     local version=""
     local issue=""
+    local no_issue=false
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -113,6 +114,10 @@ cmd_init() {
                 issue="$2"
                 shift 2
                 ;;
+            --no-issue)
+                no_issue=true
+                shift
+                ;;
             *)
                 log_error "Unknown option: $1"
                 exit 1
@@ -122,6 +127,19 @@ cmd_init() {
 
     if [[ -z "$version" ]]; then
         log_error "Version required: release.sh init --version X.Y"
+        exit 1
+    fi
+
+    # Require --issue unless --no-issue is explicitly set (v0.31+)
+    if [[ -z "$issue" && "$no_issue" != "true" ]]; then
+        log_error "Release issue required: release.sh init --version X.Y --issue N"
+        echo ""
+        echo "The release issue is the tracking hub for the entire release."
+        echo "Create it first: gh issue create --title 'vX.Y Release Planning - Theme' --label release"
+        echo ""
+        echo "Or find existing: gh issue list --label release"
+        echo ""
+        echo "For hotfix releases without tracking issue, use: --no-issue"
         exit 1
     fi
 
@@ -157,8 +175,8 @@ cmd_init() {
     if [[ -n "$issue" ]]; then
         echo "  Tracking issue: #${issue}"
     else
-        echo -e "  ${YELLOW}Tip: Link a release issue with --issue N${NC}"
-        echo "  Look for: gh issue list --label release"
+        echo -e "  ${YELLOW}WARNING: No tracking issue linked (--no-issue mode)${NC}"
+        echo "  AAR and retrospective will not have a home."
     fi
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
@@ -1647,7 +1665,8 @@ Commands:
 
 Options:
   --version X.Y      Release version (required for init)
-  --issue N          GitHub issue to track release progress (init only)
+  --issue N          GitHub issue to track release progress (required for init)
+  --no-issue         Skip issue requirement for hotfix releases (init only)
   --dry-run          Show what would be done without executing
   --execute          Execute the operation
   --force            Override validation gate requirement
@@ -1667,8 +1686,8 @@ Options:
   --below-version    Delete releases below this version (sunset only)
 
 Examples:
-  release.sh init --version 0.14
-  release.sh init --version 0.20 --issue 72
+  release.sh init --version 0.31 --issue 115
+  release.sh init --version 0.31-hotfix --no-issue   # Hotfix without tracking issue
   release.sh status
   release.sh preflight
   release.sh preflight --host father

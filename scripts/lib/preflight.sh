@@ -539,6 +539,18 @@ EOF
         echo "═══════════════════════════════════════════════════════════════"
         echo ""
 
+        # Warn if no release issue is linked (v0.31+)
+        if state_exists; then
+            local issue
+            issue=$(state_get_issue)
+            if [[ -z "$issue" ]]; then
+                echo -e "${YELLOW}[WARN]${NC} No release issue linked"
+                echo "       AAR and retrospective will not have a home."
+                echo "       To link: edit .release-state.json or re-run init with --issue N"
+                echo ""
+            fi
+        fi
+
         echo "Repository Status:"
         for i in "${!REPOS[@]}"; do
             local repo="${REPOS[$i]}"
