@@ -1,12 +1,19 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.28. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.29. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.29
+
+- **FHS installations require sudo for scenarios** - Bootstrap installs to `/usr/local/lib/homestak/` as root, so `homestak scenario` and `homestak playbook` commands need sudo. Document this requirement prominently.
+- **Legacy path migration requires fresh bootstrap** - Hosts with `/opt/homestak/` (pre-v0.26) need complete removal and re-bootstrap to get FHS paths with correct ownership. `rm -rf /opt/homestak && curl ... | sudo bash` is the cleanest fix.
+- **Clean temp files between validation runs** - Leftover `/tmp/*.tfvars.json` files from previous runs can cause permission errors if ownership differs. Consider using unique temp file names or cleaning up after runs.
+- **YAML manipulation in shell scripts is fragile** - The site-init SSH key injection broke YAML indentation. Use proper YAML libraries (Python yaml module) for modifications instead of sed/echo appends.
 
 ## v0.28
 
@@ -189,6 +196,10 @@ For quick reference, lessons grouped by theme:
 - Packer images required for unified release (v0.15)
 
 ### Technical Gotchas
+- FHS installations require sudo for scenarios (v0.29)
+- Legacy path migration requires fresh bootstrap (v0.29)
+- Clean temp files between validation runs (v0.29)
+- YAML manipulation in shell scripts is fragile (v0.29)
 - Ansible CLI booleans are strings (v0.28)
 - GitHub 'latest' is API-only (v0.28)
 - Discovery patterns simplify cleanup (v0.28)
