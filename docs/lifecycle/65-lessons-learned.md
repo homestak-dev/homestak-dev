@@ -1,12 +1,19 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.27. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.28. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.28
+
+- **Ansible CLI booleans are strings** - When passing `-e var=true` via CLI, Ansible receives a string, not a boolean. Always use `| bool` filter in conditionals for variables that might come from extra-vars (e.g., `when: bootstrap_use_local | bool`).
+- **GitHub 'latest' is API-only** - The 'latest' release concept only works via GitHub API, not in download URLs. URLs like `https://github.com/.../releases/download/latest/file` return 404. Must query API to resolve actual tag name first.
+- **Discovery patterns simplify cleanup** - Pattern-based VM discovery (e.g., `nested-pve*` in vmid range 99800-99999) is more robust than context-file dependency for destructors. Works without prior context and handles partial states gracefully.
+- **publish command needs --yes flag** - Unlike `tag --execute --yes`, the `publish` command lacks a `--yes` flag, requiring workarounds like `<<< "yes"` for non-interactive execution.
 
 ## v0.27
 
@@ -182,6 +189,10 @@ For quick reference, lessons grouped by theme:
 - Packer images required for unified release (v0.15)
 
 ### Technical Gotchas
+- Ansible CLI booleans are strings (v0.28)
+- GitHub 'latest' is API-only (v0.28)
+- Discovery patterns simplify cleanup (v0.28)
+- publish command needs --yes flag (v0.28)
 - Use `tag --yes` for non-interactive execution (v0.27, supersedes v0.26)
 - Require explicit workflow choice (v0.27)
 - Always use `--prerelease` for v0.x releases (v0.22)
