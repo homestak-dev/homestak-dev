@@ -360,7 +360,7 @@ The `resume` command outputs:
 
 ### Development Lifecycle
 
-6-phase development process in [docs/lifecycle/](docs/lifecycle/):
+7-phase development process in [docs/lifecycle/](docs/lifecycle/):
 
 | File | Purpose |
 |------|---------|
@@ -370,8 +370,9 @@ The `resume` command outputs:
 | [30-implementation.md](docs/lifecycle/30-implementation.md) | Development, testing, CHANGELOG updates |
 | [40-validation.md](docs/lifecycle/40-validation.md) | Integration testing requirements |
 | [50-merge.md](docs/lifecycle/50-merge.md) | PR process and documentation updates |
-| [60-release.md](docs/lifecycle/60-release.md) | Release coordination, tagging, retrospectives |
-| [65-lessons-learned.md](docs/lifecycle/65-lessons-learned.md) | Accumulated release insights (v0.8-v0.19) |
+| [60-release.md](docs/lifecycle/60-release.md) | Release coordination and tagging |
+| [70-retrospective.md](docs/lifecycle/70-retrospective.md) | Retrospective and lessons learned codification |
+| [75-lessons-learned.md](docs/lifecycle/75-lessons-learned.md) | Accumulated release insights (v0.8-v0.33) |
 
 ### Templates
 

@@ -35,6 +35,7 @@ Standardize the development and release process to ensure:
 | 40-Validation | ✓ | ✓ | ✓ |
 | 50-Merge | ✓ | ✓ | ✓ |
 | 60-Release | ✓ | ✓ | ✓ |
+| 70-Retrospective | ✓ | ✓ | ✓ |
 
 ## Human-in-the-Loop Touchpoints
 
@@ -46,6 +47,7 @@ Standardize the development and release process to ensure:
 | Validation review | Validation | Human reviews or executes integration tests |
 | PR approval | Merge | Human reviews, approves, and merges PR |
 | Release execution | Release | Human executes release commands |
+| Retrospective | Retrospective | Human reflects on process and codifies lessons |
 
 ## Multi-Repo Structure
 
@@ -99,5 +101,7 @@ Integration testing uses iac-driver scenarios:
 - [30-implementation.md](30-implementation.md) - Development, testing, and documentation
 - [40-validation.md](40-validation.md) - Integration testing
 - [50-merge.md](50-merge.md) - PR process and global documentation
-- [60-release.md](60-release.md) - Release coordination, tagging, and retrospective
+- [60-release.md](60-release.md) - Release coordination and tagging
+- [70-retrospective.md](70-retrospective.md) - Retrospective and lessons learned
+- [75-lessons-learned.md](75-lessons-learned.md) - Accumulated release insights
 - [../templates/](../templates/) - Reusable templates for AAR, retrospective, issues

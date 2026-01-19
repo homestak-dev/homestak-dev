@@ -1142,7 +1142,7 @@ cmd_retrospective() {
     echo ""
     echo "Before marking complete, ensure you have:"
     echo "  - Reviewed what went well and what could be improved"
-    echo "  - Updated docs/lifecycle/65-lessons-learned.md if applicable"
+    echo "  - Updated docs/lifecycle/75-lessons-learned.md if applicable"
     echo "  - Captured any process improvements for future releases"
     echo ""
     echo "Mark complete with: release.sh retrospective --done"
