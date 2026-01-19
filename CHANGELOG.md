@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## v0.32 - 2026-01-19
+
+### Theme: CLI Standardization
+
+### Added
+- Add `docs/CLI-CONVENTIONS.md` documenting CLI flag and naming standards (#117)
+- Add `--version` to release.sh using git-derived version pattern (#118)
+- Add `--json` output to `release.sh status` and `release.sh verify` (#121)
+
+### Changed
+- All scripts now derive version from git tags at runtime (no hardcoded constants)
+
 ## v0.31 - 2026-01-19
 
 ### Theme: Code Quality
