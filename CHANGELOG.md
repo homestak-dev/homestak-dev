@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Theme: Unit Testing
+
+### Changed
+- Update `docs/lifecycle/30-implementation.md` with unit test requirements (#124)
+  - Add test frameworks table by repo
+  - Add `make test` command examples
+  - Add CI enforcement note
+- Update `docs/lifecycle/40-validation.md` to distinguish unit vs integration tests (#124)
+  - Add comparison table for unit tests vs integration tests
+  - Clarify when each type runs
+
 ## v0.32 - 2026-01-19
 
 ### Theme: CLI Standardization
