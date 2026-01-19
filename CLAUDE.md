@@ -236,8 +236,10 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 
 | Command | Description |
 |---------|-------------|
+| `--version` | Show CLI version |
+| `--help` | Show help message |
 | `init --version X.Y --issue N` | Initialize release state (issue required) |
-| `status` | Show release progress |
+| `status [--json]` | Show release progress (--json for machine-readable) |
 | `resume` | Show AI-friendly recovery context (markdown) |
 | `preflight` | Check repos ready (clean, no tags, CHANGELOGs) |
 | `validate [--stage]` | Run iac-driver integration tests (--stage uses installed CLI) |
@@ -250,7 +252,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 | `packer --copy` | Copy images from previous release |
 | `full --dry-run` | Preview complete release workflow |
 | `full --execute` | Execute end-to-end release |
-| `verify` | Verify all releases exist (tags + releases + packer assets) |
+| `verify [--json]` | Verify all releases exist (--json for machine-readable) |
 | `retrospective --done` | Mark retrospective phase complete |
 | `close [--force] [--yes]` | Close release issue and clean up state |
 | `sunset --below-version X.Y` | Delete releases below version (preserves tags) |
@@ -386,6 +388,7 @@ Reusable templates in [docs/templates/](docs/templates/):
 
 | File | Purpose |
 |------|---------|
+| [docs/CLI-CONVENTIONS.md](docs/CLI-CONVENTIONS.md) | CLI flag and naming standards |
 | [docs/ISSUE-GUIDELINES.md](docs/ISSUE-GUIDELINES.md) | Issue creation and labeling standards |
 | [docs/CLAUDE-GUIDELINES.md](docs/CLAUDE-GUIDELINES.md) | CLAUDE.md documentation standards |
 | [docs/REPO-SETTINGS.md](docs/REPO-SETTINGS.md) | Repository configuration standards |
