@@ -103,11 +103,14 @@ Brief description of the release theme and goals.
 - [ ] Packer has 4 image assets (3 images + checksums)
 - [ ] Post-release smoke test (bootstrap install)
 
-### Post-Release (same day - do not defer)
+### Post-Release (Phase 60 complete)
 - [ ] After Action Report
-- [ ] Retrospective
-- [ ] Update `docs/lifecycle/60-release.md` with lessons learned
-- [ ] Close release issue
+- [ ] Housekeeping (branch cleanup)
+
+### Phase 70: Retrospective (same day - do not defer)
+- [ ] Retrospective completed
+- [ ] Lessons learned added to `docs/lifecycle/75-lessons-learned.md`
+- [ ] Close release issue via `release.sh close --execute`
 
 ---
 **Started:** YYYY-MM-DD HH:MM

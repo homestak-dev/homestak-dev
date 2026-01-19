@@ -6,7 +6,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.33. Each lesson was codi
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
-- **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+- **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
 
 ## v0.33
 

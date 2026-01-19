@@ -382,28 +382,17 @@ done
 
 **Repository setting:** Enable "Automatically delete head branches" in GitHub repo settings to auto-cleanup after PR merge.
 
-### Phase 10: Retrospective
+### Next: Phase 70 (Retrospective)
 
 > **CHECKPOINT: Phase 9 Complete**
-> Before proceeding, verify: Housekeeping completed, stale branches cleaned up.
+> Before proceeding to Phase 70, verify: Housekeeping completed, stale branches cleaned up.
 
-**Complete same day as release.** Use the [Retrospective Template](../templates/retrospective.md) to document:
+After completing Phase 9, proceed to [70-retrospective.md](70-retrospective.md) for:
+- Retrospective documentation
+- Lessons learned codification
+- Release issue closure
 
-| Section | Content |
-|---------|---------|
-| What Worked Well | Keep doing these |
-| What Could Improve | Process improvements |
-| Suggestions | Specific ideas for next release |
-| Open Questions | Decisions deferred |
-| Follow-up Issues | Create issues for discoveries |
-
-**Important:** Create GitHub issues for any problems discovered. Link them in the retrospective.
-
-#### Codify Lessons Learned
-
-After the retrospective, update `docs/lifecycle/65-lessons-learned.md` with any process improvements. Commit with message: `Update 65-lessons-learned.md with vX.Y lessons`
-
-**Close the release issue only after lessons are codified and committed.** Use `release.sh close --execute` to post a summary comment, close the issue, and clean up state files. The release issue is the record of completion - closing it signals all phases are done.
+**Do not close the release issue from Phase 60.** The release issue closure happens in Phase 70 after the retrospective is complete.
 
 ### Release Sunset (periodic)
 
@@ -541,13 +530,13 @@ Before graduating from pre-release to v1.0.0:
 
 ## Lessons Learned
 
-See [65-lessons-learned.md](65-lessons-learned.md) for accumulated insights from v0.8-v0.19 releases, organized by release and by category.
+See [75-lessons-learned.md](75-lessons-learned.md) for accumulated insights from v0.8-v0.33 releases, organized by release and by category.
 
 **Before each release:** Scan recent lessons to avoid repeating mistakes.
 
-**After each release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`.
+**After each release:** See [70-retrospective.md](70-retrospective.md) for lessons learned codification process.
 
-## Checklist: Release Complete
+## Checklist: Release Complete (Phase 60)
 
 - [ ] Dependency order determined (multi-repo)
 - [ ] Version numbers determined
@@ -557,6 +546,5 @@ See [65-lessons-learned.md](65-lessons-learned.md) for accumulated insights from
 - [ ] Post-release smoke test passed
 - [ ] After Action Report completed
 - [ ] Housekeeping (branch cleanup) completed
-- [ ] Retrospective completed
-- [ ] Lessons learned codified
-- [ ] Release issue closed
+
+**Next:** Proceed to [Phase 70 (Retrospective)](70-retrospective.md) for lessons learned and release issue closure.

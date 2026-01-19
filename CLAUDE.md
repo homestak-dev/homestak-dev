@@ -91,9 +91,22 @@ gita shell make install-deps  # Install deps in all repos
 
 ## Claude Code Skills
 
-| Skill | Description |
-|-------|-------------|
-| `/issues` | Gather GitHub issues across all repos |
+| Skill | Phase | Description |
+|-------|-------|-------------|
+| `/issues` | - | Gather GitHub issues across all repos |
+| `/planning-init` | 10 | Initialize release planning, create issue |
+| `/planning-deps` | 10 | Analyze cross-repo dependencies |
+| `/planning-conflicts` | 10 | Analyze file overlap for branch strategy |
+| `/validate-prereqs` | 40 | Check validation host readiness |
+| `/validate-run` | 40 | Run iac-driver validation scenario |
+| `/merge-pr` | 50 | Create PR with template and linked issues |
+| `/release-preflight` | 60 | Check release prerequisites |
+| `/release-changelog` | 60 | Update CHANGELOGs for release |
+| `/release-validate` | 60 | Run integration tests |
+| `/release-tag` | 60 | Create git tags (human gate) |
+| `/release-publish` | 60 | Create GitHub releases (human gate) |
+| `/release-verify` | 60 | Verify releases and generate AAR |
+| `/release-housekeeping` | 60 | Clean up branches |
 
 ## Value Propositions
 
@@ -360,7 +373,7 @@ The `resume` command outputs:
 
 ### Development Lifecycle
 
-6-phase development process in [docs/lifecycle/](docs/lifecycle/):
+7-phase development process in [docs/lifecycle/](docs/lifecycle/):
 
 | File | Purpose |
 |------|---------|
@@ -370,8 +383,9 @@ The `resume` command outputs:
 | [30-implementation.md](docs/lifecycle/30-implementation.md) | Development, testing, CHANGELOG updates |
 | [40-validation.md](docs/lifecycle/40-validation.md) | Integration testing requirements |
 | [50-merge.md](docs/lifecycle/50-merge.md) | PR process and documentation updates |
-| [60-release.md](docs/lifecycle/60-release.md) | Release coordination, tagging, retrospectives |
-| [65-lessons-learned.md](docs/lifecycle/65-lessons-learned.md) | Accumulated release insights (v0.8-v0.19) |
+| [60-release.md](docs/lifecycle/60-release.md) | Release coordination and tagging |
+| [70-retrospective.md](docs/lifecycle/70-retrospective.md) | Retrospective and lessons learned codification |
+| [75-lessons-learned.md](docs/lifecycle/75-lessons-learned.md) | Accumulated release insights (v0.8-v0.33) |
 
 ### Templates
 
