@@ -1,12 +1,18 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.31. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.32. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.32
+
+- **Git-derived versions eliminate release maintenance** - Using `git describe --tags --abbrev=0` to derive version at runtime means scripts never need VERSION constant updates during releases. Zero maintenance, always accurate. Pattern documented in `docs/CLI-CONVENTIONS.md`.
+- **Pre-existing lint warnings can block new PRs** - Shellcheck warnings in `build.sh` (existing code) blocked the CLI standardization PR even though the new code was clean. Consider adding shellcheck to local dev workflow (`make lint`) to catch issues early.
+- **CHANGELOGs should be in feature PRs** - Updating CHANGELOGs separately during release is error-prone. Include CHANGELOG entries in feature PRs so they're reviewed together and committed atomically.
 
 ## v0.31
 
