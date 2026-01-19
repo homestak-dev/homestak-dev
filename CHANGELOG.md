@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.34 - 2026-01-19
+
+### Theme: Lifecycle Skills
+
 ### Added
 - Add 13 lifecycle skills for planning, validation, merge, and release phases (#129, #130)
   - Planning: `/planning-init`, `/planning-deps`, `/planning-conflicts`
