@@ -50,7 +50,24 @@ Implement changes following:
 - Tests must pass locally before proceeding
 - **Attach test results to the originating issue** as a comment
 
-**Test file conventions:** Follow repository patterns (e.g., `test_*.py`, `*.test.js`)
+**Run tests locally:**
+```bash
+make test  # Run unit tests for the current repo
+make lint  # Run linters (if available)
+```
+
+**Test frameworks by repo:**
+
+| Repo | Framework | Test Command | Location |
+|------|-----------|--------------|----------|
+| packer | bats-core | `make test` | `test/*.bats` |
+| iac-driver | pytest | `make test` | `tests/test_*.py` |
+| bootstrap | bats-core | `make test` | `test/*.bats` |
+| homestak-dev | bats-core | `make test` | `test/*.bats` |
+
+**Test file conventions:** Follow repository patterns (e.g., `test_*.py` for Python, `*.bats` for bash)
+
+**CI enforcement:** Unit tests run automatically on push/PR to master. PRs with failing tests will not pass CI checks.
 
 **Test results reporting:** After tests pass, post a comment on the issue with:
 - Test command run

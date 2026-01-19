@@ -1,12 +1,38 @@
 # Phase: Validation
 
-Validation verifies the implementation through integration testing. This phase applies to all work types, with scope scaled to risk.
+Validation verifies the implementation through testing. This phase applies to all work types, with scope scaled to risk.
+
+## Unit Tests vs Integration Tests
+
+Homestak uses two levels of testing with different purposes and timing:
+
+| Aspect | Unit Tests | Integration Tests |
+|--------|------------|-------------------|
+| **Purpose** | Verify logic in isolation | Verify components work together |
+| **Scope** | Single function/class | Full scenarios (VM lifecycle, playbooks) |
+| **Speed** | Fast (seconds) | Slow (minutes) |
+| **Dependencies** | Mocked | Real infrastructure |
+| **When run** | Every PR (CI) | Pre-release or on-demand |
+| **Location** | `tests/` directory | iac-driver scenarios |
+
+**Unit tests** (`make test` in each repo):
+- Run automatically in CI on every push/PR
+- Must pass before merge
+- Test logic patterns, argument parsing, error handling
+- Use mocks for external dependencies (SSH, tofu, ansible)
+
+**Integration tests** (iac-driver scenarios):
+- Run manually or during release validation
+- Require real PVE infrastructure
+- Test full workflows: provision → boot → verify → destroy
+- Catch issues that unit tests miss (timing, network, API behavior)
 
 ## Inputs
 
 - Completed implementation on feature branch
 - Acceptance criteria
 - Test plan from Design phase
+- Unit tests passing in CI
 - Existing integration test suite
 
 ## Activities
