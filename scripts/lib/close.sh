@@ -99,9 +99,6 @@ close_post_and_close() {
         return 0
     fi
 
-    local comment_cmd="gh issue comment ${issue} --repo homestak-dev/homestak-dev --body \"\$summary\""
-    local close_cmd="gh issue close ${issue} --repo homestak-dev/homestak-dev"
-
     if [[ "$dry_run" == "true" ]]; then
         echo "Would post summary comment to issue #${issue}"
         echo "Would close issue #${issue}"

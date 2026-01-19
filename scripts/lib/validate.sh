@@ -47,7 +47,7 @@ validate_find_latest_report() {
 
     # Find most recent matching report
     local latest
-    latest=$(ls -t "${report_dir}"/*.${pattern}.md 2>/dev/null | head -1)
+    latest=$(find "${report_dir}" -maxdepth 1 -name "*.${pattern}.md" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
     echo "$latest"
 }
 
@@ -316,7 +316,7 @@ run_validation() {
         echo ""
         echo "  Report: ${report_path}"
         # Store relative path from workspace
-        VALIDATION_REPORT="${report_path#${WORKSPACE_DIR}/}"
+        VALIDATION_REPORT="${report_path#"${WORKSPACE_DIR}"/}"
     else
         echo ""
         echo "  Report: (not found)"
@@ -331,5 +331,5 @@ run_validation() {
     fi
 }
 
-# Export the report path variable
-VALIDATION_REPORT=""
+# Export the report path variable for use by callers
+export VALIDATION_REPORT=""

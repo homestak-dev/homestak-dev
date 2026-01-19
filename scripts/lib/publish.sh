@@ -188,7 +188,7 @@ packer_copy_images_local() {
     # Create temp directory for images
     local tmp_dir
     tmp_dir=$(mktemp -d)
-    trap "rm -rf $tmp_dir" EXIT
+    trap 'rm -rf "$tmp_dir"' EXIT
 
     # Download assets from source release
     # Include images (.qcow2) and per-image checksums (.sha256)
@@ -201,10 +201,9 @@ packer_copy_images_local() {
         return 1
     fi
 
-    # Separate images and checksums for logging
-    local images checksums
+    # Separate images for validation
+    local images
     images=$(echo "$assets" | grep '\.qcow2$' || true)
-    checksums=$(echo "$assets" | grep '\.sha256$' || true)
 
     if [[ -z "$images" ]]; then
         log_error "No image files found in source release $source_release"
@@ -254,7 +253,7 @@ packer_copy_images_local() {
     if [[ "$dry_run" != "true" ]]; then
         local img_count checksum_count
         img_count=$(echo "$images" | wc -w)
-        checksum_count=$(ls "$tmp_dir"/*.sha256 2>/dev/null | wc -l || echo "0")
+        checksum_count=$(find "$tmp_dir" -maxdepth 1 -name '*.sha256' 2>/dev/null | wc -l)
         log_success "Copied $img_count images + $checksum_count checksums from $source_release to v${version}"
     fi
 
@@ -474,7 +473,6 @@ publish_ensure_packer_assets() {
     fi
 
     # Copy images using specified workflow
-    local copy_result
     if [[ "$workflow" == "github" ]]; then
         # Use GHA workflow (server-side, faster)
         if packer_dispatch_copy_images "$version" "$source_release" "$dry_run" "true" "600"; then
@@ -543,7 +541,8 @@ publish_update_latest() {
         # Generate checksums if missing
         for img in "$tmp_dir"/*.qcow2; do
             [[ -f "$img" ]] || continue
-            local base=$(basename "$img")
+            local base
+            base=$(basename "$img")
             if [[ ! -f "$tmp_dir/${base}.sha256" ]]; then
                 sha256sum "$img" | awk '{print $1}' > "$tmp_dir/${base}.sha256"
             fi
