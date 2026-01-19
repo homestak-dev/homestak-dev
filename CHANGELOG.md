@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.33 - 2026-01-19
+
 ### Theme: Unit Testing
 
 ### Changed
