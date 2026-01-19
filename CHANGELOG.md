@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.31 - 2026-01-19
+
+### Theme: Code Quality
+
 ### Changed
 - Require `--issue N` for `release.sh init` (#114)
   - Release issue is now required by default
