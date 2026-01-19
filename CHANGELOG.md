@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.35 - 2026-01-19
+
+### Theme: release.sh unit test bug fix, shellcheck dependency
+
 ### Fixed
 - Fix failing release.sh bats tests - add `--no-issue` flag to tests (#133)
 - Fix shellcheck warnings in release.sh scripts (#138)
