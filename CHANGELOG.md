@@ -3,10 +3,22 @@
 ## Unreleased
 
 ### Added
+- Add 13 lifecycle skills for planning, validation, merge, and release phases (#129, #130)
+  - Planning: `/planning-init`, `/planning-deps`, `/planning-conflicts`
+  - Validation: `/validate-prereqs`, `/validate-run`
+  - Merge: `/merge-pr`
+  - Release: `/release-preflight`, `/release-changelog`, `/release-validate`, `/release-tag`, `/release-publish`, `/release-verify`, `/release-housekeeping`
+- Create `docs/lifecycle/70-retrospective.md` separating Retrospective from Release phase (#129)
 - Document merge strategy convention (#127)
   - Add "Merge Strategy" section to `docs/lifecycle/50-merge.md`
   - Add merge method settings to `docs/REPO-SETTINGS.md`
   - Default: squash merge; merge commits for well-structured PRs
+
+### Changed
+- Rename `65-lessons-learned.md` to `75-lessons-learned.md` to follow new phase 70 (#129)
+- Update `60-release.md` to end at Phase 9, reference Phase 70 for retrospective (#129)
+- Update `00-overview.md` with 7-phase lifecycle matrix (#129)
+- Update skills table in CLAUDE.md and README.md with new skills (#129, #130)
 
 ## v0.33 - 2026-01-19
 
