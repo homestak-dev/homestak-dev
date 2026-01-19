@@ -159,11 +159,20 @@ gh api repos/homestak-dev/NEW_REPO/vulnerability-alerts -X PUT
 
 | Setting | Value | Notes |
 |---------|-------|-------|
+| Allow squash merging | Enabled | Default merge method |
+| Allow merge commits | Enabled | For well-structured PRs |
+| Allow rebase merging | Disabled | Avoid history complications |
+| Default merge method | Squash | Matches [50-merge.md](lifecycle/50-merge.md) guidance |
 | Auto-delete head branches | Enabled | Prevents stale branch accumulation (v0.21+) |
 
-**CLI to enable:**
+**CLI to configure merge methods:**
 ```bash
-gh api -X PATCH repos/homestak-dev/REPO_NAME -f delete_branch_on_merge=true
+gh api -X PATCH repos/homestak-dev/REPO_NAME \
+  -f allow_squash_merge=true \
+  -f allow_merge_commit=true \
+  -f allow_rebase_merge=false \
+  -f squash_merge_commit_title=PR_TITLE \
+  -f delete_branch_on_merge=true
 ```
 
 ## Current Repository Settings
