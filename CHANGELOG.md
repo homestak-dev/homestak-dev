@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Fixed
+- Fix failing release.sh bats tests - add `--no-issue` flag to tests (#133)
+- Fix shellcheck warnings in release.sh scripts (#138)
+  - Remove unused variables (BOLD, checksums, copy_result, tag_results, asset_results)
+  - Use variable instead of sed for simple substitutions
+  - Declare and assign separately to avoid masking return values
+  - Use single quotes in trap to prevent early expansion
+  - Use `find` instead of `ls` for reliable file listing
+  - Use `grep -c` instead of `grep | wc -l`
+
+### Added
+- Add shellcheck and bats to `make install-deps` (requires sudo) (#134)
+
 ## v0.34 - 2026-01-19
 
 ### Theme: Lifecycle Skills

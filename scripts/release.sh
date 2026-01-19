@@ -41,7 +41,6 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 log_info() {
@@ -1439,7 +1438,7 @@ cmd_sunset() {
 
     # Parse version for comparison (e.g., "0.20" -> 20 for v0.x series)
     local below_minor
-    below_minor=$(echo "$below_version" | sed 's/^0\.//')
+    below_minor="${below_version#0.}"
 
     local total_deleted=0
     local repos_with_deletions=()
@@ -1584,12 +1583,13 @@ cmd_selftest() {
     run_test() {
         local name="$1"
         shift
-        local description="$1"
+        local desc="$1"
         shift
 
         echo -n "  Testing $name... "
         if [[ "$verbose" == "true" ]]; then
             echo ""
+            echo "    Description: $desc"
             echo "    Command: $*"
         fi
 

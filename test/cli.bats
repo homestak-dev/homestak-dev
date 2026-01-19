@@ -58,7 +58,7 @@ teardown() {
 }
 
 @test "init with version creates state file" {
-    run "$RELEASE_SH" init --version 0.99
+    run "$RELEASE_SH" init --version 0.99 --no-issue
     [ "$status" -eq 0 ]
     assert_file_exists "$STATE_FILE"
 }
@@ -70,9 +70,9 @@ teardown() {
 }
 
 @test "init fails if release already in progress" {
-    "$RELEASE_SH" init --version 0.99
+    "$RELEASE_SH" init --version 0.99 --no-issue
 
-    run "$RELEASE_SH" init --version 0.100
+    run "$RELEASE_SH" init --version 0.100 --no-issue
     [ "$status" -eq 1 ]
     assert_output_contains "already in progress"
 }
@@ -88,7 +88,7 @@ teardown() {
 }
 
 @test "status shows release info" {
-    "$RELEASE_SH" init --version 0.99
+    "$RELEASE_SH" init --version 0.99 --no-issue
 
     run "$RELEASE_SH" status
     [ "$status" -eq 0 ]
@@ -110,7 +110,7 @@ teardown() {
 # -----------------------------------------------------------------------------
 
 @test "audit shows entries after init" {
-    "$RELEASE_SH" init --version 0.99
+    "$RELEASE_SH" init --version 0.99 --no-issue
 
     run "$RELEASE_SH" audit
     [ "$status" -eq 0 ]
@@ -119,7 +119,7 @@ teardown() {
 }
 
 @test "audit --lines limits output" {
-    "$RELEASE_SH" init --version 0.99
+    "$RELEASE_SH" init --version 0.99 --no-issue
 
     run "$RELEASE_SH" audit --lines 5
     [ "$status" -eq 0 ]

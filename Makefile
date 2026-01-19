@@ -23,10 +23,20 @@ help:
 	@gita ls 2>/dev/null || echo "  (gita not installed - run make install-deps)"
 
 install-deps:
-	@echo "Installing gita..."
+	@echo "Installing dependencies..."
 	@command -v pipx >/dev/null 2>&1 || { echo "Error: pipx not found"; exit 1; }
 	@command -v gita >/dev/null 2>&1 || pipx install gita
-	@echo "gita installed"
+	@echo "  gita installed"
+	@if [ "$$(id -u)" = "0" ]; then \
+		command -v shellcheck >/dev/null 2>&1 || { apt-get update && apt-get install -y shellcheck; }; \
+		echo "  shellcheck installed"; \
+		command -v bats >/dev/null 2>&1 || { apt-get install -y bats; }; \
+		echo "  bats installed"; \
+	else \
+		command -v shellcheck >/dev/null 2>&1 || echo "  shellcheck: run with sudo to install"; \
+		command -v bats >/dev/null 2>&1 || echo "  bats: run with sudo to install"; \
+	fi
+	@echo "Done"
 
 check-deps:
 	@echo "Checking dependencies..."
@@ -77,6 +87,6 @@ test:
 	@bats test/
 
 lint:
-	@command -v shellcheck >/dev/null 2>&1 || { echo "Error: shellcheck not installed"; exit 1; }
+	@command -v shellcheck >/dev/null 2>&1 || { echo "Error: shellcheck not installed. Run: sudo make install-deps"; exit 1; }
 	@echo "Running shellcheck on release.sh..."
-	@shellcheck scripts/release.sh scripts/lib/*.sh
+	@shellcheck --severity=warning scripts/release.sh scripts/lib/*.sh

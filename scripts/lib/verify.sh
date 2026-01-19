@@ -133,9 +133,7 @@ run_verify() {
     local json_output="${2:-false}"
 
     local all_passed=true
-    local tag_results=()
     local release_results=()
-    local asset_results=()
 
     # Check tags exist
     local tag_check
@@ -260,7 +258,7 @@ EOF
                     echo -e "    ${GREEN}✓${NC} $expected"
                 elif echo "$assets" | grep -q "^${expected}\.part"; then
                     local parts
-                    parts=$(echo "$assets" | grep "^${expected}\.part" | wc -l)
+                    parts=$(echo "$assets" | grep -c "^${expected}\.part")
                     echo -e "    ${GREEN}✓${NC} $expected (${parts} parts)"
                 fi
             done
@@ -272,7 +270,7 @@ EOF
                     echo -e "    ${GREEN}✓${NC} $expected"
                 elif echo "$assets" | grep -q "^${expected}\.part"; then
                     local parts
-                    parts=$(echo "$assets" | grep "^${expected}\.part" | wc -l)
+                    parts=$(echo "$assets" | grep -c "^${expected}\.part")
                     echo -e "    ${GREEN}✓${NC} $expected (${parts} parts)"
                 else
                     echo -e "    ${RED}✗${NC} Missing: $expected"

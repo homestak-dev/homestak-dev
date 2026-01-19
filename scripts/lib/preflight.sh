@@ -145,13 +145,15 @@ preflight_check_provider_cache() {
 
     for state_dir in "$states_dir"/*/; do
         [[ -d "$state_dir" ]] || continue
-        local state_name=$(basename "$state_dir")
+        local state_name
+        state_name=$(basename "$state_dir")
         local provider_path="${state_dir}data/providers/${provider_base}"
 
         if [[ -d "$provider_path" ]]; then
             for version_dir in "$provider_path"/*/; do
                 [[ -d "$version_dir" ]] || continue
-                local cached_version=$(basename "$version_dir")
+                local cached_version
+                cached_version=$(basename "$version_dir")
                 if [[ "$cached_version" != "$lockfile_version" ]]; then
                     stale_caches+=("${state_name}:${cached_version}")
                 fi
