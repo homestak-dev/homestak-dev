@@ -20,6 +20,11 @@ set -euo pipefail
 # Configuration
 # -----------------------------------------------------------------------------
 
+# Git-derived version (do not use hardcoded VERSION constant)
+get_version() {
+    git -C "$(dirname "${BASH_SOURCE[0]}")" describe --tags --abbrev=0 2>/dev/null || echo "dev"
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_DIR="${WORKSPACE_DIR:-$(dirname "$SCRIPT_DIR")}"
 STATE_FILE="${STATE_FILE:-${WORKSPACE_DIR}/.release-state.json}"
@@ -192,13 +197,36 @@ cmd_init() {
 }
 
 cmd_status() {
+    local json_output=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --json)
+                json_output=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
     if ! state_exists; then
+        if [[ "$json_output" == "true" ]]; then
+            echo '{"status": "no_release", "message": "No release in progress"}'
+            exit 0
+        fi
         log_info "No release in progress"
         log_info "Start with: release.sh init --version X.Y"
         exit 0
     fi
 
     if ! state_validate; then
+        if [[ "$json_output" == "true" ]]; then
+            echo '{"status": "error", "message": "State file is corrupted"}'
+            exit 3
+        fi
         log_error "State file is corrupted"
         exit 3
     fi
@@ -208,6 +236,50 @@ cmd_status() {
     status=$(state_get_status)
     started_at=$(state_read '.release.started_at')
     issue=$(state_get_issue)
+
+    if [[ "$json_output" == "true" ]]; then
+        # Build JSON output
+        local phases_json="{"
+        local first=true
+        for phase in preflight validation tags releases verification; do
+            local phase_status
+            phase_status=$(state_get_phase_status "$phase")
+            if [[ "$first" == "true" ]]; then
+                first=false
+            else
+                phases_json+=","
+            fi
+            phases_json+="\"${phase}\":\"${phase_status:-pending}\""
+        done
+        phases_json+="}"
+
+        local repos_json="{"
+        first=true
+        for repo in "${REPOS[@]}"; do
+            local tag_status release_status
+            tag_status=$(state_get_repo_field "$repo" "tag")
+            release_status=$(state_get_repo_field "$repo" "release")
+            if [[ "$first" == "true" ]]; then
+                first=false
+            else
+                repos_json+=","
+            fi
+            repos_json+="\"${repo}\":{\"tag\":\"${tag_status:-pending}\",\"release\":\"${release_status:-pending}\"}"
+        done
+        repos_json+="}"
+
+        cat << EOF
+{
+  "status": "${status}",
+  "version": "${version}",
+  "issue": ${issue:-null},
+  "started_at": "${started_at}",
+  "phases": ${phases_json},
+  "repos": ${repos_json}
+}
+EOF
+        exit 0
+    fi
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
@@ -1640,8 +1712,8 @@ cmd_selftest() {
 }
 
 cmd_help() {
-    cat << 'EOF'
-release.sh - homestak-dev release automation CLI
+    cat << EOF
+release.sh $(get_version) - homestak-dev release automation CLI
 
 Usage:
   release.sh <command> [options]
@@ -1664,6 +1736,8 @@ Commands:
   audit         Show audit log
 
 Options:
+  --help, -h         Show this help message
+  --version          Show CLI version (use as first argument)
   --version X.Y      Release version (required for init)
   --issue N          GitHub issue to track release progress (required for init)
   --no-issue         Skip issue requirement for hotfix releases (init only)
@@ -1684,6 +1758,7 @@ Options:
   --timeout N        Workflow wait timeout in seconds (default: 600)
   --lines N          Number of audit log lines to show (default: 20)
   --below-version    Delete releases below this version (sunset only)
+  --json             Machine-readable JSON output (status, verify, preflight)
 
 Examples:
   release.sh init --version 0.31 --issue 115
@@ -1729,6 +1804,9 @@ Examples:
   release.sh sunset --below-version 0.20 --dry-run
   release.sh sunset --below-version 0.20 --execute
   release.sh audit --lines 50
+  release.sh --version                             # Show CLI version
+  release.sh status --json                         # Machine-readable status
+  release.sh verify --json                         # Machine-readable verification
 
 State Files:
   .release-state.json   Release progress state
@@ -1799,6 +1877,9 @@ main() {
             ;;
         help|--help|-h)
             cmd_help
+            ;;
+        --version)
+            echo "release.sh $(get_version)"
             ;;
         *)
             log_error "Unknown command: $command"
