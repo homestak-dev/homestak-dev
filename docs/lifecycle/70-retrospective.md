@@ -23,7 +23,17 @@ This separation enables automation of Release activities while preserving human 
 > **CHECKPOINT: Phase 60 Complete**
 > Before proceeding, verify: Housekeeping completed, stale branches cleaned up, AAR posted to release issue.
 
-**Complete same day as release.** Use the [Retrospective Template](../templates/retrospective.md) to document:
+**Complete same day as release.**
+
+**AI-Assisted Retrospective:** When working with Claude, request a draft retrospective first. Claude should:
+1. Review the release issue comments, AAR, and audit log
+2. Identify what worked well and what could improve
+3. Present a draft for user review and additions
+4. User adds their own observations and approves final version
+
+This ensures retrospectives are completed even when time is short, while preserving human judgment.
+
+Use the [Retrospective Template](../templates/retrospective.md) to document:
 
 | Section | Content |
 |---------|---------|

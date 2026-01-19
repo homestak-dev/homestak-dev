@@ -398,9 +398,20 @@ After completing Phase 9, proceed to [70-retrospective.md](70-retrospective.md) 
 
 Legacy releases accumulate over time. Periodically clean up old releases to reduce clutter while preserving recent history.
 
-**Retention policy:** Keep 3 most recent releases (currently v0.21+).
+**Retention policy:** Keep 5 most recent releases.
 
-**When to run:** Periodically (every few releases), not after each release.
+**When to run:** When total release count exceeds 5. After each release, check and prompt:
+
+```bash
+# Check total release count
+count=$(gh release list --repo homestak-dev/homestak-dev --limit 100 | wc -l)
+if [[ $count -gt 5 ]]; then
+  echo "⚠️ $count releases found. Consider running sunset to maintain 5-release retention."
+  echo "   ./scripts/release.sh sunset --below-version X.Y --dry-run"
+fi
+```
+
+**AI-assisted releases:** Claude should check release count after verification and prompt user to prune if count exceeds 5.
 
 ```bash
 # Preview what would be deleted
