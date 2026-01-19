@@ -1,12 +1,17 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.29. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.31. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.31
+
+- **50-merge.md applies to direct master commits** - Even without PRs, the merge phase checklist (commits, pushes, CHANGELOGs) must be completed before tagging. The user catching uncommitted changes before proceeding to tags prevented a process error.
+- **Quality-focused releases are efficient** - Testing infrastructure is inherently testable - low risk, fast validation. The entire release completed in ~30 minutes with 5 scope items.
 
 ## v0.30
 
