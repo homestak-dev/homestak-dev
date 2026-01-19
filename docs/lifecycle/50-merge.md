@@ -93,7 +93,19 @@ PR requires human action:
 - Review test coverage
 - Review documentation updates
 - Approve PR
-- Merge PR (squash or merge per repo convention)
+- Merge PR (see Merge Strategy below)
+
+### Merge Strategy
+
+| PR Type | Strategy | Rationale |
+|---------|----------|-----------|
+| Most PRs | **Squash** | Clean history, one logical change per merge |
+| Well-structured multi-commit PRs | **Merge commit** | Preserves meaningful commit breakdown |
+| Rebase | **Avoid** | Complicates history for reviewers |
+
+**Default: Squash merge.** Use merge commits only when the PR has intentionally structured commits that tell a story (e.g., "refactor X", then "add Y", then "update tests").
+
+**Single-commit PRs:** Either method produces the same result; squash is fine.
 
 ### 6. Post-Merge Verification
 

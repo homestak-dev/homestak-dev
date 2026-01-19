@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+- Document merge strategy convention (#127)
+  - Add "Merge Strategy" section to `docs/lifecycle/50-merge.md`
+  - Add merge method settings to `docs/REPO-SETTINGS.md`
+  - Default: squash merge; merge commits for well-structured PRs
+
 ## v0.33 - 2026-01-19
 
 ### Theme: Unit Testing
