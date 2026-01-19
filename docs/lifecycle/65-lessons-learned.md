@@ -1,12 +1,19 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.32. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.33. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `Update 65-lessons-learned.md with vX.Y lessons`
+
+## v0.33
+
+- **Two-phase CHANGELOG workflow** - Add entries under "Unreleased" during Implementation phase (30-implementation.md). Add version header (`## vX.Y - YYYY-MM-DD`) during Release Phase 2. This keeps feature changes with their PRs while deferring version assignment to release time.
+- **Mark infrastructure tests for CI exclusion** - Tests requiring site-config, configured hosts, or API access should use a marker (e.g., `@requires_infrastructure` for pytest) and be excluded in CI via `-m "not requires_infrastructure"`. This enables comprehensive local testing while keeping CI green.
+- **Don't auto-close release issues from scope PRs** - PR descriptions with "Closes #N" can prematurely close the release planning issue when the PR is for scope items, not the release itself. Keep release issue references separate from scope PR descriptions.
+- **Verify GitHub Action versions exist** - Action versions like `actions/checkout@v6` may not exist yet. Always verify current versions at github.com/actions/{name}/releases before using in CI workflows. At time of v0.33: checkout@v4, setup-python@v5.
 
 ## v0.32
 
@@ -175,6 +182,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.32. Each lesson was codi
 For quick reference, lessons grouped by theme:
 
 ### Validation & Testing
+- Mark infrastructure tests for CI exclusion (v0.33)
 - Validation as hard gate confirmed (v0.21)
 - Validate optimizations before merging (v0.19)
 - Test the actual CLI flow end-to-end (v0.18)
@@ -184,6 +192,8 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Two-phase CHANGELOG workflow (v0.33)
+- Don't auto-close release issues from scope PRs (v0.33)
 - Closing before retrospective: third occurrence (v0.29)
 - Passive checklists don't prevent skipped phases (v0.27)
 - CLI-only releases can skip validation (v0.27)
@@ -214,6 +224,7 @@ For quick reference, lessons grouped by theme:
 - Packer images required for unified release (v0.15)
 
 ### Technical Gotchas
+- Verify GitHub Action versions exist (v0.33)
 - FHS installations require sudo for scenarios (v0.29)
 - Legacy path migration requires fresh bootstrap (v0.29)
 - Clean temp files between validation runs (v0.29)
