@@ -60,6 +60,7 @@ A well-maintained CLAUDE.md accelerates onboarding for both humans and AI.
 | Obvious statements | "src/ contains source code" adds no value |
 | Hardcoded versions | Use "current" or omit; versions go stale |
 | Excessive detail | Enough to orient, not to replace reading code |
+| Real IP addresses in examples | Use TEST-NET-1 (192.0.2.0/24) per RFC 5737 |
 
 ## Section Headers (Standardized)
 
@@ -169,6 +170,24 @@ src/
 - OpenTofu (current stable)
 - Ansible (installed via make install-deps)
 ```
+
+### Avoid: Real IP addresses in examples
+
+```markdown
+## Example
+
+HOMESTAK_SOURCE=http://10.0.12.61:8000 ./install.sh
+```
+
+*Why to avoid:* Leaks infrastructure details, may confuse readers who try to use them. Better:
+
+```markdown
+## Example
+
+HOMESTAK_SOURCE=http://192.0.2.1:8000 ./install.sh
+```
+
+Use RFC 5737 TEST-NET-1 (192.0.2.0/24) for IPv4 examples. For documentation that needs multiple addresses, also available: TEST-NET-2 (198.51.100.0/24) and TEST-NET-3 (203.0.113.0/24).
 
 ## PR Checklist
 
