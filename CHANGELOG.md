@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## v0.37 - 2026-01-20
+
+### Theme: Recursive PVE Phase 1 Features
+
+Foundation for recursive PVE architecture: source-agnostic bootstrap and HTTP server helper for dev workflows.
+
+### Added
+- HTTP server helper for dev workflows (iac-driver#110)
+  - `serve-repos.sh` creates bare repos with `_working` branch containing uncommitted changes
+  - `--serve-repos` flag in run.sh manages server lifecycle
+- Source-agnostic bootstrap (bootstrap#25)
+  - `--source` and `--ref` flags for flexible installation sources
+  - Support for github, http://, and file:// sources
+
 ## v0.35 - 2026-01-19
 
 ### Theme: release.sh unit test bug fix, shellcheck dependency
