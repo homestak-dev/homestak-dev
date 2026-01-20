@@ -114,6 +114,17 @@ After merge:
 - Confirm changes appear as expected
 - Delete feature branch (optional, per convention)
 
+### 7. Prepare for Release Phase
+
+Before proceeding to Release (Phase 60):
+
+**Context management:** Run `/compact` to free context for release activities. Release operations are tool-heavy (preflight, validation, tagging, publishing) and generate significant output. Compacting after Merge provides a clean context boundary.
+
+**When to compact:**
+- After all sprint PRs are merged
+- Before invoking `/release-preflight`
+- Especially important for multi-repo releases
+
 ## PR Checklist (Copy to PR)
 
 ```markdown
