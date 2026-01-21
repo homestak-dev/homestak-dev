@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- Preflight now auto-decrypts secrets.yaml when secrets.yaml.enc exists (#140)
+
 ### Documentation
 - Add explicit post-merge sync step to 50-merge.md (lesson from v0.35, v0.37)
 - Add explicit release.sh init step to 60-release.md Phase 1 (lesson from v0.37)
