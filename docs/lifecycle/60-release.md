@@ -86,9 +86,22 @@ Before starting release work:
 > **CHECKPOINT: Phase 0 Complete**
 > Before proceeding, verify: Release plan reviewed, checklists current, no prerequisite releases pending.
 
-- [ ] **Identify release tracking issue** (e.g., homestak-dev#XX)
-  - Look for open issues titled "vX.Y Release Planning" or labeled `release`
-  - Include `--issue XX` when running `release.sh init`
+#### Step 1: Initialize Release State (FIRST)
+
+**Run `release.sh init` as the very first step**, before any other preflight checks:
+
+```bash
+# Identify the release tracking issue first
+gh issue list --repo homestak-dev/homestak-dev --label release --state open
+
+# Initialize release state (required before preflight)
+./scripts/release.sh init --version X.Y --issue N
+```
+
+**Why init must come first:** The state file (`.release-state.json`) tracks validation status and enables phase gating. Running init mid-release causes "validation not complete" errors even when tests passed. This has caused confusion in multiple releases (v0.37).
+
+#### Step 2: Pre-flight Checks
+
 - [ ] Git fetch on all repos (avoid rebase surprises)
 - [ ] All PRs merged to main branches
 - [ ] Working trees clean (`git status` on all repos)
