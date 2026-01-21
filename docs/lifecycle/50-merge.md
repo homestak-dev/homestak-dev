@@ -112,7 +112,15 @@ PR requires human action:
 After merge:
 - Verify `master` branch CI passes
 - Confirm changes appear as expected
+- **Sync local branch to origin** (required after squash merge):
+  ```bash
+  git fetch origin
+  git checkout master
+  git reset --hard origin/master
+  ```
 - Delete feature branch (optional, per convention)
+
+**Why sync is required:** After GitHub squash-merges a PR, the local `master` branch diverges from `origin/master` because the merge commit SHA differs from local commits. Without `git reset --hard`, subsequent operations (especially during release) will show the branch as "ahead" even though content is identical. This has caused confusion in multiple releases (v0.35, v0.37).
 
 ### 7. Prepare for Release Phase
 
@@ -196,3 +204,4 @@ When reviewing:
 - [ ] Human reviewed and approved
 - [ ] PR merged
 - [ ] Post-merge CI verified
+- [ ] Local master synced (`git reset --hard origin/master`)

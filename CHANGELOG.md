@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Documentation
+- Add explicit post-merge sync step to 50-merge.md (lesson from v0.35, v0.37)
+
 ## v0.37 - 2026-01-20
 
 ### Theme: Recursive PVE Phase 1 Features
