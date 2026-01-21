@@ -89,6 +89,7 @@ This creates an audit trail and demonstrates that testing was completed.
 - Use correct verb (Add, Fix, Change, Remove)
 - Reference issue number
 - Place under `## Unreleased` section
+- **Do NOT add version headers** (`## vX.Y - YYYY-MM-DD`) - those are added during [Release Phase 2](60-release.md#phase-2-changelogs)
 
 ```markdown
 ## Unreleased
