@@ -109,11 +109,30 @@ preflight_check_gh_auth() {
 
 preflight_check_secrets() {
     local secrets_file="${WORKSPACE_DIR}/site-config/secrets.yaml"
+    local encrypted_file="${WORKSPACE_DIR}/site-config/secrets.yaml.enc"
 
-    if [[ ! -f "$secrets_file" ]]; then
-        echo "missing"
-    else
+    # Fast path: already decrypted
+    if [[ -f "$secrets_file" ]]; then
         echo "decrypted"
+        return
+    fi
+
+    # Check if encrypted file exists
+    if [[ ! -f "$encrypted_file" ]]; then
+        echo "missing"
+        return
+    fi
+
+    # Attempt auto-decrypt
+    if make -C "${WORKSPACE_DIR}/site-config" decrypt &>/dev/null; then
+        # Verify decryption succeeded
+        if [[ -f "$secrets_file" ]]; then
+            echo "auto_decrypted"
+        else
+            echo "decrypt_failed"
+        fi
+    else
+        echo "decrypt_failed"
     fi
 }
 
@@ -426,10 +445,13 @@ run_preflight() {
     local secrets_status
     secrets_status=$(preflight_check_secrets)
 
-    if [[ "$secrets_status" == "missing" ]]; then
+    if [[ "$secrets_status" == "missing" || "$secrets_status" == "decrypt_failed" ]]; then
         if [[ "$json_output" != "true" ]]; then
-            log_error "Site-config secrets not decrypted"
-            log_error "Run: cd site-config && make decrypt"
+            if [[ "$secrets_status" == "missing" ]]; then
+                log_error "Site-config secrets.yaml.enc not found"
+            else
+                log_error "Site-config secrets decrypt failed (check age key)"
+            fi
         fi
         all_passed=false
     fi
@@ -619,11 +641,23 @@ EOF
 
         echo ""
         echo "Secrets:"
-        if [[ "$secrets_status" == "decrypted" ]]; then
-            echo -e "  ${GREEN}✓${NC} site-config/secrets.yaml present"
-        else
-            echo -e "  ${RED}✗${NC} site-config/secrets.yaml missing (run: cd site-config && make decrypt)"
-        fi
+        case "$secrets_status" in
+            decrypted)
+                echo -e "  ${GREEN}✓${NC} site-config/secrets.yaml present"
+                ;;
+            auto_decrypted)
+                echo -e "  ${GREEN}✓${NC} site-config/secrets.yaml auto-decrypted"
+                ;;
+            decrypt_failed)
+                echo -e "  ${RED}✗${NC} site-config/secrets.yaml decrypt failed (check age key)"
+                ;;
+            missing)
+                echo -e "  ${RED}✗${NC} site-config/secrets.yaml.enc not found"
+                ;;
+            *)
+                echo -e "  ${RED}✗${NC} site-config/secrets.yaml status unknown"
+                ;;
+        esac
 
         echo ""
         echo "Provider Cache:"
