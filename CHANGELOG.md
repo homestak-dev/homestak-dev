@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.38 - 2026-01-21
+
 ### Changed
 - Preflight now auto-decrypts secrets.yaml when secrets.yaml.enc exists (#140)
 
