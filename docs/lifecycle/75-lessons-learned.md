@@ -1,12 +1,17 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.33. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.37. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.37
+
+- **Sync local branches after squash-merge** - After GitHub squash-merges a PR, local feature branches diverge because the merge commit SHA differs from the local branch. Run `git reset --hard origin/master` immediately after merge to avoid branch state confusion during release. This was the third occurrence of this friction point.
+- **Initialize release state at phase start** - Run `release.sh init --version X.Y --issue N` as the very first step of the release phase, before preflight. The state file tracks validation status and enables phase gating. Running init mid-release causes "validation not complete" errors even when tests passed.
 
 ## v0.33
 
