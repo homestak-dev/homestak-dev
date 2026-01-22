@@ -1,12 +1,20 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.37. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.39. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.39
+
+- **Base64 encoding for SSH scripts** - Complex Python scripts passed through SSH need base64 encoding to avoid shell quoting issues. Heredocs and escaping fail with certain content (like SSH key material). Pattern: `echo '<base64>' | base64 -d | python3 -`.
+- **Provider lockfile caching in iac-driver** - The `.states/{env}-{node}/data/` directories cache tofu provider lockfiles. When provider version constraints change (e.g., Dependabot PRs), stale lockfiles cause validation failures. Clear state directories or add preflight check for version mismatches.
+- **Multi-level SSH key injection** - Each nesting level in recursive scenarios needs both the outer host's SSH key AND its own key injected into secrets.yaml. The outer key enables jump chains; the inner key enables the level to SSH to VMs it creates.
+- **GitHub issue auto-close limitations** - Multiple "Closes #N" references on the same line in commit messages may not auto-close all issues. Use separate lines or close manually after merge.
+- **Verify all PR merges before release** - Check each repo explicitly when multiple PRs are in flight. Easy to miss one (tofu#32 was missed in v0.39) when moving quickly through multi-repo releases.
 
 ## v0.37
 
