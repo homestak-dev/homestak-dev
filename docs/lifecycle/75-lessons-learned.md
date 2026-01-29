@@ -8,6 +8,14 @@ Accumulated insights from homestak-dev releases v0.8-v0.39. Each lesson was codi
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
 
+## v0.40
+
+- **Integration boundary blindness** - Design focused on new code (manifests, recursive actions) but didn't trace execution through existing subsystems. The nested-pve ansible role hardcodes `/opt/homestak/` but FHS installations use `/usr/local/etc/homestak/`. This blocked n3-full validation. Added "Integration Boundary Analysis" section to 20-design.md with explicit tracing checklist.
+- **Known constraints not applied** - We knew GitHub has a 2GB file limit and that debian-13-pve.qcow2 is ~6GB (that's why we split it). But `DownloadGitHubReleaseAction` wasn't audited for this constraint. Added "Known Constraints Registry" to 20-design.md.
+- **N+1 analysis principle** - "It works for N=2" doesn't mean "it works for N=3". Each additional nesting level can surface path, memory, or timeout issues not visible at lower depths. Added "N+1 Analysis" section to 20-design.md.
+- **Audit existing components for new use cases** - When reusing existing actions/roles in new contexts, explicitly audit their assumptions. The download action assumed single files; split file support had to be added mid-release.
+- **Stabilization releases must deliver core functionality** - A release themed "stabilization" that can't run its headline feature (n3-full) is a planning failure. Either scope appropriately or ensure blockers are identified in design.
+
 ## v0.39
 
 - **Base64 encoding for SSH scripts** - Complex Python scripts passed through SSH need base64 encoding to avoid shell quoting issues. Heredocs and escaping fail with certain content (like SSH key material). Pattern: `echo '<base64>' | base64 -d | python3 -`.
@@ -259,6 +267,11 @@ For quick reference, lessons grouped by theme:
 - GitHub 2GB release asset limit (v0.9)
 
 ### Planning & Design
+- Integration boundary blindness (v0.40)
+- Known constraints not applied (v0.40)
+- N+1 analysis principle (v0.40)
+- Audit existing components for new use cases (v0.40)
+- Stabilization releases must deliver core functionality (v0.40)
 - Design-first for complex features (v0.14)
 - Plan discussions surface design decisions (v0.12)
 - Dogfooding validates design (v0.14)

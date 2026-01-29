@@ -104,6 +104,84 @@ Use the [Design Summary Template](../templates/design-summary.md) for structured
 | **Error handling** | What happens when things go wrong? |
 | **Configuration** | Does this need to be configurable, or should it just work? |
 
+### Integration Boundary Analysis
+
+When a feature spans multiple components or repos, trace the data and control flow explicitly.
+
+**Boundary Tracing Checklist:**
+
+| Question | Example |
+|----------|---------|
+| What data crosses component boundaries? | Config files, secrets, SSH keys |
+| What paths are used at each stage? | `/opt/homestak/` vs `/usr/local/etc/homestak/` |
+| What assumptions does each component make? | "site-config is a sibling directory" |
+| What happens at N+1 depth/scale? | Inner PVE runs tofu - where does it find envs? |
+
+**Diagram the flow:**
+```
+Outer Host                    Inner PVE                     Leaf VM
+┌──────────┐                  ┌──────────┐                  ┌──────────┐
+│ run.sh   │ ──SSH+rsync───▶  │ site-cfg │ ──tofu apply──▶ │ created  │
+│ site-cfg │                  │ (where?) │                  │          │
+└──────────┘                  └──────────┘                  └──────────┘
+```
+
+For recursive/nested scenarios, answer: "When level N runs a command, what paths does it use, and do those paths exist?"
+
+### Path Mode Verification
+
+Any feature running on bootstrapped hosts must work with both installation modes:
+
+| Mode | Code Path | Config Path |
+|------|-----------|-------------|
+| Legacy | `/opt/homestak/` | `/opt/homestak/site-config/` |
+| FHS | `/usr/local/lib/homestak/` | `/usr/local/etc/homestak/` |
+
+**Checklist:**
+- [ ] Does new code hardcode paths? If so, does it check both locations?
+- [ ] Do ansible roles/playbooks use variables for paths, not hardcoded strings?
+- [ ] For recursive scenarios: does the inner level use the same path mode as outer?
+- [ ] Test on both a legacy install AND an FHS install if possible
+
+### Known Constraints Registry
+
+Review these constraints during design - they're easy to forget:
+
+| Constraint | Limit | Impact |
+|------------|-------|--------|
+| GitHub release file size | 2 GB | Large images must be split (`.partaa`, `.partab`) |
+| Nested virt memory | 8GB → 4GB practical | Each nesting level reduces available RAM |
+| PVE API rate limits | Varies | Polling loops need reasonable intervals |
+| SSH connection timeout | 60s default | Long operations need explicit timeout |
+| Cloud-init user-data | 16 KB typical | Large scripts should be fetched, not inline |
+
+**When designing, ask:** "Does this feature interact with any known constraints?"
+
+### N+1 Analysis
+
+If a feature works at scale N, explicitly analyze N+1:
+
+| Current | N+1 Question |
+|---------|--------------|
+| 2-level nesting works | What breaks at 3 levels? Memory? Paths? Timeouts? |
+| Single VM deployment | What if deploying 5 VMs? 10? Parallel or sequential? |
+| One host validation | What if validating across 2 hosts simultaneously? |
+
+**Document what breaks at N+1** even if N+1 isn't in scope - it informs future work.
+
+### Existing Component Audit
+
+When a feature uses existing actions/roles/modules, audit them for compatibility:
+
+| Question | Why It Matters |
+|----------|----------------|
+| What inputs does it expect? | New use case may provide different inputs |
+| What assumptions does it make? | File exists, service running, path accessible |
+| What are its failure modes? | Does it fail gracefully or crash? |
+| When was it last tested? | Old code may have undiscovered issues |
+
+**Example (v0.40):** `DownloadGitHubReleaseAction` assumed single-file downloads. When used for `debian-13-pve.qcow2` (6GB, split into parts), it 404'd. An audit would have caught: "What if the file is larger than GitHub's 2GB limit?"
+
 ## Validation Scenario Identification
 
 Before writing code, know how you'll prove it works.
