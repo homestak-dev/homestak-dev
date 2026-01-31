@@ -12,6 +12,9 @@ PACKER_IMAGES=(
     "debian-13-pve.qcow2"
 )
 
+# Flag to track if GHA workflow handled 'latest' sync (set by publish_ensure_packer_assets)
+WORKFLOW_HANDLED_LATEST=false
+
 # -----------------------------------------------------------------------------
 # Packer Template Change Detection
 # -----------------------------------------------------------------------------
@@ -86,8 +89,12 @@ packer_dispatch_copy_images() {
 
     log_info "Copying images from $source_release to v${version}"
 
+    # Build notes for copied images (#148)
+    local copy_notes="No template changes - images copied from ${source_release}"
+
     local workflow="copy-images.yml"
-    local cmd="gh workflow run $workflow --repo homestak-dev/packer -f source_release=$source_release -f target_release=v${version}"
+    # Workflow handles both versioned release and 'latest' sync (#146)
+    local cmd="gh workflow run $workflow --repo homestak-dev/packer -f source_release=$source_release -f target_release=v${version} -f notes=\"${copy_notes}\" -f sync_latest=true"
 
     if [[ "$dry_run" == "true" ]]; then
         echo "    ${cmd}"
@@ -475,9 +482,12 @@ publish_ensure_packer_assets() {
     # Copy images using specified workflow
     if [[ "$workflow" == "github" ]]; then
         # Use GHA workflow (server-side, faster)
+        # Workflow also syncs to 'latest' release, eliminating redundant local sync (#146)
         if packer_dispatch_copy_images "$version" "$source_release" "$dry_run" "true" "600"; then
             if [[ "$dry_run" != "true" ]]; then
                 log_success "Packer images copied from $source_release via GHA workflow"
+                log_success "Workflow also synced assets to 'latest' release"
+                WORKFLOW_HANDLED_LATEST=true
             fi
             return 0
         else
@@ -631,12 +641,14 @@ run_publish() {
         ((cmd_count+=2))
     else
         if [[ "$workflow" == "github" ]]; then
-            echo "  - Ensure packer release has images (via GHA workflow - fast)"
+            echo "  - Ensure packer release has images (via GHA workflow)"
+            echo "    (workflow also syncs to 'latest' - no separate transfer)"
+            ((cmd_count+=1))
         else
             echo "  - Ensure packer release has images (via local copy - ~13GB transfer)"
+            echo "  - Update 'latest' tag in packer"
+            ((cmd_count+=2))
         fi
-        echo "  - Update 'latest' tag in packer"
-        ((cmd_count+=2))
     fi
     echo ""
     echo "Total: ${cmd_count} operations"
@@ -662,13 +674,15 @@ run_publish() {
             echo "  packer auto-ensure (workflow: ${workflow}):"
             if [[ "$workflow" == "github" ]]; then
                 echo "    (Would use GHA workflow copy-images.yml - server-side, fast)"
+                echo "    (Would copy images + sync to 'latest' + update notes in one workflow)"
+                echo "    (Would skip local latest sync - workflow handles it)"
             else
                 echo "    (Would use local download/upload - ~13GB transfer)"
+                echo "    (Would check if packer release has assets, copy from previous release if not)"
+                echo ""
+                echo "  latest tag:"
+                publish_update_latest "$version" "true"
             fi
-            echo "    (Would check if packer release has assets, copy from previous release if not)"
-            echo ""
-            echo "  latest tag:"
-            publish_update_latest "$version" "true"
             echo ""
         fi
 
@@ -730,11 +744,18 @@ run_publish() {
         # Auto-ensure packer has images (copy from previous release if needed)
         echo ""
         echo "Ensuring packer release has images (workflow: ${workflow})..."
+        WORKFLOW_HANDLED_LATEST=false  # Reset flag
         publish_ensure_packer_assets "$version" "false" "$workflow"
 
-        echo ""
-        echo "Updating latest tag..."
-        publish_update_latest "$version" "false"
+        # Skip local latest sync if GHA workflow already handled it (#146)
+        if [[ "$WORKFLOW_HANDLED_LATEST" == "true" ]]; then
+            echo ""
+            log_info "Skipping local latest sync (GHA workflow handled it)"
+        else
+            echo ""
+            echo "Updating latest tag..."
+            publish_update_latest "$version" "false"
+        fi
     fi
 
     echo ""
