@@ -1,12 +1,20 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.39. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.41. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.41
+
+- **Skills load context for one phase, not the entire process** - The /release-preflight skill covers Phase 0-1 but doesn't ensure subsequent phases are followed correctly. Post-release smoke test, scope issue verification, and sunset check were all skipped until user requested re-read of 60-release.md. The release executor must reference 60-release.md at each phase transition, not just at preflight.
+- **Exploratory features expand scope** - When a release theme involves first-time implementation (n3-full), expect 50-100% scope expansion as hidden requirements surface. v0.41 grew from 9 planned items to 16 delivered (~78% expansion). Plan accordingly or split into exploration + stabilization releases.
+- **Validation scenario should match release theme** - Using vm-roundtrip to validate a recursive-pve release is insufficient. The release's headline feature should be exercised during validation. Created #149 for configurable validation scenarios.
+- **AAR requires scope comparison, not just delivery list** - Initial AAR listed "None" for deviations despite significant scope growth. Explicitly compare delivered items against original scope definition to reveal deviations.
+- **Packer image copy inherits metadata** - The GHA copy-images workflow preserves source release notes, causing confusing "What's Changed" sections referencing old PRs. Created #148 to clear notes when copying.
 
 ## v0.40
 
@@ -203,6 +211,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.39. Each lesson was codi
 For quick reference, lessons grouped by theme:
 
 ### Validation & Testing
+- Validation scenario should match release theme (v0.41)
 - Mark infrastructure tests for CI exclusion (v0.33)
 - Validation as hard gate confirmed (v0.21)
 - Validate optimizations before merging (v0.19)
@@ -213,6 +222,8 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Skills load context for one phase, not the entire process (v0.41)
+- AAR requires scope comparison, not just delivery list (v0.41)
 - Two-phase CHANGELOG workflow (v0.33)
 - Don't auto-close release issues from scope PRs (v0.33)
 - Closing before retrospective: third occurrence (v0.29)
@@ -245,6 +256,7 @@ For quick reference, lessons grouped by theme:
 - Packer images required for unified release (v0.15)
 
 ### Technical Gotchas
+- Packer image copy inherits metadata (v0.41)
 - Verify GitHub Action versions exist (v0.33)
 - FHS installations require sudo for scenarios (v0.29)
 - Legacy path migration requires fresh bootstrap (v0.29)
@@ -267,6 +279,7 @@ For quick reference, lessons grouped by theme:
 - GitHub 2GB release asset limit (v0.9)
 
 ### Planning & Design
+- Exploratory features expand scope (v0.41)
 - Integration boundary blindness (v0.40)
 - Known constraints not applied (v0.40)
 - N+1 analysis principle (v0.40)
