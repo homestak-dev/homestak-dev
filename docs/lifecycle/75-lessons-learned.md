@@ -1,12 +1,16 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.41. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.42. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.42
+
+- **Pre-merge validation is useful but disconnected from release state** - Running integration tests during implementation phase (via iac-driver directly) validates the code but does not satisfy the release.sh validation gate. Either standardize on `release.sh validate` for all validation, or document that pre-merge validation requires re-running through release.sh.
 
 ## v0.41
 
