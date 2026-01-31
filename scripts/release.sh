@@ -556,6 +556,7 @@ cmd_validate() {
     local remote=""
     local packer_release=""
     local stage=false
+    local manifest=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -573,6 +574,10 @@ cmd_validate() {
                 ;;
             --packer-release)
                 packer_release="$2"
+                shift 2
+                ;;
+            --manifest)
+                manifest="$2"
                 shift 2
                 ;;
             --skip)
@@ -601,7 +606,7 @@ cmd_validate() {
 
     # Run validation
     local validation_passed=false
-    if run_validation "$scenario" "$host" "$skip" "$verbose" "$remote" "$packer_release" "$stage"; then
+    if run_validation "$scenario" "$host" "$skip" "$verbose" "$remote" "$packer_release" "$stage" "$manifest"; then
         validation_passed=true
     fi
 
@@ -1752,6 +1757,7 @@ Options:
   --stage            Run via 'homestak scenario' CLI instead of ./run.sh (stage mode)
   --remote HOST      Run validation on remote host via SSH
   --packer-release   Packer release tag for image downloads (validate only)
+  --manifest NAME    Manifest name for recursive-pve scenarios (validate only)
   --host HOST        Check host readiness (preflight only, repeatable)
   --workflow MODE    Packer image copy method: 'github' (fast, recommended) or 'local' (required for --execute)
   --no-wait          Don't wait for workflow completion (packer only)
@@ -1770,6 +1776,7 @@ Examples:
   release.sh validate --scenario vm-roundtrip --host father
   release.sh validate --scenario vm-roundtrip --host father --remote father
   release.sh validate --scenario nested-pve-roundtrip --host father --packer-release v0.19
+  release.sh validate --scenario recursive-pve-roundtrip --manifest n1-basic --host father
   release.sh validate --stage --remote father              # Stage mode via homestak CLI
   release.sh validate --skip
   release.sh tag --dry-run

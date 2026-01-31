@@ -56,6 +56,7 @@ validate_run_scenario() {
     local host="$2"
     local verbose="${3:-false}"
     local packer_release="${4:-}"
+    local manifest="${5:-}"
 
     local cmd="${IAC_DRIVER_DIR}/run.sh --scenario ${scenario} --host ${host}"
     if [[ "$verbose" == "true" ]]; then
@@ -63,6 +64,9 @@ validate_run_scenario() {
     fi
     if [[ -n "$packer_release" ]]; then
         cmd+=" --packer-release ${packer_release}"
+    fi
+    if [[ -n "$manifest" ]]; then
+        cmd+=" --manifest ${manifest}"
     fi
 
     log_info "Running: $cmd"
@@ -84,6 +88,7 @@ validate_run_remote() {
     local host="$3"
     local verbose="${4:-false}"
     local packer_release="${5:-}"
+    local manifest="${6:-}"
 
     local verbose_flag=""
     if [[ "$verbose" == "true" ]]; then
@@ -95,8 +100,13 @@ validate_run_remote() {
         packer_release_flag="--packer-release ${packer_release}"
     fi
 
+    local manifest_flag=""
+    if [[ -n "$manifest" ]]; then
+        manifest_flag="--manifest ${manifest}"
+    fi
+
     # Build the remote command
-    local remote_cmd="cd ~/homestak-dev && ./scripts/release.sh validate --scenario ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
+    local remote_cmd="cd ~/homestak-dev && ./scripts/release.sh validate --scenario ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag} ${manifest_flag}"
 
     log_info "Running validation on ${remote_host}..."
     log_info "Remote command: ${remote_cmd}"
@@ -137,6 +147,7 @@ validate_run_stage_local() {
     local host="$2"
     local verbose="${3:-false}"
     local packer_release="${4:-}"
+    local manifest="${5:-}"
 
     # Build the command (sudo required for FHS paths)
     local cmd="sudo ${HOMESTAK_CLI} scenario ${scenario} --host ${host}"
@@ -145,6 +156,9 @@ validate_run_stage_local() {
     fi
     if [[ -n "$packer_release" ]]; then
         cmd+=" --packer-release ${packer_release}"
+    fi
+    if [[ -n "$manifest" ]]; then
+        cmd+=" --manifest ${manifest}"
     fi
 
     log_info "Running (stage): $cmd"
@@ -165,6 +179,7 @@ validate_run_stage_remote() {
     local host="$3"
     local verbose="${4:-false}"
     local packer_release="${5:-}"
+    local manifest="${6:-}"
 
     local verbose_flag=""
     if [[ "$verbose" == "true" ]]; then
@@ -176,8 +191,13 @@ validate_run_stage_remote() {
         packer_release_flag="--packer-release ${packer_release}"
     fi
 
+    local manifest_flag=""
+    if [[ -n "$manifest" ]]; then
+        manifest_flag="--manifest ${manifest}"
+    fi
+
     # Build the remote command - uses homestak CLI (sudo required for FHS paths)
-    local remote_cmd="sudo homestak scenario ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
+    local remote_cmd="sudo homestak scenario ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag} ${manifest_flag}"
 
     log_info "Running stage validation on ${remote_host}..."
     log_info "Remote command: ${remote_cmd}"
@@ -211,6 +231,7 @@ run_validation() {
     local remote_host="${5:-}"
     local packer_release="${6:-}"
     local stage="${7:-false}"
+    local manifest="${8:-}"
 
     # Handle skip
     if [[ "$skip" == "true" ]]; then
@@ -249,6 +270,9 @@ run_validation() {
     echo "  Scenario: ${scenario}"
     echo "  Host:     ${host}"
     echo "  Mode:     ${mode}"
+    if [[ -n "$manifest" ]]; then
+        echo "  Manifest: ${manifest}"
+    fi
     if [[ -n "$remote_host" ]]; then
         echo "  Remote:   ${remote_host}"
     fi
@@ -263,22 +287,22 @@ run_validation() {
     if [[ "$stage" == "true" ]]; then
         # Stage mode: use homestak CLI
         if [[ -n "$remote_host" ]]; then
-            if validate_run_stage_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release"; then
+            if validate_run_stage_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
                 scenario_passed=true
             fi
         else
-            if validate_run_stage_local "$scenario" "$host" "$verbose" "$packer_release"; then
+            if validate_run_stage_local "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
                 scenario_passed=true
             fi
         fi
     else
         # Dev mode: use iac-driver directly
         if [[ -n "$remote_host" ]]; then
-            if validate_run_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release"; then
+            if validate_run_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
                 scenario_passed=true
             fi
         else
-            if validate_run_scenario "$scenario" "$host" "$verbose" "$packer_release"; then
+            if validate_run_scenario "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
                 scenario_passed=true
             fi
         fi
