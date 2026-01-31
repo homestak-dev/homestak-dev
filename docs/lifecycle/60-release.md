@@ -164,24 +164,50 @@ Update CHANGELOGs in dependency order. Move `## Unreleased` content to versioned
 
 Run integration tests before tagging to ensure the release is sound.
 
+#### Choosing the Validation Scenario
+
+Select the validation scenario based on release scope:
+
+| Release Scope | Scenario | Duration | Use When |
+|--------------|----------|----------|----------|
+| No IaC changes | `vm-roundtrip` | ~2 min | Documentation, CLI, process changes only |
+| Tofu/ansible changes | `vm-roundtrip` | ~2 min | Standard VM provisioning paths |
+| Recursive/manifest changes | `recursive-pve-roundtrip --manifest n1-basic` | ~3 min | Manifest system, recursive actions |
+| PVE/nested changes | `recursive-pve-roundtrip --manifest n2-quick` | ~9 min | nested-pve, install roles, PVE images |
+
+**Decision process during planning:**
+1. Identify which repos have changes
+2. If iac-driver recursive/manifest code changed → use `recursive-pve-roundtrip`
+3. If packer/ansible/nested-pve changed → use `n2-quick` manifest
+4. Otherwise → use `vm-roundtrip` (default)
+
 **Using release CLI (recommended):**
 ```bash
 # Ensure secrets are decrypted first
 cd site-config && make decrypt && cd ..
 
-# Run validation (requires PVE host access)
+# Standard validation (default)
 ./scripts/release.sh validate --scenario vm-roundtrip --host father
+
+# Recursive validation (when manifest/recursive changes present)
+./scripts/release.sh validate --scenario recursive-pve-roundtrip --manifest n1-basic --host father
+
+# Full nested validation (PVE/nested changes)
+./scripts/release.sh validate --scenario recursive-pve-roundtrip --manifest n2-quick --host father
 ```
 
 **Manual validation:**
 ```bash
 cd iac-driver
 
-# Full nested-pve roundtrip (~8 min)
-./run.sh --scenario nested-pve-roundtrip --host father
-
-# Or quick validation (~2 min)
+# Quick validation (~2 min)
 ./run.sh --scenario vm-roundtrip --host father
+
+# Recursive validation (~3 min)
+./run.sh --scenario recursive-pve-roundtrip --manifest n1-basic --host father
+
+# Full nested-pve roundtrip (~9 min)
+./run.sh --scenario recursive-pve-roundtrip --manifest n2-quick --host father
 ```
 
 **Attach report to release issue as proof.** Reports are generated in `iac-driver/reports/`.

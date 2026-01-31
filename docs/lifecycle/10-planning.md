@@ -110,13 +110,33 @@ For sprints with multiple issues touching the same repo, analyze potential confl
 
 This analysis prevents scenarios where a restructure invalidates work done on the old structure.
 
-### 10. Update Release Plan
+### 10. Validation Scenario Selection
+
+Determine the appropriate validation scenario based on release scope:
+
+| Release Scope | Scenario | When to Use |
+|--------------|----------|-------------|
+| Documentation, CLI, process only | `vm-roundtrip` | No IaC code changes |
+| Tofu/ansible changes | `vm-roundtrip` | Standard VM provisioning |
+| Recursive/manifest changes | `recursive-pve-roundtrip --manifest n1-basic` | iac-driver recursive code |
+| PVE/nested/packer changes | `recursive-pve-roundtrip --manifest n2-quick` | Full stack validation |
+
+**Decision criteria:**
+1. Review scope issues - which repos are affected?
+2. If `iac-driver/src/scenarios/recursive*.py` or `iac-driver/src/manifest.py` changed → recursive scenario
+3. If `packer/`, `ansible/roles/nested-pve/`, or `debian-13-pve` image changed → n2-quick manifest
+4. Otherwise → vm-roundtrip (default, fastest)
+
+Document the chosen scenario in the release plan issue.
+
+### 11. Update Release Plan
 
 Roll up issue-level planning into the release plan issue:
 
 - Add implementation order/dependencies
 - Identify critical path items
 - Note any risks or open questions
+- **Specify validation scenario** (per section 10)
 - Update status to "In Progress" when starting execution
 
 ## Cross-Repo Considerations
@@ -156,5 +176,6 @@ A "bootstrapped" host is not automatically validation-ready. Prerequisites:
 - [ ] Effort estimates assigned
 - [ ] Dependencies mapped
 - [ ] Branch/merge strategy analyzed (if multi-issue sprint)
+- [ ] Validation scenario selected and documented
 - [ ] Issue-level planning documented
 - [ ] Sprint backlog reviewed and approved by human
