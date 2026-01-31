@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Added
+- Add `--manifest` flag to `release.sh validate` for recursive-pve scenarios (#149)
+
+### Changed
+- Optimize publish duration by consolidating latest sync in GHA workflow (#146)
+  - Workflow now handles both versioned release and latest sync in one pass
+  - Eliminates redundant ~6GB transfer, saving ~5 minutes per release
+- Update packer release notes when copying images to indicate source (#148)
+  - Notes now show "No template changes - images copied from vX.Y"
+
+### Documentation
+- Add validation scenario selection guidance to 10-planning.md and 60-release.md (#149)
+
 ## v0.38 - 2026-01-21
 
 ### Changed
