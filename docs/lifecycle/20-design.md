@@ -17,13 +17,16 @@ Not every issue needs full design. Use this guide:
 
 **Rule of thumb:** If you're unsure how to approach it, design it.
 
-## Applicability
+## Applicability by Tier
 
-| Work Type | Design Depth |
-|-----------|--------------
-| Bug Fix | **Skip** - proceed directly to Implementation |
-| Minor Enhancement | **Lightweight** - brief approach summary |
-| Feature | **Full** - complete design artifacts |
+| Tier | Design Depth |
+|------|--------------|
+| Simple | **Skip** - proceed directly to Implementation |
+| Standard | **Lightweight** - brief approach summary |
+| Complex | **Full** - complete design artifacts |
+| Exploratory | **Full + ADR** - design with Architecture Decision Record |
+
+See [00-overview.md](00-overview.md) for tier definitions.
 
 ## Inputs
 

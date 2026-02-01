@@ -1,600 +1,206 @@
 # Phase: Release
 
-Release coordinates tagging, asset publication, and retrospective across repositories. This phase applies to all work types, typically batched at sprint end.
+Release coordinates tagging, asset publication, and verification across repositories. A release aggregates one or more completed sprints.
 
-## Inputs
+## When to Release
 
-- Merged changes on `master` branch(es)
-- Previous release version
-- Sprint backlog (completed items)
+Release when:
+- Critical mass of features/fixes accumulated
+- Major functionality milestone reached
+- Security fix requires immediate deployment
+- Scheduled release cadence reached
+
+**Theme-first planning:** Create the release issue early with a theme. Sprints link to and update the release issue as they complete.
+
+## Release vs Sprint
+
+| Aspect | Sprint | Release |
+|--------|--------|---------|
+| Scope | 1-5 issues, focused theme | Multiple sprints accumulated |
+| Duration | 2-5 days | When ready |
+| Validation | During sprint | Evidence check only |
+| State | Sprint issue | Release issue |
+| Output | Merged code | Tagged, published artifacts |
+
+## Release Planning (Theme-First)
+
+Create a release issue early:
+
+```bash
+gh issue create --repo homestak-dev/homestak-dev \
+  --title "v0.45 Release Planning - Lifecycle Overhaul" \
+  --label "release"
+```
+
+As sprints complete, update the release issue:
+
+```markdown
+## Completed Sprints
+
+### Sprint 152: Recursive PVE (closed)
+- iac-driver#52, #53
+- ansible#18
+- Validation: PASSED
+
+### Sprint 155: Documentation (closed)
+- homestak-dev#45
+- Validation: PASSED (vm-roundtrip)
+
+## Release Readiness
+- [x] Sprint 152 validation evidence
+- [x] Sprint 155 validation evidence
+- [ ] CHANGELOGs updated
+- [ ] All repos clean
+```
+
+## Release Phases
+
+The release process is divided into discrete phases:
+
+| Phase | Document | Gate | Description |
+|-------|----------|------|-------------|
+| 61 | [Preflight](61-release-preflight.md) | No | Check prerequisites, validation evidence |
+| 62 | [CHANGELOG](62-release-changelog.md) | No | Update version headers |
+| 63 | [Tags](63-release-tag.md) | **Yes** | Create git tags |
+| 64 | [Packer](64-release-packer.md) | No | Handle packer images |
+| 65 | [Publish](65-release-publish.md) | **Yes** | Create GitHub releases |
+| 66 | [Verify](66-release-verify.md) | No | Verify releases exist |
+| 67 | [AAR](67-release-aar.md) | No | After Action Report |
+| 68 | [Housekeeping](68-release-housekeeping.md) | No | Branch cleanup |
+
+**Gates (63, 65):** Require explicit human approval before proceeding.
 
 ## Repository Dependency Order
 
-Releases must follow this order (downstream depends on upstream):
+Releases follow dependency order:
 
-**Meta repositories** (release process, documentation):
-1. **.github** - Organization templates and PR defaults
-2. **.claude** - Claude Code configuration and skills
-3. **homestak-dev** - Workspace parent, release methodology, CLAUDE.md
+```
+.github → .claude → homestak-dev → site-config → tofu → ansible → bootstrap → packer → iac-driver
+```
 
-**Core repositories** (functional dependencies):
-4. **site-config** - Configuration and secrets
-5. **tofu** - VM provisioning modules
-6. **ansible** - Host configuration playbooks
-7. **bootstrap** - Installation and CLI
-8. **packer** - Custom images (requires build host)
-9. **iac-driver** - Orchestration (depends on all above)
-
-**Unified versioning:** All repos get the same version tag on each release, even if unchanged. This simplifies tracking - "homestak v0.18" means all repos at v0.18.
-
-**Packer images:** `latest` is the primary image source; automation defaults to `packer_release: latest`. Versioned releases only include images when templates actually change. See [Phase 5](#phase-5-packer-images) for details.
+**Unified versioning:** All repos get the same version tag, even if unchanged.
 
 ## Version Numbering
 
 **Pre-release (current):** `v0.X`
-- Simple major.minor versioning (e.g., v0.8, v0.9, v0.10)
-- No patch numbers or release candidates while pre-release
-- Add `-rc1`, `-rc2` or `.1`, `.2` only if actually needed
+- Simple major.minor (e.g., v0.44, v0.45)
+- No patch numbers or RCs unless needed
 - No backward compatibility guarantees
-- Delete/recreate tags acceptable for pre-releases
 
 **Stable (future):** `v1.0+`
 - Semantic versioning with patch numbers
 - Backward compatibility expectations
-- No tag recreation
+
+## Release CLI
+
+The `scripts/release.sh` CLI automates release operations:
+
+```bash
+# Initialize
+./scripts/release.sh init --version 0.45 --issue 157
+
+# Run phases
+./scripts/release.sh preflight
+./scripts/release.sh validate --scenario vm-roundtrip --host father
+./scripts/release.sh tag --dry-run
+./scripts/release.sh tag --execute --yes
+./scripts/release.sh publish --execute --workflow github --yes
+./scripts/release.sh verify
+./scripts/release.sh close --execute --yes
+
+# Recovery
+./scripts/release.sh resume   # AI-friendly context
+./scripts/release.sh status   # Human-readable status
+./scripts/release.sh audit    # Action log
+```
 
 ## Multi-Session Releases
 
-**Best practice:** Complete releases in a single session when possible. Context loss during multi-session releases has caused confusion in v0.13 and v0.24.
+**Best practice:** Complete releases in a single session.
 
-**If a release spans multiple sessions:**
+If spanning multiple sessions:
 
-1. **Post phase completion comments** - After completing each phase, add a comment to the release issue:
+1. **Post phase completion comments:**
+   ```markdown
+   ✅ Phase 62: CHANGELOGs complete
+   - All 9 repos updated
+   - Ready for tags
    ```
-   ✅ Phase N: [Phase Name] complete
-   - Key actions taken
-   - Any issues encountered
-   ```
 
-2. **Recovery commands** - When resuming after context loss:
+2. **Use recovery commands:**
    ```bash
-   ./scripts/release.sh resume   # AI-friendly markdown context (recommended)
-   ./scripts/release.sh status   # Human-readable status
-   ./scripts/release.sh audit    # Timestamped action log
+   ./scripts/release.sh resume  # AI-friendly
+   ./scripts/release.sh status  # Human-readable
    ```
 
-3. **State files** - Review these to understand progress:
+3. **Review state files:**
    - `.release-state.json` - Phase completion status
-   - `.release-audit.log` - Chronological action history
-
-See also: [Release Session Recovery](../../CLAUDE.md#release-session-recovery) in CLAUDE.md.
-
-## Release Phases
-
-### Phase 0: Release Plan Refresh
-
-**When:** Execute when transitioning from "Planning" to "In Progress" - not during initial planning.
-
-Before starting release work:
-- [ ] Verify prerequisite releases are complete (tags exist, issues closed)
-- [ ] Compare release plan against this document
-- [ ] Update checklists to match current methodology
-- [ ] Add any new checklist items from lessons learned
-
-### Phase 1: Pre-flight
-
-> **CHECKPOINT: Phase 0 Complete**
-> Before proceeding, verify: Release plan reviewed, checklists current, no prerequisite releases pending.
-
-#### Step 1: Initialize Release State (FIRST)
-
-**Run `release.sh init` as the very first step**, before any other preflight checks:
-
-```bash
-# Identify the release tracking issue first
-gh issue list --repo homestak-dev/homestak-dev --label release --state open
-
-# Initialize release state (required before preflight)
-./scripts/release.sh init --version X.Y --issue N
-```
-
-**Why init must come first:** The state file (`.release-state.json`) tracks validation status and enables phase gating. Running init mid-release causes "validation not complete" errors even when tests passed. This has caused confusion in multiple releases (v0.37).
-
-#### Step 2: Pre-flight Checks
-
-- [ ] Git fetch on all repos (avoid rebase surprises)
-- [ ] All PRs merged to main branches
-- [ ] Working trees clean (`git status` on all repos)
-- [ ] No existing tags for target version
-- [ ] Site-config secrets decrypted (`site-config/secrets.yaml` exists)
-- [ ] CLAUDE.md files reflect current state
-- [ ] Organization README current (`.github/profile/README.md`)
-- [ ] CHANGELOGs current (all repos)
-- [ ] Packer build smoke test on designated build host
-
-```bash
-# Tag validation - ensure no existing tags for target version
-VERSION=0.X  # Set to target version
-for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
-  echo "=== $repo ==="
-  gh api repos/homestak-dev/$repo/git/refs/tags/v${VERSION} 2>/dev/null && echo "WARNING: tag exists!" || echo "OK: no tag"
-done
-```
-
-#### CLAUDE.md Review
-
-Verify each repo's CLAUDE.md reflects current architecture:
-
-**Meta repos:**
-- [ ] .github - org templates, PR defaults
-- [ ] .claude - skills, settings
-- [ ] homestak-dev - workspace structure, documentation index
-
-**Core repos:**
-- [ ] site-config - schema, defaults, file structure
-- [ ] iac-driver - scenarios, actions, ConfigResolver
-- [ ] tofu - modules, variables, workflow
-- [ ] packer - templates, build workflow
-- [ ] ansible - playbooks, roles, collections
-- [ ] bootstrap - CLI, installation
-
-### Phase 2: CHANGELOGs
-
-> **CHECKPOINT: Phase 1 Complete**
-> Before proceeding, verify: All pre-flight checks pass, working trees clean, no existing tags for target version.
-
-Update CHANGELOGs in dependency order. Move `## Unreleased` content to versioned header:
-
-```markdown
-## Unreleased
-
-## vX.Y - YYYY-MM-DD
-
-### Features
-- Add foo capability (#123)
-
-### Bug Fixes
-- Fix bar issue (#124)
-```
-
-### Phase 3: Validation
-
-> **CHECKPOINT: Phase 2 Complete**
-> Before proceeding, verify: All CHANGELOGs updated with version header and date.
-
-Run integration tests before tagging to ensure the release is sound.
-
-#### Choosing the Validation Scenario
-
-Select the validation scenario based on release scope:
-
-| Release Scope | Scenario | Duration | Use When |
-|--------------|----------|----------|----------|
-| No IaC changes | `vm-roundtrip` | ~2 min | Documentation, CLI, process changes only |
-| Tofu/ansible changes | `vm-roundtrip` | ~2 min | Standard VM provisioning paths |
-| Recursive/manifest changes | `recursive-pve-roundtrip --manifest n1-basic` | ~3 min | Manifest system, recursive actions |
-| PVE/nested changes | `recursive-pve-roundtrip --manifest n2-quick` | ~9 min | nested-pve, install roles, PVE images |
-
-**Decision process during planning:**
-1. Identify which repos have changes
-2. If iac-driver recursive/manifest code changed → use `recursive-pve-roundtrip`
-3. If packer/ansible/nested-pve changed → use `n2-quick` manifest
-4. Otherwise → use `vm-roundtrip` (default)
-
-**Using release CLI (recommended):**
-```bash
-# Ensure secrets are decrypted first
-cd site-config && make decrypt && cd ..
-
-# Standard validation (default)
-./scripts/release.sh validate --scenario vm-roundtrip --host father
-
-# Recursive validation (when manifest/recursive changes present)
-./scripts/release.sh validate --scenario recursive-pve-roundtrip --manifest n1-basic --host father
-
-# Full nested validation (PVE/nested changes)
-./scripts/release.sh validate --scenario recursive-pve-roundtrip --manifest n2-quick --host father
-```
-
-**Manual validation:**
-```bash
-cd iac-driver
-
-# Quick validation (~2 min)
-./run.sh --scenario vm-roundtrip --host father
-
-# Recursive validation (~3 min)
-./run.sh --scenario recursive-pve-roundtrip --manifest n1-basic --host father
-
-# Full nested-pve roundtrip (~9 min)
-./run.sh --scenario recursive-pve-roundtrip --manifest n2-quick --host father
-```
-
-**Attach report to release issue as proof.** Reports are generated in `iac-driver/reports/`.
-
-### Phase 4: Tags
-
-> **CHECKPOINT: Phase 3 Complete**
-> Before proceeding, verify: Integration tests passed, validation report attached to release issue.
-
-Create and push tags in dependency order:
-
-```bash
-# Using release CLI
-./scripts/release.sh tag --dry-run
-./scripts/release.sh tag --execute
-
-# Or manually for each repo
-git tag -a v0.X -m "Release v0.X"
-git push origin v0.X
-```
-
-### Phase 5: Packer Images
-
-> **CHECKPOINT: Phase 4 Complete**
-> Before proceeding, verify: All repos tagged, tags pushed to origin.
-
-**Latest-centric approach:** The `latest` release is the primary source for packer images. Versioned releases (v0.22, v0.23) typically have NO image assets - they're tag-only releases that inherit images from `latest`.
-
-**When to rebuild images:**
-- Packer template changes (new packages, cloud-init fixes)
-- Base Debian image updates (12.x → 12.y point release)
-- Security fixes in image content
-- New image variants added
-
-**When to skip rebuild:**
-- Documentation-only changes
-- Build script refactoring (unless it affects output)
-- CHANGELOG updates
-- Releases where templates haven't changed
-
-#### Option A: Images NOT Changed (default)
-
-Most releases skip image handling entirely:
-
-```bash
-# No packer image steps needed
-# Automation uses: packer_release: latest (default)
-# latest already points to correct images
-```
-
-Add note to release description: "Images: See `latest` release"
-
-#### Option B: Images Changed (rebuild required)
-
-When templates or base images change, rebuild and update `latest`:
-
-```bash
-# Build images on a host with QEMU/KVM support
-cd ~/homestak-dev/iac-driver
-./run.sh --scenario packer-build-fetch --remote <build-host-ip>
-
-# Images downloaded to /tmp/packer-images/
-```
-
-**Update `latest` release (via release CLI):**
-```bash
-./scripts/release.sh packer --copy --source v0.X --execute
-
-# Or via GHA workflow
-./scripts/release.sh packer --workflow --source v0.X
-```
-
-**Manual update:**
-```bash
-cd ~/homestak-dev/packer
-git tag -f latest v0.X
-git push origin latest --force
-
-# Recreate latest release with new images
-gh release delete latest --repo homestak-dev/packer --yes
-gh release create latest --prerelease \
-  --title "Latest Images" \
-  --notes "Points to v0.X" \
-  --repo homestak-dev/packer \
-  /tmp/packer-images/*.qcow2 \
-  /tmp/packer-images/*.sha256
-```
-
-Add note to release description: "Images: Included (rebuilt for <reason>)"
-
-### Phase 6: GitHub Releases
-
-> **CHECKPOINT: Phase 5 Complete**
-> Before proceeding, verify: Packer images handled (skipped or rebuilt per decision above).
-
-Create releases in dependency order. **Use `--prerelease` flag until v1.0.**
-
-```bash
-# Using release CLI (--workflow github uses server-side copy, ~2min vs local ~30min)
-./scripts/release.sh publish --dry-run
-./scripts/release.sh publish --execute --workflow github
-
-# Or manually
-gh release create v0.X --prerelease --title "v0.X" --notes "See CHANGELOG.md" --repo homestak-dev/<repo>
-```
-
-**Packer release notes:** Indicate image status in release description:
-- If images NOT changed: "Images: See `latest` release"
-- If images changed: "Images: Included (rebuilt for <reason>)"
-
-#### Packer Image Checklist (only when rebuilding)
-
-When `latest` is being updated with new images:
-- [ ] debian-12-custom.qcow2 + .sha256
-- [ ] debian-13-custom.qcow2 + .sha256
-- [ ] debian-13-pve.qcow2 + .sha256 (or split parts if >2GB)
-
-**Note:** Images >2GB must be split due to GitHub limits.
-
-### Phase 7: Verification
-
-> **CHECKPOINT: Phase 6 Complete**
-> Before proceeding, verify: All GitHub releases created in dependency order.
-
-```bash
-./scripts/release.sh verify
-
-# Or manually
-for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
-  echo "=== $repo ==="
-  gh release view v0.X --repo homestak-dev/$repo --json tagName,assets --jq '{tag: .tagName, assets: (.assets | length)}'
-done
-```
-
-Expected: All repos have releases. Packer assets depend on whether images were rebuilt:
-- Images NOT changed: 0 assets (tag-only release)
-- Images changed: 6 assets (3 images + 3 checksums)
-
-#### Post-Release Smoke Test
-
-```bash
-# Test bootstrap installation (on a clean system)
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/v0.X/install.sh | bash
-homestak --version  # Should show v0.X
-```
-
-#### Scope Issue Verification
-
-Before closing the release issue, verify all scope issues are closed:
-
-```bash
-# Check release issue for scope list, then verify each is closed
-gh issue view <release-issue> --repo homestak-dev/homestak-dev
-
-# Close any that were missed (e.g., direct pushes bypass PR auto-close)
-gh issue close <issue-num> --repo homestak-dev/<repo> --comment "Implemented in vX.Y"
-```
-
-**Note:** Issues should primarily be closed via PR merge using "Closes #XX" in the PR description. This verification step catches cases where auto-close didn't occur.
-
-### Phase 8: After Action Report
-
-> **CHECKPOINT: Phase 7 Complete**
-> Before proceeding, verify: All releases verified, post-release smoke test passed, scope issues closed.
-
-**Complete immediately after release while details are fresh.** Do not close the release issue yet - Phases 9 and 10 remain.
-
-Use the [AAR Template](../templates/aar.md) to document:
-
-| Section | Content |
-|---------|---------|
-| Planned vs Actual | Timeline comparison |
-| Deviations | What changed and why |
-| Issues Discovered | Problems found during release |
-| Artifacts Delivered | Final release inventory |
-| Validation Report | Attach integration test report |
-
-### Phase 9: Housekeeping
-
-> **CHECKPOINT: Phase 8 Complete**
-> Before proceeding, verify: AAR completed and posted to release issue.
-
-Branch cleanup should be performed while release context is fresh, so any issues discovered can be captured in the retrospective.
-
-**Note:** Housekeeping was moved before Retrospective in v0.24 to ensure branch cleanup issues are captured before closing the release.
-
-```bash
-# For each repo, clean up branches
-for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
-  echo "=== $repo ==="
-  cd ~/homestak-dev/$repo
-
-  # Delete merged local branches
-  git branch --merged | grep -v master | xargs -r git branch -d
-
-  # Prune stale remote tracking refs
-  git remote prune origin
-
-  # Check for unmerged branches (squash/rebase may leave "ahead" branches)
-  for branch in $(git branch -r | grep -v HEAD | grep -v master); do
-    if [[ -n "$(git diff master..$branch 2>/dev/null)" ]]; then
-      echo "UNMERGED: $branch"
-    fi
-  done
-
-  cd -
-done
-```
-
-**Note:** Branches may show as "ahead" by commit count even when content was merged via squash/rebase. Use `git diff` to verify actual unmerged content before deleting.
-
-**Repository setting:** Enable "Automatically delete head branches" in GitHub repo settings to auto-cleanup after PR merge.
-
-### Next: Phase 70 (Retrospective)
-
-> **CHECKPOINT: Phase 9 Complete**
-> Before proceeding to Phase 70, verify: Housekeeping completed, stale branches cleaned up.
-
-After completing Phase 9, proceed to [70-retrospective.md](70-retrospective.md) for:
-- Retrospective documentation
-- Lessons learned codification
-- Release issue closure
-
-**Do not close the release issue from Phase 60.** The release issue closure happens in Phase 70 after the retrospective is complete.
-
-### Release Sunset (periodic)
-
-Legacy releases accumulate over time. Periodically clean up old releases to reduce clutter while preserving recent history.
-
-**Retention policy:** Keep 5 most recent releases.
-
-**When to run:** When total release count exceeds 5. After each release, check and prompt:
-
-```bash
-# Check total release count
-count=$(gh release list --repo homestak-dev/homestak-dev --limit 100 | wc -l)
-if [[ $count -gt 5 ]]; then
-  echo "⚠️ $count releases found. Consider running sunset to maintain 5-release retention."
-  echo "   ./scripts/release.sh sunset --below-version X.Y --dry-run"
-fi
-```
-
-**AI-assisted releases:** Claude should check release count after verification and prompt user to prune if count exceeds 5.
-
-```bash
-# Preview what would be deleted
-./scripts/release.sh sunset --below-version 0.21 --dry-run
-
-# Execute deletion (deletes GitHub releases, preserves git tags)
-./scripts/release.sh sunset --below-version 0.21 --execute
-```
-
-**What sunset does:**
-- Deletes GitHub releases below the specified version across all 9 repos
-- Preserves git tags (history remains intact)
-- Preserves packer's `latest` release (contains current images)
-- Reports count of deleted releases per repo
-
-**Adjusting threshold:** Increment `--below-version` as new releases accumulate. With 3-release retention, after releasing v0.24, sunset threshold would move to v0.22.
+   - `.release-audit.log` - Action history
 
 ## Scope Management
 
 ### Scope Freeze
 
-Once a release transitions from "Planning" to "In Progress":
-- **No new features** - New scope goes to the next release
-- **Bug fixes only** - Critical issues discovered during release may be addressed
-- **Document deferrals** - Add deferred items to release issue
+Once release transitions to "In Progress":
+- **No new features** - goes to next release
+- **Bug fixes only** - critical issues during release
+- **Document deferrals** - add to release issue
 
 ### Hotfix Process
 
 For critical bugs requiring immediate release:
-1. Create fix on main/master branch
-2. Increment patch version (v0.9 → v0.9.1) if needed
-3. Update CHANGELOG with hotfix entry
-4. Run abbreviated validation (vm-roundtrip)
+1. Create fix on master
+2. Increment patch version if needed (v0.44 → v0.44.1)
+3. Update CHANGELOG
+4. Run abbreviated validation
 5. Tag and release affected repo(s) only
-6. Hotfixes do NOT require full release train
 
-## Release CLI (v0.14+)
+## Release Sunset
 
-The `scripts/release.sh` CLI automates multi-repo release operations.
-
-| Command | Description |
-|---------|-------------|
-| `init --version X.Y` | Initialize release state |
-| `status` | Show release progress |
-| `preflight` | Check repos ready (clean, no tags, CHANGELOGs) |
-| `validate` | Run iac-driver integration tests |
-| `tag --dry-run` | Preview tag creation |
-| `tag --execute` | Create and push tags |
-| `tag --reset` | Reset tags to HEAD (v0.x only) |
-| `publish --dry-run` | Preview release creation |
-| `publish --execute --workflow github` | Create GitHub releases (fast server-side image copy) |
-| `packer --check` | Check for template changes |
-| `packer --copy` | Copy images from previous release |
-| `full --dry-run` | Preview complete release workflow |
-| `full --execute` | Execute end-to-end release |
-| `verify` | Verify all releases exist |
-| `audit` | Show timestamped action log |
-
-### Release Workflow Example
+Keep 5 most recent releases. After each release:
 
 ```bash
-./scripts/release.sh init --version 0.20
-./scripts/release.sh preflight
-./scripts/release.sh validate --scenario vm-roundtrip --host father
-./scripts/release.sh tag --dry-run
-./scripts/release.sh tag --execute
-./scripts/release.sh publish --execute --workflow github
-./scripts/release.sh packer --copy --execute
-./scripts/release.sh verify
-
-# Or use full command for end-to-end automation
-./scripts/release.sh full --dry-run
-./scripts/release.sh full --execute --host father
+# Check count
+count=$(gh release list --repo homestak-dev/homestak-dev --limit 100 | wc -l)
+if [[ $count -gt 5 ]]; then
+  echo "Consider: ./scripts/release.sh sunset --below-version X.Y"
+fi
 ```
 
-## Templates
+Sunset deletes GitHub releases but preserves git tags.
 
-- [Release Issue Template](../templates/release-issue.md) - Create release planning issue
-- [AAR Template](../templates/aar.md) - After Action Report
-- [Retrospective Template](../templates/retrospective.md) - Sprint retrospective
+## Outputs
 
-## Recipes
+- All repos tagged with version
+- GitHub releases created
+- Packer images handled
+- Verification complete
+- AAR documented
+- Branches cleaned up
 
-### Renaming a Release
+## Checklist: Release Ready
 
-To rename a release (e.g., `v0.5.0-rc1` → `v0.5`) without re-uploading assets:
+Before starting release phases:
+- [ ] Release issue exists with theme
+- [ ] All planned sprints completed
+- [ ] Validation evidence available for each sprint
+- [ ] No blocking issues open
+- [ ] All repos on clean master
 
-```bash
-# 1. Get the commit SHA for the old tag
-git show-ref --tags | grep v0.5.0-rc1
+## Related Documents
 
-# 2. Create new tag pointing to same commit
-git tag v0.5 <commit-sha>
-git push origin v0.5
+### Release Phases
+- [61-release-preflight.md](61-release-preflight.md) - Preflight checks
+- [62-release-changelog.md](62-release-changelog.md) - CHANGELOG updates
+- [63-release-tag.md](63-release-tag.md) - Tag creation [GATE]
+- [64-release-packer.md](64-release-packer.md) - Packer images
+- [65-release-publish.md](65-release-publish.md) - GitHub releases [GATE]
+- [66-release-verify.md](66-release-verify.md) - Verification
+- [67-release-aar.md](67-release-aar.md) - After Action Report
+- [68-release-housekeeping.md](68-release-housekeeping.md) - Branch cleanup
 
-# 3. Edit release to use new tag
-gh release edit v0.5.0-rc1 --repo homestak-dev/<repo> --tag v0.5 --title "v0.5"
-
-# 4. Delete old tag
-git tag -d v0.5.0-rc1
-git push origin :refs/tags/v0.5.0-rc1
-```
-
-## Path to Stable
-
-Before graduating from pre-release to v1.0.0:
-
-- [ ] User-facing documentation (beyond CLAUDE.md)
-- [ ] CI/CD pipeline for automated integration tests
-- [ ] All "known issues" resolved or documented
-- [ ] Core workflows fully working
-- [ ] Security audit (secrets, SSH, API tokens)
-- [ ] Bootstrap UX polished
-
-## References
-
-**Historical releases** (issues in .github repo):
-- [v0.6 Release](https://github.com/homestak-dev/.github/issues/4)
-- [v0.7 Release](https://github.com/homestak-dev/.github/issues/6)
-- [v0.8 Release](https://github.com/homestak-dev/.github/issues/11)
-- [v0.9 Release](https://github.com/homestak-dev/.github/issues/14)
-- [v0.10 Release](https://github.com/homestak-dev/.github/issues/18)
-- [v0.11 Release](https://github.com/homestak-dev/.github/issues/21)
-
-**Current releases** (issues in homestak-dev repo):
-- v0.12+ release issues tracked in [homestak-dev/homestak-dev](https://github.com/homestak-dev/homestak-dev/issues)
-
-## Lessons Learned
-
-See [75-lessons-learned.md](75-lessons-learned.md) for accumulated insights from v0.8-v0.33 releases, organized by release and by category.
-
-**Before each release:** Scan recent lessons to avoid repeating mistakes.
-
-**After each release:** See [70-retrospective.md](70-retrospective.md) for lessons learned codification process.
-
-## Checklist: Release Complete (Phase 60)
-
-- [ ] Dependency order determined (multi-repo)
-- [ ] Version numbers determined
-- [ ] All repos tagged
-- [ ] GitHub releases created
-- [ ] Packer images handled (see Phase 5 - usually skip, update `latest` if changed)
-- [ ] Post-release smoke test passed
-- [ ] After Action Report completed
-- [ ] Housekeeping (branch cleanup) completed
-
-**Next:** Proceed to [Phase 70 (Retrospective)](70-retrospective.md) for lessons learned and release issue closure.
+### Other
+- [55-sprint-close.md](55-sprint-close.md) - Sprint completion before release
+- [70-retrospective.md](70-retrospective.md) - Release retrospective
+- [75-lessons-learned.md](75-lessons-learned.md) - Accumulated insights
+- [../templates/release-issue.md](../templates/release-issue.md) - Release issue template

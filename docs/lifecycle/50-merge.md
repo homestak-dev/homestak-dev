@@ -1,10 +1,21 @@
 # Phase: Merge
 
-Merge integrates validated changes into the protected `master` branch through pull request review. This phase applies to all work types.
+Merge integrates validated changes into the protected `master` branch through pull request review. The merge strategy differs based on branch type.
+
+## Merge Strategies
+
+| Branch Type | Strategy | Rationale |
+|-------------|----------|-----------|
+| Trunk fixes (`fix/`, `enhance/`) | **Squash** | Clean history, one commit per change |
+| Sprint branches (`sprint-N/`) | **Merge commit** | Preserve sprint history, coordinated work |
+| Documentation | **Squash** | Simple, non-functional |
+
+**Default: Squash merge** for trunk-path work.
+**Sprint branches: Merge commit** to preserve the work history.
 
 ## Inputs
 
-- Validated feature branch
+- Validated feature/sprint branch
 - Test results from Validation phase
 - Design artifacts (if applicable)
 
@@ -14,9 +25,10 @@ Merge integrates validated changes into the protected `master` branch through pu
 
 Create pull request with:
 
-**Title:** `<type>(<scope>): <summary>` (matches primary commit)
+**Title:** `<type>(<scope>): <summary>` for trunk PRs, or `Sprint N: Theme` for sprint PRs
 
 **Description template:**
+
 ```markdown
 ## Summary
 Brief description of changes.
@@ -26,65 +38,83 @@ Brief description of changes.
 - [ ] New feature
 - [ ] Refactoring
 - [ ] Documentation
-- [ ] Other: <!-- describe -->
+- [ ] Sprint merge
 
 ## Changes
 - Key change 1
 - Key change 2
 
 ## Testing
-Summary of validation performed.
-- Unit tests added/modified
-- Integration test scenario used (e.g., vm-roundtrip, nested-pve-roundtrip)
-- Manual verification steps
+- Unit tests: [passing/updated]
+- Integration scenario: [scenario name]
+- Validation result: [PASSED]
 
 ## Related Issues
 Closes #<issue-number>
 
 ## Checklist
 - [ ] Tests pass locally
-- [ ] Integration test scenario identified and passes
-- [ ] External tool assumptions verified (test actual CLI behavior)
-- [ ] CHANGELOG.md updated (if user-facing change)
-- [ ] CLAUDE.md updated (if architecture/workflow changed)
-- [ ] Performance claims measured (before/after timing, if applicable)
-- [ ] Prerequisites documented (configs, artifacts, permissions)
+- [ ] Integration scenario passes
+- [ ] CHANGELOG.md updated
+- [ ] CLAUDE.md updated (if architecture changed)
 ```
 
-### 2. Documentation Updates
+### 2. Sprint PR Specifics
 
-Assess and update cross-cutting documentation:
+For sprint PRs:
+
+**Title:** `Sprint 152: Recursive PVE Stabilization`
+
+**Description additions:**
+
+```markdown
+## Sprint Scope
+- iac-driver#52 - Recursive action
+- iac-driver#53 - ConfigResolver update
+
+## Validation Evidence
+- Scenario: recursive-pve-roundtrip --manifest n2-quick
+- Result: PASSED
+- Report: [link]
+
+## Sprint Issue
+Closes #152
+```
+
+### 3. Documentation Updates
+
+Verify documentation is current:
 
 | Documentation | When to Update |
 |---------------|----------------|
-| **CHANGELOG** | User-facing changes (should already be done in Implementation phase) |
+| **CHANGELOG** | User-facing changes (in this PR, not deferred) |
 | **CLAUDE.md** | Architecture, workflow, or interface changes |
 | **README** | Installation, usage, or features changed |
 | **API docs** | Public interfaces changed |
-| **Migration guides** | Breaking changes introduced |
 
 **CHANGELOG in PR, not release:**
 - Bad: "I'll update CHANGELOG during release"
 - Good: CHANGELOG updated in same PR as feature
 
-### 3. CLAUDE.md Update Requirements
-
-Update repo's CLAUDE.md when:
-- Architecture changes
-- New CLI options added
-- New scenarios added
-- New actions or patterns introduced
-- Configuration schema changes
-
-Verify accuracy after changes using the [CLAUDE Guidelines](../CLAUDE-GUIDELINES.md).
-
 ### 4. Pre-Merge Verification
 
 Before requesting review:
-- Rebase on current `master` if needed
-- Verify all tests still pass
-- Confirm no merge conflicts
-- Review diff for unintended changes
+
+```bash
+# Rebase on current master (trunk PRs)
+git fetch origin
+git rebase origin/master
+
+# Or merge master into sprint branch (sprint PRs)
+git fetch origin
+git merge origin/master
+
+# Verify tests still pass
+make test
+
+# Check for conflicts
+git status
+```
 
 ### 5. Human Review and Merge
 
@@ -93,81 +123,119 @@ PR requires human action:
 - Review test coverage
 - Review documentation updates
 - Approve PR
-- Merge PR (see Merge Strategy below)
+- Merge PR using appropriate strategy:
+  - **Squash and merge** for trunk PRs
+  - **Create a merge commit** for sprint PRs
 
-### Merge Strategy
+### 6. Post-Merge Sync
 
-| PR Type | Strategy | Rationale |
-|---------|----------|-----------|
-| Most PRs | **Squash** | Clean history, one logical change per merge |
-| Well-structured multi-commit PRs | **Merge commit** | Preserves meaningful commit breakdown |
-| Rebase | **Avoid** | Complicates history for reviewers |
+**Critical:** After merge, sync local master:
 
-**Default: Squash merge.** Use merge commits only when the PR has intentionally structured commits that tell a story (e.g., "refactor X", then "add Y", then "update tests").
-
-**Single-commit PRs:** Either method produces the same result; squash is fine.
-
-### 6. Post-Merge Verification
-
-After merge:
-- Verify `master` branch CI passes
-- Confirm changes appear as expected
-- **Sync local branch to origin** (required after squash merge):
-  ```bash
-  git fetch origin
-  git checkout master
-  git reset --hard origin/master
-  ```
-- Delete feature branch (optional, per convention)
-
-**Why sync is required:** After GitHub squash-merges a PR, the local `master` branch diverges from `origin/master` because the merge commit SHA differs from local commits. Without `git reset --hard`, subsequent operations (especially during release) will show the branch as "ahead" even though content is identical. This has caused confusion in multiple releases (v0.35, v0.37).
-
-### 7. Prepare for Release Phase
-
-Before proceeding to Release (Phase 60):
-
-**Context management:** Run `/compact` to free context for release activities. Release operations are tool-heavy (preflight, validation, tagging, publishing) and generate significant output. Compacting after Merge provides a clean context boundary.
-
-**When to compact:**
-- After all sprint PRs are merged
-- Before invoking `/release-preflight`
-- Especially important for multi-repo releases
-
-## PR Checklist (Copy to PR)
-
-```markdown
-## PR Readiness Checklist
-
-See [50-merge.md](https://github.com/homestak-dev/homestak-dev/blob/master/docs/lifecycle/50-merge.md) for full guidance.
-
-- [ ] Feature tested end-to-end (not just unit tests)
-- [ ] External tool assumptions verified (test actual CLI behavior)
-- [ ] CHANGELOG entry in this PR
-- [ ] CLAUDE.md updated if architecture changed
-- [ ] Performance claims measured (before/after timing)
-- [ ] Prerequisites documented (configs, artifacts, permissions)
-- [ ] Integration test scenario identified
+```bash
+git fetch origin
+git checkout master
+git reset --hard origin/master
 ```
 
-## Review Checklists
+**Why sync is required:** After GitHub merges a PR (especially squash), the local `master` branch diverges from `origin/master` because commit SHAs differ. Without `git reset --hard`, subsequent operations show the branch as "ahead" even though content is identical.
 
-### Author Self-Review
+### 7. Clean Up Branches
 
-Before requesting review:
-- [ ] I ran the integration test myself
-- [ ] I verified external tool commands work
-- [ ] I updated CHANGELOG in this PR
-- [ ] I documented any prerequisites
-- [ ] I tested with real infrastructure, not mocks
+```bash
+# Delete local feature/sprint branch
+git branch -d feature-branch
 
-### Reviewer Checklist
+# Prune remote tracking refs
+git remote prune origin
 
-When reviewing:
-- [ ] Code logic reviewed
-- [ ] Test coverage adequate
-- [ ] Documentation accurate
-- [ ] No assumptions about external tools
-- [ ] CHANGELOG entry present and accurate
+# For sprint branches, clean up in all affected repos
+for repo in iac-driver ansible; do
+  cd ~/homestak-dev/$repo
+  git checkout master
+  git branch -d sprint-152/recursive-pve
+  git push origin --delete sprint-152/recursive-pve
+done
+```
+
+### 8. Update Sprint Issue
+
+For sprint PRs, update the sprint issue to reflect merge:
+
+```markdown
+## Sprint Log
+
+### YYYY-MM-DD - Merged
+PR #55 merged to master
+- All scope issues delivered
+- Proceeding to sprint close
+```
+
+## Cross-Repo Merges
+
+For sprints touching multiple repos:
+
+### Merge Order
+
+Follow [repository dependency order](00-overview.md#repository-dependency-order):
+
+```
+site-config → tofu → ansible → bootstrap → packer → iac-driver
+```
+
+Upstream repos merge first so downstream can reference their changes.
+
+### Coordinated Merge
+
+1. Create PRs in all affected repos
+2. Review all PRs together for consistency
+3. Merge in dependency order
+4. Sync local master in each repo after merge
+
+## Context Transition
+
+After all sprint PRs are merged, prepare for release or sprint close:
+
+**Run `/compact`** to free context for next phase:
+- Release operations are tool-heavy
+- Fresh context reduces errors
+
+**When to compact:**
+- After all sprint PRs merged
+- Before `/release-preflight`
+- Especially important for multi-repo releases
+
+## Outputs
+
+- Merged PR(s)
+- Updated `master` branch(es)
+- Documentation current
+- Feature/sprint branches cleaned up
+
+## Checklist: Merge Complete
+
+### Trunk PR
+- [ ] PR created with template
+- [ ] CHANGELOG updated
+- [ ] CLAUDE.md updated (if applicable)
+- [ ] Rebased on current master
+- [ ] All checks pass
+- [ ] Human approved
+- [ ] Squash merged
+- [ ] Local master synced
+
+### Sprint PR
+- [ ] PR created with sprint template
+- [ ] All scope issues referenced
+- [ ] Validation evidence linked
+- [ ] CHANGELOG updated
+- [ ] CLAUDE.md updated
+- [ ] Master merged into branch
+- [ ] All checks pass
+- [ ] Human approved
+- [ ] Merge commit created
+- [ ] Local master synced
+- [ ] Sprint branches cleaned up
+- [ ] Sprint issue updated
 
 ## Definition of Done
 
@@ -178,30 +246,16 @@ When reviewing:
 
 ### Tested
 - Unit tests for logic (where applicable)
-- Integration test scenario passes
+- Integration scenario passes
 
 ### Documented
-- CHANGELOG entry in PR (not deferred to release)
+- CHANGELOG entry in PR
 - CLAUDE.md updated for architectural changes
-- CLI help text (`--help`) reflects new options
-- Examples for non-obvious usage
+- CLI help text reflects new options
 
-## Outputs
+## Related Documents
 
-- Merged PR
-- Updated `master` branch
-- Global documentation current
-- Feature branch cleaned up
-
-## Checklist: Merge Complete
-
-- [ ] PR created with complete description
-- [ ] CHANGELOG updated (if applicable)
-- [ ] CLAUDE.md updated (if applicable)
-- [ ] API docs updated (if applicable)
-- [ ] Rebased on current master
-- [ ] All checks pass
-- [ ] Human reviewed and approved
-- [ ] PR merged
-- [ ] Post-merge CI verified
-- [ ] Local master synced (`git reset --hard origin/master`)
+- [40-validation.md](40-validation.md) - Validation before merge
+- [55-sprint-close.md](55-sprint-close.md) - Sprint wrap-up after merge
+- [60-release.md](60-release.md) - Release coordination
+- [80-reference.md](80-reference.md) - Quick reference
