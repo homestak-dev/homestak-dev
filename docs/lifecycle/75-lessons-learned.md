@@ -1,12 +1,18 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.42. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.43. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.43
+
+- **CHANGELOG finalization is not verified by preflight** - Phase 2 requires human attention to move "Unreleased" content to version headers. Unlike tags and clean trees, this step has no automated verification, making it easy to skip accidentally. v0.42 was tagged with #146, #148, #149 still in Unreleased.
+- **Forward-fixing CHANGELOGs is acceptable** - When CHANGELOG attribution errors are discovered post-release, fixing on master preserves accurate history going forward. Tags are immutable snapshots but master is the living documentation.
+- **Multi-session releases compound CHANGELOG risk** - Quick successive releases (v0.41→v0.42) increase risk of skipping Phase 2 CHANGELOG step due to fatigue or haste. Same-session release completion reduces this risk.
 
 ## v0.42
 
