@@ -100,17 +100,7 @@ gita shell make install-deps  # Install deps in all repos
 | `/session` | save, resume, checkpoint | Context preservation across compactions |
 | `/issues` | - | Gather GitHub issues across all repos |
 
-### Supporting Skills
-
-| Skill | Phase | Description |
-|-------|-------|-------------|
-| `/planning-deps` | 10 | Analyze cross-repo dependencies |
-| `/planning-conflicts` | 10 | Analyze file overlap for branch strategy |
-| `/validate-prereqs` | 40 | Check validation host readiness |
-| `/validate-run` | 40 | Run iac-driver validation scenario |
-| `/merge-pr` | 50 | Create PR with template and linked issues |
-
-See [.claude/CLAUDE.md](.claude/CLAUDE.md) for full skill documentation including legacy skills.
+See [.claude/CLAUDE.md](.claude/CLAUDE.md) for full skill documentation.
 
 ## Value Propositions
 
