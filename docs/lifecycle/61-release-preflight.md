@@ -1,5 +1,7 @@
 # Phase 61: Release Preflight
 
+> Part of [Release Lifecycle](60-release.md). See overview for phase sequence and gates.
+
 Preflight checks verify release prerequisites and validation evidence before proceeding.
 
 ## Purpose

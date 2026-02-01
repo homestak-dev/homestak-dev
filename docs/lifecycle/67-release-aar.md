@@ -1,5 +1,7 @@
 # Phase 67: After Action Report
 
+> Part of [Release Lifecycle](60-release.md). See overview for phase sequence and gates.
+
 Document the release execution while details are fresh.
 
 ## Purpose

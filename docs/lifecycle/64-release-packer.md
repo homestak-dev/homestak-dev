@@ -1,5 +1,7 @@
 # Phase 64: Release Packer Images
 
+> Part of [Release Lifecycle](60-release.md). See overview for phase sequence and gates.
+
 Handle packer images for the release.
 
 ## Purpose

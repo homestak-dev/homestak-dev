@@ -1,5 +1,7 @@
 # Phase 66: Release Verify
 
+> Part of [Release Lifecycle](60-release.md). See overview for phase sequence and gates.
+
 Verify all releases were created correctly.
 
 ## Purpose

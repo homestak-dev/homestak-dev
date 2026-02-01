@@ -1,5 +1,7 @@
 # Phase 68: Release Housekeeping
 
+> Part of [Release Lifecycle](60-release.md). See overview for phase sequence and gates.
+
 Clean up branches and perform post-release maintenance.
 
 ## Purpose

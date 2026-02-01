@@ -1,5 +1,7 @@
 # Phase 65: Release Publish
 
+> Part of [Release Lifecycle](60-release.md). See overview for phase sequence and gates.
+
 Create GitHub releases for all repositories.
 
 ## GATE: Human Approval Required

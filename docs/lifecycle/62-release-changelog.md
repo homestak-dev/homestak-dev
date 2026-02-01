@@ -1,5 +1,7 @@
 # Phase 62: Release CHANGELOG
 
+> Part of [Release Lifecycle](60-release.md). See overview for phase sequence and gates.
+
 Update CHANGELOGs to add version headers for the release.
 
 ## Purpose

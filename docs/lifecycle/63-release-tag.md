@@ -1,5 +1,7 @@
 # Phase 63: Release Tags
 
+> Part of [Release Lifecycle](60-release.md). See overview for phase sequence and gates.
+
 Create and push git tags for the release.
 
 ## GATE: Human Approval Required
