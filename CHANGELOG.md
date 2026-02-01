@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.43 - 2026-02-01
+
+### Theme: site-config V2 Schema
+
+Foundation for VM lifecycle architecture: v2 directory structure with JSON schemas for specifications, nodes, and postures.
+
 ### Added
 - Add `--manifest` flag to `release.sh validate` for recursive-pve scenarios (#149)
 
