@@ -6,7 +6,15 @@
 
 ### Theme: site-config V2 Schema
 
-Foundation for VM lifecycle architecture: v2 directory structure with JSON schemas for specifications, nodes, and postures.
+Foundation for VM lifecycle architecture. Primary changes in site-config (v2/ schemas) and bootstrap (`spec validate` command).
+
+- Release alignment with homestak v0.43
+
+## v0.42 - 2026-01-31
+
+### Theme: Release Process Enhancements
+
+Improvements identified during v0.40/v0.41 retrospectives.
 
 ### Added
 - Add `--manifest` flag to `release.sh validate` for recursive-pve scenarios (#149)
