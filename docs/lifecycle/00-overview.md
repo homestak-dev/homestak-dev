@@ -17,37 +17,150 @@ Standardize the development and release process to ensure:
 3. **Document as you go**: Capture decisions and rationale during work, not after.
 4. **Learn from every sprint**: After Action Reports and Retrospectives drive improvement.
 
-## Work Type Classification
+## Key Terminology
 
-| Type | Description | Typical Scope |
-|------|-------------|---------------|
-| **Bug Fix** | Corrects incorrect behavior | 1-2 files, existing tests may need updates |
-| **Minor Enhancement** | Small improvements to existing functionality | Limited scope, low risk |
-| **Feature** | New capability or significant change | Multiple files, new tests, documentation |
+| Term | Definition |
+|------|------------|
+| **Sprint** | A focused work period (2-5 days) containing related issues. May or may not end in a release. |
+| **Release** | A versioned, tagged set of artifacts published to GitHub. Multiple sprints may accumulate before release. |
+| **Trunk** | The `master` branch. Direct commits or quick PRs for simple fixes. |
+| **Sprint branch** | A branch named `sprint-{issue#}/{theme}` for structured multi-issue work. |
+
+## Branch Model: Hybrid
+
+The hybrid branch model supports both quick fixes and structured sprint work:
+
+```
+master ─────●─────●───────────────────●─────●─────●───▶
+            │     │                   ↑     │     │
+          bugfix docs               merge  bugfix docs
+            │     │                   │
+            │     │   sprint-152 ──●───●───┘
+            │     │                f1  f2
+            │     │
+         (trunk path)           (sprint path)
+```
+
+### When to Use Each Path
+
+| Scenario | Path | Branch Name | Merge Strategy | Rationale |
+|----------|------|-------------|----------------|-----------|
+| Bug fix (Simple tier) | Trunk | `fix/123-desc` or direct | Squash | Quick, isolated |
+| Doc updates | Trunk | `docs/topic` or direct | Squash | Non-functional |
+| Single-issue enhancement | Trunk | `enhance/123-desc` | Squash | Simple enough |
+| Multi-issue sprint | Sprint branch | `sprint-152/theme` | Merge commit | Coordinated work, preserve history |
+| Complex/Exploratory work | Sprint branch | `sprint-152/theme` | Merge commit | Benefits from isolation |
+| Cross-repo changes | Sprint branch | Same branch name in affected repos | Merge commit | Coordinated merge |
+
+### Sprint Branch Naming
+
+Format: `sprint-{issue#}/{theme}`
+
+- `{issue#}` is the sprint tracking issue number in homestak-dev
+- `{theme}` is a short kebab-case description
+
+Examples:
+- `sprint-152/recursive-pve` - Sprint #152 focused on recursive PVE stabilization
+- `sprint-160/ci-cd-phase2` - Sprint #160 for CI/CD improvements
+
+## Work Tiers
+
+Work is classified into tiers that determine process rigor:
+
+| Tier | Definition | Session Strategy | Quality Gate | Doc Requirement |
+|------|------------|------------------|--------------|-----------------|
+| **Simple** | Bug fixes, typos, config tweaks | Informal | PR review + tests pass | None expected |
+| **Standard** | Single-issue enhancements | Issue comments | PR + test scenario + smoke test | Update if behavior changes |
+| **Complex** | Multi-issue sprints, architectural changes | Issue + decision log | PR + test plan + validation run | CLAUDE.md required |
+| **Exploratory** | New patterns, research-driven work | Issue + ADR + dead-ends log | PR + ADR approved + integration test | CLAUDE.md + README required |
+
+### Tier Selection Guide
+
+| Question | Simple | Standard | Complex | Exploratory |
+|----------|--------|----------|---------|-------------|
+| Touches multiple repos? | No | Maybe | Often | Usually |
+| Requires design decisions? | No | Minor | Yes | Many |
+| Changes architecture? | No | No | Maybe | Usually |
+| Has clear acceptance criteria? | Yes | Yes | Yes | Discovered during work |
+| Known solution path? | Yes | Yes | Usually | No |
 
 ## Phase Applicability Matrix
 
-| Phase | Bug Fix | Minor Enhancement | Feature |
-|-------|---------|-------------------|---------|
-| 10-Planning | ✓ | ✓ | ✓ |
-| 20-Design | Skip | Lightweight | Full |
-| 30-Implementation | ✓ | ✓ | ✓ |
-| 40-Validation | ✓ | ✓ | ✓ |
-| 50-Merge | ✓ | ✓ | ✓ |
-| 60-Release | ✓ | ✓ | ✓ |
-| 70-Retrospective | ✓ | ✓ | ✓ |
+| Phase | Simple | Standard | Complex | Exploratory |
+|-------|--------|----------|---------|-------------|
+| 10-Sprint Planning | Light | Yes | Full | Full + ADR |
+| 20-Design | Skip | Light | Full | Full + ADR |
+| 25-Documentation | Skip | If changed | Required | Required |
+| 30-Implementation | Yes | Yes | Yes | Yes |
+| 40-Validation | Smoke | Scenario | Full suite | Full + new tests |
+| 50-Merge | Squash | Squash | Merge commit | Merge commit |
+| 55-Sprint Close | Skip | Quick | Full | Full + ADR archive |
+| 60-Release | Batched | Batched | Batched | Batched |
+| 70-Retrospective | Skip | Brief | Full | Full + lessons |
 
-## Human-in-the-Loop Touchpoints
+## Sprint vs Release Lifecycle
 
-| Touchpoint | Phase | Action |
-|------------|-------|--------|
-| Sprint initiation | Planning | Human defines scope and priorities |
-| Design review | Design | Human approves approach before implementation |
-| Implementation review | Implementation | Human reviews proposed changes |
-| Validation review | Validation | Human reviews or executes integration tests |
-| PR approval | Merge | Human reviews, approves, and merges PR |
-| Release execution | Release | Human executes release commands |
-| Retrospective | Retrospective | Human reflects on process and codifies lessons |
+### Sprint Lifecycle
+
+A sprint is a focused work period with its own lifecycle:
+
+```
+Sprint Issue Created
+        │
+        ▼
+   10-Sprint Planning ───▶ Scope defined, branches created
+        │
+        ▼
+   20-Design ─────────────▶ Technical approach (scaled to tier)
+        │
+        ▼
+   25-Documentation ──────▶ CLAUDE.md, README updates
+        │
+        ▼
+   30-Implementation ─────▶ Code, tests, CHANGELOG
+        │
+        ▼
+   40-Validation ─────────▶ Integration tests
+        │
+        ▼
+   50-Merge ──────────────▶ PR merged to master
+        │
+        ▼
+   55-Sprint Close ───────▶ Retrospective, update release issue
+        │
+        ▼
+   Sprint Issue Closed
+```
+
+### Release Lifecycle
+
+A release aggregates one or more sprints:
+
+```
+Release Issue Created (theme-first)
+        │
+        ├──── Sprint A completed ───▶ Update release issue
+        │
+        ├──── Sprint B completed ───▶ Update release issue
+        │
+        ▼
+   60-Release ────────────▶ When critical mass reached
+        │
+        ├── 61-Preflight ──────▶ Check validation evidence
+        ├── 62-CHANGELOG ──────▶ Version headers
+        ├── 63-Tags ───────────▶ [GATE] Create tags
+        ├── 64-Packer ─────────▶ Image handling
+        ├── 65-Publish ────────▶ [GATE] GitHub releases
+        ├── 66-Verify ─────────▶ Verification
+        ├── 67-AAR ────────────▶ After Action Report
+        └── 68-Housekeeping ───▶ Branch cleanup
+        │
+        ▼
+   70-Retrospective ──────▶ Release retrospective
+        │
+        ▼
+   Release Issue Closed
+```
 
 ## Multi-Repo Structure
 
@@ -78,11 +191,31 @@ Releases follow dependency order (downstream depends on upstream):
 
 All repos get the same version tag on each release, even if unchanged. This simplifies tracking - "homestak v0.18" means all repos at v0.18.
 
-## Sprint Cadence
+### Cross-Repo Sprint Branches
 
-Typical sprint: 2-3 days containing either:
-- 3-8 issues (bug fixes and minor enhancements), OR
-- 1-2 features
+For sprints touching multiple repos, create the same branch name in each affected repo:
+
+```bash
+# Create sprint branch in all affected repos
+for repo in iac-driver ansible tofu; do
+  cd ~/homestak-dev/$repo
+  git checkout -b sprint-152/recursive-pve
+done
+```
+
+## Human-in-the-Loop Touchpoints
+
+| Touchpoint | Phase | Action |
+|------------|-------|--------|
+| Sprint initiation | Sprint Planning | Human defines scope and priorities |
+| Tier classification | Sprint Planning | Human approves work tier |
+| Design review | Design | Human approves approach before implementation |
+| Implementation review | Implementation | Human reviews proposed changes |
+| Validation review | Validation | Human reviews or executes integration tests |
+| PR approval | Merge | Human reviews, approves, and merges PR |
+| Sprint close | Sprint Close | Human reviews retrospective |
+| Release gates | Release (63, 65) | Human approves tags and publishing |
+| Retrospective | Retrospective | Human reflects on process and codifies lessons |
 
 ## Validation Scenarios
 
@@ -96,12 +229,30 @@ Integration testing uses iac-driver scenarios:
 
 ## Related Documents
 
-- [10-planning.md](10-planning.md) - Sprint planning and backlog formation
+### Lifecycle Phases
+- [05-session-management.md](05-session-management.md) - Session and context management
+- [10-sprint-planning.md](10-sprint-planning.md) - Sprint planning and branch creation
 - [20-design.md](20-design.md) - Design artifacts and review
+- [25-documentation.md](25-documentation.md) - Knowledge management
 - [30-implementation.md](30-implementation.md) - Development, testing, and documentation
 - [40-validation.md](40-validation.md) - Integration testing
-- [50-merge.md](50-merge.md) - PR process and global documentation
-- [60-release.md](60-release.md) - Release coordination and tagging
-- [70-retrospective.md](70-retrospective.md) - Retrospective and lessons learned
+- [50-merge.md](50-merge.md) - PR process and merge strategies
+- [55-sprint-close.md](55-sprint-close.md) - Sprint retrospective and release readiness
+- [60-release.md](60-release.md) - Release coordination overview
+- [61-release-preflight.md](61-release-preflight.md) - Preflight checks
+- [62-release-changelog.md](62-release-changelog.md) - CHANGELOG updates
+- [63-release-tag.md](63-release-tag.md) - Tag creation
+- [64-release-packer.md](64-release-packer.md) - Packer images
+- [65-release-publish.md](65-release-publish.md) - GitHub releases
+- [66-release-verify.md](66-release-verify.md) - Verification
+- [67-release-aar.md](67-release-aar.md) - After Action Report
+- [68-release-housekeeping.md](68-release-housekeeping.md) - Branch cleanup
+- [70-retrospective.md](70-retrospective.md) - Release retrospective and lessons learned
 - [75-lessons-learned.md](75-lessons-learned.md) - Accumulated release insights
-- [../templates/](../templates/) - Reusable templates for AAR, retrospective, issues
+- [80-reference.md](80-reference.md) - Quick reference and checklists
+
+### Templates
+- [../templates/sprint-issue.md](../templates/sprint-issue.md) - Sprint tracking issue
+- [../templates/release-issue.md](../templates/release-issue.md) - Release planning issue
+- [../templates/aar.md](../templates/aar.md) - After Action Report
+- [../templates/retrospective.md](../templates/retrospective.md) - Retrospective

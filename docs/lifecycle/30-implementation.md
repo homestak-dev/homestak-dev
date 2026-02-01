@@ -1,18 +1,26 @@
 # Phase: Implementation
 
-Implementation covers development, unit testing, and code-level documentation. This phase applies to all work types.
+Implementation covers development, unit testing, and code-level documentation. This phase applies to all work tiers.
 
 ## Inputs
 
-- Approved design (or direct from Planning for bug fixes)
+- Approved design (or direct from Planning for Simple tier)
 - Acceptance criteria
 - Existing codebase
 
+## Branch Strategy by Path
+
+| Path | Branch Type | From |
+|------|-------------|------|
+| Trunk | Feature branch | `master` |
+| Sprint | Sprint branch | Already created in Planning |
+
 ## Activities
 
-### 1. Branch Creation
+### 1. Branch Creation (Trunk Path)
 
-Create a feature branch from `master`:
+For trunk-path work (Simple/Standard tier), create a feature branch:
+
 ```bash
 git checkout master
 git pull origin master
@@ -28,6 +36,15 @@ Examples:
 - `fix/42-null-pointer-handler`
 - `enhance/108-improve-logging`
 - `feature/15-user-authentication`
+
+### 1b. Sprint Branch (Sprint Path)
+
+For sprint-path work (Complex/Exploratory tier), the branch was created during Planning:
+
+```bash
+git checkout sprint-152/recursive-pve
+git pull origin sprint-152/recursive-pve
+```
 
 **Note:** For small fixes without associated issues, the issue number is optional.
 

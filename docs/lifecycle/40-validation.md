@@ -1,10 +1,19 @@
 # Phase: Validation
 
-Validation verifies the implementation through testing. This phase applies to all work types, with scope scaled to risk.
+Validation verifies implementation through integration testing. This phase applies during sprints to ensure code works before merge and before release.
+
+## Validation Timing
+
+| Context | When | Purpose |
+|---------|------|---------|
+| **Sprint validation** | Before PR merge | Verify implementation works |
+| **Release validation** | Before tagging | Confirm no regressions |
+
+Sprint validation is the primary gate. Release validation checks for evidence that sprints were validated.
 
 ## Unit Tests vs Integration Tests
 
-Homestak uses two levels of testing with different purposes and timing:
+Homestak uses two levels of testing:
 
 | Aspect | Unit Tests | Integration Tests |
 |--------|------------|-------------------|
@@ -12,210 +21,231 @@ Homestak uses two levels of testing with different purposes and timing:
 | **Scope** | Single function/class | Full scenarios (VM lifecycle, playbooks) |
 | **Speed** | Fast (seconds) | Slow (minutes) |
 | **Dependencies** | Mocked | Real infrastructure |
-| **When run** | Every PR (CI) | Pre-release or on-demand |
+| **When run** | Every PR (CI) | Before merge, before release |
 | **Location** | `tests/` directory | iac-driver scenarios |
 
 **Unit tests** (`make test` in each repo):
 - Run automatically in CI on every push/PR
 - Must pass before merge
 - Test logic patterns, argument parsing, error handling
-- Use mocks for external dependencies (SSH, tofu, ansible)
+- Use mocks for external dependencies
 
 **Integration tests** (iac-driver scenarios):
-- Run manually or during release validation
-- Require real PVE infrastructure
+- Run manually before merge for IaC changes
+- Required before release
 - Test full workflows: provision → boot → verify → destroy
-- Catch issues that unit tests miss (timing, network, API behavior)
+- Catch issues that unit tests miss
 
 ## Inputs
 
-- Completed implementation on feature branch
-- Acceptance criteria
+- Completed implementation on feature/sprint branch
+- Acceptance criteria from issue
 - Test plan from Design phase
 - Unit tests passing in CI
-- Existing integration test suite
 
 ## Activities
 
-### 1. Integration Test Scope
+### 1. Determine Test Scope
 
-Determine test scope based on change:
+Based on work tier and change type:
 
-| Change Type | Test Scope |
-|-------------|------------|
-| Isolated bug fix | Targeted tests around affected area |
-| Enhancement | Related feature tests + regression |
-| Feature | New feature tests + full regression |
+| Tier | Validation Requirement |
+|------|------------------------|
+| Simple | Smoke test (unit tests + manual check) |
+| Standard | Integration scenario |
+| Complex | Full scenario suite |
+| Exploratory | Full suite + new scenario coverage |
 
-### 2. Required Validation by Change Type
+### 2. Select Validation Scenario
 
-Certain changes require validation testing **before merge**, not just code review:
+| Change Type | Scenario | Duration |
+|-------------|----------|----------|
+| Documentation, CLI, process | `vm-roundtrip` | ~2 min |
+| Tofu/ansible changes | `vm-roundtrip` | ~2 min |
+| Recursive/manifest code | `recursive-pve-roundtrip --manifest n1-basic` | ~3 min |
+| PVE/nested/packer changes | `recursive-pve-roundtrip --manifest n2-quick` | ~9 min |
+
+### 3. Required Validation by Change Type
+
+Certain changes require validation **before merge**:
 
 | Change Type | Required Validation |
 |-------------|---------------------|
 | Packer template changes | Build image, run `vm-roundtrip` or `nested-pve-roundtrip` |
 | Boot/startup optimizations | Measure actual timing before and after |
-| Cloud-init modifications | Full VM lifecycle test (provision → boot → verify) |
+| Cloud-init modifications | Full VM lifecycle test |
 | Tofu module changes | `vm-roundtrip` on target environment |
-| Ansible role changes | Run playbook on test VM, verify behavior |
+| Ansible role changes | Run playbook on test VM |
 | iac-driver action changes | Scenario that exercises the action |
 | CLI commands | Full command flow |
 
-### 3. External Tool Verification
+### 4. Verify Prerequisites
 
-**CRITICAL:** Do not assume CLI flags exist. Test actual behavior.
+Before running validation:
 
-**Bad (assumption):**
+| Prerequisite | Check Command |
+|--------------|---------------|
+| Node configuration | `ls site-config/nodes/$(hostname).yaml` |
+| API token | `grep api_tokens site-config/secrets.yaml` |
+| Secrets decrypted | `ls site-config/secrets.yaml` |
+| Packer images | `ls /var/lib/vz/template/iso/debian-*-custom.img` |
+| Nested virtualization | `cat /sys/module/kvm_intel/parameters/nested` |
+
+Or use preflight check:
+
 ```bash
-# Assumed gh release list supports --json
-gh release list --json name  # DOES NOT EXIST
+cd iac-driver
+./run.sh --preflight --host father
 ```
 
-**Good (verification):**
+### 5. Execute Validation
+
+**Using iac-driver:**
+
 ```bash
-# Test in terminal first, then implement
-gh release view v0.19 --json assets
+cd ~/homestak-dev/iac-driver
+
+# Quick validation (~2 min)
+./run.sh --scenario vm-roundtrip --host father
+
+# Recursive validation (~3 min)
+./run.sh --scenario recursive-pve-roundtrip --manifest n1-basic --host father
+
+# Full nested-pve validation (~9 min)
+./run.sh --scenario recursive-pve-roundtrip --manifest n2-quick --host father
 ```
 
-### 4. Performance Validation
+**Constructor/destructor separately (for debugging):**
+
+```bash
+./run.sh --scenario nested-pve-constructor --host father -C /tmp/nested-pve.ctx
+# ... inspect inner PVE ...
+./run.sh --scenario nested-pve-destructor --host father -C /tmp/nested-pve.ctx
+```
+
+### 6. Document Results
+
+Post validation results to the sprint issue:
+
+```markdown
+## Validation - YYYY-MM-DD
+
+**Scenario:** vm-roundtrip
+**Host:** father
+**Result:** PASSED
+
+**Summary:**
+- VM provisioned in 6.8s
+- SSH accessible in 45s
+- Guest agent responsive
+- Cleanup complete
+
+**Report:** `iac-driver/reports/YYYYMMDD-HHMMSS.passed.md`
+```
+
+For failures, include:
+- Phase that failed
+- Error message
+- Root cause analysis
+- Fix applied
+
+### 7. Performance Validation
 
 If claiming optimization:
 
 1. Measure baseline (before change)
 2. Apply change
 3. Measure with change
-4. Document results in PR
+4. Document results
 
-**Example (v0.19 packer#13):**
+```markdown
+## Performance Validation
+
+**Metric:** Guest agent response time
+**Baseline:** 135s
+**After change:** 133s
+**Conclusion:** No significant improvement - reverted optimization
 ```
-Baseline (debian-13-custom): 135s guest agent response
-Optimized (same image): 133s guest agent response
-Result: No significant improvement - revert optimization
-```
 
-### 5. Test Execution
+### 8. External Tool Verification
 
-Run integration tests appropriate to scope:
-- New tests for new functionality
-- Existing tests for regression
-- Cross-repo tests if changes span repositories
+**CRITICAL:** Do not assume CLI flags exist. Test actual behavior.
 
-**Using iac-driver:**
 ```bash
-# Quick validation (~2 min)
-./run.sh --scenario vm-roundtrip --host father
+# Bad - assumption
+gh release list --json name  # DOES NOT EXIST
 
-# Full nested-pve roundtrip (~8 min)
-./run.sh --scenario nested-pve-roundtrip --host father
-
-# Or constructor + destructor separately with context persistence
-./run.sh --scenario nested-pve-constructor --host father -C /tmp/nested-pve.ctx
-# ... verify inner PVE, check test VM ...
-./run.sh --scenario nested-pve-destructor --host father -C /tmp/nested-pve.ctx
+# Good - verification first
+gh release view v0.19 --json assets  # Test actual command
 ```
-
-**Document results:**
-- Which test suites ran
-- Pass/fail summary
-- Any flaky or skipped tests (with rationale)
-
-### 6. Issue Documentation
-
-For any failures:
-- Identify root cause
-- Determine if failure is pre-existing or introduced
-- Fix introduced failures before proceeding
-- Document pre-existing failures for backlog
-
-### 7. Human Review/Execution
-
-Integration tests involve human at this checkpoint:
-- Review test plan and scope
-- Review test results
-- Execute tests directly when appropriate (environment access, credentials, etc.)
-- Approve validation as complete
 
 ## Validation Host Prerequisites
 
-A "bootstrapped" host is not automatically validation-ready:
+Quick check for validation readiness:
 
-| Prerequisite | Description | Setup Command |
-|--------------|-------------|---------------|
-| **Node configuration** | `site-config/nodes/{hostname}.yaml` must exist | `cd site-config && make node-config` |
-| **API token** | Token in `site-config/secrets.yaml` | `pveum user token add root@pam homestak --privsep 0` |
-| **Secrets decrypted** | `site-config/secrets.yaml` must be decrypted | `cd site-config && make decrypt` |
-| **Packer images** | Images published to local PVE storage | `cd packer && ./publish.sh` or download from release |
-| **SSH access** | SSH key access to the validation host | Standard SSH setup |
-| **Nested virtualization** | For nested-pve scenarios | Check: `cat /sys/module/kvm_intel/parameters/nested` |
-
-**Quick check for validation readiness:**
 ```bash
 HOST=$(hostname)
 
 # 1. Check node config exists
 ls site-config/nodes/${HOST}.yaml 2>/dev/null || echo "MISSING: node config"
 
-# 2. Check API token exists (requires decrypted secrets)
-grep -q "api_tokens:" site-config/secrets.yaml && \
-  grep -q "${HOST}:" site-config/secrets.yaml && \
-  echo "OK: API token found" || echo "MISSING: API token"
+# 2. Check API token exists
+grep -q "${HOST}:" site-config/secrets.yaml && echo "OK: API token" || echo "MISSING: API token"
 
 # 3. Check packer images
 ls /var/lib/vz/template/iso/debian-*-custom.img 2>/dev/null || echo "MISSING: packer images"
 
 # 4. Check nested virtualization
-cat /sys/module/kvm_intel/parameters/nested | grep -q Y && \
-  echo "OK: nested virt enabled" || echo "WARNING: nested virt disabled"
+cat /sys/module/kvm_intel/parameters/nested | grep -q Y && echo "OK: nested virt" || echo "WARNING: no nested virt"
 ```
 
 **Common issues:**
 
 | Issue | Solution |
 |-------|----------|
-| `API token not found` | Generate token with `pveum`, add to secrets.yaml, run `make encrypt` |
-| `node config missing` | Run `make node-config` on the PVE host |
-| `packer images missing` | Run `./publish.sh` or download from packer release |
-| `tofu provider version conflict` | Clear stale provider cache: `rm -rf iac-driver/.states/*/data/providers/` |
+| `API token not found` | Generate with `pveum`, add to secrets.yaml |
+| `node config missing` | Run `make node-config` on PVE host |
+| `packer images missing` | Run `./publish.sh` or download from release |
+| `provider version conflict` | Clear: `rm -rf iac-driver/.states/*/data/providers/` |
 
 ## Outputs
 
 - Test execution results documented
-- All introduced issues resolved
-- Human approval of validation
+- All failures resolved
+- Performance measured (if applicable)
+- Evidence in sprint issue for release
 
 ## Checklist: Validation Complete
 
-- [ ] Integration test scope determined
-- [ ] External tool assumptions verified (tested actual CLI behavior)
-- [ ] Appropriate test suites executed
-- [ ] Performance claims measured (if applicable)
-- [ ] Results documented
+- [ ] Test scope determined based on tier
+- [ ] Prerequisites verified
+- [ ] Appropriate scenario executed
+- [ ] Results documented in sprint issue
+- [ ] External tool assumptions verified
+- [ ] Performance measured (if claimed)
 - [ ] No introduced failures remain
-- [ ] Pre-existing issues documented (if any)
-- [ ] Human reviewed and approved
 
-## Anti-Patterns (Lessons from v0.8-v0.19)
+## Anti-Patterns
 
 ### Don't Ship Untested Optimizations
 
 If you claim "faster" or "optimized":
-
 1. Measure baseline
 2. Measure with change
 3. Include results in PR
 4. Revert if no improvement
 
-**v0.19 example:** "Boot time optimization" was never validated against actual boot times. The change broke networking entirely.
-
 ### Don't Assume Prerequisite State
 
-Document explicitly:
-- What configs must exist
-- What artifacts must be available
-- What infrastructure must be running
-
-**v0.18 example:** `packer --copy` assumed SHA256SUMS existed in previous releases - it didn't.
+Document explicitly what must exist before validation can run.
 
 ### Don't Skip Validation for "Simple" Changes
 
-**v0.19:** A "simple" packer optimization broke networking because it was never tested with actual VM provisioning. Validation at PR time catches issues early.
+A "simple" packer optimization broke networking in v0.19 because it was never tested with actual VM provisioning.
+
+## Related Documents
+
+- [30-implementation.md](30-implementation.md) - Unit testing during implementation
+- [55-sprint-close.md](55-sprint-close.md) - Sprint validation wrap-up
+- [61-release-preflight.md](61-release-preflight.md) - Release validation evidence check
+- [80-reference.md](80-reference.md) - Validation scenario reference

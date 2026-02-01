@@ -91,22 +91,16 @@ gita shell make install-deps  # Install deps in all repos
 
 ## Claude Code Skills
 
-| Skill | Phase | Description |
-|-------|-------|-------------|
+### Primary Skills
+
+| Skill | Subcommands | Description |
+|-------|-------------|-------------|
+| `/sprint` | plan, init, validate, sync, merge, close | Sprint lifecycle management |
+| `/release` | plan init, plan update, execute | Release lifecycle with gates |
+| `/session` | save, resume, checkpoint | Context preservation across compactions |
 | `/issues` | - | Gather GitHub issues across all repos |
-| `/planning-init` | 10 | Initialize release planning, create issue |
-| `/planning-deps` | 10 | Analyze cross-repo dependencies |
-| `/planning-conflicts` | 10 | Analyze file overlap for branch strategy |
-| `/validate-prereqs` | 40 | Check validation host readiness |
-| `/validate-run` | 40 | Run iac-driver validation scenario |
-| `/merge-pr` | 50 | Create PR with template and linked issues |
-| `/release-preflight` | 60 | Check release prerequisites |
-| `/release-changelog` | 60 | Update CHANGELOGs for release |
-| `/release-validate` | 60 | Run integration tests |
-| `/release-tag` | 60 | Create git tags (human gate) |
-| `/release-publish` | 60 | Create GitHub releases (human gate) |
-| `/release-verify` | 60 | Verify releases and generate AAR |
-| `/release-housekeeping` | 60 | Clean up branches |
+
+See [.claude/CLAUDE.md](.claude/CLAUDE.md) for full skill documentation.
 
 ## Value Propositions
 

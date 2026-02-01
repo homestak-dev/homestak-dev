@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+### Theme: Lifecycle Overhaul
+
+Major restructuring of development lifecycle to decouple sprints from releases.
+
+### Added
+- New `/sprint` skill with subcommands: plan, init, validate, sync, merge, close (#157)
+- New `/release` skill with subcommands: plan init, plan update, execute (#157)
+- New `/session` skill with subcommands: save, resume, checkpoint (#157)
+- New lifecycle docs: 05-session-management.md, 25-documentation.md, 55-sprint-close.md, 80-reference.md (#157)
+- Split release phases into individual files: 61-68 (#157)
+- Sprint issue template: docs/templates/sprint-issue.md (#157)
+
+### Changed
+- Renamed 10-planning.md to 10-sprint-planning.md with sprint-focused workflow (#157)
+- Updated 00-overview.md with hybrid branch model and work tiers (#157)
+- Updated 40-validation.md for sprint-level validation (#157)
+- Updated 50-merge.md to distinguish sprint vs trunk merge strategies (#157)
+- Updated 60-release.md as overview document (phases moved to 61-68) (#157)
+- Updated 70-retrospective.md for release-only retrospective (#157)
+- Updated release-issue.md template for theme-first planning (#157)
+- Updated CLAUDE.md files with new skill structure (#157)
+
+### Documentation
+- Added work tier classification: Simple, Standard, Complex, Exploratory (#157)
+- Added hybrid branch model: trunk path vs sprint path (#157)
+- Added session management guidance for context preservation (#157)
+- Added knowledge management phase (25-documentation.md) (#157)
+
 ## v0.43 - 2026-02-01
 
 ### Theme: site-config V2 Schema

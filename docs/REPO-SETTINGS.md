@@ -88,6 +88,7 @@ In addition to GitHub's defaults, these custom labels are used across homestak-d
 |-------|-------|-------------|
 | `epic` | `#3B0A80` | Epic issue tracking multiple sub-tasks |
 | `refactor` | `#FEF2C0` | Code refactoring or cleanup |
+| `sprint` | `#1D76DB` | Sprint planning and tracking issues |
 | `release` | `#0E8A16` | Release planning and coordination |
 | `testing` | `#BFD4F2` | Test coverage or testing infrastructure |
 | `security` | `#D93F0B` | Security-related issues |
@@ -97,6 +98,7 @@ In addition to GitHub's defaults, these custom labels are used across homestak-d
 ```bash
 gh label create epic --repo homestak-dev/REPO_NAME --description "Epic issue tracking multiple sub-tasks" --color 3B0A80
 gh label create refactor --repo homestak-dev/REPO_NAME --description "Code refactoring or cleanup" --color FEF2C0
+gh label create sprint --repo homestak-dev/REPO_NAME --description "Sprint planning and tracking issues" --color 1D76DB
 gh label create release --repo homestak-dev/REPO_NAME --description "Release planning and coordination" --color 0E8A16
 gh label create testing --repo homestak-dev/REPO_NAME --description "Test coverage or testing infrastructure" --color BFD4F2
 gh label create security --repo homestak-dev/REPO_NAME --description "Security-related issues" --color D93F0B
@@ -159,11 +161,15 @@ gh api repos/homestak-dev/NEW_REPO/vulnerability-alerts -X PUT
 
 | Setting | Value | Notes |
 |---------|-------|-------|
-| Allow squash merging | Enabled | Default merge method |
-| Allow merge commits | Enabled | For well-structured PRs |
+| Allow squash merging | Enabled | Default for trunk PRs |
+| Allow merge commits | Enabled | For sprint branch PRs |
 | Allow rebase merging | Disabled | Avoid history complications |
 | Default merge method | Squash | Matches [50-merge.md](lifecycle/50-merge.md) guidance |
 | Auto-delete head branches | Enabled | Prevents stale branch accumulation (v0.21+) |
+
+**Merge strategy by path:**
+- **Trunk path:** Squash merge (clean history for small changes)
+- **Sprint path:** Merge commit (preserves sprint branch history)
 
 **CLI to configure merge methods:**
 ```bash
