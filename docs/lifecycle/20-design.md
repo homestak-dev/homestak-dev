@@ -96,6 +96,35 @@ Produce design artifacts covering:
 
 Use the [Design Summary Template](../templates/design-summary.md) for structured documentation.
 
+### Design Artifact Location
+
+Where to put design documentation depends on its intended lifespan:
+
+| Design Type | Location | Rationale |
+|-------------|----------|-----------|
+| Ephemeral (single issue) | Issue comment | Self-contained, no git clutter |
+| Long-lasting (reference) | `docs/designs/` | Discoverable, versioned |
+| Cross-release (architecture) | `docs/designs/` + ADR | Permanent record |
+
+**Guidelines by tier:**
+
+| Tier | Recommended Location |
+|------|---------------------|
+| Simple | Issue comment (if any design needed) |
+| Standard | Issue comment or sprint issue |
+| Complex | `docs/designs/` if others will reference |
+| Exploratory | Always `docs/designs/` + ADR |
+
+**File naming for `docs/designs/`:**
+- Pattern: `vX.Y-<feature-name>.md`
+- Examples: `v0.45-specify-server.md`, `v0.45-specify-client.md`
+
+**When to use `docs/designs/`:**
+- Design will be referenced beyond the current sprint
+- Multiple sprints build on the same architecture
+- Design decisions affect multiple repos
+- Onboarding documentation for future contributors
+
 ### Design Considerations
 
 | Consideration | Questions to Ask |

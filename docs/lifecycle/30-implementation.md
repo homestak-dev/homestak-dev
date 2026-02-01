@@ -67,6 +67,18 @@ Implement changes following:
 - Tests must pass locally before proceeding
 - **Attach test results to the originating issue** as a comment
 
+**When to write unit tests:**
+
+| Change Type | Unit Tests Required? | Notes |
+|-------------|---------------------|-------|
+| CLI argument parsing | Yes | Test flag combinations, edge cases |
+| New Python module | Yes | Test logic in isolation |
+| Shell script functions | Yes (bats) | Test argument handling, output |
+| Ansible role | No | Use integration test (playbook run) |
+| Tofu module | No | Use integration test (vm-roundtrip) |
+| Documentation only | No | Review is sufficient |
+| Configuration changes | No | Integration test validates |
+
 **Run tests locally:**
 ```bash
 make test  # Run unit tests for the current repo
@@ -79,10 +91,19 @@ make lint  # Run linters (if available)
 |------|-----------|--------------|----------|
 | packer | bats-core | `make test` | `test/*.bats` |
 | iac-driver | pytest | `make test` | `tests/test_*.py` |
-| bootstrap | bats-core | `make test` | `test/*.bats` |
+| bootstrap | bats-core | `make test` | `tests/*.bats` |
 | homestak-dev | bats-core | `make test` | `test/*.bats` |
 
 **Test file conventions:** Follow repository patterns (e.g., `test_*.py` for Python, `*.bats` for bash)
+
+**Bats vs shell scripts:**
+
+| Type | Purpose | When to Use |
+|------|---------|-------------|
+| Bats tests (`*.bats`) | CI-friendly unit tests | Argument parsing, output validation, error handling |
+| Shell scripts (`test_*.sh`) | Manual integration tests | End-to-end flows, network operations, multi-step workflows |
+
+Bats tests run in CI on every push/PR. Shell integration tests are run manually before merge.
 
 **CI enforcement:** Unit tests run automatically on push/PR to master. PRs with failing tests will not pass CI checks.
 

@@ -56,14 +56,33 @@ Based on work tier and change type:
 | Complex | Full scenario suite |
 | Exploratory | Full suite + new scenario coverage |
 
-### 2. Select Validation Scenario
+### 2. Select Validation Scenario ("Size to Fit")
+
+Not every change needs full integration testing. Match validation effort to change risk:
 
 | Change Type | Scenario | Duration |
 |-------------|----------|----------|
+| Documentation only | None (review) | 0 |
+| CLI argument/help text | Unit tests only | seconds |
+| CLI with new behavior | Manual command test | ~1 min |
 | Documentation, CLI, process | `vm-roundtrip` | ~2 min |
 | Tofu/ansible changes | `vm-roundtrip` | ~2 min |
 | Recursive/manifest code | `recursive-pve-roundtrip --manifest n1-basic` | ~3 min |
 | PVE/nested/packer changes | `recursive-pve-roundtrip --manifest n2-quick` | ~9 min |
+
+**Size to Fit principle:** Use the lightest validation that proves the change works. Don't run 9-minute nested-pve scenarios for a CLI help text fix.
+
+**When unit tests are sufficient:**
+- Argument parsing changes (test with bats)
+- Error message updates
+- Help text modifications
+- Pure refactoring with existing test coverage
+
+**When integration tests are required:**
+- Any IaC code (tofu, ansible, packer)
+- Changes affecting VM lifecycle
+- Network or SSH configuration
+- Cloud-init modifications
 
 ### 3. Required Validation by Change Type
 

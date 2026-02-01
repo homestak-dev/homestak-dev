@@ -7,6 +7,11 @@
 Major restructuring of development lifecycle to decouple sprints from releases.
 
 ### Added
+- Add phase doc loading guidance to sprint skill (#165)
+- Add `--all` flag to `/sprint merge` for multi-repo sprints (#167)
+- Add design artifact location guidance to 20-design.md (#163)
+- Add unit testing guidance to 30-implementation.md (#166)
+- Add "size to fit" validation guidance to 40-validation.md (#166)
 - New `/sprint` skill with subcommands: plan, init, validate, sync, merge, close (#157)
 - New `/release` skill with subcommands: plan init, plan update, execute (#157)
 - New `/session` skill with subcommands: save, resume, checkpoint (#157)
