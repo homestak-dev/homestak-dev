@@ -1,12 +1,18 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.44. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.45. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.45
+
+- **Release execute must continue through AAR and Retrospective** - The `/release execute` skill should automatically generate AAR and Retrospective after Housekeeping, not stop and prompt the user to complete them manually. The user reviews and approves, but doesn't generate. This release initially stopped after Phase 67, requiring correction.
+- **Sprint validation doesn't satisfy release validation gate** - Even when all sprints have validation evidence (spec-vm-roundtrip, vm-roundtrip), the release.sh state file tracks its own validation phase. Running `release.sh validate` is required during release execution to satisfy the tag precondition.
+- **Phase reordering (67↔68) improves AAR completeness** - Moving Housekeeping before AAR (implemented in v0.45) allows the AAR to include branch cleanup results and any issues discovered during housekeeping. This is a process improvement from v0.44 lesson.
 
 ## v0.44
 
