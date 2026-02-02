@@ -80,4 +80,4 @@ Link follow-up issues in the AAR.
 
 ## Next Phase
 
-Proceed to [70-retrospective.md](70-retrospective.md) for release retrospective and issue closure.
+Proceed to [69-retrospective.md](69-retrospective.md) for release retrospective and issue closure.

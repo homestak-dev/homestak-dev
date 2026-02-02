@@ -245,9 +245,9 @@ Integration testing uses iac-driver scenarios:
 - [64-release-packer.md](64-release-packer.md) - Packer images
 - [65-release-publish.md](65-release-publish.md) - GitHub releases
 - [66-release-verify.md](66-release-verify.md) - Verification
-- [67-release-aar.md](67-release-aar.md) - After Action Report
-- [68-release-housekeeping.md](68-release-housekeeping.md) - Branch cleanup
-- [70-retrospective.md](70-retrospective.md) - Release retrospective and lessons learned
+- [67-release-housekeeping.md](67-release-housekeeping.md) - Branch cleanup
+- [68-release-aar.md](68-release-aar.md) - After Action Report
+- [69-retrospective.md](69-retrospective.md) - Release retrospective and lessons learned
 - [75-lessons-learned.md](75-lessons-learned.md) - Accumulated release insights
 - [80-reference.md](80-reference.md) - Quick reference and checklists
 

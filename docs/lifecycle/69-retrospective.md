@@ -1,4 +1,4 @@
-# Phase: Retrospective
+# Phase 69: Retrospective
 
 Retrospective captures lessons learned and closes the release cycle. This phase completes the development lifecycle.
 
@@ -7,7 +7,7 @@ Retrospective captures lessons learned and closes the release cycle. This phase 
 | Type | When | Scope | Depth |
 |------|------|-------|-------|
 | Sprint | At sprint close (55) | Sprint execution | Brief (in sprint issue) |
-| Release | After release (70) | Full release cycle | Full (dedicated section) |
+| Release | After release (69) | Full release cycle | Full (dedicated section) |
 
 Sprint retrospectives are documented in sprint issues during Phase 55.
 This document covers release retrospectives.
