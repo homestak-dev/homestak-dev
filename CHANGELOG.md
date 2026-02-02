@@ -6,6 +6,7 @@
 - Reorder release phases: Housekeeping (67) before AAR (68) (#170)
   - AAR can now document issues discovered during branch cleanup
   - Renumber Retrospective from 70 to 69 (removes gap)
+  - Rename to 69-release-retro.md for naming consistency
   - Updated cross-references in all lifecycle docs
 
 ## v0.44 - 2026-02-02

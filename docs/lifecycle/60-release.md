@@ -201,6 +201,6 @@ Before starting release phases:
 
 ### Other
 - [55-sprint-close.md](55-sprint-close.md) - Sprint completion before release
-- [69-retrospective.md](69-retrospective.md) - Release retrospective
+- [69-release-retro.md](69-release-retro.md) - Release retrospective
 - [75-lessons-learned.md](75-lessons-learned.md) - Accumulated insights
 - [../templates/release-issue.md](../templates/release-issue.md) - Release issue template

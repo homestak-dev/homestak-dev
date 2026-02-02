@@ -226,4 +226,4 @@ For trunk-path work (Simple tier), there's no sprint to close. The work is compl
 - [10-sprint-planning.md](10-sprint-planning.md) - Sprint setup
 - [50-merge.md](50-merge.md) - PR merge process
 - [60-release.md](60-release.md) - Release coordination
-- [69-retrospective.md](69-retrospective.md) - Release retrospective
+- [69-release-retro.md](69-release-retro.md) - Release retrospective

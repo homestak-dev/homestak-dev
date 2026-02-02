@@ -247,7 +247,7 @@ Integration testing uses iac-driver scenarios:
 - [66-release-verify.md](66-release-verify.md) - Verification
 - [67-release-housekeeping.md](67-release-housekeeping.md) - Branch cleanup
 - [68-release-aar.md](68-release-aar.md) - After Action Report
-- [69-retrospective.md](69-retrospective.md) - Release retrospective and lessons learned
+- [69-release-retro.md](69-release-retro.md) - Release retrospective and lessons learned
 - [75-lessons-learned.md](75-lessons-learned.md) - Accumulated release insights
 - [80-reference.md](80-reference.md) - Quick reference and checklists
 
