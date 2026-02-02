@@ -471,7 +471,7 @@ cmd_resume() {
             ;;
         verification)
             echo "1. Run \`release.sh verify\` to check all releases"
-            echo "2. Complete AAR and Retrospective"
+            echo "2. Complete Housekeeping, AAR and Retrospective"
             echo "3. Close release issue"
             ;;
         "")
@@ -479,7 +479,7 @@ cmd_resume() {
                 echo "Release v${version} is complete."
                 echo ""
                 echo "Post-release tasks:"
-                echo "1. Complete AAR and Retrospective (if not done)"
+                echo "1. Complete Housekeeping, AAR and Retrospective (if not done)"
                 echo "2. Close release issue"
                 echo "3. Run \`release.sh init --version X.Y\` for next release"
             else

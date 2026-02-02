@@ -76,8 +76,8 @@ close_generate_summary() {
 | Tags | ✅ |
 | Releases | ✅ |
 | Verification | ✅ |
-| AAR | ✅ (manual) |
 | Housekeeping | ✅ (manual) |
+| AAR | ✅ (manual) |
 | Retrospective | ✅ (manual) |
 
 ### Repos
@@ -158,8 +158,8 @@ run_close() {
             log_error "Not all phases complete. Use --force to override."
             echo ""
             echo "Reminder: Complete these phases before closing:"
-            echo "  - After Action Report (post to release issue)"
             echo "  - Housekeeping (branch cleanup)"
+            echo "  - After Action Report (post to release issue)"
             echo "  - Retrospective (update lessons learned)"
             return 1
         fi
@@ -170,8 +170,8 @@ run_close() {
     echo ""
 
     echo -e "${YELLOW}Reminder:${NC} Before closing, ensure you have completed:"
-    echo "  - [ ] After Action Report posted to release issue"
     echo "  - [ ] Housekeeping (branch cleanup) completed"
+    echo "  - [ ] After Action Report posted to release issue"
     echo "  - [ ] Retrospective completed"
     echo "  - [ ] Lessons learned updated in docs/lifecycle/75-lessons-learned.md"
     echo ""

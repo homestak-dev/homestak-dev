@@ -327,8 +327,8 @@ EOF
         echo ""
 
         # Reminder about release issue lifecycle
-        echo -e "${YELLOW}Note:${NC} Release issue should remain open until Phase 10 (Retrospective) is complete."
-        echo "      Phases remaining after verify: AAR → Housekeeping → Retrospective → Close"
+        echo -e "${YELLOW}Note:${NC} Release issue should remain open until Phase 69 (Retrospective) is complete."
+        echo "      Phases remaining after verify: Housekeeping → AAR → Retrospective → Close"
         echo ""
     fi
 
