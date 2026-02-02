@@ -2,12 +2,24 @@
 
 ## Unreleased
 
+## v0.45 - 2026-02-02
+
+### Theme: Create Integration
+
+Integrates Create phase with Specify mechanism, enabling automatic spec discovery on VM first boot.
+
 ### Changed
 - Reorder release phases: Housekeeping (67) before AAR (68) (#170)
   - AAR can now document issues discovered during branch cleanup
   - Renumber Retrospective from 70 to 69 (removes gap)
   - Rename to 69-release-retro.md for naming consistency
   - Updated cross-references in all lifecycle docs
+- Rename `HOMESTAK_DISCOVERY` → `HOMESTAK_SPEC_SERVER` in design docs (#154)
+
+### Documentation
+- Update vm-lifecycle-architecture.md with v0.45 completion (#154)
+  - Create phase now injects spec server variables via cloud-init
+  - Auth token injection based on posture
 
 ## v0.44 - 2026-02-02
 
