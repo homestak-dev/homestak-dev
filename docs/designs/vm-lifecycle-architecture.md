@@ -1,8 +1,8 @@
 # VM Lifecycle Architecture
 
 **Epic:** [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125)
-**Status:** Active (v0.43 complete, subsequent phases in progress)
-**Date:** 2026-02-01
+**Status:** Active (v0.45 complete — Create → Specify integration)
+**Date:** 2026-02-02
 
 ## Overview
 
@@ -350,7 +350,36 @@ iac-driver/
 
 ## Implementation Status
 
-The architecture is being implemented incrementally across multiple releases. See [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) for current release status and planning.
+The architecture is being implemented incrementally across multiple releases.
+
+### Completed
+
+| Release | Phase | Deliverables |
+|---------|-------|--------------|
+| v0.43 | Schema Foundation | V2 directory structure, JSON schemas for specs/nodes/postures |
+| v0.44 | Specify Infrastructure | `homestak serve` server, `homestak spec get` client, auth model |
+| v0.45 | Create → Specify | Cloud-init integration, auth token injection, `spec-vm-roundtrip` scenario |
+
+### v0.45 Details (Create → Specify)
+
+**Components:**
+- **tofu**: Cloud-init injects `HOMESTAK_SPEC_SERVER`, `HOMESTAK_IDENTITY`, `HOMESTAK_AUTH_TOKEN` to `/etc/profile.d/homestak.sh`
+- **iac-driver**: ConfigResolver outputs `spec_server` and per-VM `auth_token` based on posture
+- **bootstrap**: First-boot spec fetch in cloud-init runcmd (idempotent)
+- **site-config**: `defaults.spec_server` in site.yaml
+
+**Validation:**
+```bash
+./run.sh --scenario spec-vm-roundtrip --host father
+```
+
+### In Progress
+
+See [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) for current release status and planning.
+
+| Target | Phase | Scope |
+|--------|-------|-------|
+| v0.49 | Apply | Package installation, service configuration, platform ready state |
 
 ## Related Documents
 
@@ -362,5 +391,6 @@ The architecture is being implemented incrementally across multiple releases. Se
 
 | Date | Change |
 |------|--------|
+| 2026-02-02 | Update for v0.45: Create → Specify integration complete |
 | 2026-02-02 | Move release plan to epic (avoid staleness) |
 | 2026-02-02 | Initial document extracted from iac-driver#125 |
