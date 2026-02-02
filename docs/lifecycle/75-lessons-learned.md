@@ -1,12 +1,17 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.43. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.44. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.44
+
+- **Closed release before retrospective - fourth occurrence** - Despite prior lessons (v0.25, v0.26, v0.29), same error repeated. The `release.sh close --force` bypasses validation check but doesn't verify retrospective completion. Need stronger guardrail: either block close until retrospective posted, or require explicit `--skip-retrospective` flag.
+- **Housekeeping should precede AAR** - Current phase order (67-AAR, 68-Housekeeping) means AAR is written before cleanup completes. Reordering to Housekeeping→AAR would let the report include cleanup results and any issues discovered.
 
 ## v0.43
 
@@ -232,6 +237,8 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Closed release before retrospective - fourth occurrence (v0.44)
+- Housekeeping should precede AAR (v0.44)
 - Skills load context for one phase, not the entire process (v0.41)
 - AAR requires scope comparison, not just delivery list (v0.41)
 - Two-phase CHANGELOG workflow (v0.33)
