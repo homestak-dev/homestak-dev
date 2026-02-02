@@ -2,11 +2,13 @@
 
 Create a new issue in `homestak-dev` repo with this template.
 
-**Title format:** `Sprint {issue#}: {Theme}`
+**Title format:** `Sprint: v{X.Y} {Theme}`
 
 Examples:
-- `Sprint 152: Recursive PVE Stabilization`
-- `Sprint 155: CI/CD Phase 2`
+- `Sprint: v0.45 Recursive PVE Stabilization`
+- `Sprint: v0.46 CI/CD Phase 2`
+
+Note: Sprint PRs in component repos use `Sprint {issue#}: v{X.Y} {Theme}` to reference the sprint issue.
 
 ---
 

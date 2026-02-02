@@ -25,7 +25,7 @@ Merge integrates validated changes into the protected `master` branch through pu
 
 Create pull request with:
 
-**Title:** `<type>(<scope>): <summary>` for trunk PRs, or `Sprint N: Theme` for sprint PRs
+**Title:** `<type>(<scope>): <summary>` for trunk PRs, or `Sprint {issue#}: v{X.Y} {Theme}` for sprint PRs
 
 **Description template:**
 
@@ -63,7 +63,7 @@ Closes #<issue-number>
 
 For sprint PRs:
 
-**Title:** `Sprint 152: Recursive PVE Stabilization`
+**Title:** `Sprint 152: v0.40 Recursive PVE Stabilization`
 
 **Description additions:**
 
