@@ -83,4 +83,4 @@ gh issue close <issue-num> --repo homestak-dev/<repo> \
 
 ## Next Phase
 
-Proceed to [67-release-aar.md](67-release-aar.md).
+Proceed to [67-release-housekeeping.md](67-release-housekeeping.md).
