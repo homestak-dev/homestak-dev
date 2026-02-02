@@ -41,8 +41,8 @@ This is a polyrepo workspace managed with [gita](https://github.com/nosarthur/gi
 
 ```
 homestak-dev/              # This repo (workspace parent)
-├── .claude/               # Claude Code configuration and skills
-├── .github/               # GitHub org config (PR templates, CI)
+├── .claude/               # Claude Code configuration and skills (SEPARATE REPO)
+├── .github/               # GitHub org config (SEPARATE REPO)
 ├── scripts/               # Release automation CLI
 │   ├── release.sh         # Main CLI entry point
 │   └── lib/               # Modular library functions
@@ -53,6 +53,11 @@ homestak-dev/              # This repo (workspace parent)
 ├── site-config/           # Site-specific secrets and configuration
 └── tofu/                  # OpenTofu modules for VM provisioning
 ```
+
+**Important:** `.claude/` and `.github/` are **separate git repositories**, not subdirectories of homestak-dev. They have their own branches, commits, and release tags. When making changes to skills or org config, remember to:
+- Create sprint branches in these repos separately
+- Commit and push to their own remotes
+- Include them in multi-repo PRs
 
 Each component has its own `CLAUDE.md` with detailed context (auto-loaded via imports):
 
