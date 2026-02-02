@@ -2,9 +2,11 @@
 
 ## Unreleased
 
-### Theme: Lifecycle Overhaul
+## v0.44 - 2026-02-02
 
-Major restructuring of development lifecycle to decouple sprints from releases.
+### Theme: Specify Infrastructure
+
+Completes the Specify phase infrastructure for the VM lifecycle architecture, plus lifecycle documentation improvements.
 
 ### Added
 - Add phase doc loading guidance to sprint skill (#165)
