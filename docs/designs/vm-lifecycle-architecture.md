@@ -348,16 +348,9 @@ iac-driver/
 └── run.sh                  # Entry point (routes appropriately)
 ```
 
-## Release Plan
+## Implementation Status
 
-| Release | Focus | Status |
-|---------|-------|--------|
-| v0.43 | V2 Schema Foundation | Complete |
-| v0.44 | Specify Infrastructure (serve, spec get) | In Progress |
-| v0.47 | Create Integration (cloud-init + discovery) | Planning |
-| v0.49 | Apply Phase (first "platform ready") | Planning |
-
-Spacing allows room for bug fixes, unrelated enhancements, and course corrections.
+The architecture is being implemented incrementally across multiple releases. See [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) for current release status and planning.
 
 ## Related Documents
 
@@ -369,4 +362,5 @@ Spacing allows room for bug fixes, unrelated enhancements, and course correction
 
 | Date | Change |
 |------|--------|
+| 2026-02-02 | Move release plan to epic (avoid staleness) |
 | 2026-02-02 | Initial document extracted from iac-driver#125 |
