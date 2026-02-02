@@ -171,6 +171,15 @@ For operations that cannot be easily undone:
 - Default to error rather than silent overwrite
 - Provide `--dry-run` preview when available
 
+### Branch Protection and HITL Gates
+
+Branch protection failures are human-in-the-loop checkpoints, not obstacles to bypass:
+
+- **NEVER** use `--admin` or `--force` to bypass branch protection without explicit user instruction
+- When `gh pr merge` fails due to branch policy, STOP and present the PR for human review
+- The merge phase has a mandatory human gate: create PRs → await approval → merge
+- Do not conflate "user asked to start merge phase" with "user approved the PRs"
+
 ## Terminology
 
 Consistent terminology across all repos:

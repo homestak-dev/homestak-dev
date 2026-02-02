@@ -118,6 +118,9 @@ git status
 
 ### 5. Human Review and Merge
 
+> **⚠️ HUMAN GATE:** Stop here. Present PRs to user and await explicit approval before merging.
+> Branch protection failures are checkpoints, not obstacles to bypass with `--admin`.
+
 PR requires human action:
 - Review code changes
 - Review test coverage
