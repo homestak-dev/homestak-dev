@@ -50,19 +50,15 @@ Examples:
 
 <!-- Add entries as work progresses -->
 
-## Sprint Retrospective
+## Notes
 
-<!-- Complete at sprint close -->
-
-### What Worked Well
--
-
-### What Could Improve
--
-
-### Follow-up Items
--
+<!-- Optional: deferred scope, constraints, context -->
 
 ---
 **Started:** YYYY-MM-DD
 **Completed:** YYYY-MM-DD
+
+<!--
+Retrospective goes in closing comment, not body.
+See docs/lifecycle/55-sprint-close.md for format.
+-->

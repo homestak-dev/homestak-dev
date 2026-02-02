@@ -52,7 +52,7 @@ This creates the validation evidence needed for release.
 
 ### 3. Sprint Retrospective
 
-Complete a brief retrospective in the sprint issue:
+Complete a brief retrospective as a **closing comment** (not in the issue body). This mirrors the release retrospective pattern and keeps the issue body focused on planning/execution state.
 
 ```markdown
 ## Sprint Retrospective
@@ -68,6 +68,10 @@ Complete a brief retrospective in the sprint issue:
 ### Follow-up Items
 - [ ] Create issue for discovered tech debt
 - [ ] Update CLAUDE.md with new pattern
+
+---
+**Started:** YYYY-MM-DD
+**Completed:** YYYY-MM-DD
 ```
 
 **Tier-based depth:**
@@ -149,11 +153,24 @@ done
 
 ### 8. Close Sprint Issue
 
-Add final summary and close:
+Close with retrospective as the closing comment:
 
 ```bash
 gh issue close 152 --repo homestak-dev/homestak-dev \
-  --comment "Sprint complete. All scope delivered and validated. Linked to release #150."
+  --comment "## Sprint Retrospective
+
+### What Worked Well
+- ...
+
+### What Could Improve
+- ...
+
+### Follow-up Items
+- [ ] ...
+
+---
+**Started:** YYYY-MM-DD
+**Completed:** YYYY-MM-DD"
 ```
 
 ## Deferred Items
