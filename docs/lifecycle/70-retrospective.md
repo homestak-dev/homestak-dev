@@ -21,7 +21,7 @@ This document covers release retrospectives.
 
 ## Prerequisites
 
-- Phase 68 (Housekeeping) complete
+- Phase 68 (AAR) complete
 - AAR posted to release issue
 - All sprints have retrospectives
 
@@ -122,6 +122,6 @@ Context loss leads to incomplete entries.
 ## Related Documents
 
 - [55-sprint-close.md](55-sprint-close.md) - Sprint retrospective
-- [68-release-housekeeping.md](68-release-housekeeping.md) - Preceding phase
+- [68-release-aar.md](68-release-aar.md) - Preceding phase
 - [75-lessons-learned.md](75-lessons-learned.md) - Accumulated lessons
 - [../templates/retrospective.md](../templates/retrospective.md) - Template

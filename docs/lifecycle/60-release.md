@@ -65,8 +65,8 @@ The release process is divided into discrete phases:
 | 64 | [Packer](64-release-packer.md) | No | Handle packer images |
 | 65 | [Publish](65-release-publish.md) | **Yes** | Create GitHub releases |
 | 66 | [Verify](66-release-verify.md) | No | Verify releases exist |
-| 67 | [AAR](67-release-aar.md) | No | After Action Report |
-| 68 | [Housekeeping](68-release-housekeeping.md) | No | Branch cleanup |
+| 67 | [Housekeeping](67-release-housekeeping.md) | No | Branch cleanup |
+| 68 | [AAR](68-release-aar.md) | No | After Action Report |
 
 **Gates (63, 65):** Require explicit human approval before proceeding.
 
@@ -196,8 +196,8 @@ Before starting release phases:
 - [64-release-packer.md](64-release-packer.md) - Packer images
 - [65-release-publish.md](65-release-publish.md) - GitHub releases [GATE]
 - [66-release-verify.md](66-release-verify.md) - Verification
-- [67-release-aar.md](67-release-aar.md) - After Action Report
-- [68-release-housekeeping.md](68-release-housekeeping.md) - Branch cleanup
+- [67-release-housekeeping.md](67-release-housekeeping.md) - Branch cleanup
+- [68-release-aar.md](68-release-aar.md) - After Action Report
 
 ### Other
 - [55-sprint-close.md](55-sprint-close.md) - Sprint completion before release

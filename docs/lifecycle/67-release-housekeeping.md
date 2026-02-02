@@ -1,4 +1,4 @@
-# Phase 68: Release Housekeeping
+# Phase 67: Release Housekeeping
 
 > Part of [Release Lifecycle](60-release.md). See overview for phase sequence and gates.
 
@@ -10,7 +10,7 @@ Clean up development artifacts and prepare for next cycle.
 
 ## Prerequisites
 
-- Phase 67 (AAR) complete
+- Phase 66 (Verify) complete
 
 ## Activities
 
@@ -107,4 +107,4 @@ Performs branch cleanup across repos.
 
 ## Next Phase
 
-Proceed to [70-retrospective.md](70-retrospective.md) for release retrospective and issue closure.
+Proceed to [68-release-aar.md](68-release-aar.md).
