@@ -161,7 +161,7 @@ Driver
     │
     ├── SSH → target: "tofu apply"
     ├── SSH → target: "ansible-playbook ..."
-    └── SSH → target: "homestak scenario ..."
+    └── SSH → target: "./run.sh --manifest X --action create"
 ```
 
 | Characteristic | Value |
@@ -669,9 +669,11 @@ bootstrap/                         bootstrap/
 iac-driver/                        ├── src/
 ├── src/                           │   ├── resolver.py (unified FK)
 │   ├── config_resolver.py         │   ├── serve.py (specs + manifests)
-│   ├── scenarios/*.py   ──retire──►   │   └── manifest_executor.py
+│   ├── scenarios/*.py   ──retire──►   │   └── cli.py (manifest execution inline)
 │                                  └── run.sh --manifest X --action Y
 ```
+
+**Note:** Manifest execution is handled inline in `cli.py`, not in a separate `manifest_executor.py` module. The CLI parses the manifest, resolves dependencies, and orchestrates actions directly.
 
 The work in #139 positions iac-driver as the orchestration brain — owning both the server (pull model) and the executor (push and pull models).
 
@@ -933,6 +935,14 @@ Assertions:
 | ST-6 | None | New capability |
 | ST-7 | None | New capability |
 | ST-8 | Partial (scenarios are mostly idempotent) | Formal validation |
+
+## Related Documents
+
+- [node-lifecycle.md](node-lifecycle.md) — Single-node lifecycle phases
+- [phase-interfaces.md](phase-interfaces.md) — Phase interface contracts
+- [requirements-catalog.md](requirements-catalog.md) — Structured requirements with IDs
+- [test-strategy.md](test-strategy.md) — Test hierarchy and system test catalog
+- [gap-analysis.md](gap-analysis.md) — Design gap tracking
 
 ## Changelog
 

@@ -371,6 +371,7 @@ This document describes the lifecycle phases for a **single node**. For multi-no
 | Lifecycle phases (create, config, run, destroy) | This document |
 | Spec schema | This document |
 | Auth model for config phase | This document |
+| Phase interface contracts (inputs/outputs) | [phase-interfaces.md](phase-interfaces.md) |
 | Topology patterns (flat, tiered, mesh, hub-spoke, federated) | node-orchestration.md |
 | Execution models (detailed comparison) | node-orchestration.md |
 | Manifest schema | node-orchestration.md |
@@ -440,8 +441,11 @@ The architecture is being implemented incrementally across multiple releases.
 
 - [config-server.md](config-server.md) — Server design
 - [config-client.md](config-client.md) — Client design
+- [phase-interfaces.md](phase-interfaces.md) — Phase interface contracts (run/destroy phase details)
 - [node-orchestration.md](node-orchestration.md) — Multi-node orchestration
-- [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) — Architecture evolution epic (detailed discussion, requirements catalog)
+- [requirements-catalog.md](requirements-catalog.md) — Structured requirements with IDs
+- [test-strategy.md](test-strategy.md) — Test hierarchy and system test catalog
+- [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) — Architecture evolution epic (detailed discussion)
 
 ## Changelog
 
