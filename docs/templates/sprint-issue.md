@@ -17,7 +17,7 @@ Note: Sprint PRs in component repos use `Sprint {issue#}: {Theme}` to reference 
 | Field | Value |
 |-------|-------|
 | Branch | `sprint/{theme}` |
-| Release | #{release-issue} |
+| Release | #{release-issue} or — |
 | Status | planning |
 | Tier | {Simple/Standard/Complex/Exploratory} |
 
@@ -48,7 +48,7 @@ Note: Sprint PRs in component repos use `Sprint {issue#}: {Theme}` to reference 
 
 ### YYYY-MM-DD - Sprint Init
 - Created branches
-- Linked to release #{N}
+- Linked to release #{N} *(if applicable)*
 
 <!-- Add entries as work progresses -->
 
