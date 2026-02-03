@@ -267,6 +267,6 @@ cat /usr/local/etc/homestak/state/spec.yaml
 
 ## Related Documents
 
-- [config-server.md](config-server.md) - Server design (Sprint #161)
+- [spec-server.md](spec-server.md) - Server design (Sprint #161)
 - [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) - Architecture evolution epic
 - [homestak-dev#153](https://github.com/homestak-dev/homestak-dev/issues/153) - v0.44 Release Planning

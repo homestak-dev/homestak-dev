@@ -353,7 +353,7 @@ homestak spec validate <path>     # Validate spec against schema
 homestak spec get                 # Fetch spec from server
 
 # Server
-homestak serve                    # Start config server
+homestak serve                    # Start spec server
 
 # Future
 homestak config                   # Apply spec to reach platform ready
@@ -439,8 +439,8 @@ The architecture is being implemented incrementally across multiple releases.
 
 ## Related Documents
 
-- [config-server.md](config-server.md) — Server design
-- [config-client.md](config-client.md) — Client design
+- [spec-server.md](spec-server.md) — Server design
+- [spec-client.md](spec-client.md) — Client design
 - [phase-interfaces.md](phase-interfaces.md) — Phase interface contracts (run/destroy phase details)
 - [node-orchestration.md](node-orchestration.md) — Multi-node orchestration
 - [requirements-catalog.md](requirements-catalog.md) — Structured requirements with IDs
