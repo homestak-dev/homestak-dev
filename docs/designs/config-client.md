@@ -1,6 +1,6 @@
 # Design Summary: `homestak spec get`
 
-**Sprint:** #162 (v0.44 Specify Client + Integration)
+**Sprint:** #162 (v0.44 Config Client + Integration)
 **Release:** #153
 **Epic:** iac-driver#125 (Architecture evolution)
 **Author:** Claude
@@ -8,7 +8,7 @@
 
 ## Problem Statement
 
-Nodes need to fetch their specifications from the spec server (`homestak serve`) and persist them locally. The `homestak spec get` command provides the client-side of the Specify phase.
+Nodes need to fetch their specifications from the spec server (`homestak serve`) and persist them locally. The `homestak spec get` command provides the client-side of the config phase.
 
 **Success criteria:**
 - Client fetches spec from server via HTTP
@@ -123,7 +123,7 @@ Map server error codes to client behavior:
 1. **Server (`homestak serve`)** - HTTP API from Sprint #161
 2. **Path discovery** - Reuse `discover_etc_path()` pattern
 3. **State directory** - New `/usr/local/etc/homestak/state/`
-4. **Future: Apply phase (v0.49)** - Will read `state/spec.yaml`
+4. **Config completion (v0.49)** - Will read `state/spec.yaml` to complete config phase
 
 ## Data Flow
 
@@ -267,6 +267,6 @@ cat /usr/local/etc/homestak/state/spec.yaml
 
 ## Related Documents
 
-- [v0.44-specify-server.md](v0.44-specify-server.md) - Server design (Sprint #161)
+- [config-server.md](config-server.md) - Server design (Sprint #161)
 - [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) - Architecture evolution epic
 - [homestak-dev#153](https://github.com/homestak-dev/homestak-dev/issues/153) - v0.44 Release Planning

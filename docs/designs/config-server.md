@@ -1,6 +1,6 @@
 # Design Summary: `homestak serve`
 
-**Sprint:** #161 (v0.44 Specify Server Foundation)
+**Sprint:** #161 (v0.44 Config Server Foundation)
 **Release:** #153
 **Epic:** iac-driver#125 (Architecture evolution)
 **Author:** Claude
@@ -8,7 +8,7 @@
 
 ## Problem Statement
 
-Nodes need to discover their specifications autonomously rather than being passively configured. The `homestak serve` command provides an HTTP server that exposes specs from `site-config/v2/specs/` to requesting nodes.
+Nodes need to discover their specifications as part of the config phase. The `homestak serve` command provides an HTTP server that exposes specs from `site-config/v2/specs/` to requesting nodes.
 
 **Success criteria:**
 - Server starts and binds to port 44443
@@ -149,7 +149,7 @@ Load posture → get auth.method
 
 1. **site-config v2 structure** - Reads specs, postures, secrets
 2. **bootstrap path resolution** - Uses existing `HOMESTAK_ETC` discovery
-3. **Future: cloud-init (v0.45)** - Will inject `HOMESTAK_SPEC_SERVER` URL
+3. **Cloud-init (v0.45)** - Injects `HOMESTAK_SPEC_SERVER` URL
 
 ## Risk Assessment
 

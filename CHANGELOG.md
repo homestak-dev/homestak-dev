@@ -6,7 +6,7 @@
 
 ### Theme: Create Integration
 
-Integrates Create phase with Specify mechanism, enabling automatic spec discovery on VM first boot.
+Integrates create phase with config mechanism, enabling automatic spec discovery on VM first boot.
 
 ### Changed
 - Reorder release phases: Housekeeping (67) before AAR (68) (#170)
@@ -17,8 +17,8 @@ Integrates Create phase with Specify mechanism, enabling automatic spec discover
 - Rename `HOMESTAK_DISCOVERY` → `HOMESTAK_SPEC_SERVER` in design docs (#154)
 
 ### Documentation
-- Update vm-lifecycle-architecture.md with v0.45 completion (#154)
-  - Create phase now injects spec server variables via cloud-init
+- Update node-lifecycle.md with v0.45 completion (#154)
+  - create phase now injects spec server variables via cloud-init
   - Auth token injection based on posture
 
 ## v0.44 - 2026-02-02
