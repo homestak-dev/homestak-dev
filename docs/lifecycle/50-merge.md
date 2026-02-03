@@ -7,7 +7,7 @@ Merge integrates validated changes into the protected `master` branch through pu
 | Branch Type | Strategy | Rationale |
 |-------------|----------|-----------|
 | Trunk fixes (`fix/`, `enhance/`) | **Squash** | Clean history, one commit per change |
-| Sprint branches (`sprint-N/`) | **Merge commit** | Preserve sprint history, coordinated work |
+| Sprint branches (`sprint/`) | **Merge commit** | Preserve sprint history, coordinated work |
 | Documentation | **Squash** | Simple, non-functional |
 
 **Default: Squash merge** for trunk-path work.
@@ -25,7 +25,7 @@ Merge integrates validated changes into the protected `master` branch through pu
 
 Create pull request with:
 
-**Title:** `<type>(<scope>): <summary>` for trunk PRs, or `Sprint {issue#}: v{X.Y} {Theme}` for sprint PRs
+**Title:** `<type>(<scope>): <summary>` for trunk PRs, or `Sprint {issue#}: {Theme}` for sprint PRs
 
 **Description template:**
 
@@ -63,7 +63,7 @@ Closes #<issue-number>
 
 For sprint PRs:
 
-**Title:** `Sprint 152: v0.40 Recursive PVE Stabilization`
+**Title:** `Sprint 152: Recursive PVE Stabilization`
 
 **Description additions:**
 
@@ -155,8 +155,8 @@ git remote prune origin
 for repo in iac-driver ansible; do
   cd ~/homestak-dev/$repo
   git checkout master
-  git branch -d sprint-152/recursive-pve
-  git push origin --delete sprint-152/recursive-pve
+  git branch -d sprint/recursive-pve
+  git push origin --delete sprint/recursive-pve
 done
 ```
 

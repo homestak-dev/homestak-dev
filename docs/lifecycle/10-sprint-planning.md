@@ -27,16 +27,16 @@ For trunk-path work, skip this phase and go directly to Implementation.
 
 ### 1. Create Sprint Issue
 
-Create a GitHub issue in `homestak-dev` using the [Sprint Issue Template](../templates/sprint-issue.md):
+Create a GitHub issue using the [Sprint Issue Template](../templates/sprint-issue.md):
 
 ```bash
-gh issue create --repo homestak-dev/homestak-dev \
-  --title "Sprint 152: Recursive PVE Stabilization" \
+gh issue create \
+  --title "Sprint: Recursive PVE Stabilization" \
   --label "sprint" \
   --body "$(cat docs/templates/sprint-issue.md)"
 ```
 
-**Title format:** `Sprint {issue#}: {Theme}`
+**Title format:** `Sprint: {Theme}`
 
 ### 2. Populate Metadata Section
 
@@ -44,7 +44,7 @@ gh issue create --repo homestak-dev/homestak-dev \
 ## Metadata
 | Field | Value |
 |-------|-------|
-| Branch | `sprint-152/recursive-pve` |
+| Branch | `sprint/recursive-pve` |
 | Release | #150 |
 | Status | planning |
 | Tier | Complex |
@@ -87,7 +87,7 @@ For each issue:
 Create the same branch in each affected repo:
 
 ```bash
-BRANCH="sprint-152/recursive-pve"
+BRANCH="sprint/recursive-pve"
 for repo in iac-driver ansible; do
   cd ~/homestak-dev/$repo
   git checkout master && git pull origin master

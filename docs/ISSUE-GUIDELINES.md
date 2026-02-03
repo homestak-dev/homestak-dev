@@ -14,7 +14,7 @@ Actual work items representing bugs, enhancements, or features:
 ### Sprint Issues
 
 Track multi-issue coordinated work (see [10-sprint-planning.md](lifecycle/10-sprint-planning.md)):
-- Created via `/sprint plan` command
+- Created via `/sprint plan` command (in any repo)
 - Use `sprint` label
 - Track branch, repos, scope, and sprint log
 - Closed via `/sprint close` command

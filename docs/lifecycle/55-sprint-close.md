@@ -130,7 +130,7 @@ For Exploratory tier sprints, ensure decisions and dead-ends are preserved:
 After PRs are merged, delete sprint branches:
 
 ```bash
-BRANCH="sprint-152/recursive-pve"
+BRANCH="sprint/recursive-pve"
 for repo in iac-driver ansible; do
   cd ~/homestak-dev/$repo
   git checkout master
@@ -145,7 +145,7 @@ done
 ## Metadata
 | Field | Value |
 |-------|-------|
-| Branch | ~~`sprint-152/recursive-pve`~~ (deleted) |
+| Branch | ~~`sprint/recursive-pve`~~ (deleted) |
 | Release | #150 |
 | Status | complete |
 | Tier | Complex |
@@ -156,7 +156,7 @@ done
 Close with retrospective as the closing comment:
 
 ```bash
-gh issue close 152 --repo homestak-dev/homestak-dev \
+gh issue close 152 \
   --comment "## Sprint Retrospective
 
 ### What Worked Well

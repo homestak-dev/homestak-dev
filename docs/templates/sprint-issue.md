@@ -1,14 +1,14 @@
 # Sprint Issue Template
 
-Create a new issue in `homestak-dev` repo with this template.
+Create a new issue using this template.
 
-**Title format:** `Sprint: v{X.Y} {Theme}`
+**Title format:** `Sprint: {Theme}`
 
 Examples:
-- `Sprint: v0.45 Recursive PVE Stabilization`
-- `Sprint: v0.46 CI/CD Phase 2`
+- `Sprint: Recursive PVE Stabilization`
+- `Sprint: CI/CD Phase 2`
 
-Note: Sprint PRs in component repos use `Sprint {issue#}: v{X.Y} {Theme}` to reference the sprint issue.
+Note: Sprint PRs in component repos use `Sprint {issue#}: {Theme}` to reference the sprint issue.
 
 ---
 
@@ -16,7 +16,7 @@ Note: Sprint PRs in component repos use `Sprint {issue#}: v{X.Y} {Theme}` to ref
 
 | Field | Value |
 |-------|-------|
-| Branch | `sprint-{issue#}/{theme}` |
+| Branch | `sprint/{theme}` |
 | Release | #{release-issue} |
 | Status | planning |
 | Tier | {Simple/Standard/Complex/Exploratory} |

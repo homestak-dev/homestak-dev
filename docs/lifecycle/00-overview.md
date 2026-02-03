@@ -24,7 +24,7 @@ Standardize the development and release process to ensure:
 | **Sprint** | A focused work period (2-5 days) containing related issues. May or may not end in a release. |
 | **Release** | A versioned, tagged set of artifacts published to GitHub. Multiple sprints may accumulate before release. |
 | **Trunk** | The `master` branch. Direct commits or quick PRs for simple fixes. |
-| **Sprint branch** | A branch named `sprint-{issue#}/{theme}` for structured multi-issue work. |
+| **Sprint branch** | A branch named `sprint/{theme}` for structured multi-issue work. |
 
 ## Branch Model: Hybrid
 
@@ -35,7 +35,7 @@ master ─────●─────●────────────�
             │     │                   ↑     │     │
           bugfix docs               merge  bugfix docs
             │     │                   │
-            │     │   sprint-152 ──●───●───┘
+            │     │   sprint/... ──●───●───┘
             │     │                f1  f2
             │     │
          (trunk path)           (sprint path)
@@ -48,20 +48,19 @@ master ─────●─────●────────────�
 | Bug fix (Simple tier) | Trunk | `fix/123-desc` or direct | Squash | Quick, isolated |
 | Doc updates | Trunk | `docs/topic` or direct | Squash | Non-functional |
 | Single-issue enhancement | Trunk | `enhance/123-desc` | Squash | Simple enough |
-| Multi-issue sprint | Sprint branch | `sprint-152/theme` | Merge commit | Coordinated work, preserve history |
-| Complex/Exploratory work | Sprint branch | `sprint-152/theme` | Merge commit | Benefits from isolation |
+| Multi-issue sprint | Sprint branch | `sprint/theme` | Merge commit | Coordinated work, preserve history |
+| Complex/Exploratory work | Sprint branch | `sprint/theme` | Merge commit | Benefits from isolation |
 | Cross-repo changes | Sprint branch | Same branch name in affected repos | Merge commit | Coordinated merge |
 
 ### Sprint Branch Naming
 
-Format: `sprint-{issue#}/{theme}`
+Format: `sprint/{theme}`
 
-- `{issue#}` is the sprint tracking issue number in homestak-dev
 - `{theme}` is a short kebab-case description
 
 Examples:
-- `sprint-152/recursive-pve` - Sprint #152 focused on recursive PVE stabilization
-- `sprint-160/ci-cd-phase2` - Sprint #160 for CI/CD improvements
+- `sprint/recursive-pve` - Sprint focused on recursive PVE stabilization
+- `sprint/ci-cd-phase2` - Sprint for CI/CD improvements
 
 ## Work Tiers
 
@@ -199,7 +198,7 @@ For sprints touching multiple repos, create the same branch name in each affecte
 # Create sprint branch in all affected repos
 for repo in iac-driver ansible tofu; do
   cd ~/homestak-dev/$repo
-  git checkout -b sprint-152/recursive-pve
+  git checkout -b sprint/recursive-pve
 done
 ```
 

@@ -77,7 +77,7 @@ Use dedicated handoff sections in the sprint issue:
 
 ### Current State
 - Phase: Implementation (30%)
-- Branch: sprint-152/recursive-pve
+- Branch: sprint/recursive-pve
 - Repos touched: iac-driver, ansible
 
 ### Decisions Made
@@ -161,7 +161,7 @@ The sprint issue IS the session state. No separate state files.
 ## Metadata
 | Field | Value |
 |-------|-------|
-| Branch | `sprint-152/recursive-pve` |
+| Branch | `sprint/recursive-pve` |
 | Release | #150 |
 | Status | in_progress |
 | Tier | Complex |

@@ -42,8 +42,8 @@ Examples:
 For sprint-path work (Complex/Exploratory tier), the branch was created during Planning:
 
 ```bash
-git checkout sprint-152/recursive-pve
-git pull origin sprint-152/recursive-pve
+git checkout sprint/recursive-pve
+git pull origin sprint/recursive-pve
 ```
 
 **Note:** For small fixes without associated issues, the issue number is optional.

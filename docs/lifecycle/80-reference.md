@@ -8,15 +8,15 @@ Consolidated checklists, commands, and templates for the homestak development li
 
 ```bash
 # 1. Create sprint issue (or use /sprint plan)
-gh issue create --repo homestak-dev/homestak-dev \
-  --title "Sprint 152: Recursive PVE Stabilization" \
+gh issue create \
+  --title "Sprint: Recursive PVE Stabilization" \
   --label "sprint"
 
 # 2. Create sprint branches in affected repos
 for repo in iac-driver ansible; do
   cd ~/homestak-dev/$repo
   git checkout master && git pull
-  git checkout -b sprint-152/recursive-pve
+  git checkout -b sprint/recursive-pve
 done
 
 # 3. Update sprint issue metadata
@@ -39,7 +39,7 @@ gita shell "git status"  # Status in all repos
 
 ```bash
 # 1. Create PRs
-gh pr create --title "Sprint 152: Recursive PVE" --base master
+gh pr create --title "Sprint 152: Recursive PVE Stabilization" --base master
 
 # 2. After merge, sync local master
 git fetch origin
