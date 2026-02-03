@@ -226,28 +226,34 @@ Each manifest-node combination has isolated state:
 
 **Question:** What's the strategy for multi-node partial failure?
 
-**Resolution:** Fail-fast with optional rollback.
+**Resolution:** Configurable via `--on-error` flag.
 
 **Behavior:**
-1. **Default (--fail-fast):** Stop on first failure, leave completed nodes running
-2. **With --rollback:** On failure, destroy completed nodes in reverse order
-3. **With --continue-on-error:** Log failures, continue with independent nodes
+
+| Mode | Description |
+|------|-------------|
+| `stop` (default) | Stop on first failure, leave completed nodes running |
+| `rollback` | On failure, destroy completed nodes in reverse order |
+| `continue` | Log failures, continue with independent nodes |
 
 **Rationale:**
-- Fail-fast is safest default (don't make partial state worse)
-- Rollback is opt-in (may not always be desired)
-- Continue-on-error for resilient deployments
+- `stop` is safest default (don't make partial state worse)
+- `rollback` is opt-in (may not always be desired)
+- `continue` for resilient deployments with independent nodes
 
 **Implementation:**
 ```bash
 # Default: stop on failure
 ./run.sh --manifest nested-test --action create --host father
 
+# Explicit stop (same as default)
+./run.sh --manifest nested-test --action create --host father --on-error=stop
+
 # Rollback on failure
-./run.sh --manifest nested-test --action create --host father --rollback
+./run.sh --manifest nested-test --action create --host father --on-error=rollback
 
 # Continue despite failures
-./run.sh --manifest nested-test --action create --host father --continue-on-error
+./run.sh --manifest nested-test --action create --host father --on-error=continue
 ```
 
 ### Q3: Run Phase Triggers

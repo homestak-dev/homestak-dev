@@ -659,23 +659,33 @@ Several open issues are affected by this design:
 
 ### Architecture Alignment
 
+**Principle:** iac-driver owns both orchestration AND implementation. Bootstrap stays minimal (installation only).
+
 ```
 Current (v0.45)                    Future (this doc)
 ───────────────                    ─────────────────
 bootstrap/                         bootstrap/
-├── lib/serve.py      ──move──►   └── lib/spec_client.py (client only)
+├── homestak.sh                    ├── homestak.sh (thin wrapper)
+├── lib/serve.py      ──move──►   └── install.sh
 ├── lib/spec_resolver.py
+├── lib/spec_client.py  ──move──►
                                    iac-driver/
 iac-driver/                        ├── src/
 ├── src/                           │   ├── resolver.py (unified FK)
-│   ├── config_resolver.py         │   ├── serve.py (specs + manifests)
-│   ├── scenarios/*.py   ──retire──►   │   └── cli.py (manifest execution inline)
-│                                  └── run.sh --manifest X --action Y
+│   ├── config_resolver.py         │   ├── serve.py (spec server)
+│   ├── scenarios/*.py   ──retire──►   │   ├── spec_client.py
+│                                  │   ├── config.py (homestak config)
+│                                  │   └── cli.py (manifest execution)
+│                                  └── run.sh
 ```
 
-**Note:** Manifest execution is handled inline in `cli.py`, not in a separate `manifest_executor.py` module. The CLI parses the manifest, resolves dependencies, and orchestrates actions directly.
+**Key points:**
+- **iac-driver** owns all lifecycle code: orchestration (manifests, serve) and implementation (spec get, config)
+- **bootstrap** stays minimal: installation scripts and a thin `homestak` wrapper that delegates to iac-driver
+- Target VMs have iac-driver installed (via bootstrap), so all commands are available
+- `homestak` CLI remains the user-facing command on targets, but delegates to iac-driver internals
 
-The work in #139 positions iac-driver as the orchestration brain — owning both the server (pull model) and the executor (push and pull models).
+The work in #139 positions iac-driver as the lifecycle engine — owning both the server (pull model) and the client/executor (push and pull models).
 
 ## System Test Scenarios
 
