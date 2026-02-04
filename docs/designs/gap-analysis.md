@@ -22,7 +22,7 @@ This document tracks the design documentation landscape for the homestak lifecyc
 
 | Document | Blocks | Priority | Description |
 |----------|--------|----------|-------------|
-| `config-apply.md` | homestak-dev#155 | P0 | `homestak config` command to apply spec and reach "platform ready" state |
+| `config-apply.md` | iac-driver (TBD) | P0 | Config phase implementation to reach "platform ready" state |
 | `manifest-schema-v2.md` | iac-driver#140-P2 | P0 | Manifest schema v2 with `nodes` graph structure, absorbs `node.schema.json` |
 | `scenario-consolidation.md` | iac-driver#140-P4 | P1 | Transitional doc for migrating from `*-constructor/*-destructor` to `--manifest X --action Y` |
 
@@ -31,7 +31,7 @@ This document tracks the design documentation landscape for the homestak lifecyc
 ```
 node-lifecycle.md (complete)
         │
-        ├── config-apply.md (missing) ─────► homestak-dev#155
+        ├── config-apply.md (missing) ─────► iac-driver (TBD)
         │
         └── phase-interfaces.md (new) ─────► Run/Destroy contracts
 
@@ -113,7 +113,7 @@ Track progress on closing design gaps.
 
 | Gap | Target Sprint | Status | Notes |
 |-----|--------------|--------|-------|
-| config-apply.md | Sprint 4 (#155) | Not started | Blocks first "platform ready" |
+| config-apply.md | Sprint 4 (iac-driver TBD) | Not started | Blocks first "platform ready" |
 | manifest-schema-v2.md | Sprint 2 (#140-P2) | Not started | Blocks CLI simplification |
 | scenario-consolidation.md | Sprint 5 (#140-P4) | Not started | Transitional, archive after |
 | phase-interfaces.md | Sprint 0 | **Complete** | Resolved Q1-Q6, documented all phase contracts |
@@ -126,5 +126,6 @@ Track progress on closing design gaps.
 
 | Date | Change |
 |------|--------|
+| 2026-02-04 | Removed homestak-dev#155 references (closed - config phase belongs in iac-driver) |
 | 2026-02-04 | Updated Gap Closure Tracking with Sprint 0 completions |
 | 2026-02-03 | Initial document |
