@@ -1,6 +1,6 @@
 # Design Summary: `homestak serve`
 
-**Sprint:** #161 (v0.44 Config Server Foundation)
+**Sprint:** #161 (v0.44 Spec Server Foundation)
 **Release:** #153
 **Epic:** iac-driver#125 (Architecture evolution)
 **Author:** Claude
