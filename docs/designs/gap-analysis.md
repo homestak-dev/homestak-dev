@@ -116,12 +116,15 @@ Track progress on closing design gaps.
 | config-apply.md | Sprint 4 (#155) | Not started | Blocks first "platform ready" |
 | manifest-schema-v2.md | Sprint 2 (#140-P2) | Not started | Blocks CLI simplification |
 | scenario-consolidation.md | Sprint 5 (#140-P4) | Not started | Transitional, archive after |
-| phase-interfaces.md | Sprint 0 | In progress | This sprint deliverable |
-| node-orchestration.md CLI examples | Sprint 0 | Not started | Update in this sprint |
-| node-lifecycle.md phase-interfaces ref | Sprint 0 | Not started | Update in this sprint |
+| phase-interfaces.md | Sprint 0 | **Complete** | Resolved Q1-Q6, documented all phase contracts |
+| node-orchestration.md CLI examples | Sprint 0 | **Complete** | Updated to `./run.sh --manifest X --action Y` |
+| node-lifecycle.md phase-interfaces ref | Sprint 0 | **Complete** | Added cross-reference |
+| requirements-catalog.md Source column | Sprint 0 | **Complete** | Added Source tracking, 11 implicit requirements |
+| Terminology standardization | Sprint 0 | **Complete** | "spec server" not "config server" |
 
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-02-04 | Updated Gap Closure Tracking with Sprint 0 completions |
 | 2026-02-03 | Initial document |
