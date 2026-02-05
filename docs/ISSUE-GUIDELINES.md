@@ -37,7 +37,7 @@ Use clear, actionable titles. The format depends on the issue/PR type:
 |------|--------|---------|
 | Scope issue | `<Verb> <what>` | `Add --dry-run flag to release.sh` |
 | Sprint issue | `Sprint: <Theme>` | `Sprint: Unified Controller Daemon` |
-| Release issue | `Release vX.Y: <Theme>` | `Release v0.46: Lifecycle Overhaul` |
+| Release issue | `Release: vX.Y - <Theme>` | `Release: v0.46 - Lifecycle Overhaul` |
 | PR (all types) | `<type>(<scope>): <summary>` | `feat(controller): Add unified controller daemon` |
 
 **Scope issue verb patterns:**

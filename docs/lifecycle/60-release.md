@@ -28,7 +28,7 @@ Create a release issue early:
 
 ```bash
 gh issue create --repo homestak-dev/homestak-dev \
-  --title "v0.45 Release Planning - Lifecycle Overhaul" \
+  --title "Release: v0.45 - Lifecycle Overhaul" \
   --label "release"
 ```
 
