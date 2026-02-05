@@ -25,7 +25,7 @@ Merge integrates validated changes into the protected `master` branch through pu
 
 Create pull request with:
 
-**Title:** `<type>(<scope>): <summary>` for trunk PRs, or `Sprint {issue#}: {Theme}` for sprint PRs
+**Title:** `<type>(<scope>): <summary>` (conventional commit format for all PRs — see [ISSUE-GUIDELINES.md](../ISSUE-GUIDELINES.md#title-format))
 
 **Description template:**
 
@@ -61,9 +61,11 @@ Closes #<issue-number>
 
 ### 2. Sprint PR Specifics
 
-For sprint PRs:
+For sprint PRs, use the same conventional commit title format as trunk PRs:
 
-**Title:** `Sprint 152: Recursive PVE Stabilization`
+**Title:** `feat(controller): Add unified controller daemon with spec/repo serving`
+
+Sprint context goes in the description body, not the title.
 
 **Description additions:**
 
