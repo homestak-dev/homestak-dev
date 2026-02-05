@@ -244,16 +244,16 @@ Each manifest-node combination has isolated state:
 **Implementation:**
 ```bash
 # Default: stop on failure
-./run.sh --manifest nested-test --action create --host father
+./run.sh create -M nested-test -H father
 
 # Explicit stop (same as default)
-./run.sh --manifest nested-test --action create --host father --on-error=stop
+./run.sh create -M nested-test -H father --on-error=stop
 
 # Rollback on failure
-./run.sh --manifest nested-test --action create --host father --on-error=rollback
+./run.sh create -M nested-test -H father --on-error=rollback
 
 # Continue despite failures
-./run.sh --manifest nested-test --action create --host father --on-error=continue
+./run.sh create -M nested-test -H father --on-error=continue
 ```
 
 ### Q3: Run Phase Triggers

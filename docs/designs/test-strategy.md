@@ -37,6 +37,20 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 
 **Total:** 12 files, ~5,500 lines (including conftest.py)
 
+**Sprint 1 additions (unified controller):**
+| File | Lines | Coverage Focus |
+|------|-------|----------------|
+| `test_ctrl_server.py` | ~400 | HTTPS server, daemon lifecycle, signals |
+| `test_ctrl_auth.py` | ~300 | Posture + token auth middleware |
+| `test_ctrl_specs.py` | ~400 | Spec endpoint, caching, SIGHUP |
+| `test_ctrl_repos.py` | ~400 | Git protocol, `_working` branch |
+| `test_ctrl_tls.py` | ~200 | Self-signed cert generation, fingerprint |
+| `test_resolver_base.py` | ~300 | Shared FK resolution utilities |
+| `test_spec_resolver.py` | ~400 | SpecResolver (migrated from bootstrap) |
+| `test_spec_client.py` | ~300 | HTTP client, error handling, state |
+
+**Sprint 1 total:** +2,700 lines, 8 new files
+
 **Target coverage for new lifecycle/ components:**
 - `lifecycle/core/create.py` - Create phase orchestration
 - `lifecycle/core/config.py` - Config phase orchestration
@@ -56,10 +70,16 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 | Scenario | Components Tested | Duration |
 |----------|-------------------|----------|
 | `vm-roundtrip` | tofu + PVE API + SSH | ~2m |
+| `vm-rt` | controller + spec_client + tofu | ~2m |
 | `pve-setup` | ansible + PVE host | ~3m |
 | `user-setup` | ansible (users role) | ~30s |
 | `bootstrap-install` | bootstrap + validation | ~2m |
 | `packer-build` | packer + QEMU | ~3m |
+
+**Sprint 1 additions:**
+| Scenario | Components Tested | Duration |
+|----------|-------------------|----------|
+| `controller-repos` | controller + git clone | ~30s |
 
 **Characteristics:**
 - Require real PVE host (not mocked)
@@ -73,7 +93,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 
 **Location:** `iac-driver/src/scenarios/` (current), future: manifest-based
 
-**Execution:** `./run.sh --manifest <name> --action test --host <host>`
+**Execution:** `./run.sh test -M <name> -H <host>`
 
 **Validation focus:** ST-1 through ST-8 from node-orchestration.md.
 
@@ -96,7 +116,7 @@ From [node-orchestration.md](node-orchestration.md), these scenarios validate th
 
 **Execution:** Pull
 
-**Blocks:** config-apply.md, `homestak config`
+**Blocks:** config-apply.md
 
 ```yaml
 Manifest:
@@ -111,7 +131,7 @@ Manifest:
 **Steps:**
 1. Driver provisions VM with identity + spec_server env vars
 2. VM boots, runs `homestak spec get`
-3. VM runs `homestak config` (applies spec)
+3. VM applies spec locally (config phase — future)
 4. Verify: VM reaches platform ready state
 5. Destroy VM
 
@@ -129,7 +149,7 @@ Manifest:
 
 **Execution:** Push
 
-**Blocks:** cli.py `--manifest X --action Y`
+**Blocks:** `./run.sh create/destroy/test -M X -H host`
 
 ```yaml
 Manifest:
@@ -160,7 +180,7 @@ Manifest:
 
 **Execution:** Push
 
-**Blocks:** cli.py `--manifest X --action Y`
+**Blocks:** `./run.sh create/destroy/test -M X -H host`
 
 ```yaml
 Manifest:
@@ -197,7 +217,7 @@ Manifest:
 
 **Execution:** Push
 
-**Blocks:** cli.py `--manifest X --action Y`
+**Blocks:** `./run.sh create/destroy/test -M X -H host`
 
 ```yaml
 Manifest:
@@ -228,7 +248,7 @@ Manifest:
 
 **Execution:** Mixed (push + pull)
 
-**Blocks:** cli.py `--manifest X --action Y`
+**Blocks:** `./run.sh create/destroy/test -M X -H host`
 
 ```yaml
 Manifest:
@@ -259,7 +279,7 @@ Manifest:
 
 **Execution:** Push
 
-**Blocks:** cli.py `--manifest X --action Y`
+**Blocks:** `./run.sh create/destroy/test -M X -H host`
 
 ```yaml
 Manifest:
@@ -291,9 +311,9 @@ Manifest:
 **Blocks:** manifest-schema-v2.md
 
 **Steps:**
-1. `homestak manifest validate v2/manifests/valid.yaml` → exit 0
-2. `homestak manifest validate v2/manifests/invalid-schema.yaml` → exit 1
-3. `homestak manifest validate v2/manifests/invalid-fk.yaml` → exit 1
+1. `./run.sh validate -M v2/manifests/valid.yaml` → exit 0
+2. `./run.sh validate -M v2/manifests/invalid-schema.yaml` → exit 1
+3. `./run.sh validate -M v2/manifests/invalid-fk.yaml` → exit 1
 
 **Assertions:**
 - Valid manifests pass
@@ -337,16 +357,26 @@ Manifest:
 
 ## Mapping to Current Scenarios
 
-| System Test | Current Equivalent | Gap |
-|-------------|-------------------|-----|
-| ST-1 | `spec-vm-roundtrip` | Missing full config phase (`homestak config`) |
-| ST-2 | `vm-roundtrip` | No manifest, hardcoded in scenario |
-| ST-3 | `nested-pve-roundtrip` | No manifest, hardcoded 2-level |
-| ST-4 | `recursive-pve-roundtrip --manifest n3-full` | Close, but uses old CLI |
-| ST-5 | None | New capability (mixed execution modes) |
-| ST-6 | None | New capability (parallel peer creation) |
-| ST-7 | None | New capability (manifest validation) |
-| ST-8 | Partial | Scenarios are mostly idempotent but not formally tested |
+| System Test | Current Equivalent | Gap | Sprint |
+|-------------|-------------------|-----|--------|
+| ST-1 | `vm-rt` | Missing full config phase | Sprint 4 (#147) |
+| ST-2 | `vm-roundtrip` | No manifest, hardcoded in scenario | Sprint 3 (#144) |
+| ST-3 | `nested-pve-roundtrip` | No manifest, hardcoded 2-level | Sprint 3 (#144) |
+| ST-4 | `recursive-pve-roundtrip --manifest n3-full` | Close, but uses old CLI | Sprint 3 (#144) |
+| ST-5 | None | New capability (mixed execution modes) | Sprint 3 (#144) |
+| ST-6 | None | New capability (parallel peer creation) | Sprint 3 (#144) |
+| ST-7 | None | New capability (manifest validation) | Sprint 2 (#143) |
+| ST-8 | Partial | Scenarios are mostly idempotent but not formally tested | Core |
+
+### Sprint 1 Contribution to System Tests
+
+Sprint 1 (unified controller, #148) **enables** multiple system tests:
+
+| System Test | Sprint 1 Contribution |
+|-------------|----------------------|
+| ST-1 | Spec server infrastructure (controller/specs.py) |
+| ST-2 | Repos serving for push execution (controller/repos.py) |
+| ST-5 | Mixed mode support via posture-based auth |
 
 ## Coverage Matrix
 
@@ -393,17 +423,21 @@ pytest tests/test_config_resolver.py -k "test_resolve_env"  # Specific test
 
 ```bash
 # Full lifecycle test
-./run.sh --manifest single-node --action test --host father
+./run.sh test -M single-node -H father
 
 # Create only (leave running for debugging)
-./run.sh --manifest nested-test --action create --host father
+./run.sh create -M nested-test -H father
 
 # Destroy after debugging
-./run.sh --manifest nested-test --action destroy --host father
+./run.sh destroy -M nested-test -H father
 ```
 
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-02-05 | Updated CLI references to verb-based subcommands; updated ST-7 validate commands |
+| 2026-02-05 | Added test_controller_tls.py for TLS requirements; updated line counts |
+| 2026-02-05 | Added Sprint 1 unit tests (controller, resolver); added controller-repos scenario; mapped ST gaps to sprints |
+| 2026-02-04 | Renamed spec-vm-roundtrip → vm-rt; updated ST-1 gap to reference Sprint 4 #147 |
 | 2026-02-03 | Initial document |

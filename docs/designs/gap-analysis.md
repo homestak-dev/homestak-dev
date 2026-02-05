@@ -24,7 +24,7 @@ This document tracks the design documentation landscape for the homestak lifecyc
 |----------|--------|----------|-------------|
 | `config-apply.md` | iac-driver (TBD) | P0 | Config phase implementation to reach "platform ready" state |
 | `manifest-schema-v2.md` | iac-driver#140-P2 | P0 | Manifest schema v2 with `nodes` graph structure, absorbs `node.schema.json` |
-| `scenario-consolidation.md` | iac-driver#140-P4 | P1 | Transitional doc for migrating from `*-constructor/*-destructor` to `--manifest X --action Y` |
+| `scenario-consolidation.md` | iac-driver#145 | P1 | Transitional doc for migrating from `*-constructor/*-destructor` to verb-based subcommands |
 
 ### Document Dependencies
 
@@ -39,7 +39,7 @@ node-orchestration.md (complete)
         │
         ├── manifest-schema-v2.md (missing) ──► iac-driver#140-P2
         │
-        └── scenario-consolidation.md (missing, transitional) ──► iac-driver#140-P4
+        └── scenario-consolidation.md (missing, transitional) ──► iac-driver#145
                                                                         │
                                                                         └── Archive after migration
 ```
@@ -52,8 +52,8 @@ Identified issues in existing design documents that should be corrected.
 
 | Section | Issue | Fix |
 |---------|-------|-----|
-| CLI examples | Uses `homestak ...` command pattern | Update to `./run.sh --manifest X --action Y` |
-| Architecture Alignment | References "manifest-executor.md" | Remove reference - manifest execution is inline in `cli.py` |
+| CLI examples | ~~Uses `homestak ...` command pattern~~ | **Complete** — Updated to verb-based `./run.sh create/destroy/test -M X -H host` |
+| Architecture Alignment | ~~References "manifest-executor.md"~~ | **Complete** — Operator package replaces inline execution (#144) |
 | Implementation Relationship | References phase numbers from sprint planning | Update to reference design docs directly |
 
 ### node-lifecycle.md
@@ -78,12 +78,12 @@ Items identified during Sprint 0 analysis for NFR (Non-Functional Requirements) 
 
 | Current | Issue | Target |
 |---------|-------|--------|
-| `vm-constructor` | Action encoded in name | Retire after `--action create` |
-| `vm-destructor` | Action encoded in name | Retire after `--action destroy` |
-| `vm-roundtrip` | Test pattern encoded in name | Retire after `--action test` |
-| `nested-pve-constructor` | Hardcoded 2-level | Retire after manifest support |
-| `nested-pve-destructor` | Hardcoded 2-level | Retire after manifest support |
-| `nested-pve-roundtrip` | Hardcoded 2-level | Retire after manifest support |
+| `vm-constructor` | Action encoded in name | Retire after `./run.sh create` |
+| `vm-destructor` | Action encoded in name | Retire after `./run.sh destroy` |
+| `vm-roundtrip` | Test pattern encoded in name | Retire after `./run.sh test` |
+| `nested-pve-constructor` | Hardcoded 2-level | Retire after manifest operator (#144) |
+| `nested-pve-destructor` | Hardcoded 2-level | Retire after manifest operator (#144) |
+| `nested-pve-roundtrip` | Hardcoded 2-level | Retire after manifest operator (#144) |
 | `recursive-pve-*` | Old manifest format | Retire after v2 manifest support |
 
 ### Directory Structure (iac-driver)
@@ -105,7 +105,7 @@ Items identified during Sprint 0 analysis for NFR (Non-Functional Requirements) 
 | Location | Item | Disposition |
 |----------|------|-------------|
 | `iac-driver/src/scenarios/cleanup_nested_pve.py` | Shared cleanup actions | Evaluate after scenario consolidation |
-| `iac-driver/src/actions/recursive.py` | RecursiveScenarioAction | May become manifest-executor primitive |
+| `iac-driver/src/actions/recursive.py` | RecursiveScenarioAction | May become operator primitive |
 
 ## Gap Closure Tracking
 
@@ -113,19 +113,25 @@ Track progress on closing design gaps.
 
 | Gap | Target Sprint | Status | Notes |
 |-----|--------------|--------|-------|
-| config-apply.md | Sprint 4 (iac-driver TBD) | Not started | Blocks first "platform ready" |
-| manifest-schema-v2.md | Sprint 2 (#140-P2) | Not started | Blocks CLI simplification |
-| scenario-consolidation.md | Sprint 5 (#140-P4) | Not started | Transitional, archive after |
+| unified-controller (#148) | Sprint 1 (#146) | **Complete** | Delivered in PR #150, #148 closed |
+| config-apply.md | Sprint 4 (iac-driver#147) | Not started | Blocks first "platform ready" |
+| manifest-schema-v2.md | Sprint 2 (#143) | Not started | Blocks operator (#144) |
+| scenario-consolidation.md | Sprint 5 (#145) | Not started | Transitional, archive after |
 | phase-interfaces.md | Sprint 0 | **Complete** | Resolved Q1-Q6, documented all phase contracts |
-| node-orchestration.md CLI examples | Sprint 0 | **Complete** | Updated to `./run.sh --manifest X --action Y` |
+| node-orchestration.md CLI examples | Sprint 0 | **Complete** | Updated to verb-based `./run.sh create/destroy/test` |
 | node-lifecycle.md phase-interfaces ref | Sprint 0 | **Complete** | Added cross-reference |
+| CLI verb pattern update | Sprint 0 | **Complete** | All design docs updated from `--manifest X --action Y` to verb subcommands |
 | requirements-catalog.md Source column | Sprint 0 | **Complete** | Added Source tracking, 11 implicit requirements |
+| requirements-catalog.md CTL category | Sprint 1 | **Complete** | Added controller requirements (REQ-CTL-001 to 010) |
 | Terminology standardization | Sprint 0 | **Complete** | "spec server" not "config server" |
 
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-02-05 | Updated CLI pattern references to verb-based subcommands; marked #148 complete; updated scenario retirement targets |
+| 2026-02-05 | Added unified controller (#148) to gap tracking; added CTL category to requirements |
+| 2026-02-04 | Updated Sprint 4 to reference iac-driver#147 (config phase) |
 | 2026-02-04 | Removed homestak-dev#155 references (closed - config phase belongs in iac-driver) |
 | 2026-02-04 | Updated Gap Closure Tracking with Sprint 0 completions |
 | 2026-02-03 | Initial document |

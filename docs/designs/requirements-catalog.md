@@ -23,6 +23,7 @@ REQ-{CATEGORY}-{NUMBER}
 Categories:
 - CRE: Create/Provisioning
 - CFG: Configuration (config phase)
+- CTL: Controller (unified HTTP server)
 - EXE: Execution (command running, timeouts)
 - NET: Networking (SSH, API access)
 - OBS: Observability (logging, reporting)
@@ -97,6 +98,29 @@ Requirements for the config phase: sources, resolution, state management.
 | REQ-CFG-013 | Context mutations persist (passed by reference) | P0 | Validated | impl | - | - |
 | REQ-CFG-014 | tfvars.json written atomically (temp file + rename) | P1 | Validated | impl | - | - |
 | REQ-CFG-015 | State directory auto-created if missing | P1 | Validated | impl | - | - |
+
+---
+
+## CTL: Controller
+
+Requirements for the unified controller daemon (specs + repos serving).
+
+| ID | Requirement | Priority | Status | Source | Design Doc | Test |
+|----|-------------|----------|--------|--------|------------|------|
+| REQ-CTL-001 | Single daemon serving both specs and repos | P0 | Proposed | design | #148 | test_ctrl_server.py |
+| REQ-CTL-002 | Single port for all endpoints (default: 44443) | P0 | Proposed | design | #148 | test_ctrl_server.py |
+| REQ-CTL-003 | Posture-based auth for /spec/* (network, site_token, node_token) | P0 | Proposed | design | #148 | test_ctrl_auth.py |
+| REQ-CTL-004 | Token auth for /repos/* (Bearer token) | P0 | Proposed | design | #148 | test_ctrl_auth.py |
+| REQ-CTL-005 | Daemon lifecycle: PID file, SIGTERM graceful shutdown, SIGHUP cache clear | P0 | Proposed | design | #148 | test_ctrl_server.py |
+| REQ-CTL-006 | Git dumb HTTP protocol for repos serving | P0 | Proposed | design | #148 | test_ctrl_repos.py |
+| REQ-CTL-007 | `_working` branch for uncommitted changes | P0 | Proposed | design | #148 | test_ctrl_repos.py |
+| REQ-CTL-008 | /health endpoint (no auth) | P1 | Proposed | design | #148 | test_ctrl_server.py |
+| REQ-CTL-009 | /repos endpoint lists available repos | P1 | Proposed | design | #148 | test_ctrl_repos.py |
+| REQ-CTL-010 | Spec caching with SIGHUP invalidation | P1 | Proposed | design | #148 | test_ctrl_specs.py |
+| REQ-CTL-011 | TLS required for all connections | P0 | Proposed | design | #148 | test_ctrl_server.py |
+| REQ-CTL-012 | Self-signed cert auto-generation | P0 | Proposed | design | #148 | test_ctrl_tls.py |
+| REQ-CTL-013 | site-config cert support | P1 | Proposed | design | #148 | - (design only) |
+| REQ-CTL-014 | Cert fingerprint logging on startup | P2 | Proposed | design | #148 | test_ctrl_server.py |
 
 ---
 
@@ -239,7 +263,7 @@ Requirements for multi-node coordination from node-orchestration.md.
 |----|-------------|----------|--------|--------|------------|------|
 | REQ-ORC-001 | Manifests define topology independent of execution | P0 | Accepted | design | node-orchestration.md | ST-2 through ST-6 |
 | REQ-ORC-002 | Push/pull/hybrid execution models are co-equal | P0 | Accepted | design | node-orchestration.md | ST-5 |
-| REQ-ORC-003 | CLI: `./run.sh --manifest X --action create|destroy|test` | P0 | Proposed | design | node-orchestration.md | ST-2 through ST-6 |
+| REQ-ORC-003 | CLI: `./run.sh create\|destroy\|test -M <manifest> -H <host>` (verb-based subcommands) | P0 | Proposed | design | node-orchestration.md | ST-2 through ST-6 |
 | REQ-ORC-004 | Manifest v1 (levels) deprecated, v2 (nodes) only | P0 | Accepted | design | node-orchestration.md | ST-7 |
 | REQ-ORC-005 | Parent created before children, children destroyed before parent | P0 | Accepted | design | node-orchestration.md | ST-3, ST-4 |
 | REQ-ORC-006 | Execution mode inherits from document default with per-node override | P1 | Accepted | design | node-orchestration.md | ST-5 |
@@ -277,6 +301,8 @@ Requirements for code quality, naming, structure, and cleanup.
 | REQ-NFR-006 | Scenario names follow `noun-verb` pattern | P2 | Accepted | impl | - | - |
 | REQ-NFR-007 | Phase names follow `verb_noun` pattern | P2 | Accepted | impl | - | - |
 | REQ-NFR-008 | Action classes follow `VerbNounAction` pattern | P2 | Accepted | impl | - | - |
+| REQ-NFR-009 | Plumbing code uses reasonable abbreviations (e.g., `ctrl` for controller, `cfg` for config) | P2 | Accepted | design | - | - |
+| REQ-NFR-010 | Test files abbreviate long prefixes (e.g., `test_ctrl_*` not `test_controller_*`) | P2 | Accepted | design | - | - |
 
 ---
 
@@ -294,11 +320,20 @@ Mapping test coverage to requirements.
 | `test_validation.py` | REQ-NET-011 |
 | `test_recursive_action.py` | REQ-OBS-001, 011 |
 | `test_scenario_attributes.py` | REQ-OBS-010 |
+| `test_ctrl_server.py` | REQ-CTL-001, 002, 005, 008, 011, 014 |
+| `test_ctrl_tls.py` | REQ-CTL-012 |
+| `test_ctrl_auth.py` | REQ-CTL-003, 004 |
+| `test_ctrl_specs.py` | REQ-CTL-010 |
+| `test_ctrl_repos.py` | REQ-CTL-006, 007, 009 |
+| `test_resolver_base.py` | REQ-CFG-003, 004, REQ-SEC-007 |
+| `test_spec_resolver.py` | REQ-LIF-006 |
+| `test_spec_client.py` | REQ-LIF-007, 008 |
 | `vm-roundtrip` | REQ-CRE-001, 002, 004, 005, 006, 010 |
-| `spec-vm-roundtrip` | REQ-CRE-003, REQ-LIF-007, 008 |
+| `vm-rt` | REQ-CRE-003, REQ-LIF-007, 008, REQ-CTL-001, 003 |
+| `controller-repos` | REQ-CTL-004, 006, 007 |
 | `nested-pve-roundtrip` | REQ-NET-007, 008, REQ-CFG-013, 014, 015 |
-| ST-1 | REQ-LIF-001, 002, 005 |
-| ST-2 | REQ-LIF-001, REQ-ORC-003 |
+| ST-1 | REQ-LIF-001, 002, 005, REQ-CTL-001, 003 |
+| ST-2 | REQ-LIF-001, REQ-ORC-003, REQ-CTL-004, 006 |
 | ST-3, ST-4 | REQ-ORC-005 |
 | ST-5 | REQ-LIF-005, REQ-ORC-002, 006 |
 | ST-7 | REQ-ORC-004, 009 |
@@ -310,5 +345,8 @@ Mapping test coverage to requirements.
 
 | Date | Change |
 |------|--------|
+| 2026-02-05 | Updated REQ-ORC-003 to verb-based CLI pattern |
+| 2026-02-05 | Added TLS requirements (REQ-CTL-011 to 014); updated traceability matrix |
+| 2026-02-05 | Added CTL category (unified controller) with REQ-CTL-001 through 010; updated traceability matrix |
 | 2026-02-03 | Added Source column; integrated implicit requirements from codebase (CFG-013 to 015, EXE-008 to 010, NET-012 to 014, OBS-011, 012) |
 | 2026-02-03 | Initial catalog from iac-driver#125 Comment #5 |
