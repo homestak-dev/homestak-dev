@@ -36,6 +36,7 @@ Use clear, actionable titles. The format depends on the issue/PR type:
 | Type | Format | Example |
 |------|--------|---------|
 | Scope issue | `<Verb> <what>` | `Add --dry-run flag to release.sh` |
+| Epic | `Epic: <Theme>` | `Epic: CI/CD strategy` |
 | Sprint issue | `Sprint: <Theme>` | `Sprint: Unified Controller Daemon` |
 | Release issue | `Release: vX.Y - <Theme>` | `Release: v0.46 - Lifecycle Overhaul` |
 | PR (all types) | `<type>(<scope>): <summary>` | `feat(controller): Add unified controller daemon` |
@@ -65,6 +66,8 @@ Use clear, actionable titles. The format depends on the issue/PR type:
 - Questions as titles: "Why does X happen?"
 - Implementation details: "Refactor X to use Y pattern"
 - Sprint numbers in titles (use theme, not `Sprint 1: ...`)
+- Prefixes that duplicate labels: `Enhancement:`, `Bug:`, `[CLI]`
+- Component prefixes: `ConfigResolver:`, `release.sh:` (work the component into the verb phrase)
 
 ### Description Content
 
@@ -229,7 +232,12 @@ Something is broken. Please fix.
 When creating an issue:
 
 ```
-1. Title: <Verb> <what> [context]
+1. Title (by type):
+   - Scope:   <Verb> <what>
+   - Epic:    Epic: <Theme>
+   - Sprint:  Sprint: <Theme>
+   - Release: Release: vX.Y - <Theme>
+   - PR:      <type>(<scope>): <summary>
 2. Labels:
    - ONE of: bug | enhancement | epic
    - ZERO+ of: documentation | refactor | testing | security | breaking-change
