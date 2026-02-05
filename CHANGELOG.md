@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Changed
+- Migrate branch protection to GitHub Rulesets with OrganizationAdmin bypass (#185)
+  - Replace classic branch protection on all 9 public repos
+  - Add `homestak-bot` machine user for PR authorship (enables human review/approval)
+  - Enable auto-merge on all repos
+  - Update REPO-SETTINGS.md, CLAUDE.md, and lifecycle docs for rulesets workflow
+
 ## v0.45 - 2026-02-02
 
 ### Theme: Create Integration
