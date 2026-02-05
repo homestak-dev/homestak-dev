@@ -80,7 +80,7 @@ for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer sit
   git add CHANGELOG.md
   git commit -m "docs: Update CHANGELOG for v0.45
 
-Co-Authored-By: Claude <assistant@anthropic.com>"
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
   git push origin master
 done
 ```
