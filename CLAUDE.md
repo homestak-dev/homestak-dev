@@ -403,6 +403,7 @@ Reusable templates in [docs/templates/](docs/templates/):
 |------|---------|
 | [aar.md](docs/templates/aar.md) | After Action Report template |
 | [retrospective.md](docs/templates/retrospective.md) | Sprint retrospective template |
+| [epic-issue.md](docs/templates/epic-issue.md) | Epic issue template |
 | [release-issue.md](docs/templates/release-issue.md) | Release planning issue template |
 | [design-summary.md](docs/templates/design-summary.md) | Design documentation templates |
 

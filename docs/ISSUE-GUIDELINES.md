@@ -11,6 +11,14 @@ Actual work items representing bugs, enhancements, or features:
 - Assigned to sprints or worked directly on trunk
 - Closed when work is complete
 
+### Epic Issues
+
+Track multi-issue efforts requiring breakdown (see [epic-issue.md](templates/epic-issue.md)):
+- Use `epic` label
+- Track phased implementation, sub-tasks, design decisions
+- Reference sprint tracking issues by number, not ordinal (e.g., `#146` not "Sprint 1")
+- Link to design docs in `docs/designs/`
+
 ### Sprint Issues
 
 Track multi-issue coordinated work (see [10-sprint-planning.md](lifecycle/10-sprint-planning.md)):

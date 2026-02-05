@@ -72,7 +72,7 @@ Identified issues in existing design documents that should be corrected.
 
 ## Code/Structure Cleanup Candidates
 
-Items identified during Sprint 0 analysis for NFR (Non-Functional Requirements) cleanup. These don't block functionality but improve maintainability.
+Items identified during iac-driver#141 analysis for NFR (Non-Functional Requirements) cleanup. These don't block functionality but improve maintainability.
 
 ### Scenario Naming (iac-driver)
 
@@ -111,24 +111,25 @@ Items identified during Sprint 0 analysis for NFR (Non-Functional Requirements) 
 
 Track progress on closing design gaps.
 
-| Gap | Target Sprint | Status | Notes |
-|-----|--------------|--------|-------|
-| unified-controller (#148) | Sprint 1 (#146) | **Complete** | Delivered in PR #150, #148 closed |
-| config-apply.md | Sprint 4 (iac-driver#147) | Not started | Blocks first "platform ready" |
-| manifest-schema-v2.md | Sprint 2 (#143) | Not started | Blocks operator (#144) |
-| scenario-consolidation.md | Sprint 5 (#145) | Not started | Transitional, archive after |
-| phase-interfaces.md | Sprint 0 | **Complete** | Resolved Q1-Q6, documented all phase contracts |
-| node-orchestration.md CLI examples | Sprint 0 | **Complete** | Updated to verb-based `./run.sh create/destroy/test` |
-| node-lifecycle.md phase-interfaces ref | Sprint 0 | **Complete** | Added cross-reference |
-| CLI verb pattern update | Sprint 0 | **Complete** | All design docs updated from `--manifest X --action Y` to verb subcommands |
-| requirements-catalog.md Source column | Sprint 0 | **Complete** | Added Source tracking, 11 implicit requirements |
-| requirements-catalog.md CTL category | Sprint 1 | **Complete** | Added controller requirements (REQ-CTL-001 to 010) |
-| Terminology standardization | Sprint 0 | **Complete** | "spec server" not "config server" |
+| Gap | Target | Status | Notes |
+|-----|--------|--------|-------|
+| unified-controller (#148) | iac-driver#146 | **Complete** | Delivered in PR #150, #148 closed |
+| config-apply.md | iac-driver#147 | Not started | Blocks first "platform ready" |
+| manifest-schema-v2.md | iac-driver#143 | Not started | Part of manifest operator sprint (#143 + #144) |
+| scenario-consolidation.md | iac-driver#145 | Not started | Transitional, archive after |
+| phase-interfaces.md | iac-driver#141 | **Complete** | Resolved Q1-Q6, documented all phase contracts |
+| node-orchestration.md CLI examples | iac-driver#141 | **Complete** | Updated to verb-based `./run.sh create/destroy/test` |
+| node-lifecycle.md phase-interfaces ref | iac-driver#141 | **Complete** | Added cross-reference |
+| CLI verb pattern update | iac-driver#141 | **Complete** | All design docs updated from `--manifest X --action Y` to verb subcommands |
+| requirements-catalog.md Source column | iac-driver#141 | **Complete** | Added Source tracking, 11 implicit requirements |
+| requirements-catalog.md CTL category | iac-driver#146 | **Complete** | Added controller requirements (REQ-CTL-001 to 010) |
+| Terminology standardization | iac-driver#141 | **Complete** | "spec server" not "config server" |
 
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-02-05 | Replace ordinal sprint labels with issue references; update for #143+#144 combination |
 | 2026-02-05 | Updated CLI pattern references to verb-based subcommands; marked #148 complete; updated scenario retirement targets |
 | 2026-02-05 | Added unified controller (#148) to gap tracking; added CTL category to requirements |
 | 2026-02-04 | Updated Sprint 4 to reference iac-driver#147 (config phase) |
