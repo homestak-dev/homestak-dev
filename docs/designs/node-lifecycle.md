@@ -181,7 +181,7 @@ When nested-pve creates test1 (inside nested-pve):
 
 | Term | Directory | Meaning |
 |------|-----------|---------|
-| **Node** | `v2/nodes/` | Compute entity (VM, CT, PVE host, k3s node) |
+| **Node** | manifest `nodes[]` | Compute entity (VM, CT, PVE host, k3s node) |
 | **Spec** | `v2/specs/` | Specification — what a node should become |
 | **Def** | `v2/defs/` | Schema definition — structure of specs/nodes |
 | **Posture** | `v2/postures/` | Security configuration (dev, stage, prod, local) |
@@ -244,7 +244,7 @@ site-config/
 └── v2/
     ├── defs/                 # Schema definitions
     │   ├── spec.schema.json
-    │   ├── node.schema.json
+    │   ├── manifest.schema.json
     │   └── posture.schema.json
     ├── specs/                # Node specifications (what to become)
     │   ├── pve.yaml
@@ -260,16 +260,14 @@ site-config/
     │   ├── vm-medium.yaml
     │   ├── vm-large.yaml
     │   └── vm-xlarge.yaml
-    └── nodes/                # Node templates (infrastructure)
-        ├── pve.yaml
-        └── base.yaml
+    └── (nodes defined inline in manifests, v2/nodes/ retired)
 ```
 
 ### Lifecycle Coverage
 
 | Directory | Phase | Purpose |
 |-----------|-------|---------|
-| `v2/nodes/` + `v2/presets/` | create | Infrastructure provisioning |
+| manifest `nodes[]` + `v2/presets/` | create | Infrastructure provisioning |
 | `v2/specs/` + `v2/postures/` | config | What to become + how to secure |
 
 ## Spec Schema (v1)
