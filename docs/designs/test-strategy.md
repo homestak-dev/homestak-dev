@@ -37,7 +37,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 
 **Total:** 12 files, ~5,500 lines (including conftest.py)
 
-**Sprint 1 additions (unified controller):**
+**Unified controller additions (iac-driver#146):**
 | File | Lines | Coverage Focus |
 |------|-------|----------------|
 | `test_ctrl_server.py` | ~400 | HTTPS server, daemon lifecycle, signals |
@@ -49,7 +49,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 | `test_spec_resolver.py` | ~400 | SpecResolver (migrated from bootstrap) |
 | `test_spec_client.py` | ~300 | HTTP client, error handling, state |
 
-**Sprint 1 total:** +2,700 lines, 8 new files
+**iac-driver#146 total:** +2,700 lines, 8 new files
 
 **Target coverage for new lifecycle/ components:**
 - `lifecycle/core/create.py` - Create phase orchestration
@@ -76,7 +76,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 | `bootstrap-install` | bootstrap + validation | ~2m |
 | `packer-build` | packer + QEMU | ~3m |
 
-**Sprint 1 additions:**
+**Unified controller additions (iac-driver#146):**
 | Scenario | Components Tested | Duration |
 |----------|-------------------|----------|
 | `controller-repos` | controller + git clone | ~30s |
@@ -357,22 +357,22 @@ Manifest:
 
 ## Mapping to Current Scenarios
 
-| System Test | Current Equivalent | Gap | Sprint |
-|-------------|-------------------|-----|--------|
-| ST-1 | `vm-rt` | Missing full config phase | Sprint 4 (#147) |
-| ST-2 | `vm-roundtrip` | No manifest, hardcoded in scenario | Sprint 3 (#144) |
-| ST-3 | `nested-pve-roundtrip` | No manifest, hardcoded 2-level | Sprint 3 (#144) |
-| ST-4 | `recursive-pve-roundtrip --manifest n3-full` | Close, but uses old CLI | Sprint 3 (#144) |
-| ST-5 | None | New capability (mixed execution modes) | Sprint 3 (#144) |
-| ST-6 | None | New capability (parallel peer creation) | Sprint 3 (#144) |
-| ST-7 | None | New capability (manifest validation) | Sprint 2 (#143) |
+| System Test | Current Equivalent | Gap | Blocked By |
+|-------------|-------------------|-----|------------|
+| ST-1 | `vm-rt` | Missing full config phase | iac-driver#147 |
+| ST-2 | `vm-roundtrip` | No manifest, hardcoded in scenario | iac-driver#143, #144 |
+| ST-3 | `nested-pve-roundtrip` | No manifest, hardcoded 2-level | iac-driver#143, #144 |
+| ST-4 | `recursive-pve-roundtrip --manifest n3-full` | Close, but uses old CLI | iac-driver#143, #144 |
+| ST-5 | None | New capability (mixed execution modes) | iac-driver#143, #144 |
+| ST-6 | None | New capability (parallel peer creation) | iac-driver#143, #144 |
+| ST-7 | None | New capability (manifest validation) | iac-driver#143, #144 |
 | ST-8 | Partial | Scenarios are mostly idempotent but not formally tested | Core |
 
-### Sprint 1 Contribution to System Tests
+### Unified Controller (iac-driver#146) Contribution to System Tests
 
-Sprint 1 (unified controller, #148) **enables** multiple system tests:
+The unified controller sprint (iac-driver#146) **enables** multiple system tests:
 
-| System Test | Sprint 1 Contribution |
+| System Test | Contribution |
 |-------------|----------------------|
 | ST-1 | Spec server infrastructure (controller/specs.py) |
 | ST-2 | Repos serving for push execution (controller/repos.py) |
@@ -436,8 +436,9 @@ pytest tests/test_config_resolver.py -k "test_resolve_env"  # Specific test
 
 | Date | Change |
 |------|--------|
+| 2026-02-05 | Replace ordinal sprint labels with issue references; update for #143+#144 combination |
 | 2026-02-05 | Updated CLI references to verb-based subcommands; updated ST-7 validate commands |
 | 2026-02-05 | Added test_controller_tls.py for TLS requirements; updated line counts |
-| 2026-02-05 | Added Sprint 1 unit tests (controller, resolver); added controller-repos scenario; mapped ST gaps to sprints |
-| 2026-02-04 | Renamed spec-vm-roundtrip → vm-rt; updated ST-1 gap to reference Sprint 4 #147 |
+| 2026-02-05 | Added unified controller unit tests (iac-driver#146); added controller-repos scenario; mapped ST gaps to scope issues |
+| 2026-02-04 | Renamed spec-vm-roundtrip → vm-rt; updated ST-1 gap to reference iac-driver#147 |
 | 2026-02-03 | Initial document |

@@ -314,7 +314,7 @@ nodes:
 
 ### Simplified CLI
 
-With topology and execution mode externalized to the manifest, the CLI uses verb subcommands (established in Sprint 1):
+With topology and execution mode externalized to the manifest, the CLI uses verb subcommands (established in iac-driver#146):
 
 ```bash
 # Legacy: scenario name encodes action + topology style
