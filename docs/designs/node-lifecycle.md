@@ -132,7 +132,7 @@ Nodes discover their spec and converge autonomously.
 ```
 Driver                           Target
 ──────                           ──────
-1. homestak serve (spec server)
+1. ./run.sh serve (controller daemon)
 2. tofu apply (inject identity + endpoint)
                                  3. Boot with identity
                                  4. homestak spec get
@@ -140,7 +140,7 @@ Driver                           Target
    GET /spec/{identity}          │
    ─────────────────────────────▶
    200 OK + spec                 │
-                                 5. homestak config
+                                 5. Apply spec locally (future)
                                  6. PLATFORM READY
 ```
 
@@ -345,21 +345,21 @@ parent: father               # Parent node (for VMs)
 
 ## CLI Pattern
 
+**Driver CLI** (`./run.sh` — iac-driver, verb-based subcommands):
+
 ```bash
-homestak <noun> <verb> [args...]
+./run.sh serve                              # Start controller daemon
+./run.sh create -M <manifest> -H <host>     # Create nodes per manifest
+./run.sh destroy -M <manifest> -H <host>    # Destroy nodes per manifest
+./run.sh test -M <manifest> -H <host>       # Roundtrip validation
+./run.sh config -M <manifest> -H <host>     # Config phase (future)
+```
 
-# Spec management
+**Target CLI** (`homestak` — bootstrap, runs on target nodes):
+
+```bash
 homestak spec validate <path>     # Validate spec against schema
-homestak spec get                 # Fetch spec from server
-
-# Server
-homestak serve                    # Start spec server
-
-# Future
-homestak config                   # Apply spec to reach platform ready
-homestak node create <template>   # Create node from template
-homestak node list                # List nodes
-homestak node destroy <name>      # Destroy node
+homestak spec get                 # Fetch spec from server (pull model)
 ```
 
 ## Scope & Relationship
@@ -421,7 +421,7 @@ The architecture is being implemented incrementally across multiple releases.
 | Release | Phase | Deliverables |
 |---------|-------|--------------|
 | v0.43 | Schema Foundation | V2 directory structure, JSON schemas for specs/nodes/postures |
-| v0.44 | Config Infrastructure | `homestak serve` server, `homestak spec get` client, auth model |
+| v0.44 | Config Infrastructure | Spec server, `homestak spec get` client, auth model |
 | v0.45 | create → config | Cloud-init integration, auth token injection, `spec-vm-roundtrip` scenario |
 
 ### v0.45 Details (create → config)
@@ -451,6 +451,7 @@ The architecture is being implemented incrementally across multiple releases.
 
 | Date | Change |
 |------|--------|
+| 2026-02-05 | Update CLI Pattern section: distinguish driver CLI (`./run.sh`) from target CLI (`homestak`); remove premature `homestak config` porcelain reference |
 | 2026-02-03 | Rename to node-lifecycle.md; normalize execution models as co-equal (push/hybrid/pull all first-class); add terminology framework; remove "In Progress" section |
 | 2026-02-03 | Rename to node-lifecycle-architecture.md; consolidate to 4 phases (create, config, run, destroy); add #140 epic, scope & relationship section |
 | 2026-02-02 | Update for v0.45: create → config integration complete |

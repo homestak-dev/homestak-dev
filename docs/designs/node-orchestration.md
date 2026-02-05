@@ -161,7 +161,7 @@ Driver
     │
     ├── SSH → target: "tofu apply"
     ├── SSH → target: "ansible-playbook ..."
-    └── SSH → target: "./run.sh --manifest X --action create"
+    └── SSH → target: "./run.sh create -M X -H host"
 ```
 
 | Characteristic | Value |
@@ -314,25 +314,24 @@ nodes:
 
 ### Simplified CLI
 
-With topology and execution mode externalized to the manifest, the CLI becomes:
+With topology and execution mode externalized to the manifest, the CLI uses verb subcommands (established in Sprint 1):
 
 ```bash
-# Current: scenario name encodes action + topology style
+# Legacy: scenario name encodes action + topology style
 ./run.sh --scenario recursive-pve-constructor --manifest n2-quick --host father
 ./run.sh --scenario recursive-pve-destructor --manifest n2-quick --host father
-./run.sh --scenario recursive-pve-roundtrip --manifest n2-quick --host father
 
-# Future: manifest is the noun, action is the verb
-./run.sh --manifest nested-test --action create --host father
-./run.sh --manifest nested-test --action destroy --host father
-./run.sh --manifest nested-test --action test --host father    # create + verify + destroy
+# Current: verb-based subcommands
+./run.sh create -M nested-test -H father
+./run.sh destroy -M nested-test -H father
+./run.sh test -M nested-test -H father    # create + verify + destroy
 ```
 
 **Benefits:**
-- No scenario proliferation (`vm-constructor`, `nested-pve-constructor`, `recursive-pve-constructor` collapse to `--action create`)
+- No scenario proliferation (`vm-constructor`, `nested-pve-constructor`, `recursive-pve-constructor` collapse to `create`)
 - Topology and execution mode are externalized, not encoded in scenario names
-- CLI is more intuitive: manifest is what, action is the operation
-- Mode can be overridden at CLI if needed: `--manifest nested-test --action create --mode push`
+- CLI is more intuitive: verb is the operation, manifest is the target
+- Mode can be overridden at CLI if needed: `./run.sh create -M nested-test -H father --mode push`
 
 ### Execution Mode Inheritance
 
@@ -504,14 +503,14 @@ These terms and patterns should NOT be used in new development:
 
 | Obsolete Term | Why | Use Instead |
 |---------------|-----|-------------|
-| `nested-pve-*` scenarios | Hardcoded 2-level, push-only | `--manifest X --action Y` |
-| `recursive-pve-*` scenarios | Old manifest format, push-only | `--manifest X --action Y` |
-| `vm-constructor` / `vm-destructor` | Action encoded in name | `--action create` / `--action destroy` |
-| `*-roundtrip` scenarios | Test pattern encoded in name | `--action test` |
+| `nested-pve-*` scenarios | Hardcoded 2-level, push-only | verb commands (`./run.sh create|destroy|test`) |
+| `recursive-pve-*` scenarios | Old manifest format, push-only | verb commands (`./run.sh create|destroy|test`) |
+| `vm-constructor` / `vm-destructor` | Action encoded in name | `create` / `destroy` |
+| `*-roundtrip` scenarios | Test pattern encoded in name | `test` |
 | `levels` (manifest) | Linear only | `nodes` with `parent` |
 | `SyncReposToVMAction` | Pre-bootstrap pattern | Bootstrap handles repos |
 
-**Note:** Action classes like `TofuApplyRemoteAction` are valid primitives for push execution. What's obsolete is their use in hardcoded scenarios (`nested-pve-*`, `recursive-pve-*`). The manifest executor will use these primitives internally.
+**Note:** Action classes like `TofuApplyRemoteAction` are valid primitives for push execution. What's obsolete is their use in hardcoded scenarios (`nested-pve-*`, `recursive-pve-*`). The operator will use these primitives internally.
 
 **Action naming convention:**
 - `*RemoteAction` = push (driver executes via SSH)
@@ -578,10 +577,10 @@ Execution mode is defined in the manifest with optional CLI override:
 
 ```bash
 # Use manifest's defined mode
-./run.sh --manifest nested-test --action create --host father
+./run.sh create -M nested-test -H father
 
 # Override manifest's mode
-./run.sh --manifest nested-test --action create --host father --mode push
+./run.sh create -M nested-test -H father --mode push
 ```
 
 **Mode mixing:** Different nodes can use different modes (defined in manifest). A node created via push can later operate in pull mode for the run phase. The mode is a property of the operation, not the node itself.
@@ -598,7 +597,7 @@ Execution mode is defined in the manifest with optional CLI override:
 
 4. **Manifest FK resolution:** Same FK pattern used throughout site-config. Manifests reference specs, presets, postures by name; resolution happens at runtime.
 
-5. **Scenario consolidation:** Most scenarios collapse to `--action create|destroy|test`. Apply-phase scenarios (`pve-setup`, `user-setup`) deferred to Apply phase design.
+5. **Scenario consolidation:** Most scenarios collapse to verb subcommands (`create`, `destroy`, `test`). Apply-phase scenarios (`pve-setup`, `user-setup`) deferred to Apply phase design.
 
    **Manifests are required.** Ad-hoc single-node operations without a manifest are anti-pattern — they produce snowflake infrastructure. Even a one-node deployment should have a manifest. This maintains IaC principles: all infrastructure is declared, versioned, reproducible.
 
@@ -624,7 +623,7 @@ This design document represents a significant architectural evolution. Related i
 |------------------|---------|
 | Unified FK resolution | Manifests use same FK pattern as specs |
 | Spec server in iac-driver | Server can serve both specs AND manifests |
-| `./run.sh --serve` entry point | Aligns with `./run.sh --manifest X --action Y` CLI pattern |
+| `./run.sh serve` entry point | Aligns with verb-based CLI pattern (`./run.sh create/destroy/test`) |
 | ConfigResolver + SpecResolver consolidation | Single resolver can handle v1 (envs) and v2 (manifests) |
 
 ### Phased Implementation
@@ -633,7 +632,7 @@ This design document represents a significant architectural evolution. Related i
 |-------|-------|-----------|
 | 1. #139 | Move spec server, unify FK resolution | v0.45 (current) |
 | 2. Manifest schema | Define manifest.schema.json, retire node.schema.json | #139 |
-| 3. CLI simplification | `--manifest X --action create\|destroy\|test` | Manifest schema |
+| 3. Operator (#144) | `./run.sh create\|destroy\|test -M X -H host` | Manifest schema |
 | 4. Scenario consolidation | Retire `*-constructor`, `*-destructor`, `*-roundtrip` | CLI simplification |
 | 5. Pull execution | Full pull model for config phase | All above |
 
@@ -674,7 +673,7 @@ iac-driver/                        ├── src/
 ├── src/                           │   ├── resolver.py (unified FK)
 │   ├── config_resolver.py         │   ├── serve.py (spec server)
 │   ├── scenarios/*.py   ──retire──►   │   ├── spec_client.py
-│                                  │   ├── config.py (homestak config)
+│                                  │   ├── config.py (config phase)
 │                                  │   └── cli.py (manifest execution)
 │                                  └── run.sh
 ```
@@ -711,12 +710,12 @@ Manifest:
         mode: pull
 
 Steps:
-1. ./run.sh --manifest single-node --action create --host father
+1. ./run.sh create -M single-node -H father
 2. Driver provisions VM with identity + spec_server env vars
 3. VM boots, runs `homestak spec get`
-4. VM runs `homestak config` (future: currently manual)
+4. VM applies spec locally (config phase — future)
 5. Verify: VM reaches platform ready state
-6. ./run.sh --manifest single-node --action destroy --host father
+6. ./run.sh destroy -M single-node -H father
 
 Assertions:
 - VM fetched spec from server (check /usr/local/etc/homestak/state/spec.yaml)
@@ -743,11 +742,11 @@ Manifest:
         mode: push
 
 Steps:
-1. ./run.sh --manifest single-node-push --action create --host father
+1. ./run.sh create -M single-node-push -H father
 2. Driver provisions VM
 3. Driver SSHes to VM, runs configuration
 4. Verify: VM reaches platform ready state
-5. ./run.sh --manifest single-node-push --action destroy --host father
+5. ./run.sh destroy -M single-node-push -H father
 
 Assertions:
 - No spec server required
@@ -782,12 +781,12 @@ Manifest:
       parent: inner-pve
 
 Steps:
-1. ./run.sh --manifest nested-test --action create --host father
+1. ./run.sh create -M nested-test -H father
 2. Driver creates inner-pve on father
 3. inner-pve reaches platform ready (PVE installed)
 4. Driver creates test-vm on inner-pve
 5. test-vm reaches platform ready
-6. ./run.sh --manifest nested-test --action destroy --host father
+6. ./run.sh destroy -M nested-test -H father
 7. Destroy order: test-vm first, then inner-pve
 
 Assertions:
@@ -843,7 +842,7 @@ Manifest:
       # Inherits: pull    # Apps converge autonomously
 
 Steps:
-1. ./run.sh --manifest mixed-mode --action create --host father
+1. ./run.sh create -M mixed-mode -H father
 2. inner-pve created via push (driver configures)
 3. app-vm created, fetches spec via pull (autonomous)
 4. Both reach platform ready
@@ -875,10 +874,10 @@ Manifest:
       parent: null
 
 Steps:
-1. ./run.sh --manifest workers --action create --host father
+1. ./run.sh create -M workers -H father
 2. All three VMs created (potentially in parallel)
 3. All reach platform ready
-4. ./run.sh --manifest workers --action destroy --host father
+4. ./run.sh destroy -M workers -H father
 
 Assertions:
 - No ordering dependency between peers
@@ -892,9 +891,9 @@ Assertions:
 
 ```
 Steps:
-1. homestak manifest validate v2/manifests/valid.yaml → exit 0
-2. homestak manifest validate v2/manifests/invalid-schema.yaml → exit 1, schema error
-3. homestak manifest validate v2/manifests/invalid-fk.yaml → exit 1, unresolved FK
+1. `./run.sh validate -M valid` → exit 0
+2. `./run.sh validate -M invalid-schema` → exit 1, schema error
+3. `./run.sh validate -M invalid-fk` → exit 1, unresolved FK
 
 Assertions:
 - Valid manifests pass
@@ -908,11 +907,11 @@ Assertions:
 
 ```
 Steps:
-1. ./run.sh --manifest single-node --action create --host father
-2. ./run.sh --manifest single-node --action create --host father  # Re-run
+1. ./run.sh create -M single-node -H father
+2. ./run.sh create -M single-node -H father  # Re-run
 3. Verify: No error, no duplicate VM, state unchanged
-4. ./run.sh --manifest single-node --action destroy --host father
-5. ./run.sh --manifest single-node --action destroy --host father  # Re-run
+4. ./run.sh destroy -M single-node -H father
+5. ./run.sh destroy -M single-node -H father  # Re-run
 6. Verify: No error, clean exit
 
 Assertions:
@@ -958,6 +957,7 @@ Assertions:
 
 | Date | Change |
 |------|--------|
+| 2026-02-05 | Update CLI examples to verb-based pattern (`./run.sh create -M X -H host`); remove `--manifest X --action Y` references; rename "manifest executor" to "operator" |
 | 2026-02-03 | Rename to node-orchestration.md; add reading order guidance; apply terminology framework (driver/target, parent/child node, host/guest); update cross-references to node-lifecycle.md |
 | 2026-02-03 | Rename to orchestration-architecture.md; terminology updates (hierarchical→tiered, constellation→federated, 6 phases→4 phases); add obsolete terms section |
 | 2026-02-03 | Add epic #140, related issues analysis, implementation relationship |
