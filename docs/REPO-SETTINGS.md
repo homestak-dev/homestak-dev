@@ -22,31 +22,77 @@ All repos should include these base topics:
 
 Add repo-specific topics as appropriate (e.g., `ansible`, `opentofu`, `packer`).
 
-### Branch Protection (master)
+### Branch Protection (master) — Rulesets
+
+All public repos use GitHub Rulesets (not classic branch protection):
 
 ```json
 {
-  "required_pull_request_reviews": {
-    "required_approving_review_count": 1,
-    "dismiss_stale_reviews": false
+  "name": "master-protection",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [
+    {
+      "actor_id": 0,
+      "actor_type": "OrganizationAdmin",
+      "bypass_mode": "pull_request"
+    }
+  ],
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/heads/master"],
+      "exclude": []
+    }
   },
-  "enforce_admins": false,
-  "required_status_checks": null,
-  "restrictions": null
+  "rules": [
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": false,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": false
+      }
+    }
+  ]
 }
 ```
 
+**Bypass:** OrganizationAdmin can merge without separate reviewer approval.
+
 **CLI to apply:**
 ```bash
-gh api repos/homestak-dev/REPO_NAME/branches/master/protection -X PUT --input - <<'EOF'
+gh api repos/homestak-dev/REPO_NAME/rulesets --method POST --input - <<'EOF'
 {
-  "required_pull_request_reviews": {
-    "required_approving_review_count": 1,
-    "dismiss_stale_reviews": false
+  "name": "master-protection",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [
+    {
+      "actor_id": 0,
+      "actor_type": "OrganizationAdmin",
+      "bypass_mode": "pull_request"
+    }
+  ],
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/heads/master"],
+      "exclude": []
+    }
   },
-  "enforce_admins": false,
-  "required_status_checks": null,
-  "restrictions": null
+  "rules": [
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": false,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": false
+      }
+    }
+  ]
 }
 EOF
 ```
@@ -140,18 +186,20 @@ git add .
 git commit -m "Initial commit"
 git push
 
-# 6. Add branch protection
-gh api repos/homestak-dev/NEW_REPO/branches/master/protection -X PUT --input - <<'EOF'
+# 6. Add branch protection (ruleset)
+gh api repos/homestak-dev/NEW_REPO/rulesets --method POST --input - <<'EOF'
 {
-  "required_pull_request_reviews": {
-    "required_approving_review_count": 1,
-    "dismiss_stale_reviews": false
-  },
-  "enforce_admins": false,
-  "required_status_checks": null,
-  "restrictions": null
+  "name": "master-protection",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [{"actor_id": 0, "actor_type": "OrganizationAdmin", "bypass_mode": "pull_request"}],
+  "conditions": {"ref_name": {"include": ["refs/heads/master"], "exclude": []}},
+  "rules": [{"type": "pull_request", "parameters": {"required_approving_review_count": 1, "dismiss_stale_reviews_on_push": false, "require_code_owner_review": false, "require_last_push_approval": false, "required_review_thread_resolution": false}}]
 }
 EOF
+
+# 6b. Enable auto-merge
+gh api repos/homestak-dev/NEW_REPO --method PATCH --field allow_auto_merge=true
 
 # 7. Enable security
 gh api repos/homestak-dev/NEW_REPO/vulnerability-alerts -X PUT
@@ -165,6 +213,7 @@ gh api repos/homestak-dev/NEW_REPO/vulnerability-alerts -X PUT
 | Allow merge commits | Enabled | For sprint branch PRs |
 | Allow rebase merging | Disabled | Avoid history complications |
 | Default merge method | Squash | Matches [50-merge.md](lifecycle/50-merge.md) guidance |
+| Allow auto-merge | Enabled | PRs merge automatically after approval |
 | Auto-delete head branches | Enabled | Prevents stale branch accumulation (v0.21+) |
 
 **Merge strategy by path:**
@@ -178,13 +227,15 @@ gh api -X PATCH repos/homestak-dev/REPO_NAME \
   -f allow_merge_commit=true \
   -f allow_rebase_merge=false \
   -f squash_merge_commit_title=PR_TITLE \
-  -f delete_branch_on_merge=true
+  -f delete_branch_on_merge=true \
+  -f allow_auto_merge=true
 ```
 
 ## Current Repository Settings
 
-As of v0.21, all repos are configured with:
-- Branch protection requiring 1 review
+As of v0.34, all repos are configured with:
+- Rulesets requiring 1 review (OrganizationAdmin bypass)
+- Auto-merge enabled
 - Wiki disabled
 - Vulnerability alerts enabled
 - Auto-delete head branches enabled
