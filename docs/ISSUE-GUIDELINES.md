@@ -31,7 +31,16 @@ Track release planning and execution (see [60-release.md](lifecycle/60-release.m
 
 ### Title Format
 
-Use clear, actionable titles:
+Use clear, actionable titles. The format depends on the issue/PR type:
+
+| Type | Format | Example |
+|------|--------|---------|
+| Scope issue | `<Verb> <what>` | `Add --dry-run flag to release.sh` |
+| Sprint issue | `Sprint: <Theme>` | `Sprint: Unified Controller Daemon` |
+| Release issue | `Release: vX.Y - <Theme>` | `Release: v0.46 - Lifecycle Overhaul` |
+| PR (all types) | `<type>(<scope>): <summary>` | `feat(controller): Add unified controller daemon` |
+
+**Scope issue verb patterns:**
 
 | Pattern | Example |
 |---------|---------|
@@ -40,10 +49,22 @@ Use clear, actionable titles:
 | `Update <component>` | Update ansible to support Debian 13 |
 | `Remove <item>` | Remove deprecated vm-simple scenario |
 
+**PR title types** (conventional commits):
+
+| Type | When to Use |
+|------|-------------|
+| `fix` | Bug fix |
+| `feat` | New feature |
+| `docs` | Documentation only |
+| `test` | Test coverage or infrastructure |
+| `refactor` | Code restructuring without behavior change |
+| `chore` | Maintenance, dependencies, CI |
+
 **Avoid:**
 - Vague titles: "Bug fix", "Improvement", "Update"
 - Questions as titles: "Why does X happen?"
 - Implementation details: "Refactor X to use Y pattern"
+- Sprint numbers in titles (use theme, not `Sprint 1: ...`)
 
 ### Description Content
 
@@ -176,13 +197,21 @@ See docs/lifecycle/40-validation.md "Validation Host Prerequisites" section.
 
 ### Good Sprint Issue
 
-Created via `/sprint plan "Recursive PVE Stabilization" --release 157`
+Created via `/sprint plan "Unified Controller Daemon" --release 157`
 
-**Title:** Sprint: Recursive PVE Stabilization
+**Title:** Sprint: Unified Controller Daemon
 
 **Labels:** `sprint`
 
 **Description:** (populated from template - see [sprint-issue.md](templates/sprint-issue.md))
+
+### Good Sprint PR
+
+**Title:** `feat(controller): Add unified controller daemon with spec/repo serving`
+
+**Labels:** (none — PRs don't need labels)
+
+**Description:** (sprint scope, validation evidence, linked sprint issue — see [50-merge.md](lifecycle/50-merge.md))
 
 ### Poor Issue
 

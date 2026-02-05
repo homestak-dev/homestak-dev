@@ -2,11 +2,11 @@
 
 Create a new issue in `homestak-dev` repo with this template.
 
-**Title format:** `vX.Y Release Planning - Theme`
+**Title format:** `Release: vX.Y - <Theme>`
 
 Examples:
-- `v0.45 Release Planning - Lifecycle Overhaul`
-- `v0.46 Release Planning - CI/CD Phase 2`
+- `Release: v0.45 - Lifecycle Overhaul`
+- `Release: v0.46 - CI/CD Phase 2`
 
 ---
 
