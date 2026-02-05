@@ -1,6 +1,6 @@
 # Node Orchestration
 
-**Status:** Draft
+**Status:** Implemented (Phase 2 complete)
 **Date:** 2026-02-02
 **Epic:** [iac-driver#140](https://github.com/homestak-dev/iac-driver/issues/140) — Manifest-based Orchestration Architecture
 **Related:** [node-lifecycle.md](node-lifecycle.md), [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125)
@@ -628,13 +628,13 @@ This design document represents a significant architectural evolution. Related i
 
 ### Phased Implementation
 
-| Phase | Scope | Builds On |
-|-------|-------|-----------|
-| 1. #139 | Move spec server, unify FK resolution | v0.45 (current) |
-| 2. Manifest schema | Define manifest.schema.json, retire node.schema.json | #139 |
-| 3. Operator (#144) | `./run.sh create\|destroy\|test -M X -H host` | Manifest schema |
-| 4. Scenario consolidation | Retire `*-constructor`, `*-destructor`, `*-roundtrip` | CLI simplification |
-| 5. Pull execution | Full pull model for config phase | All above |
+| Phase | Scope | Builds On | Status |
+|-------|-------|-----------|--------|
+| 1. #139, #148 | Move spec server, unified controller | v0.45 (current) | **Complete** |
+| 2. #143 | Manifest schema v2, retire node.schema.json | Phase 1 | **Complete** |
+| 3. #144 | Operator engine (`manifest_opr/`), verb CLI | Phase 2 | **Complete** |
+| 4. #145 | Scenario consolidation, retire legacy scenarios | Phase 3 | Planned |
+| 5. #147 | Pull execution, config phase | All above | Planned |
 
 ### Related Issues
 

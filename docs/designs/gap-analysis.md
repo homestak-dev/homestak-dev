@@ -23,7 +23,7 @@ This document tracks the design documentation landscape for the homestak lifecyc
 | Document | Blocks | Priority | Description |
 |----------|--------|----------|-------------|
 | `config-apply.md` | iac-driver (TBD) | P0 | Config phase implementation to reach "platform ready" state |
-| `manifest-schema-v2.md` | iac-driver#140-P2 | P0 | Manifest schema v2 with `nodes` graph structure, absorbs `node.schema.json` |
+| ~~`manifest-schema-v2.md`~~ | ~~iac-driver#140-P2~~ | ~~P0~~ | ~~Manifest schema v2~~ — **Completed** in iac-driver#143. Schema at `site-config/v2/defs/manifest.schema.json`, implementation in `manifest.py` |
 | `scenario-consolidation.md` | iac-driver#145 | P1 | Transitional doc for migrating from `*-constructor/*-destructor` to verb-based subcommands |
 
 ### Document Dependencies
@@ -67,8 +67,8 @@ Identified issues in existing design documents that should be corrected.
 
 | File | Issue | Fix |
 |------|-------|-----|
-| `iac-driver/CLAUDE.md` | Manifest section references v1 schema | Update with v2 schema link when ready |
-| `site-config/CLAUDE.md` | v2/nodes/ described | Update after manifest absorbs nodes |
+| ~~`iac-driver/CLAUDE.md`~~ | ~~Manifest section references v1 schema~~ | **Done** — v2 operator engine docs added |
+| ~~`site-config/CLAUDE.md`~~ | ~~v2/nodes/ described~~ | **Done** — v2/nodes/ removed, manifest v2 docs added |
 
 ## Code/Structure Cleanup Candidates
 
@@ -97,8 +97,8 @@ Items identified during iac-driver#141 analysis for NFR (Non-Functional Requirem
 
 | Current | Issue | Target |
 |---------|-------|--------|
-| `v2/nodes/*.yaml` | Instances, not templates | Absorb into manifests per node-orchestration.md |
-| `v2/defs/node.schema.json` | Separate from manifest | Properties absorbed into `manifest.schema.json` |
+| ~~`v2/nodes/*.yaml`~~ | ~~Instances, not templates~~ | **Done** — deleted, absorbed into manifest `nodes[]` |
+| ~~`v2/defs/node.schema.json`~~ | ~~Separate from manifest~~ | **Done** — deleted, properties in `manifest.schema.json` |
 
 ### Dead Code Candidates
 
