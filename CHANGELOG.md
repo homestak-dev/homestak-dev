@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Add CI workflow with bats tests and shellcheck lint (#190)
+
 ### Changed
 - Migrate branch protection to GitHub Rulesets with OrganizationAdmin bypass (#185)
   - Replace classic branch protection on all 9 public repos
