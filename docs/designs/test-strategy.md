@@ -69,8 +69,8 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 **Current scenarios:**
 | Scenario | Components Tested | Duration |
 |----------|-------------------|----------|
-| `vm-roundtrip` | tofu + PVE API + SSH | ~2m |
-| `vm-rt` | controller + spec_client + tofu | ~2m |
+| `./run.sh test -M n1-basic-v2 -H <host>` | tofu + PVE API + SSH | ~2m |
+| `spec-vm-roundtrip` | controller + spec_client + tofu | ~2m |
 | `pve-setup` | ansible + PVE host | ~3m |
 | `user-setup` | ansible (users role) | ~30s |
 | `bootstrap-install` | bootstrap + validation | ~2m |
@@ -91,7 +91,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 
 **Scope:** Multi-phase behavior, multi-node topologies, complete lifecycle validation.
 
-**Location:** `iac-driver/src/scenarios/` (current), future: manifest-based
+**Location:** `iac-driver/src/manifest_opr/` (operator engine)
 
 **Execution:** `./run.sh test -M <name> -H <host>`
 
@@ -359,13 +359,13 @@ Manifest:
 
 | System Test | Current Equivalent | Gap | Blocked By |
 |-------------|-------------------|-----|------------|
-| ST-1 | `vm-rt` | Missing full config phase | iac-driver#147 |
-| ST-2 | `vm-roundtrip` | No manifest, hardcoded in scenario | iac-driver#143, #144 |
-| ST-3 | `nested-pve-roundtrip` | No manifest, hardcoded 2-level | iac-driver#143, #144 |
-| ST-4 | `recursive-pve-roundtrip --manifest n3-full` | Close, but uses old CLI | iac-driver#143, #144 |
-| ST-5 | None | New capability (mixed execution modes) | iac-driver#143, #144 |
-| ST-6 | None | New capability (parallel peer creation) | iac-driver#143, #144 |
-| ST-7 | None | New capability (manifest validation) | iac-driver#143, #144 |
+| ST-1 | `spec-vm-roundtrip` | Missing full config phase | iac-driver#147 |
+| ST-2 | `./run.sh test -M n1-basic-v2` | **Available** — operator handles flat VM lifecycle | - |
+| ST-3 | `./run.sh test -M n2-quick-v2` | **Available** — operator handles tiered PVE+VM | - |
+| ST-4 | `./run.sh test -M n3-full-v2` | **Available** — operator delegates via SSH | - |
+| ST-5 | None | New capability (mixed execution modes) | iac-driver#147 |
+| ST-6 | None | New capability (parallel peer creation) | Future |
+| ST-7 | None | New capability (manifest validation) | Future |
 | ST-8 | Partial | Scenarios are mostly idempotent but not formally tested | Core |
 
 ### Unified Controller (iac-driver#146) Contribution to System Tests
@@ -409,17 +409,17 @@ pytest tests/test_config_resolver.py -k "test_resolve_env"  # Specific test
 ### Running Integration Tests
 
 ```bash
-# Single component test
-./run.sh --scenario vm-roundtrip --host father
+# Single component test (flat VM lifecycle)
+./run.sh test -M n1-basic-v2 -H father
 
 # With verbose output
-./run.sh --scenario vm-roundtrip --host father --verbose
+./run.sh test -M n1-basic-v2 -H father --verbose
 
 # Dry run (preview)
-./run.sh --scenario vm-roundtrip --host father --dry-run
+./run.sh test -M n1-basic-v2 -H father --dry-run
 ```
 
-### Running System Tests (Future)
+### Running System Tests
 
 ```bash
 # Full lifecycle test
@@ -436,6 +436,7 @@ pytest tests/test_config_resolver.py -k "test_resolve_env"  # Specific test
 
 | Date | Change |
 |------|--------|
+| 2026-02-06 | Update for scenario consolidation (#195): retired scenarios replaced with verb commands; ST-2/3/4 now available; system tests no longer "future" |
 | 2026-02-05 | Replace ordinal sprint labels with issue references; update for #143+#144 combination |
 | 2026-02-05 | Updated CLI references to verb-based subcommands; updated ST-7 validate commands |
 | 2026-02-05 | Added test_controller_tls.py for TLS requirements; updated line counts |

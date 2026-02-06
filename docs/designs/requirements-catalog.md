@@ -62,16 +62,16 @@ Requirements for the create phase: VM allocation, identity injection, image mana
 
 | ID | Requirement | Priority | Status | Source | Design Doc | Test |
 |----|-------------|----------|--------|--------|------------|------|
-| REQ-CRE-001 | VM ID allocation must be deterministic or auto-assigned | P0 | Validated | design | - | vm-roundtrip |
-| REQ-CRE-002 | Serial device required for Debian 12 cloud images (prevents kernel panic) | P0 | Validated | test | - | vm-roundtrip |
+| REQ-CRE-001 | VM ID allocation must be deterministic or auto-assigned | P0 | Validated | design | - | `test -M n1-basic-v2` |
+| REQ-CRE-002 | Serial device required for Debian 12 cloud images (prevents kernel panic) | P0 | Validated | test | - | `test -M n1-basic-v2` |
 | REQ-CRE-003 | Unique identity must be established at birth (hostname, token) | P0 | Validated | design | node-lifecycle.md | spec-vm-roundtrip |
-| REQ-CRE-004 | Cloud-init user-data must be injected via NoCloud datasource | P0 | Validated | design | - | vm-roundtrip |
-| REQ-CRE-005 | SSH authorized keys must be injected for initial access | P0 | Validated | design | - | vm-roundtrip |
-| REQ-CRE-006 | Automation user created via cloud-init (default: homestak) | P0 | Validated | design | - | vm-roundtrip |
+| REQ-CRE-004 | Cloud-init user-data must be injected via NoCloud datasource | P0 | Validated | design | - | `test -M n1-basic-v2` |
+| REQ-CRE-005 | SSH authorized keys must be injected for initial access | P0 | Validated | design | - | `test -M n1-basic-v2` |
+| REQ-CRE-006 | Automation user created via cloud-init (default: homestak) | P0 | Validated | design | - | `test -M n1-basic-v2` |
 | REQ-CRE-007 | Packer images use .qcow2, PVE expects .img (extension rename) | P0 | Validated | impl | - | packer-build |
 | REQ-CRE-008 | Large images (>2GB) must be split for GitHub release assets | P1 | Validated | test | - | packer-build-fetch |
 | REQ-CRE-009 | 'latest' tag requires API resolution (not usable in direct URLs) | P1 | Validated | test | - | DownloadGitHubReleaseAction |
-| REQ-CRE-010 | Image must exist before VM creation | P0 | Validated | impl | - | vm-constructor |
+| REQ-CRE-010 | Image must exist before VM creation | P0 | Validated | impl | - | `create -M n1-basic-v2` |
 | REQ-CRE-011 | Create constraints (cores, memory, disk) bound future purpose | P2 | Proposed | design | node-lifecycle.md | - |
 | REQ-CRE-012 | VM IDs should use 5-digit convention (10000+ dev, 99900+ test) | P2 | Validated | design | - | site-config |
 
@@ -328,10 +328,10 @@ Mapping test coverage to requirements.
 | `test_resolver_base.py` | REQ-CFG-003, 004, REQ-SEC-007 |
 | `test_spec_resolver.py` | REQ-LIF-006 |
 | `test_spec_client.py` | REQ-LIF-007, 008 |
-| `vm-roundtrip` | REQ-CRE-001, 002, 004, 005, 006, 010 |
-| `vm-rt` | REQ-CRE-003, REQ-LIF-007, 008, REQ-CTL-001, 003 |
+| `test -M n1-basic-v2` | REQ-CRE-001, 002, 004, 005, 006, 010 |
+| `spec-vm-roundtrip` | REQ-CRE-003, REQ-LIF-007, 008, REQ-CTL-001, 003 |
 | `controller-repos` | REQ-CTL-004, 006, 007 |
-| `nested-pve-roundtrip` | REQ-NET-007, 008, REQ-CFG-013, 014, 015 |
+| `test -M n2-quick-v2` | REQ-NET-007, 008, REQ-CFG-013, 014, 015 |
 | ST-1 | REQ-LIF-001, 002, 005, REQ-CTL-001, 003 |
 | ST-2 | REQ-LIF-001, REQ-ORC-003, REQ-CTL-004, 006 |
 | ST-3, ST-4 | REQ-ORC-005 |
