@@ -64,7 +64,7 @@ Requirements for the create phase: VM allocation, identity injection, image mana
 |----|-------------|----------|--------|--------|------------|------|
 | REQ-CRE-001 | VM ID allocation must be deterministic or auto-assigned | P0 | Validated | design | - | `test -M n1-basic-v2` |
 | REQ-CRE-002 | Serial device required for Debian 12 cloud images (prevents kernel panic) | P0 | Validated | test | - | `test -M n1-basic-v2` |
-| REQ-CRE-003 | Unique identity must be established at birth (hostname, token) | P0 | Validated | design | node-lifecycle.md | spec-vm-roundtrip |
+| REQ-CRE-003 | Unique identity must be established at birth (hostname, token) | P0 | Validated | design | node-lifecycle.md | spec-vm-push-roundtrip |
 | REQ-CRE-004 | Cloud-init user-data must be injected via NoCloud datasource | P0 | Validated | design | - | `test -M n1-basic-v2` |
 | REQ-CRE-005 | SSH authorized keys must be injected for initial access | P0 | Validated | design | - | `test -M n1-basic-v2` |
 | REQ-CRE-006 | Automation user created via cloud-init (default: homestak) | P0 | Validated | design | - | `test -M n1-basic-v2` |
@@ -249,9 +249,9 @@ Requirements for the 4-phase lifecycle model from node-lifecycle.md.
 | REQ-LIF-003 | Run phase supports drift detection | P1 | Proposed | design | phase-interfaces.md | - |
 | REQ-LIF-004 | Destroy phase handles graceful shutdown | P1 | Proposed | design | phase-interfaces.md | - |
 | REQ-LIF-005 | Push, pull, and hybrid are co-equal execution models | P0 | Accepted | design | node-lifecycle.md | ST-1, ST-2, ST-5 |
-| REQ-LIF-006 | Spec schema defines "what to become" (packages, services, users) | P0 | Validated | design | node-lifecycle.md | spec validate |
-| REQ-LIF-007 | Auth model: network/site_token/node_token by posture | P0 | Validated | design | node-lifecycle.md | spec-vm-roundtrip |
-| REQ-LIF-008 | Identity injected via cloud-init env vars | P0 | Validated | design | node-lifecycle.md | spec-vm-roundtrip |
+| REQ-LIF-006 | Spec schema defines "what to become" (packages, services, users) | P0 | Validated | design | node-lifecycle.md | `make validate` (site-config) |
+| REQ-LIF-007 | Auth model: network/site_token/node_token by posture | P0 | Validated | design | node-lifecycle.md | spec-vm-push-roundtrip |
+| REQ-LIF-008 | Identity injected via cloud-init env vars | P0 | Validated | design | node-lifecycle.md | spec-vm-push-roundtrip |
 
 ---
 
@@ -329,7 +329,7 @@ Mapping test coverage to requirements.
 | `test_spec_resolver.py` | REQ-LIF-006 |
 | `test_spec_client.py` | REQ-LIF-007, 008 |
 | `test -M n1-basic-v2` | REQ-CRE-001, 002, 004, 005, 006, 010 |
-| `spec-vm-roundtrip` | REQ-CRE-003, REQ-LIF-007, 008, REQ-CTL-001, 003 |
+| `spec-vm-push-roundtrip` | REQ-CRE-003, REQ-LIF-007, 008, REQ-CTL-001, 003 |
 | `controller-repos` | REQ-CTL-004, 006, 007 |
 | `test -M n2-quick-v2` | REQ-NET-007, 008, REQ-CFG-013, 014, 015 |
 | ST-1 | REQ-LIF-001, 002, 005, REQ-CTL-001, 003 |
@@ -345,6 +345,7 @@ Mapping test coverage to requirements.
 
 | Date | Change |
 |------|--------|
+| 2026-02-06 | Sprint #199 overlay: REQ-LIF-006 test ref updated (`spec validate` → `make validate` in site-config); REQ-NFR-005 satisfied (serve.py, spec_resolver.py deleted) |
 | 2026-02-05 | Updated REQ-ORC-003 to verb-based CLI pattern |
 | 2026-02-05 | Added TLS requirements (REQ-CTL-011 to 014); updated traceability matrix |
 | 2026-02-05 | Added CTL category (unified controller) with REQ-CTL-001 through 010; updated traceability matrix |

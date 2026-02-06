@@ -356,8 +356,14 @@ parent: father               # Parent node (for VMs)
 **Target CLI** (`homestak` — bootstrap, runs on target nodes):
 
 ```bash
-homestak spec validate <path>     # Validate spec against schema
 homestak spec get                 # Fetch spec from server (pull model)
+```
+
+**Developer CLI** (site-config, runs in workspace):
+
+```bash
+cd site-config && make validate                    # Validate YAML + schemas
+cd site-config && ./scripts/validate-schemas.sh    # Schema validation only
 ```
 
 ## Scope & Relationship
@@ -420,7 +426,7 @@ The architecture is being implemented incrementally across multiple releases.
 |---------|-------|--------------|
 | v0.43 | Schema Foundation | V2 directory structure, JSON schemas for specs/nodes/postures |
 | v0.44 | Config Infrastructure | Spec server, `homestak spec get` client, auth model |
-| v0.45 | create → config | Cloud-init integration, auth token injection, `spec-vm-roundtrip` scenario |
+| v0.45 | create → config | Cloud-init integration, auth token injection, `spec-vm-push-roundtrip` scenario |
 
 ### v0.45 Details (create → config)
 
@@ -432,7 +438,7 @@ The architecture is being implemented incrementally across multiple releases.
 
 **Validation:**
 ```bash
-./run.sh --scenario spec-vm-roundtrip --host father
+./run.sh --scenario spec-vm-push-roundtrip --host father
 ```
 
 ## Related Documents

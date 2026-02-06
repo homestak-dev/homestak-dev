@@ -60,7 +60,7 @@ gh issue close 152 --repo homestak-dev/homestak-dev
 ./scripts/release.sh preflight
 
 # Validation (choose based on scope)
-./scripts/release.sh validate --scenario vm-roundtrip --host father
+./scripts/release.sh validate --host father
 
 # Tags [GATE]
 ./scripts/release.sh tag --dry-run
@@ -253,10 +253,10 @@ gh pr status
 ./run.sh --list-scenarios
 
 # Quick validation
-./run.sh --scenario vm-roundtrip --host father
+./run.sh test -M n1-basic-v2 -H father
 
-# Full nested validation
-./run.sh --scenario recursive-pve-roundtrip --manifest n2-quick --host father
+# Tiered validation
+./run.sh test -M n2-quick-v2 -H father
 
 # Preflight only
 ./run.sh --preflight --host father
@@ -268,7 +268,7 @@ gh pr status
 # Full workflow
 ./scripts/release.sh init --version 0.45 --issue 157
 ./scripts/release.sh preflight
-./scripts/release.sh validate --scenario vm-roundtrip --host father
+./scripts/release.sh validate --host father
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute
 ./scripts/release.sh publish --execute --workflow github
@@ -358,9 +358,9 @@ Types: `fix`, `feat`, `docs`, `test`, `refactor`, `chore`
 
 | Scenario | Use When | Duration |
 |----------|----------|----------|
-| `vm-roundtrip` | Standard changes, docs, CLI | ~2 min |
-| `recursive-pve-roundtrip --manifest n1-basic` | Recursive/manifest code | ~3 min |
-| `recursive-pve-roundtrip --manifest n2-quick` | PVE/nested/packer changes | ~9 min |
+| `./run.sh test -M n1-basic-v2 -H <host>` | Standard changes, docs, CLI | ~2 min |
+| `./run.sh test -M n2-quick-v2 -H <host>` | Tiered/PVE/packer changes | ~9 min |
+| `./run.sh test -M n3-full-v2 -H <host>` | Full 3-level nesting | ~15 min |
 | `packer-build-fetch` | Packer template changes | ~5 min |
 
 ## Repository Order

@@ -220,8 +220,8 @@ Before writing code, know how you'll prove it works.
 
 | Change Type | Validation Approach |
 |-------------|---------------------|
-| Packer template | Build image → `vm-roundtrip` or `nested-pve-roundtrip` |
-| Tofu module | `vm-roundtrip` on target environment |
+| Packer template | Build image → `./run.sh test -M n1-basic-v2` or `n2-quick-v2` |
+| Tofu module | `./run.sh test -M n1-basic-v2 -H <host>` |
 | iac-driver action | Scenario that exercises the action |
 | Ansible role | Run playbook on test VM, verify behavior |
 | CLI command | Full command flow, including edge cases |
@@ -233,12 +233,12 @@ Before writing code, know how you'll prove it works.
 ```markdown
 ## Test Plan
 
-**Scenario:** vm-roundtrip on father
+**Scenario:** `./run.sh test -M n1-basic-v2 -H father`
 
 **Steps:**
 1. Build image with changes: `./build.sh debian-13-custom`
 2. Publish to PVE: `./publish.sh`
-3. Run validation: `./run.sh --scenario vm-roundtrip --host father`
+3. Run validation: `./run.sh test -M n1-basic-v2 -H father`
 
 **Expected result:** VM boots, SSH accessible, guest agent responds
 

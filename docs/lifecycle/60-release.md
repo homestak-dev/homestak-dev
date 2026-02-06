@@ -44,7 +44,7 @@ As sprints complete, update the release issue:
 
 ### Sprint 155: Documentation (closed)
 - homestak-dev#45
-- Validation: PASSED (vm-roundtrip)
+- Validation: PASSED (`./run.sh test -M n1-basic-v2 -H father`)
 
 ## Release Readiness
 - [x] Sprint 152 validation evidence
@@ -101,7 +101,7 @@ The `scripts/release.sh` CLI automates release operations:
 
 # Run phases
 ./scripts/release.sh preflight
-./scripts/release.sh validate --scenario vm-roundtrip --host father
+./scripts/release.sh validate --host father
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute --yes
 ./scripts/release.sh publish --execute --workflow github --yes

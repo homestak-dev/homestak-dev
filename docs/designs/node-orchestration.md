@@ -328,7 +328,7 @@ With topology and execution mode externalized to the manifest, the CLI uses verb
 ```
 
 **Benefits:**
-- No scenario proliferation (`vm-constructor`, `nested-pve-constructor`, `recursive-pve-constructor` collapse to `create`)
+- No scenario proliferation (retired `vm-constructor`, `nested-pve-constructor`, etc. collapsed to `create`)
 - Topology and execution mode are externalized, not encoded in scenario names
 - CLI is more intuitive: verb is the operation, manifest is the target
 - Mode can be overridden at CLI if needed: `./run.sh create -M nested-test -H father --mode push`
@@ -564,9 +564,9 @@ After scenario consolidation (Sprint homestak-dev#195), VM lifecycle uses verb c
 | `./run.sh destroy -M <manifest> -H <host>` | destroy | Push |
 | `./run.sh test -M <manifest> -H <host>` | create → verify → destroy | Push |
 | `pve-setup` | config (to existing host) | Push |
-| `spec-vm-roundtrip` | create → config (pull) → destroy | Pull (config phase) |
+| `spec-vm-push-roundtrip` | create → specify (push) | Push (verify spec server) |
 
-The `spec-vm-roundtrip` scenario validates pull execution for config phase. Future work extends pull to run phase. See [scenario-consolidation.md](scenario-consolidation.md) for migration details.
+The `spec-vm-push-roundtrip` scenario validates that spec server env vars are injected and reachable via SSH. Pull mode (config phase) is tracked in iac-driver#147/iac-driver#156.
 
 ### Mode Selection
 
@@ -658,26 +658,27 @@ Several open issues are affected by this design:
 **Principle:** iac-driver owns both orchestration AND implementation. Bootstrap stays minimal (installation only).
 
 ```
-Current (v0.45)                    Future (this doc)
-───────────────                    ─────────────────
+Before (v0.45)                     After (Sprint #199+)
+──────────────                     ────────────────────
 bootstrap/                         bootstrap/
 ├── homestak.sh                    ├── homestak.sh (thin wrapper)
-├── lib/serve.py      ──move──►   └── install.sh
-├── lib/spec_resolver.py
-├── lib/spec_client.py  ──move──►
+├── lib/serve.py      ──removed──  ├── lib/spec_client.py
+├── lib/spec_resolver.py ─removed─ └── install.sh
+├── lib/spec_client.py
                                    iac-driver/
 iac-driver/                        ├── src/
-├── src/                           │   ├── resolver.py (unified FK)
-│   ├── config_resolver.py         │   ├── serve.py (spec server)
-│   ├── scenarios/*.py   ──retire──►   │   ├── spec_client.py
-│                                  │   ├── config.py (config phase)
-│                                  │   └── cli.py (manifest execution)
+├── src/                           │   ├── resolver/ (unified FK)
+│   ├── config_resolver.py         │   ├── controller/ (spec+repo server)
+│   ├── scenarios/*.py ──retired──►│   ├── manifest_opr/ (operator engine)
+│                                  │   └── cli.py (verb commands)
 │                                  └── run.sh
 ```
 
+**Status:** The serve/resolver migration completed in Sprint #199 (bootstrap#38). Scenario retirement completed in Sprint #195 (iac-driver#145). The architecture above reflects current state.
+
 **Key points:**
-- **iac-driver** owns all lifecycle code: orchestration (manifests, serve) and implementation (spec get, config)
-- **bootstrap** stays minimal: installation scripts and a thin `homestak` wrapper that delegates to iac-driver
+- **iac-driver** owns all lifecycle code: orchestration (manifests, controller) and implementation (spec get, config)
+- **bootstrap** stays minimal: installation scripts, `spec_client.py`, and a thin `homestak` wrapper that delegates to iac-driver
 - Target VMs have iac-driver installed (via bootstrap), so all commands are available
 - `homestak` CLI remains the user-facing command on targets, but delegates to iac-driver internals
 
@@ -933,13 +934,13 @@ Assertions:
 
 | System Test | Current Equivalent | Gap |
 |-------------|-------------------|-----|
-| ST-1 | `spec-vm-roundtrip` | Missing full config phase |
-| ST-2 | `vm-roundtrip` | No manifest, hardcoded |
-| ST-3 | `nested-pve-roundtrip` | No manifest, hardcoded 2-level |
-| ST-4 | `recursive-pve-roundtrip --manifest n3-full` | Close, but uses old CLI |
-| ST-5 | None | New capability |
-| ST-6 | None | New capability |
-| ST-7 | None | New capability |
+| ST-1 | `spec-vm-push-roundtrip` | Missing full config phase (iac-driver#147) |
+| ST-2 | `./run.sh test -M n1-basic-v2` | **Available** |
+| ST-3 | `./run.sh test -M n2-quick-v2` | **Available** |
+| ST-4 | `./run.sh test -M n3-full-v2` | **Available** |
+| ST-5 | None | New capability (mixed execution modes) |
+| ST-6 | None | New capability (parallel peers) |
+| ST-7 | None | New capability (manifest validation) |
 | ST-8 | Partial (scenarios are mostly idempotent) | Formal validation |
 
 ## Related Documents

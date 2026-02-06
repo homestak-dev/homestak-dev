@@ -1,5 +1,7 @@
 # Design Summary: `homestak serve`
 
+> **Superseded (Sprint #199):** The `homestak serve` command and its implementation (`bootstrap/lib/serve.py`, `bootstrap/lib/spec_resolver.py`) were removed in Sprint #199. The iac-driver controller (`./run.sh serve`) now provides spec serving with HTTPS/TLS, auth, and repo serving. This document is retained as a historical design artifact.
+
 **Sprint:** #161 (v0.44 Spec Server Foundation)
 **Release:** #153
 **Epic:** iac-driver#125 (Architecture evolution)

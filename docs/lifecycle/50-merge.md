@@ -75,7 +75,7 @@ Sprint context goes in the description body, not the title.
 - iac-driver#53 - ConfigResolver update
 
 ## Validation Evidence
-- Scenario: recursive-pve-roundtrip --manifest n2-quick
+- Scenario: `./run.sh test -M n2-quick-v2 -H father`
 - Result: PASSED
 - Report: [link]
 
@@ -191,10 +191,11 @@ Upstream repos merge first so downstream can reference their changes.
 
 ### Coordinated Merge
 
-1. Create PRs in all affected repos
-2. Review all PRs together for consistency
-3. Merge in dependency order
-4. Sync local master in each repo after merge
+1. Create PRs in all affected repos (`GH_TOKEN=$HOMESTAK_BOT_TOKEN gh pr create`)
+2. **Immediately** enable auto-merge on each PR (`gh pr merge --auto --squash <pr> --repo homestak-dev/<repo>` — use default auth, not bot)
+3. Review all PRs together for consistency
+4. Approve PRs in dependency order
+5. Sync local master in each repo after merge
 
 ## Context Transition
 
@@ -229,7 +230,8 @@ After all sprint PRs are merged, prepare for release or sprint close:
 - [ ] Local master synced
 
 ### Sprint PR
-- [ ] PR created with sprint template
+- [ ] PR created with sprint template (bot token)
+- [ ] Auto-merge enabled on each PR (default auth)
 - [ ] All scope issues referenced
 - [ ] Validation evidence linked
 - [ ] CHANGELOG updated
