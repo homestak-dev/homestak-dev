@@ -24,7 +24,7 @@ This document tracks the design documentation landscape for the homestak lifecyc
 |----------|--------|----------|-------------|
 | `config-apply.md` | iac-driver (TBD) | P0 | Config phase implementation to reach "platform ready" state |
 | ~~`manifest-schema-v2.md`~~ | ~~iac-driver#140-P2~~ | ~~P0~~ | ~~Manifest schema v2~~ — **Completed** in iac-driver#143. Schema at `site-config/v2/defs/manifest.schema.json`, implementation in `manifest.py` |
-| `scenario-consolidation.md` | iac-driver#145 | P1 | Transitional doc for migrating from `*-constructor/*-destructor` to verb-based subcommands |
+| ~~`scenario-consolidation.md`~~ | ~~iac-driver#145~~ | ~~P1~~ | ~~Transitional doc for migrating from `*-constructor/*-destructor` to verb-based subcommands~~ — **Completed** in homestak-dev#195. See [scenario-consolidation.md](scenario-consolidation.md) |
 
 ### Document Dependencies
 
@@ -37,11 +37,9 @@ node-lifecycle.md (complete)
 
 node-orchestration.md (complete)
         │
-        ├── manifest-schema-v2.md (missing) ──► iac-driver#140-P2
+        ├── manifest-schema-v2.md (complete) ──► iac-driver#143
         │
-        └── scenario-consolidation.md (missing, transitional) ──► iac-driver#145
-                                                                        │
-                                                                        └── Archive after migration
+        └── scenario-consolidation.md (complete) ──► iac-driver#145
 ```
 
 ## Design Debt
@@ -78,13 +76,13 @@ Items identified during iac-driver#141 analysis for NFR (Non-Functional Requirem
 
 | Current | Issue | Target |
 |---------|-------|--------|
-| `vm-constructor` | Action encoded in name | Retire after `./run.sh create` |
-| `vm-destructor` | Action encoded in name | Retire after `./run.sh destroy` |
-| `vm-roundtrip` | Test pattern encoded in name | Retire after `./run.sh test` |
-| `nested-pve-constructor` | Hardcoded 2-level | Retire after manifest operator (#144) |
-| `nested-pve-destructor` | Hardcoded 2-level | Retire after manifest operator (#144) |
-| `nested-pve-roundtrip` | Hardcoded 2-level | Retire after manifest operator (#144) |
-| `recursive-pve-*` | Old manifest format | Retire after v2 manifest support |
+| ~~`vm-constructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh create -M n1-basic-v2 -H <host>` |
+| ~~`vm-destructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh destroy -M n1-basic-v2 -H <host>` |
+| ~~`vm-roundtrip`~~ | ~~Test pattern encoded in name~~ | **Retired** — `./run.sh test -M n1-basic-v2 -H <host>` |
+| ~~`nested-pve-constructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh create -M n2-quick-v2 -H <host>` |
+| ~~`nested-pve-destructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh destroy -M n2-quick-v2 -H <host>` |
+| ~~`nested-pve-roundtrip`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh test -M n2-quick-v2 -H <host>` |
+| ~~`recursive-pve-*`~~ | ~~Old manifest format~~ | **Retired** — `./run.sh create/destroy/test -M <manifest> -H <host>` |
 
 ### Directory Structure (iac-driver)
 
@@ -104,8 +102,8 @@ Items identified during iac-driver#141 analysis for NFR (Non-Functional Requirem
 
 | Location | Item | Disposition |
 |----------|------|-------------|
-| `iac-driver/src/scenarios/cleanup_nested_pve.py` | Shared cleanup actions | Evaluate after scenario consolidation |
-| `iac-driver/src/actions/recursive.py` | RecursiveScenarioAction | May become operator primitive |
+| ~~`iac-driver/src/scenarios/cleanup_nested_pve.py`~~ | ~~Shared cleanup actions~~ | **Deleted** — Consolidated into operator (#145) |
+| `iac-driver/src/actions/recursive.py` | RecursiveScenarioAction | **Kept** — Used by operator for subtree delegation |
 
 ## Gap Closure Tracking
 
@@ -115,8 +113,8 @@ Track progress on closing design gaps.
 |-----|--------|--------|-------|
 | unified-controller (#148) | iac-driver#146 | **Complete** | Delivered in PR #150, #148 closed |
 | config-apply.md | iac-driver#147 | Not started | Blocks first "platform ready" |
-| manifest-schema-v2.md | iac-driver#143 | Not started | Part of manifest operator sprint (#143 + #144) |
-| scenario-consolidation.md | iac-driver#145 | Not started | Transitional, archive after |
+| manifest-schema-v2.md | iac-driver#143 | **Complete** | Schema at `site-config/v2/defs/manifest.schema.json` |
+| scenario-consolidation.md | iac-driver#145 | **Complete** | [scenario-consolidation.md](scenario-consolidation.md) |
 | phase-interfaces.md | iac-driver#141 | **Complete** | Resolved Q1-Q6, documented all phase contracts |
 | node-orchestration.md CLI examples | iac-driver#141 | **Complete** | Updated to verb-based `./run.sh create/destroy/test` |
 | node-lifecycle.md phase-interfaces ref | iac-driver#141 | **Complete** | Added cross-reference |
@@ -129,6 +127,7 @@ Track progress on closing design gaps.
 
 | Date | Change |
 |------|--------|
+| 2026-02-06 | Mark scenario consolidation complete (#145); update scenario naming, dead code, gap closure tracking |
 | 2026-02-05 | Replace ordinal sprint labels with issue references; update for #143+#144 combination |
 | 2026-02-05 | Updated CLI pattern references to verb-based subcommands; marked #148 complete; updated scenario retirement targets |
 | 2026-02-05 | Added unified controller (#148) to gap tracking; added CTL category to requirements |
