@@ -182,6 +182,17 @@ For issues affecting multiple repos:
 
 See [00-overview.md](lifecycle/00-overview.md) for when to use each path.
 
+## Issue Placement
+
+Create issues in the **most relevant repo** for the work being done. Exceptions:
+
+| Issue Type | Repo | Rationale |
+|------------|------|-----------|
+| Sprint issues | homestak-dev | Sprints coordinate across repos |
+| Release issues | homestak-dev | Releases coordinate across repos |
+| Sprint doc cleanup | homestak-dev | Sprint-scoped, typically spans multiple repos |
+| Scope issues | Most relevant repo | Where the primary code change happens |
+
 ## Examples
 
 ### Good Scope Issue

@@ -35,7 +35,7 @@ Nodes need to fetch their specifications from the spec server (`homestak serve`)
 - `bootstrap/lib/spec_client.py` - HTTP client implementation
 
 **Reused from Sprint #161:**
-- Error code structure from `spec_resolver.py`
+- Error code structure from `spec_resolver.py` (originally in bootstrap, removed in Sprint #199; resolver now in iac-driver)
 - Path discovery pattern (`discover_etc_path()`)
 
 ## Interface Design

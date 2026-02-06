@@ -356,8 +356,14 @@ parent: father               # Parent node (for VMs)
 **Target CLI** (`homestak` — bootstrap, runs on target nodes):
 
 ```bash
-homestak spec validate <path>     # Validate spec against schema
 homestak spec get                 # Fetch spec from server (pull model)
+```
+
+**Developer CLI** (site-config, runs in workspace):
+
+```bash
+cd site-config && make validate                    # Validate YAML + schemas
+cd site-config && ./scripts/validate-schemas.sh    # Schema validation only
 ```
 
 ## Scope & Relationship

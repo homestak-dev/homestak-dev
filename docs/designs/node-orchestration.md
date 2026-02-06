@@ -658,26 +658,27 @@ Several open issues are affected by this design:
 **Principle:** iac-driver owns both orchestration AND implementation. Bootstrap stays minimal (installation only).
 
 ```
-Current (v0.45)                    Future (this doc)
-───────────────                    ─────────────────
+Before (v0.45)                     After (Sprint #199+)
+──────────────                     ────────────────────
 bootstrap/                         bootstrap/
 ├── homestak.sh                    ├── homestak.sh (thin wrapper)
-├── lib/serve.py      ──move──►   └── install.sh
-├── lib/spec_resolver.py
-├── lib/spec_client.py  ──move──►
+├── lib/serve.py      ──removed──  ├── lib/spec_client.py
+├── lib/spec_resolver.py ─removed─ └── install.sh
+├── lib/spec_client.py
                                    iac-driver/
 iac-driver/                        ├── src/
-├── src/                           │   ├── resolver.py (unified FK)
-│   ├── config_resolver.py         │   ├── serve.py (spec server)
-│   ├── scenarios/*.py   ──retire──►   │   ├── spec_client.py
-│                                  │   ├── config.py (config phase)
-│                                  │   └── cli.py (manifest execution)
+├── src/                           │   ├── resolver/ (unified FK)
+│   ├── config_resolver.py         │   ├── controller/ (spec+repo server)
+│   ├── scenarios/*.py ──retired──►│   ├── manifest_opr/ (operator engine)
+│                                  │   └── cli.py (verb commands)
 │                                  └── run.sh
 ```
 
+**Status:** The serve/resolver migration completed in Sprint #199 (bootstrap#38). Scenario retirement completed in Sprint #195 (iac-driver#145). The architecture above reflects current state.
+
 **Key points:**
-- **iac-driver** owns all lifecycle code: orchestration (manifests, serve) and implementation (spec get, config)
-- **bootstrap** stays minimal: installation scripts and a thin `homestak` wrapper that delegates to iac-driver
+- **iac-driver** owns all lifecycle code: orchestration (manifests, controller) and implementation (spec get, config)
+- **bootstrap** stays minimal: installation scripts, `spec_client.py`, and a thin `homestak` wrapper that delegates to iac-driver
 - Target VMs have iac-driver installed (via bootstrap), so all commands are available
 - `homestak` CLI remains the user-facing command on targets, but delegates to iac-driver internals
 

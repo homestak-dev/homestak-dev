@@ -74,6 +74,8 @@ For each issue:
 - Identify dependencies between issues
 - Flag items needing clarification
 
+**Always include a doc cleanup issue.** Every sprint should have a Simple-tier "Update docs and cross-refs" issue in homestak-dev to cover CLAUDE.md updates, CHANGELOG entries, and cross-repo reference fixes. Create it during planning so it's not forgotten at the end. See [ISSUE-GUIDELINES.md](../ISSUE-GUIDELINES.md#issue-placement) for issue placement conventions.
+
 ### 4. Identify Affected Repos
 
 ```markdown
@@ -169,6 +171,36 @@ Issues touching the same files may benefit from a single PR:
 - Reduces merge conflicts
 - Enables atomic review
 - May complicate rollback
+
+## Splitting a Sprint
+
+If a sprint grows too large during planning or design, split it into sequential sprints with clear dependency boundaries.
+
+### When to Split
+
+- Sprint scope exceeds Standard tier and contains independent workstreams
+- A natural dependency boundary exists (e.g., cleanup before new features)
+- The sprint has more than 4-5 scope issues across multiple tiers
+
+### How to Split
+
+1. **Identify the boundary** — look for a point where one group of issues is prerequisite to another
+2. **Create the new sprint issue** in homestak-dev with its own scope, repos, and doc cleanup issue
+3. **Update the original sprint** — remove moved issues, adjust tier, update sprint log
+4. **Rename branches if needed** — if the original sprint's theme changed, rename branches to match:
+   ```bash
+   git branch -m sprint/old-name sprint/new-name
+   git push origin :sprint/old-name sprint/new-name -u
+   ```
+5. **Link the sprints** — the later sprint should note its dependency on the earlier one
+
+### Example
+
+A "Config Phase" sprint with bootstrap cleanup + new feature work splits into:
+- Sprint A (Standard): Bootstrap Cleanup — prerequisite removals and moves
+- Sprint B (Complex): Config Phase + Pull Mode — depends on Sprint A
+
+Each sprint gets its own branch name, doc cleanup issue, and validation scenario.
 
 ## Cross-Repo Considerations
 
