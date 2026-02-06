@@ -113,12 +113,12 @@ class ConfigApply:
         return result
 ```
 
-**Path discovery:** Reuse `discover_state_path()` from `bootstrap/lib/spec_client.py` pattern (check `$HOMESTAK_ETC`, FHS, legacy). Implement equivalent discovery in `config_apply.py` to find both state dir and ansible dir.
+**Path discovery:** `config_apply.py` discovers paths via environment variables or FHS defaults:
 
-**Ansible discovery:**
-1. `$HOMESTAK_LIB/ansible/` (FHS)
-2. `../ansible/` (dev workspace sibling)
-3. `/opt/homestak/ansible/` (legacy)
+- **State dir:** `$HOMESTAK_ETC/state/` or `/usr/local/etc/homestak/state/`
+- **Ansible dir:** `$HOMESTAK_LIB/ansible/` or `/usr/local/lib/homestak/ansible/`
+
+**Dev environment:** Set `HOMESTAK_LIB` to point to your workspace (e.g., `HOMESTAK_LIB=/home/user/homestak-dev`). There is no sibling directory discovery — the config command is designed for bootstrapped hosts where FHS paths exist.
 
 ### Spec-to-Ansible Vars Mapping
 
@@ -286,18 +286,14 @@ Add `./run.sh config` to the existing runcmd block:
 %{if var.spec_server != ""}
       - |
         # Fetch spec and apply config on first boot (v0.48+)
-        if [ ! -f /usr/local/etc/homestak/state/spec.yaml ]; then
-          mkdir -p /usr/local/etc/homestak/state
-          . /etc/profile.d/homestak.sh
-          /usr/local/bin/homestak spec get --insecure 2>/dev/null || true
-        fi
         if [ ! -f /usr/local/etc/homestak/state/config-complete.json ]; then
-          /usr/local/lib/homestak/iac-driver/run.sh config 2>/dev/null || true
+          . /etc/profile.d/homestak.sh
+          /usr/local/lib/homestak/iac-driver/run.sh config --fetch --insecure 2>/dev/null || true
         fi
 %{endif}
 ```
 
-**Note:** `--insecure` added to `spec get` to handle controller's self-signed TLS certificate. This flag was missing in the original runcmd (pre-existing issue, fixed here).
+**Note:** `--fetch` tells iac-driver to fetch the spec from the controller (using `HOMESTAK_SPEC_SERVER` + `HOMESTAK_IDENTITY` env vars) before applying config. `--insecure` handles the controller's self-signed TLS certificate.
 
 ## Integration Points
 
@@ -312,16 +308,17 @@ site-config                  iac-driver                     ansible
 └──────────────┘             └───────┬────────┘             └───────▲────────┘
                                      │ serve                        │
                              ┌───────▼────────┐                     │
-                             │ spec_client.py │                     │
-                             │ (spec get)     │                     │
-                             │                │                     │
-                             │ config_apply.py│─── ansible-playbook─┘
-                             │ (./run.sh      │
-                             │  config)       │
-                             └────────────────┘
+                             │ ./run.sh config │                    │
+                             │   --fetch       │                    │
+                             │                 │                    │
+                             │ 1. spec_client  │                    │
+                             │    → spec.yaml  │                    │
+                             │ 2. config_apply │── ansible-playbook─┘
+                             │    → roles      │
+                             └─────────────────┘
 ```
 
-Both `spec get` (bootstrap) and `config` (iac-driver) run ON the VM. The spec client fetches from the controller; the config command runs ansible locally.
+`./run.sh config --fetch` runs ON the VM. The `--fetch` flag uses `spec_client.py` to fetch the spec from the controller, then `config_apply.py` maps spec to ansible vars and runs roles locally.
 
 ### Integration Boundaries
 
@@ -342,7 +339,7 @@ Config phase runs on bootstrapped VMs at FHS paths:
 - Ansible: `/usr/local/lib/homestak/ansible/`
 - Playbook: `/usr/local/lib/homestak/ansible/playbooks/config-apply.yml`
 
-Legacy path support (`/opt/homestak/`): iac-driver's `get_site_config_dir()` already handles discovery. Config command uses equivalent discovery for ansible path.
+Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. FHS paths (`/usr/local/lib/homestak/`) are the default. Legacy `/opt/homestak/` is not supported by the config command — only by iac-driver's `get_site_config_dir()` for site-config discovery.
 
 ## Risk Assessment
 

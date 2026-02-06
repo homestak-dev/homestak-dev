@@ -145,8 +145,8 @@ When a feature spans multiple components or repos, trace the data and control fl
 | Question | Example |
 |----------|---------|
 | What data crosses component boundaries? | Config files, secrets, SSH keys |
-| What paths are used at each stage? | `/opt/homestak/` vs `/usr/local/etc/homestak/` |
-| What assumptions does each component make? | "site-config is a sibling directory" |
+| What paths are used at each stage? | FHS `/usr/local/lib/homestak/` vs `$HOMESTAK_LIB` for dev |
+| What assumptions does each component make? | "FHS paths exist" vs "env vars set for dev" |
 | What happens at N+1 depth/scale? | Inner PVE runs tofu - where does it find envs? |
 
 **Diagram the flow:**
@@ -162,18 +162,20 @@ For recursive/nested scenarios, answer: "When level N runs a command, what paths
 
 ### Path Mode Verification
 
-Any feature running on bootstrapped hosts must work with both installation modes:
+Any feature running on bootstrapped hosts must work with the FHS installation layout. Dev environments use environment variables.
 
-| Mode | Code Path | Config Path |
-|------|-----------|-------------|
-| Legacy | `/opt/homestak/` | `/opt/homestak/site-config/` |
-| FHS | `/usr/local/lib/homestak/` | `/usr/local/etc/homestak/` |
+| Mode | Code Path | Config Path | How |
+|------|-----------|-------------|-----|
+| FHS (production) | `/usr/local/lib/homestak/` | `/usr/local/etc/homestak/` | Bootstrap default |
+| Dev workspace | `$HOMESTAK_LIB` | `$HOMESTAK_ETC` | Env vars |
+
+**Note:** Legacy `/opt/homestak/` is still supported by iac-driver's `get_site_config_dir()` for backward compatibility, but new features (e.g., `./run.sh config`) target FHS paths only.
 
 **Checklist:**
-- [ ] Does new code hardcode paths? If so, does it check both locations?
+- [ ] Does new code hardcode paths? Use env var with FHS fallback (`$HOMESTAK_LIB` → `/usr/local/lib/homestak/`)
 - [ ] Do ansible roles/playbooks use variables for paths, not hardcoded strings?
 - [ ] For recursive scenarios: does the inner level use the same path mode as outer?
-- [ ] Test on both a legacy install AND an FHS install if possible
+- [ ] For dev testing: document which env vars must be set (e.g., `HOMESTAK_LIB`, `HOMESTAK_ETC`)
 
 ### Known Constraints Registry
 
