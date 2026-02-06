@@ -285,7 +285,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 # Manual workflow
 ./scripts/release.sh init --version 0.31 --issue 115
 ./scripts/release.sh preflight
-./scripts/release.sh validate --scenario vm-roundtrip --host father
+./scripts/release.sh validate --host father
 # Or use --stage to validate via installed CLI (requires bootstrap on remote)
 ./scripts/release.sh validate --stage --remote father
 ./scripts/release.sh tag --dry-run

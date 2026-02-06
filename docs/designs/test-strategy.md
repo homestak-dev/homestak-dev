@@ -70,7 +70,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 | Scenario | Components Tested | Duration |
 |----------|-------------------|----------|
 | `./run.sh test -M n1-basic-v2 -H <host>` | tofu + PVE API + SSH | ~2m |
-| `spec-vm-roundtrip` | controller + spec_client + tofu | ~2m |
+| `spec-vm-push-roundtrip` | controller + spec_client + tofu | ~2m |
 | `pve-setup` | ansible + PVE host | ~3m |
 | `user-setup` | ansible (users role) | ~30s |
 | `bootstrap-install` | bootstrap + validation | ~2m |
@@ -359,7 +359,7 @@ Manifest:
 
 | System Test | Current Equivalent | Gap | Blocked By |
 |-------------|-------------------|-----|------------|
-| ST-1 | `spec-vm-roundtrip` | Missing full config phase | iac-driver#147 |
+| ST-1 | `spec-vm-push-roundtrip` | Missing full config phase | iac-driver#147 |
 | ST-2 | `./run.sh test -M n1-basic-v2` | **Available** — operator handles flat VM lifecycle | - |
 | ST-3 | `./run.sh test -M n2-quick-v2` | **Available** — operator handles tiered PVE+VM | - |
 | ST-4 | `./run.sh test -M n3-full-v2` | **Available** — operator delegates via SSH | - |
@@ -389,8 +389,8 @@ Requirements → Tests traceability. See [requirements-catalog.md](requirements-
 | REQ-ORC-001 (manifests) | test_manifest.py | - | ST-2 through ST-6 |
 | REQ-ORC-002 (push/pull/hybrid) | - | - | ST-1, ST-2, ST-5 |
 | REQ-ORC-003 (CLI --manifest) | - | - | All except ST-1, ST-7 |
-| REQ-CRE-001 (VM ID allocation) | test_config_resolver.py | vm-roundtrip | ST-2 |
-| REQ-CRE-002 (serial device) | - | vm-roundtrip | ST-2 |
+| REQ-CRE-001 (VM ID allocation) | test_config_resolver.py | `./run.sh test -M n1-basic-v2` | ST-2 |
+| REQ-CRE-002 (serial device) | - | `./run.sh test -M n1-basic-v2` | ST-2 |
 | REQ-CFG-001 (site-config source) | test_config_resolver.py | - | - |
 | REQ-EXE-001 (timeouts) | test_common.py | - | - |
 | REQ-EXE-003 (idempotency) | - | - | ST-8 |

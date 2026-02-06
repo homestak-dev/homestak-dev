@@ -117,16 +117,16 @@ Select based on sprint scope:
 
 | Sprint Scope | Scenario | When to Use |
 |--------------|----------|-------------|
-| Documentation, CLI, process | `vm-roundtrip` | No IaC code changes |
-| Tofu/ansible changes | `vm-roundtrip` | Standard VM provisioning |
-| Recursive/manifest changes | `recursive-pve-roundtrip --manifest n1-basic` | iac-driver recursive code |
-| PVE/nested/packer changes | `recursive-pve-roundtrip --manifest n2-quick` | Full stack validation |
+| Documentation, CLI, process | `./run.sh test -M n1-basic-v2 -H <host>` | No IaC code changes |
+| Tofu/ansible changes | `./run.sh test -M n1-basic-v2 -H <host>` | Standard VM provisioning |
+| Manifest/operator changes | `./run.sh test -M n2-quick-v2 -H <host>` | Tiered topology code |
+| PVE/nested/packer changes | `./run.sh test -M n2-quick-v2 -H <host>` | Full stack validation |
 
 Document in sprint issue:
 
 ```markdown
 ## Validation
-**Scenario:** `recursive-pve-roundtrip --manifest n2-quick`
+**Scenario:** `./run.sh test -M n2-quick-v2 -H father`
 **Host:** father
 **Rationale:** Sprint includes nested-pve changes
 ```

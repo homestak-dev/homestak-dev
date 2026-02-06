@@ -74,7 +74,7 @@ class NewConfig:
 
 ### Test Plan
 
-**Scenario:** [e.g., vm-roundtrip on father]
+**Scenario:** [e.g., `./run.sh test -M n1-basic-v2 -H father`]
 
 **Steps:**
 1. Step 1

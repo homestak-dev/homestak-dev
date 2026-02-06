@@ -328,7 +328,7 @@ With topology and execution mode externalized to the manifest, the CLI uses verb
 ```
 
 **Benefits:**
-- No scenario proliferation (`vm-constructor`, `nested-pve-constructor`, `recursive-pve-constructor` collapse to `create`)
+- No scenario proliferation (retired `vm-constructor`, `nested-pve-constructor`, etc. collapsed to `create`)
 - Topology and execution mode are externalized, not encoded in scenario names
 - CLI is more intuitive: verb is the operation, manifest is the target
 - Mode can be overridden at CLI if needed: `./run.sh create -M nested-test -H father --mode push`
@@ -564,9 +564,9 @@ After scenario consolidation (Sprint homestak-dev#195), VM lifecycle uses verb c
 | `./run.sh destroy -M <manifest> -H <host>` | destroy | Push |
 | `./run.sh test -M <manifest> -H <host>` | create → verify → destroy | Push |
 | `pve-setup` | config (to existing host) | Push |
-| `spec-vm-roundtrip` | create → config (pull) → destroy | Pull (config phase) |
+| `spec-vm-push-roundtrip` | create → specify (push) | Push (verify spec server) |
 
-The `spec-vm-roundtrip` scenario validates pull execution for config phase. Future work extends pull to run phase. See [scenario-consolidation.md](scenario-consolidation.md) for migration details.
+The `spec-vm-push-roundtrip` scenario validates that spec server env vars are injected and reachable via SSH. Pull mode (config phase) is tracked in iac-driver#147/iac-driver#156.
 
 ### Mode Selection
 
@@ -933,13 +933,13 @@ Assertions:
 
 | System Test | Current Equivalent | Gap |
 |-------------|-------------------|-----|
-| ST-1 | `spec-vm-roundtrip` | Missing full config phase |
-| ST-2 | `vm-roundtrip` | No manifest, hardcoded |
-| ST-3 | `nested-pve-roundtrip` | No manifest, hardcoded 2-level |
-| ST-4 | `recursive-pve-roundtrip --manifest n3-full` | Close, but uses old CLI |
-| ST-5 | None | New capability |
-| ST-6 | None | New capability |
-| ST-7 | None | New capability |
+| ST-1 | `spec-vm-push-roundtrip` | Missing full config phase (iac-driver#147) |
+| ST-2 | `./run.sh test -M n1-basic-v2` | **Available** |
+| ST-3 | `./run.sh test -M n2-quick-v2` | **Available** |
+| ST-4 | `./run.sh test -M n3-full-v2` | **Available** |
+| ST-5 | None | New capability (mixed execution modes) |
+| ST-6 | None | New capability (parallel peers) |
+| ST-7 | None | New capability (manifest validation) |
 | ST-8 | Partial (scenarios are mostly idempotent) | Formal validation |
 
 ## Related Documents
