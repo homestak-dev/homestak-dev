@@ -510,11 +510,7 @@ These terms and patterns should NOT be used in new development:
 | `levels` (manifest) | Linear only | `nodes` with `parent` |
 | `SyncReposToVMAction` | Pre-bootstrap pattern | Bootstrap handles repos |
 
-**Note:** Action classes like `TofuApplyRemoteAction` are valid primitives for push execution. What's obsolete is their use in hardcoded scenarios (`nested-pve-*`, `recursive-pve-*`). The operator will use these primitives internally.
-
-**Action naming convention:**
-- `*RemoteAction` = push (driver executes via SSH)
-- `*LocalAction` = pull (target executes locally) — future additions
+**Note:** `TofuApplyRemoteAction` and `TofuDestroyRemoteAction` were retired in Sprint homestak-dev#195. The operator delegates via `RecursiveScenarioAction` with `raw_command` instead. See [scenario-consolidation.md](scenario-consolidation.md) for details.
 
 ## Relationship to Node Lifecycle
 
@@ -558,18 +554,19 @@ create (push) → config (pull) → run (pull) → destroy (push)
 
 This is the hybrid model: push for lifecycle boundaries (create/destroy), pull for configuration and runtime (config/run).
 
-### Legacy Scenarios and Execution Model
+### Scenarios and Execution Model
 
-Current iac-driver scenarios use push execution throughout:
+After scenario consolidation (Sprint homestak-dev#195), VM lifecycle uses verb commands:
 
-| Scenario | Phases Covered | Execution |
-|----------|----------------|-----------|
-| `vm-constructor` | create, (implicit config via cloud-init) | Push |
-| `vm-destructor` | destroy | Push |
+| Command | Phases Covered | Execution |
+|---------|----------------|-----------|
+| `./run.sh create -M <manifest> -H <host>` | create, config (PVE lifecycle) | Push |
+| `./run.sh destroy -M <manifest> -H <host>` | destroy | Push |
+| `./run.sh test -M <manifest> -H <host>` | create → verify → destroy | Push |
 | `pve-setup` | config (to existing host) | Push |
-| `recursive-pve-*` | create, config, (nested create, config...) | Push (delegated) |
+| `spec-vm-roundtrip` | create → config (pull) → destroy | Pull (config phase) |
 
-The v0.45 `spec-vm-roundtrip` scenario introduced pull for config phase. Future work extends pull to run phase.
+The `spec-vm-roundtrip` scenario validates pull execution for config phase. Future work extends pull to run phase. See [scenario-consolidation.md](scenario-consolidation.md) for migration details.
 
 ### Mode Selection
 
@@ -957,6 +954,7 @@ Assertions:
 
 | Date | Change |
 |------|--------|
+| 2026-02-06 | Update for scenario consolidation (#195): mark `TofuApply/DestroyRemoteAction` retired; update legacy scenarios table to current verb commands |
 | 2026-02-05 | Update CLI examples to verb-based pattern (`./run.sh create -M X -H host`); remove `--manifest X --action Y` references; rename "manifest executor" to "operator" |
 | 2026-02-03 | Rename to node-orchestration.md; add reading order guidance; apply terminology framework (driver/target, parent/child node, host/guest); update cross-references to node-lifecycle.md |
 | 2026-02-03 | Rename to orchestration-architecture.md; terminology updates (hierarchical→tiered, constellation→federated, 6 phases→4 phases); add obsolete terms section |
