@@ -935,9 +935,9 @@ Assertions:
 | System Test | Current Equivalent | Gap |
 |-------------|-------------------|-----|
 | ST-1 | `spec-vm-push-roundtrip` | Missing full config phase (iac-driver#147) |
-| ST-2 | `./run.sh test -M n1-basic-v2` | **Available** |
-| ST-3 | `./run.sh test -M n2-quick-v2` | **Available** |
-| ST-4 | `./run.sh test -M n3-full-v2` | **Available** |
+| ST-2 | `./run.sh test -M n1-basic` | **Available** |
+| ST-3 | `./run.sh test -M n2-quick` | **Available** |
+| ST-4 | `./run.sh test -M n3-full` | **Available** |
 | ST-5 | None | New capability (mixed execution modes) |
 | ST-6 | None | New capability (parallel peers) |
 | ST-7 | None | New capability (manifest validation) |

@@ -4,7 +4,7 @@
 **Issue:** [iac-driver#141](https://github.com/homestak-dev/iac-driver/issues/141)
 **Source:** [iac-driver#125 Comment #5](https://github.com/homestak-dev/iac-driver/issues/125#issuecomment-2621234567)
 **Status:** Active
-**Last Updated:** 2026-02-03
+**Last Updated:** 2026-02-06
 
 ## Overview
 
@@ -62,18 +62,19 @@ Requirements for the create phase: VM allocation, identity injection, image mana
 
 | ID | Requirement | Priority | Status | Source | Design Doc | Test |
 |----|-------------|----------|--------|--------|------------|------|
-| REQ-CRE-001 | VM ID allocation must be deterministic or auto-assigned | P0 | Validated | design | - | `test -M n1-basic-v2` |
-| REQ-CRE-002 | Serial device required for Debian 12 cloud images (prevents kernel panic) | P0 | Validated | test | - | `test -M n1-basic-v2` |
+| REQ-CRE-001 | VM ID allocation must be deterministic or auto-assigned | P0 | Validated | design | - | `test -M n1-basic` |
+| REQ-CRE-002 | Serial device required for Debian 12 cloud images (prevents kernel panic) | P0 | Validated | test | - | `test -M n1-basic` |
 | REQ-CRE-003 | Unique identity must be established at birth (hostname, token) | P0 | Validated | design | node-lifecycle.md | spec-vm-push-roundtrip |
-| REQ-CRE-004 | Cloud-init user-data must be injected via NoCloud datasource | P0 | Validated | design | - | `test -M n1-basic-v2` |
-| REQ-CRE-005 | SSH authorized keys must be injected for initial access | P0 | Validated | design | - | `test -M n1-basic-v2` |
-| REQ-CRE-006 | Automation user created via cloud-init (default: homestak) | P0 | Validated | design | - | `test -M n1-basic-v2` |
+| REQ-CRE-004 | Cloud-init user-data must be injected via NoCloud datasource | P0 | Validated | design | - | `test -M n1-basic` |
+| REQ-CRE-005 | SSH authorized keys must be injected for initial access | P0 | Validated | design | - | `test -M n1-basic` |
+| REQ-CRE-006 | Automation user created via cloud-init (default: homestak) | P0 | Validated | design | - | `test -M n1-basic` |
 | REQ-CRE-007 | Packer images use .qcow2, PVE expects .img (extension rename) | P0 | Validated | impl | - | packer-build |
 | REQ-CRE-008 | Large images (>2GB) must be split for GitHub release assets | P1 | Validated | test | - | packer-build-fetch |
 | REQ-CRE-009 | 'latest' tag requires API resolution (not usable in direct URLs) | P1 | Validated | test | - | DownloadGitHubReleaseAction |
-| REQ-CRE-010 | Image must exist before VM creation | P0 | Validated | impl | - | `create -M n1-basic-v2` |
+| REQ-CRE-010 | Image must exist before VM creation | P0 | Validated | impl | - | `create -M n1-basic` |
 | REQ-CRE-011 | Create constraints (cores, memory, disk) bound future purpose | P2 | Proposed | design | node-lifecycle.md | - |
 | REQ-CRE-012 | VM IDs should use 5-digit convention (10000+ dev, 99900+ test) | P2 | Validated | design | - | site-config |
+| REQ-CRE-013 | Cloud-init runcmd chains `spec get` → `./run.sh config` on first boot | P0 | Accepted | design | config-phase.md | `test -M n1-pull` |
 
 ---
 
@@ -98,6 +99,10 @@ Requirements for the config phase: sources, resolution, state management.
 | REQ-CFG-013 | Context mutations persist (passed by reference) | P0 | Validated | impl | - | - |
 | REQ-CFG-014 | tfvars.json written atomically (temp file + rename) | P1 | Validated | impl | - | - |
 | REQ-CFG-015 | State directory auto-created if missing | P1 | Validated | impl | - | - |
+| REQ-CFG-016 | `./run.sh config` maps spec to ansible vars and runs existing roles locally | P0 | Accepted | design | config-phase.md | `test -M n1-pull` |
+| REQ-CFG-017 | Platform-ready marker written on successful config only | P0 | Accepted | design | config-phase.md | `test -M n1-pull` |
+| REQ-CFG-018 | Config command is idempotent (safe to run multiple times) | P0 | Accepted | design | config-phase.md | - |
+| REQ-CFG-019 | Spec-to-ansible mapping covers packages, timezone, users, SSH keys, security posture | P0 | Accepted | design | config-phase.md | `test -M n1-pull` |
 
 ---
 
@@ -140,6 +145,7 @@ Requirements for command execution, timeouts, and idempotency.
 | REQ-EXE-008 | Environment inherited via os.environ.copy() | P1 | Validated | impl | - | - |
 | REQ-EXE-009 | Process group for cleanup on timeout (subprocess with start_new_session) | P1 | Validated | impl | - | - |
 | REQ-EXE-010 | Shell=True for commands with pipes/redirects | P1 | Validated | impl | - | - |
+| REQ-EXE-011 | WaitForFileAction polls for file existence via SSH with configurable timeout/interval | P0 | Accepted | design | config-phase.md | `test -M n1-pull` |
 
 ### Timeout Tiers (Established)
 
@@ -245,7 +251,7 @@ Requirements for the 4-phase lifecycle model from node-lifecycle.md.
 | ID | Requirement | Priority | Status | Source | Design Doc | Test |
 |----|-------------|----------|--------|--------|------------|------|
 | REQ-LIF-001 | 4-phase model: create → config → run → destroy | P0 | Accepted | design | node-lifecycle.md | ST-1, ST-2 |
-| REQ-LIF-002 | Config phase reaches "platform ready" state | P0 | Proposed | design | config-apply.md | ST-1 |
+| REQ-LIF-002 | Config phase reaches "platform ready" state | P0 | Accepted | design | config-phase.md | ST-1, `test -M n1-pull` |
 | REQ-LIF-003 | Run phase supports drift detection | P1 | Proposed | design | phase-interfaces.md | - |
 | REQ-LIF-004 | Destroy phase handles graceful shutdown | P1 | Proposed | design | phase-interfaces.md | - |
 | REQ-LIF-005 | Push, pull, and hybrid are co-equal execution models | P0 | Accepted | design | node-lifecycle.md | ST-1, ST-2, ST-5 |
@@ -270,6 +276,8 @@ Requirements for multi-node coordination from node-orchestration.md.
 | REQ-ORC-007 | Flat topology supports parallel peer creation | P1 | Proposed | design | node-orchestration.md | ST-6 |
 | REQ-ORC-008 | Manifests reference specs and presets directly (no v2/nodes/) | P1 | Accepted | design | node-orchestration.md | - |
 | REQ-ORC-009 | Manifest validation catches schema violations and unresolved FKs | P0 | Proposed | design | manifest-schema-v2.md | ST-7 |
+| REQ-ORC-010 | Pull nodes verified via file markers, not SSH-based config push | P0 | Accepted | design | config-phase.md | `test -M n1-pull` |
+| REQ-ORC-011 | `execution.mode: pull` on `type: pve` nodes is a manifest validation error | P1 | Accepted | design | config-phase.md | test_manifest.py |
 
 ---
 
@@ -316,7 +324,7 @@ Mapping test coverage to requirements.
 | `test_common.py` | REQ-EXE-001, 002, 003, 005, 008, 009, 010, REQ-NET-001, 002, 006, 012, 013 |
 | `test_actions.py` | REQ-CFG-009, REQ-REC-001 |
 | `test_cli.py` | REQ-CFG-012, REQ-OBS-004, 007, 009, 012, REQ-REC-005, 007 |
-| `test_manifest.py` | REQ-ORC-001, 004 |
+| `test_manifest.py` | REQ-ORC-001, 004, 011 |
 | `test_validation.py` | REQ-NET-011 |
 | `test_recursive_action.py` | REQ-OBS-001, 011 |
 | `test_scenario_attributes.py` | REQ-OBS-010 |
@@ -328,16 +336,17 @@ Mapping test coverage to requirements.
 | `test_resolver_base.py` | REQ-CFG-003, 004, REQ-SEC-007 |
 | `test_spec_resolver.py` | REQ-LIF-006 |
 | `test_spec_client.py` | REQ-LIF-007, 008 |
-| `test -M n1-basic-v2` | REQ-CRE-001, 002, 004, 005, 006, 010 |
+| `test -M n1-basic` | REQ-CRE-001, 002, 004, 005, 006, 010 |
 | `spec-vm-push-roundtrip` | REQ-CRE-003, REQ-LIF-007, 008, REQ-CTL-001, 003 |
 | `controller-repos` | REQ-CTL-004, 006, 007 |
-| `test -M n2-quick-v2` | REQ-NET-007, 008, REQ-CFG-013, 014, 015 |
+| `test -M n2-quick` | REQ-NET-007, 008, REQ-CFG-013, 014, 015 |
 | ST-1 | REQ-LIF-001, 002, 005, REQ-CTL-001, 003 |
 | ST-2 | REQ-LIF-001, REQ-ORC-003, REQ-CTL-004, 006 |
 | ST-3, ST-4 | REQ-ORC-005 |
 | ST-5 | REQ-LIF-005, REQ-ORC-002, 006 |
 | ST-7 | REQ-ORC-004, 009 |
 | ST-8 | REQ-TST-004, 005 |
+| `test -M n1-pull` | REQ-CRE-013, REQ-CFG-016, 017, 019, REQ-EXE-011, REQ-LIF-002, REQ-ORC-010 |
 
 ---
 
@@ -345,6 +354,7 @@ Mapping test coverage to requirements.
 
 | Date | Change |
 |------|--------|
+| 2026-02-06 | Sprint #201 (Config Phase): Added REQ-CRE-013, REQ-CFG-016–019, REQ-EXE-011, REQ-ORC-010–011; updated REQ-LIF-002 to `accepted` with config-phase.md ref; cleaned `-v2` manifest suffixes; added `test -M n1-pull` traceability |
 | 2026-02-06 | Sprint #199 overlay: REQ-LIF-006 test ref updated (`spec validate` → `make validate` in site-config); REQ-NFR-005 satisfied (serve.py, spec_resolver.py deleted) |
 | 2026-02-05 | Updated REQ-ORC-003 to verb-based CLI pattern |
 | 2026-02-05 | Added TLS requirements (REQ-CTL-011 to 014); updated traceability matrix |
