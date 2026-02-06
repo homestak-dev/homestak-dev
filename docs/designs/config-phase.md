@@ -405,9 +405,9 @@ name: n1-pull
 description: Single VM with pull execution mode
 pattern: flat
 nodes:
-  - name: pull-test
+  - name: edge
     type: vm
-    preset: vm-medium
+    preset: vm-small
     image: debian-12
     vmid: 99950
     execution:
@@ -467,7 +467,7 @@ nodes:
 | Cloud-init runcmd extension | Done | tofu 676f5bc |
 | `n1-pull.yaml` test manifest | Done | site-config 02c4108 |
 | `spec-vm-pull-roundtrip` scenario | Done | iac-driver 3c2017b |
-| `pull-test.yaml` test spec | Done | site-config 0b0faed |
+| `edge.yaml` spec | Done | site-config 0b0faed |
 
 **Deferred (as planned):**
 - Push-mode SSH config (existing push uses tofu+ansible; additive)
