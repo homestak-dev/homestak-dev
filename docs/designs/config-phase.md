@@ -35,9 +35,9 @@ Driver             1. tofu apply                          1. tofu apply
                    5. SSH → ./run.sh config               5. poll for config-complete
                       ↓
 VM                 6. reads spec.yaml                     5a. cloud-init runcmd:
-                   7. maps to ansible vars                    homestak spec get
-                   8. runs ansible roles                      ./run.sh config
-                   9. writes config-complete              5b. writes config-complete
+                   7. maps to ansible vars                    ./run.sh config --fetch
+                   8. runs ansible roles                  5b. fetches spec, applies config
+                   9. writes config-complete              5c. writes config-complete
                       ↓                                      ↓
 Driver             10. verify marker                      6. marker found → done
 ```
