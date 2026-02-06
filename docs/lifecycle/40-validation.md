@@ -65,10 +65,10 @@ Not every change needs full integration testing. Match validation effort to chan
 | Documentation only | None (review) | 0 |
 | CLI argument/help text | Unit tests only | seconds |
 | CLI with new behavior | Manual command test | ~1 min |
-| Documentation, CLI, process | `./run.sh test -M n1-basic-v2 -H <host>` | ~2 min |
-| Tofu/ansible changes | `./run.sh test -M n1-basic-v2 -H <host>` | ~2 min |
-| Manifest/operator code | `./run.sh test -M n2-quick-v2 -H <host>` | ~9 min |
-| PVE/nested/packer changes | `./run.sh test -M n2-quick-v2 -H <host>` | ~9 min |
+| Documentation, CLI, process | `./run.sh test -M n1-basic -H <host>` | ~2 min |
+| Tofu/ansible changes | `./run.sh test -M n1-basic -H <host>` | ~2 min |
+| Manifest/operator code | `./run.sh test -M n2-quick -H <host>` | ~9 min |
+| PVE/nested/packer changes | `./run.sh test -M n2-quick -H <host>` | ~9 min |
 
 **Size to Fit principle:** Use the lightest validation that proves the change works. Don't run 9-minute nested-pve scenarios for a CLI help text fix.
 
@@ -90,10 +90,10 @@ Certain changes require validation **before merge**:
 
 | Change Type | Required Validation |
 |-------------|---------------------|
-| Packer template changes | Build image, run `./run.sh test -M n1-basic-v2` or `n2-quick-v2` |
+| Packer template changes | Build image, run `./run.sh test -M n1-basic` or `n2-quick` |
 | Boot/startup optimizations | Measure actual timing before and after |
 | Cloud-init modifications | Full VM lifecycle test |
-| Tofu module changes | `./run.sh test -M n1-basic-v2 -H <host>` |
+| Tofu module changes | `./run.sh test -M n1-basic -H <host>` |
 | Ansible role changes | Run playbook on test VM |
 | iac-driver action changes | Scenario that exercises the action |
 | CLI commands | Full command flow |
@@ -125,21 +125,21 @@ cd iac-driver
 cd ~/homestak-dev/iac-driver
 
 # Quick validation (~2 min)
-./run.sh test -M n1-basic-v2 -H father
+./run.sh test -M n1-basic -H father
 
 # Tiered validation (~9 min)
-./run.sh test -M n2-quick-v2 -H father
+./run.sh test -M n2-quick -H father
 
 # Full 3-level validation (~15 min)
-./run.sh test -M n3-full-v2 -H father
+./run.sh test -M n3-full -H father
 ```
 
 **Constructor/destructor separately (for debugging):**
 
 ```bash
-./run.sh create -M n2-quick-v2 -H father
+./run.sh create -M n2-quick -H father
 # ... inspect inner PVE ...
-./run.sh destroy -M n2-quick-v2 -H father --yes
+./run.sh destroy -M n2-quick -H father --yes
 ```
 
 ### 6. Document Results
@@ -149,7 +149,7 @@ Post validation results to the sprint issue:
 ```markdown
 ## Validation - YYYY-MM-DD
 
-**Scenario:** `./run.sh test -M n1-basic-v2 -H father`
+**Scenario:** `./run.sh test -M n1-basic -H father`
 **Host:** father
 **Result:** PASSED
 

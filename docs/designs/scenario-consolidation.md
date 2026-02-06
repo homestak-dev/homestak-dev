@@ -14,12 +14,12 @@ This document describes the consolidation of 9 legacy scenarios and 3 remote act
 
 | Retired Scenario | Replacement |
 |------------------|-------------|
-| `vm-constructor` | `./run.sh create -M n1-basic-v2 -H <host>` |
-| `vm-destructor` | `./run.sh destroy -M n1-basic-v2 -H <host>` |
-| `vm-roundtrip` | `./run.sh test -M n1-basic-v2 -H <host>` |
-| `nested-pve-constructor` | `./run.sh create -M n2-quick-v2 -H <host>` |
-| `nested-pve-destructor` | `./run.sh destroy -M n2-quick-v2 -H <host>` |
-| `nested-pve-roundtrip` | `./run.sh test -M n2-quick-v2 -H <host>` |
+| `vm-constructor` | `./run.sh create -M n1-basic -H <host>` |
+| `vm-destructor` | `./run.sh destroy -M n1-basic -H <host>` |
+| `vm-roundtrip` | `./run.sh test -M n1-basic -H <host>` |
+| `nested-pve-constructor` | `./run.sh create -M n2-quick -H <host>` |
+| `nested-pve-destructor` | `./run.sh destroy -M n2-quick -H <host>` |
+| `nested-pve-roundtrip` | `./run.sh test -M n2-quick -H <host>` |
 | `recursive-pve-constructor` | `./run.sh create -M <manifest> -H <host>` |
 | `recursive-pve-destructor` | `./run.sh destroy -M <manifest> -H <host>` |
 | `recursive-pve-roundtrip` | `./run.sh test -M <manifest> -H <host>` |

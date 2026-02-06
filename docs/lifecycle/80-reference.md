@@ -253,10 +253,10 @@ gh pr status
 ./run.sh --list-scenarios
 
 # Quick validation
-./run.sh test -M n1-basic-v2 -H father
+./run.sh test -M n1-basic -H father
 
 # Tiered validation
-./run.sh test -M n2-quick-v2 -H father
+./run.sh test -M n2-quick -H father
 
 # Preflight only
 ./run.sh --preflight --host father
@@ -358,9 +358,9 @@ Types: `fix`, `feat`, `docs`, `test`, `refactor`, `chore`
 
 | Scenario | Use When | Duration |
 |----------|----------|----------|
-| `./run.sh test -M n1-basic-v2 -H <host>` | Standard changes, docs, CLI | ~2 min |
-| `./run.sh test -M n2-quick-v2 -H <host>` | Tiered/PVE/packer changes | ~9 min |
-| `./run.sh test -M n3-full-v2 -H <host>` | Full 3-level nesting | ~15 min |
+| `./run.sh test -M n1-basic -H <host>` | Standard changes, docs, CLI | ~2 min |
+| `./run.sh test -M n2-quick -H <host>` | Tiered/PVE/packer changes | ~9 min |
+| `./run.sh test -M n3-full -H <host>` | Full 3-level nesting | ~15 min |
 | `packer-build-fetch` | Packer template changes | ~5 min |
 
 ## Repository Order

@@ -350,7 +350,7 @@ parent: father               # Parent node (for VMs)
 ./run.sh create -M <manifest> -H <host>     # Create nodes per manifest
 ./run.sh destroy -M <manifest> -H <host>    # Destroy nodes per manifest
 ./run.sh test -M <manifest> -H <host>       # Roundtrip validation
-./run.sh config -M <manifest> -H <host>     # Config phase (future)
+./run.sh config [--spec /path/to/spec.yaml]  # Apply spec locally (v0.48+)
 ```
 
 **Target CLI** (`homestak` — bootstrap, runs on target nodes):

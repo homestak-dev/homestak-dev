@@ -22,7 +22,7 @@ This document tracks the design documentation landscape for the homestak lifecyc
 
 | Document | Blocks | Priority | Description |
 |----------|--------|----------|-------------|
-| `config-apply.md` | iac-driver (TBD) | P0 | Config phase implementation to reach "platform ready" state |
+| ~~`config-apply.md`~~ | ~~iac-driver (TBD)~~ | ~~P0~~ | ~~Config phase implementation to reach "platform ready" state~~ — **Completed** in iac-driver#147 (Sprint #201). See [config-phase.md](config-phase.md) |
 | ~~`manifest-schema-v2.md`~~ | ~~iac-driver#140-P2~~ | ~~P0~~ | ~~Manifest schema v2~~ — **Completed** in iac-driver#143. Schema at `site-config/v2/defs/manifest.schema.json`, implementation in `manifest.py` |
 | ~~`scenario-consolidation.md`~~ | ~~iac-driver#145~~ | ~~P1~~ | ~~Transitional doc for migrating from `*-constructor/*-destructor` to verb-based subcommands~~ — **Completed** in homestak-dev#195. See [scenario-consolidation.md](scenario-consolidation.md) |
 
@@ -76,12 +76,12 @@ Items identified during iac-driver#141 analysis for NFR (Non-Functional Requirem
 
 | Current | Issue | Target |
 |---------|-------|--------|
-| ~~`vm-constructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh create -M n1-basic-v2 -H <host>` |
-| ~~`vm-destructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh destroy -M n1-basic-v2 -H <host>` |
-| ~~`vm-roundtrip`~~ | ~~Test pattern encoded in name~~ | **Retired** — `./run.sh test -M n1-basic-v2 -H <host>` |
-| ~~`nested-pve-constructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh create -M n2-quick-v2 -H <host>` |
-| ~~`nested-pve-destructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh destroy -M n2-quick-v2 -H <host>` |
-| ~~`nested-pve-roundtrip`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh test -M n2-quick-v2 -H <host>` |
+| ~~`vm-constructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh create -M n1-basic -H <host>` |
+| ~~`vm-destructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh destroy -M n1-basic -H <host>` |
+| ~~`vm-roundtrip`~~ | ~~Test pattern encoded in name~~ | **Retired** — `./run.sh test -M n1-basic -H <host>` |
+| ~~`nested-pve-constructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh create -M n2-quick -H <host>` |
+| ~~`nested-pve-destructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh destroy -M n2-quick -H <host>` |
+| ~~`nested-pve-roundtrip`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh test -M n2-quick -H <host>` |
 | ~~`recursive-pve-*`~~ | ~~Old manifest format~~ | **Retired** — `./run.sh create/destroy/test -M <manifest> -H <host>` |
 
 ### Directory Structure (iac-driver)
@@ -127,6 +127,7 @@ Track progress on closing design gaps.
 
 | Date | Change |
 |------|--------|
+| 2026-02-06 | Mark config-apply.md complete (#147, Sprint #201); config phase + pull mode implemented |
 | 2026-02-06 | Mark scenario consolidation complete (#145); update scenario naming, dead code, gap closure tracking |
 | 2026-02-05 | Replace ordinal sprint labels with issue references; update for #143+#144 combination |
 | 2026-02-05 | Updated CLI pattern references to verb-based subcommands; marked #148 complete; updated scenario retirement targets |

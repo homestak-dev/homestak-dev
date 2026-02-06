@@ -75,7 +75,7 @@ Sprint context goes in the description body, not the title.
 - iac-driver#53 - ConfigResolver update
 
 ## Validation Evidence
-- Scenario: `./run.sh test -M n2-quick-v2 -H father`
+- Scenario: `./run.sh test -M n2-quick -H father`
 - Result: PASSED
 - Report: [link]
 
