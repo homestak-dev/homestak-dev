@@ -630,8 +630,8 @@ This design document represents a significant architectural evolution. Related i
 | 1. #139, #148 | Move spec server, unified controller | v0.45 (current) | **Complete** |
 | 2. #143 | Manifest schema v2, retire node.schema.json | Phase 1 | **Complete** |
 | 3. #144 | Operator engine (`manifest_opr/`), verb CLI | Phase 2 | **Complete** |
-| 4. #145 | Scenario consolidation, retire legacy scenarios | Phase 3 | Planned |
-| 5. #147 | Pull execution, config phase | All above | Planned |
+| 4. #145 | Scenario consolidation, retire legacy scenarios | Phase 3 | **Complete** |
+| 5. #147 | Pull execution, config phase | All above | **Complete** |
 
 ### Related Issues
 

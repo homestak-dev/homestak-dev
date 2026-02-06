@@ -22,7 +22,7 @@ This document tracks the design documentation landscape for the homestak lifecyc
 
 | Document | Blocks | Priority | Description |
 |----------|--------|----------|-------------|
-| `config-apply.md` | iac-driver (TBD) | P0 | Config phase implementation to reach "platform ready" state |
+| ~~`config-apply.md`~~ | ~~iac-driver (TBD)~~ | ~~P0~~ | ~~Config phase implementation to reach "platform ready" state~~ — **Completed** in iac-driver#147 (Sprint #201). See [config-phase.md](config-phase.md) |
 | ~~`manifest-schema-v2.md`~~ | ~~iac-driver#140-P2~~ | ~~P0~~ | ~~Manifest schema v2~~ — **Completed** in iac-driver#143. Schema at `site-config/v2/defs/manifest.schema.json`, implementation in `manifest.py` |
 | ~~`scenario-consolidation.md`~~ | ~~iac-driver#145~~ | ~~P1~~ | ~~Transitional doc for migrating from `*-constructor/*-destructor` to verb-based subcommands~~ — **Completed** in homestak-dev#195. See [scenario-consolidation.md](scenario-consolidation.md) |
 
@@ -127,6 +127,7 @@ Track progress on closing design gaps.
 
 | Date | Change |
 |------|--------|
+| 2026-02-06 | Mark config-apply.md complete (#147, Sprint #201); config phase + pull mode implemented |
 | 2026-02-06 | Mark scenario consolidation complete (#145); update scenario naming, dead code, gap closure tracking |
 | 2026-02-05 | Replace ordinal sprint labels with issue references; update for #143+#144 combination |
 | 2026-02-05 | Updated CLI pattern references to verb-based subcommands; marked #148 complete; updated scenario retirement targets |

@@ -131,7 +131,7 @@ Manifest:
 **Steps:**
 1. Driver provisions VM with identity + spec_server env vars
 2. VM boots, runs `homestak spec get`
-3. VM applies spec locally (config phase — future)
+3. VM applies spec locally (`./run.sh config`, v0.48+)
 4. Verify: VM reaches platform ready state
 5. Destroy VM
 
@@ -359,11 +359,11 @@ Manifest:
 
 | System Test | Current Equivalent | Gap | Blocked By |
 |-------------|-------------------|-----|------------|
-| ST-1 | `spec-vm-push-roundtrip` | Missing full config phase | iac-driver#147 |
+| ST-1 | `spec-vm-pull-roundtrip` | **Available** — full pull mode config phase (iac-driver#156) | - |
 | ST-2 | `./run.sh test -M n1-basic` | **Available** — operator handles flat VM lifecycle | - |
 | ST-3 | `./run.sh test -M n2-quick` | **Available** — operator handles tiered PVE+VM | - |
 | ST-4 | `./run.sh test -M n3-full` | **Available** — operator delegates via SSH | - |
-| ST-5 | None | New capability (mixed execution modes) | iac-driver#147 |
+| ST-5 | None | New capability (mixed execution modes) | Future |
 | ST-6 | None | New capability (parallel peer creation) | Future |
 | ST-7 | None | New capability (manifest validation) | Future |
 | ST-8 | Partial | Scenarios are mostly idempotent but not formally tested | Core |

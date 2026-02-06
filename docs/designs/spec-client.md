@@ -123,7 +123,7 @@ Map server error codes to client behavior:
 1. **Server (`homestak serve`)** - HTTP API from Sprint #161
 2. **Path discovery** - Reuse `discover_etc_path()` pattern
 3. **State directory** - New `/usr/local/etc/homestak/state/`
-4. **Config completion (v0.49)** - Will read `state/spec.yaml` to complete config phase
+4. **Config completion (v0.48)** - `./run.sh config` reads `state/spec.yaml` and applies via ansible (iac-driver#147)
 
 ## Data Flow
 
