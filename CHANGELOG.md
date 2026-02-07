@@ -15,6 +15,8 @@
   - Update REPO-SETTINGS.md, CLAUDE.md, and lifecycle docs for rulesets workflow
 
 ### Documentation
+- Update config flow diagram: `envs/` → `specs/`, `presets/`, `manifests/`; `resolve_env()` → `resolve_inline_vm()` (Sprint #212, #211)
+- Fix stale `test_resolve_env` test reference in test-strategy.md (#211)
 - Update design doc paths for v2/ consolidation (Sprint #209, #208)
   - node-lifecycle.md, node-orchestration.md, config-phase.md, spec-server.md, spec-client.md
   - `v2/specs/` → `specs/`, `v2/postures/` → `postures/`, `v2/presets/` → `presets/`, `v2/defs/` → `defs/`
