@@ -566,7 +566,7 @@ After scenario consolidation (Sprint homestak-dev#195), VM lifecycle uses verb c
 | `pve-setup` | config (to existing host) | Push |
 | `spec-vm-push-roundtrip` | create → specify (push) | Push (verify spec server) |
 
-The `spec-vm-push-roundtrip` scenario validates that spec server env vars are injected and reachable via SSH. Pull mode (config phase) is tracked in iac-driver#147/iac-driver#156.
+The `spec-vm-push-roundtrip` scenario validates that spec server env vars are injected and reachable via SSH. The `spec-vm-pull-roundtrip` scenario validates the full pull-mode config phase (iac-driver#147/#156, completed in Sprint homestak-dev#201).
 
 ### Mode Selection
 
@@ -934,7 +934,7 @@ Assertions:
 
 | System Test | Current Equivalent | Gap |
 |-------------|-------------------|-----|
-| ST-1 | `spec-vm-push-roundtrip` | Missing full config phase (iac-driver#147) |
+| ST-1 | `spec-vm-pull-roundtrip` | **Available** (Sprint homestak-dev#201) |
 | ST-2 | `./run.sh test -M n1-basic` | **Available** |
 | ST-3 | `./run.sh test -M n2-quick` | **Available** |
 | ST-4 | `./run.sh test -M n3-full` | **Available** |
@@ -955,6 +955,7 @@ Assertions:
 
 | Date | Change |
 |------|--------|
+| 2026-02-07 | ST-1 available (Sprint #201 delivered config phase); update pull mode text |
 | 2026-02-06 | Update for scenario consolidation (#195): mark `TofuApply/DestroyRemoteAction` retired; update legacy scenarios table to current verb commands |
 | 2026-02-05 | Update CLI examples to verb-based pattern (`./run.sh create -M X -H host`); remove `--manifest X --action Y` references; rename "manifest executor" to "operator" |
 | 2026-02-03 | Rename to node-orchestration.md; add reading order guidance; apply terminology framework (driver/target, parent/child node, host/guest); update cross-references to node-lifecycle.md |

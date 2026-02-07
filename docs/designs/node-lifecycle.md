@@ -1,7 +1,7 @@
 # Node Lifecycle
 
 **Epic:** [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125), [iac-driver#140](https://github.com/homestak-dev/iac-driver/issues/140)
-**Status:** Active (v0.45 complete — create → config integration)
+**Status:** Active
 **Date:** 2026-02-02
 **Related:** [node-orchestration.md](node-orchestration.md)
 
@@ -418,28 +418,7 @@ iac-driver/
 
 ## Implementation Status
 
-The architecture is being implemented incrementally across multiple releases.
-
-### Completed
-
-| Release | Phase | Deliverables |
-|---------|-------|--------------|
-| v0.43 | Schema Foundation | V2 directory structure, JSON schemas for specs/nodes/postures |
-| v0.44 | Config Infrastructure | Spec server, `homestak spec get` client, auth model |
-| v0.45 | create → config | Cloud-init integration, auth token injection, `spec-vm-push-roundtrip` scenario |
-
-### v0.45 Details (create → config)
-
-**Components:**
-- **tofu**: Cloud-init injects `HOMESTAK_SPEC_SERVER`, `HOMESTAK_IDENTITY`, `HOMESTAK_AUTH_TOKEN` to `/etc/profile.d/homestak.sh`
-- **iac-driver**: ConfigResolver outputs `spec_server` and per-VM `auth_token` based on posture
-- **bootstrap**: First-boot spec fetch in cloud-init runcmd (idempotent)
-- **site-config**: `defaults.spec_server` in site.yaml
-
-**Validation:**
-```bash
-./run.sh --scenario spec-vm-push-roundtrip --host father
-```
+Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) (Node Lifecycle Architecture epic). See the epic's release plan and acceptance criteria for current progress.
 
 ## Related Documents
 
@@ -455,6 +434,7 @@ The architecture is being implemented incrementally across multiple releases.
 
 | Date | Change |
 |------|--------|
+| 2026-02-07 | Status → Active; replace Implementation Status section with epic reference (avoid staleness) |
 | 2026-02-05 | Update CLI Pattern section: distinguish driver CLI (`./run.sh`) from target CLI (`homestak`); remove premature `homestak config` porcelain reference |
 | 2026-02-03 | Rename to node-lifecycle.md; normalize execution models as co-equal (push/hybrid/pull all first-class); add terminology framework; remove "In Progress" section |
 | 2026-02-03 | Rename to node-lifecycle-architecture.md; consolidate to 4 phases (create, config, run, destroy); add #140 epic, scope & relationship section |
