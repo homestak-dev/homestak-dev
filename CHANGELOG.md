@@ -15,6 +15,10 @@
   - Update REPO-SETTINGS.md, CLAUDE.md, and lifecycle docs for rulesets workflow
 
 ### Documentation
+- Update design doc paths for v2/ consolidation (Sprint #209, #208)
+  - node-lifecycle.md, node-orchestration.md, config-phase.md, spec-server.md, spec-client.md
+  - `v2/specs/` → `specs/`, `v2/postures/` → `postures/`, `v2/presets/` → `presets/`, `v2/defs/` → `defs/`
+  - Mark iac-driver#166 (controller startup timeout) as fixed in config-phase.md
 - Fix stale references across design docs from Sprint #201 config phase completion
   - node-lifecycle.md: Status → Active; replace implementation status table with epic reference
   - node-orchestration.md: ST-1 → Available; update pull mode completion text

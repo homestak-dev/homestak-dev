@@ -10,7 +10,7 @@
 
 ## Problem Statement
 
-Nodes need to discover their specifications as part of the config phase. The `homestak serve` command provides an HTTP server that exposes specs from `site-config/v2/specs/` to requesting nodes.
+Nodes need to discover their specifications as part of the config phase. The `homestak serve` command provides an HTTP server that exposes specs from `site-config/specs/` to requesting nodes.
 
 **Success criteria:**
 - Server starts and binds to port 44443
@@ -99,8 +99,8 @@ homestak serve [--port 44443] [--bind 0.0.0.0] [--verbose]
 
 ### Configuration
 
-- Specs read from: `$HOMESTAK_ETC/v2/specs/`
-- Postures read from: `$HOMESTAK_ETC/v2/postures/`
+- Specs read from: `$HOMESTAK_ETC/specs/`
+- Postures read from: `$HOMESTAK_ETC/postures/`
 - Secrets read from: `$HOMESTAK_ETC/secrets.yaml`
 
 ## Auth Flow
@@ -192,9 +192,9 @@ Load posture → get auth.method
 
 | Category | Check | Status |
 |----------|-------|--------|
-| v2 structure | `site-config/v2/specs/` exists | Ready |
-| Postures | `site-config/v2/postures/` exists | Ready |
-| Schemas | `site-config/v2/defs/*.json` exist | Ready |
+| v2 structure | `site-config/specs/` exists | Ready |
+| Postures | `site-config/postures/` exists | Ready |
+| Schemas | `site-config/defs/*.json` exist | Ready |
 | Secrets | `secrets.yaml` with auth.site_token | Needs addition |
 
 ## Open Questions (Resolved)
@@ -209,5 +209,5 @@ Load posture → get auth.method
 
 - [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) - Architecture evolution epic
 - [homestak-dev#153](https://github.com/homestak-dev/homestak-dev/issues/153) - v0.44 Release Planning
-- [site-config/v2/defs/spec.schema.json](../site-config/v2/defs/spec.schema.json) - Spec schema
-- [site-config/v2/defs/posture.schema.json](../site-config/v2/defs/posture.schema.json) - Posture schema
+- [site-config/defs/spec.schema.json](../site-config/defs/spec.schema.json) - Spec schema
+- [site-config/defs/posture.schema.json](../site-config/defs/posture.schema.json) - Posture schema

@@ -182,10 +182,10 @@ When nested-pve creates test1 (inside nested-pve):
 | Term | Directory | Meaning |
 |------|-----------|---------|
 | **Node** | manifest `nodes[]` | Compute entity (VM, CT, PVE host, k3s node) |
-| **Spec** | `v2/specs/` | Specification — what a node should become |
-| **Def** | `v2/defs/` | Schema definition — structure of specs/nodes |
-| **Posture** | `v2/postures/` | Security configuration (dev, stage, prod, local) |
-| **Preset** | `v2/presets/` | Size preset (vm-small, vm-large, etc.) |
+| **Spec** | `specs/` | Specification — what a node should become |
+| **Def** | `defs/` | Schema definition — structure of specs/nodes |
+| **Posture** | `postures/` | Security configuration (dev, stage, prod, local) |
+| **Preset** | `presets/` | Size preset (vm-small, vm-large, etc.) |
 
 ## Key Principles
 
@@ -233,42 +233,40 @@ Load posture → get auth.method
                      against secrets.auth.node_tokens.{identity}
 ```
 
-## site-config v2 Structure
+## site-config Structure
 
-The v2 directory is self-contained, enabling independent evolution:
+Lifecycle entities are at the top level of site-config (consolidated from former `v2/` subdirectory):
 
 ```
 site-config/
-├── v1 (current, unchanged)
 ├── secrets.yaml              # Shared (site-wide)
-└── v2/
-    ├── defs/                 # Schema definitions
-    │   ├── spec.schema.json
-    │   ├── manifest.schema.json
-    │   └── posture.schema.json
-    ├── specs/                # Node specifications (what to become)
-    │   ├── pve.yaml
-    │   └── base.yaml
-    ├── postures/             # Security postures with auth model
-    │   ├── dev.yaml
-    │   ├── stage.yaml
-    │   ├── prod.yaml
-    │   └── local.yaml
-    ├── presets/              # Size presets (vm- prefix)
-    │   ├── vm-xsmall.yaml
-    │   ├── vm-small.yaml
-    │   ├── vm-medium.yaml
-    │   ├── vm-large.yaml
-    │   └── vm-xlarge.yaml
-    └── (nodes defined inline in manifests, v2/nodes/ retired)
+├── defs/                     # Schema definitions
+│   ├── spec.schema.json
+│   ├── manifest.schema.json
+│   └── posture.schema.json
+├── specs/                    # Node specifications (what to become)
+│   ├── pve.yaml
+│   └── base.yaml
+├── postures/                 # Security postures with auth model
+│   ├── dev.yaml
+│   ├── stage.yaml
+│   ├── prod.yaml
+│   └── local.yaml
+├── presets/                  # Size presets (vm- prefix)
+│   ├── vm-xsmall.yaml
+│   ├── vm-small.yaml
+│   ├── vm-medium.yaml
+│   ├── vm-large.yaml
+│   └── vm-xlarge.yaml
+└── (nodes defined inline in manifests)
 ```
 
 ### Lifecycle Coverage
 
 | Directory | Phase | Purpose |
 |-----------|-------|---------|
-| manifest `nodes[]` + `v2/presets/` | create | Infrastructure provisioning |
-| `v2/specs/` + `v2/postures/` | config | What to become + how to secure |
+| manifest `nodes[]` + `presets/` | create | Infrastructure provisioning |
+| `specs/` + `postures/` | config | What to become + how to secure |
 
 ## Spec Schema (v1)
 
@@ -287,7 +285,7 @@ network:
   dns: [10.0.12.1, 1.1.1.1]
 
 access:
-  posture: dev               # FK to v2/postures/
+  posture: dev               # FK to postures/
   users:
     - name: homestak
       sudo: true
@@ -315,7 +313,7 @@ run:
 
 | Reference | Resolves To |
 |-----------|-------------|
-| `access.posture: dev` | `v2/postures/dev.yaml` |
+| `access.posture: dev` | `postures/dev.yaml` |
 | `ssh_keys.jderose` | `secrets.yaml → ssh_keys.jderose` |
 
 ## Node Schema (v1)
@@ -324,9 +322,9 @@ Node templates define infrastructure for compute nodes:
 
 ```yaml
 type: vm
-spec: pve                    # FK to v2/specs/
+spec: pve                    # FK to specs/
 image: debian-13-pve
-preset: vm-large             # FK to v2/presets/
+preset: vm-large             # FK to presets/
 disk: 64                     # Override preset
 parent: father               # Parent node (for VMs)
 ```
@@ -434,6 +432,7 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/ia
 
 | Date | Change |
 |------|--------|
+| 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |
 | 2026-02-07 | Status → Active; replace Implementation Status section with epic reference (avoid staleness) |
 | 2026-02-05 | Update CLI Pattern section: distinguish driver CLI (`./run.sh`) from target CLI (`homestak`); remove premature `homestak config` porcelain reference |
 | 2026-02-03 | Rename to node-lifecycle.md; normalize execution models as co-equal (push/hybrid/pull all first-class); add terminology framework; remove "In Progress" section |

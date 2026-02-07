@@ -356,20 +356,20 @@ With manifests owning topology + execution, what role does `site-config/v2/nodes
 **The identity problem:** A node's filename is its primary key (`pve.yaml` → `pve`). This makes nodes instances, not templates. You can't instantiate "pve" twice — you'd need `inner-pve.yaml`, `outer-pve.yaml`, defeating reusability.
 
 **What's actually reusable:**
-- `v2/specs/` — what to become (packages, services) ✓
-- `v2/presets/` — resource sizing (cores, memory, disk) ✓
-- `v2/postures/` — security configuration ✓
-- `v2/nodes/` — type + image + spec FK... with fixed identity ✗
+- `specs/` — what to become (packages, services) ✓
+- `presets/` — resource sizing (cores, memory, disk) ✓
+- `postures/` — security configuration ✓
+- ~~`v2/nodes/`~~ — type + image + spec FK... with fixed identity ✗ (eliminated)
 
-**Recommendation:** Eliminate `v2/nodes/` as a separate layer. Manifests reference specs and presets directly:
+**Recommendation:** Eliminate standalone node files. Manifests reference specs and presets directly:
 
 ```yaml
-# v2/manifests/nested-test.yaml
+# manifests/nested-test.yaml
 nodes:
   - name: inner-pve           # Instance identity (unique per manifest)
     type: vm
-    spec: pve                 # FK to v2/specs/pve.yaml
-    preset: vm-large          # FK to v2/presets/vm-large.yaml
+    spec: pve                 # FK to specs/pve.yaml
+    preset: vm-large          # FK to presets/vm-large.yaml
     image: debian-13-pve
     execution:
       mode: push
@@ -384,9 +384,9 @@ nodes:
 
 **Resulting structure:**
 ```
-site-config/v2/
+site-config/
 ├── defs/
-│   ├── manifest.schema.json   # NEW: absorbs node.schema.json properties
+│   ├── manifest.schema.json   # Absorbs node.schema.json properties
 │   ├── spec.schema.json
 │   └── posture.schema.json
 ├── specs/          # What nodes become (packages, services, config)
@@ -402,7 +402,7 @@ This is simpler and avoids the "template vs instance" confusion that plagued v1/
 The manifest schema absorbs properties from `node.schema.json`, which can be retired:
 
 ```yaml
-# v2/defs/manifest.schema.json (conceptual)
+# defs/manifest.schema.json (conceptual)
 schema_version: 2
 name: string                      # Manifest identifier
 pattern: enum                     # flat, tiered, mesh, hub-spoke, federated
@@ -413,8 +413,8 @@ execution:
 nodes:                            # Arbitrary graph of node definitions
   - name: string                  # Instance identity (unique within manifest)
     type: enum                    # vm, ct, pve (from node.schema.json)
-    spec: string                  # FK to v2/specs/
-    preset: string                # FK to v2/presets/
+    spec: string                  # FK to specs/
+    preset: string                # FK to presets/
     image: string                 # For type: vm
     template: string              # For type: ct
     parent: string                # FK to another node in this manifest (optional)
@@ -431,8 +431,8 @@ nodes:                            # Arbitrary graph of node definitions
 - **Federated:** Multiple subgraphs with cross-links
 
 **Migration path:**
-- `v2/defs/node.schema.json` → properties move into manifest node definitions
-- `v2/nodes/*.yaml` → instances defined inline in manifests
+- `defs/node.schema.json` → properties moved into manifest node definitions
+- Standalone node files → instances defined inline in manifests
 - Node schema can be deleted once manifests absorb its responsibilities
 
 ## User Personas
@@ -695,8 +695,8 @@ These scenarios validate the full stack: orchestration (#140) → lifecycle (#12
 ```
 Preconditions:
 - Spec server running on driver
-- v2/specs/base.yaml defined
-- v2/manifests/single-node.yaml exists
+- specs/base.yaml defined
+- manifests/single-node.yaml exists
 
 Manifest:
   nodes:
@@ -758,8 +758,8 @@ Assertions:
 
 ```
 Preconditions:
-- v2/specs/pve.yaml and v2/specs/base.yaml defined
-- v2/manifests/nested-test.yaml exists
+- specs/pve.yaml and specs/base.yaml defined
+- manifests/nested-test.yaml exists
 
 Manifest:
   pattern: tiered
@@ -955,6 +955,7 @@ Assertions:
 
 | Date | Change |
 |------|--------|
+| 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |
 | 2026-02-07 | ST-1 available (Sprint #201 delivered config phase); update pull mode text |
 | 2026-02-06 | Update for scenario consolidation (#195): mark `TofuApply/DestroyRemoteAction` retired; update legacy scenarios table to current verb commands |
 | 2026-02-05 | Update CLI examples to verb-based pattern (`./run.sh create -M X -H host`); remove `--manifest X --action Y` references; rename "manifest executor" to "operator" |

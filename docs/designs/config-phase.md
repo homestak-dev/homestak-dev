@@ -305,8 +305,8 @@ Add `./run.sh config` to the existing runcmd block:
 ```
 site-config                  iac-driver                     ansible
 ┌──────────────┐             ┌────────────────┐             ┌────────────────┐
-│ v2/specs/    │──resolve──▶ │ controller     │             │ roles:         │
-│ v2/postures/ │             │ (./run.sh      │             │ base, users,   │
+│ specs/       │──resolve──▶ │ controller     │             │ roles:         │
+│ postures/    │             │ (./run.sh      │             │ base, users,   │
 │ secrets.yaml │             │  serve)        │             │ security       │
 └──────────────┘             └───────┬────────┘             └───────▲────────┘
                                      │ serve                        │
@@ -479,10 +479,10 @@ nodes:
 | `tofu/envs/generic/main.tf` | Add `HOMESTAK_REF=_working` to cloud-init runcmd | tofu#40 |
 | `tofu/envs/generic/main.tf` | Fix SSH key indent (6→10) in cloud-init user-data | tofu#40 |
 | `users/defaults/main.yml` | Add `local_user_shell` default for users role | ansible#37 |
-| `v2/specs/edge.yaml` | Fix SSH key FK (`jderose@father` not `jderose`) | site-config#55 |
+| `specs/edge.yaml` | Fix SSH key FK (`jderose@father` not `jderose`) | site-config#55 |
 
 **Known issues:**
-- iac-driver#166: `StartSpecServerAction` SSH FD inheritance — controller must be pre-started as workaround
+- ~~iac-driver#166: `StartSpecServerAction` SSH FD inheritance~~ — **Fixed** (Sprint #209): close inherited FDs > 2 before exec
 
 **Deferred (as planned):**
 - Push-mode SSH config (existing push uses tofu+ansible; additive)
