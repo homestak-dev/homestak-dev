@@ -4,6 +4,8 @@
 
 ### Added
 - Add CI workflow with bats tests and shellcheck lint (#190)
+- Add config phase design doc (`docs/designs/config-phase.md`) for Sprint #201
+- Add scenario consolidation design doc (`docs/designs/scenario-consolidation.md`) for Sprint #195
 
 ### Changed
 - Migrate branch protection to GitHub Rulesets with OrganizationAdmin bypass (#185)
@@ -11,6 +13,15 @@
   - Add `homestak-bot` machine user for PR authorship (enables human review/approval)
   - Enable auto-merge on all repos
   - Update REPO-SETTINGS.md, CLAUDE.md, and lifecycle docs for rulesets workflow
+
+### Documentation
+- Fix stale references across design docs from Sprint #201 config phase completion
+  - node-lifecycle.md: Status → Active; replace implementation status table with epic reference
+  - node-orchestration.md: ST-1 → Available; update pull mode completion text
+  - gap-analysis.md: Fix inconsistent gap closure tracking for config-apply.md
+- Update design doc cross-refs for Sprint #201 (#202, #205)
+- Update design doc cross-refs for Sprint #199 (#204)
+- Update design doc cross-refs for scenario consolidation Sprint #195 (#196, #197)
 
 ## v0.45 - 2026-02-02
 

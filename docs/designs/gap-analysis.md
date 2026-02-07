@@ -112,7 +112,7 @@ Track progress on closing design gaps.
 | Gap | Target | Status | Notes |
 |-----|--------|--------|-------|
 | unified-controller (#148) | iac-driver#146 | **Complete** | Delivered in PR #150, #148 closed |
-| config-apply.md | iac-driver#147 | Not started | Blocks first "platform ready" |
+| config-apply.md | iac-driver#147 | **Complete** | Delivered in Sprint homestak-dev#201. See [config-phase.md](config-phase.md) |
 | manifest-schema-v2.md | iac-driver#143 | **Complete** | Schema at `site-config/v2/defs/manifest.schema.json` |
 | scenario-consolidation.md | iac-driver#145 | **Complete** | [scenario-consolidation.md](scenario-consolidation.md) |
 | phase-interfaces.md | iac-driver#141 | **Complete** | Resolved Q1-Q6, documented all phase contracts |
@@ -127,6 +127,7 @@ Track progress on closing design gaps.
 
 | Date | Change |
 |------|--------|
+| 2026-02-07 | Fix stale Gap Closure Tracking: config-apply.md → Complete (was inconsistent with Missing Design Docs section) |
 | 2026-02-06 | Mark config-apply.md complete (#147, Sprint #201); config phase + pull mode implemented |
 | 2026-02-06 | Mark scenario consolidation complete (#145); update scenario naming, dead code, gap closure tracking |
 | 2026-02-05 | Replace ordinal sprint labels with issue references; update for #143+#144 combination |
