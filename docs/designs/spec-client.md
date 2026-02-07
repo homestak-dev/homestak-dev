@@ -231,8 +231,8 @@ cat /usr/local/etc/homestak/state/spec.yaml
 | Category | Check | Status |
 |----------|-------|--------|
 | Server | `homestak serve` implemented | Ready (Sprint #161) |
-| Specs | v2/specs/ files exist | Ready |
-| Postures | v2/postures/ files exist | Ready |
+| Specs | specs/ files exist | Ready |
+| Postures | postures/ files exist | Ready |
 | Network | Client can reach server | Test at validation |
 
 ## Implementation Sequence
