@@ -121,11 +121,14 @@ site-config is the single source of truth:
 ```
 site-config/
 ├── site.yaml       # Site-wide defaults (timezone, packages)
+├── secrets.yaml    # API tokens, SSH keys, passwords
+├── defs/           # JSON Schema definitions
+├── hosts/          # Physical machines (SSH access)
+├── nodes/          # PVE instances (API access)
 ├── postures/       # Security postures (dev, prod, local)
 ├── specs/          # Node specifications (what to become)
 ├── presets/        # VM size presets (cores, memory, disk)
-├── manifests/      # Deployment topologies (v2 graph nodes)
-└── secrets.yaml    # API tokens, SSH keys, passwords
+└── manifests/      # Deployment topologies (v2 graph nodes)
         │
         ▼
 ConfigResolver (iac-driver)
