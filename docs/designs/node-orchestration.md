@@ -1,6 +1,6 @@
 # Node Orchestration
 
-**Status:** Implemented (Phase 2 complete)
+**Status:** Active
 **Date:** 2026-02-02
 **Epic:** [iac-driver#140](https://github.com/homestak-dev/iac-driver/issues/140) — Manifest-based Orchestration Architecture
 **Related:** [node-lifecycle.md](node-lifecycle.md), [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125)
@@ -264,12 +264,12 @@ A manifest describes **what** to build without prescribing **how** to build it:
 - Cardinality (how many of each)
 - Constraints and dependencies
 
-### Current State
+### Schema v1 (Legacy)
 
-The current manifest schema (v1) is coupled to push execution:
+The v1 manifest schema uses linear `levels[]` and is coupled to push execution. It remains supported for backward compatibility but v2 is the primary format:
 
 ```yaml
-# Current: execution-coupled
+# Legacy: linear levels, push-only
 schema_version: 1
 name: n2-quick
 levels:
@@ -281,7 +281,7 @@ levels:
     post_scenario_args: ["--local"]    # Push-specific
 ```
 
-### Future Direction
+### Schema v2 (Current)
 
 Manifests define topology, execution model, and node instances:
 
@@ -621,17 +621,19 @@ This design document represents a significant architectural evolution. Related i
 | Unified FK resolution | Manifests use same FK pattern as specs |
 | Spec server in iac-driver | Server can serve both specs AND manifests |
 | `./run.sh serve` entry point | Aligns with verb-based CLI pattern (`./run.sh create/destroy/test`) |
-| ConfigResolver + SpecResolver consolidation | Single resolver can handle v1 (envs) and v2 (manifests) |
+| ConfigResolver + SpecResolver consolidation | Single resolver handles manifests and specs |
 
 ### Phased Implementation
 
-| Phase | Scope | Builds On | Status |
-|-------|-------|-----------|--------|
-| 1. #139, #148 | Move spec server, unified controller | v0.45 (current) | **Complete** |
-| 2. #143 | Manifest schema v2, retire node.schema.json | Phase 1 | **Complete** |
-| 3. #144 | Operator engine (`manifest_opr/`), verb CLI | Phase 2 | **Complete** |
-| 4. #145 | Scenario consolidation, retire legacy scenarios | Phase 3 | **Complete** |
-| 5. #147 | Pull execution, config phase | All above | **Complete** |
+| Phase | Scope | Builds On | Status | Released |
+|-------|-------|-----------|--------|----------|
+| 1. #139, #148 | Move spec server, unified controller | v0.45 | **Complete** | v0.43–v0.45 |
+| 2. #143 | Manifest schema v2, retire node.schema.json | Phase 1 | **Complete** | On master |
+| 3. #144 | Operator engine (`manifest_opr/`), verb CLI | Phase 2 | **Complete** | On master |
+| 4. #145 | Scenario consolidation, retire legacy scenarios | Phase 3 | **Complete** | On master |
+| 5. #147 | Pull execution, config phase | All above | **Complete** | On master |
+
+**Note:** v0.43–v0.45 are released. Phases 2–5 are merged to master but unreleased.
 
 ### Related Issues
 
@@ -640,17 +642,17 @@ Several open issues are affected by this design:
 | Issue | Title | Disposition |
 |-------|-------|-------------|
 | #93 | Per-host SSH key authorization | **Independent** — SSH access control, not superseded by auth.node_tokens (API auth) |
-| #113 | Retire legacy remote execution | **Expanded scope** — not just remote actions, but most scenario code |
+| #113 | Retire legacy remote execution | **Complete** — retired in #153 (Sprint homestak-dev#195) |
 | #115 | Manifest schema v2: Tree structure | **Closed** — this design delivers `nodes` with `parent` references |
-| #120 | Deprecate nested-pve scenarios | **Expanded scope** — all `*-constructor`, `*-destructor`, `*-roundtrip` collapse to `--action` |
+| #120 | Deprecate nested-pve scenarios | **Complete** — all `*-constructor`, `*-destructor`, `*-roundtrip` replaced by verb commands (`create`/`destroy`/`test`) |
 | #124 | Simplify SSH key injection | **Still relevant** — push execution coexists with pull; push still needs clean SSH handling |
 
-**Actions taken:**
+**Disposition:**
 
-- **#115**: Closed as superseded
-- **#120**: Comment added — scope expands to full scenario consolidation
-- **#113**: Comment added — retirement includes most of `src/scenarios/*.py`
-- **#124**: Remains open — push execution path still needs this improvement
+- **#115**: Closed — superseded by manifest schema v2
+- **#120**: **Complete** — absorbed by #145 (scenario consolidation)
+- **#113**: **Complete** — retired in #153 (Sprint homestak-dev#195)
+- **#124**: Remains open — push execution path still needs clean SSH handling
 - **#93**: Remains open — different concern from auth.node_tokens (SSH access vs API auth)
 
 ### Architecture Alignment
@@ -711,14 +713,14 @@ Steps:
 1. ./run.sh create -M single-node -H father
 2. Driver provisions VM with identity + spec_server env vars
 3. VM boots, runs `homestak spec get`
-4. VM applies spec locally (config phase — future)
+4. VM applies spec locally (`./run.sh config`)
 5. Verify: VM reaches platform ready state
 6. ./run.sh destroy -M single-node -H father
 
 Assertions:
 - VM fetched spec from server (check /usr/local/etc/homestak/state/spec.yaml)
 - SSH access works with keys from spec
-- Packages from spec are installed (future: config phase)
+- Packages from spec are installed
 ```
 
 ### ST-2: Single-node Push Lifecycle
@@ -728,7 +730,7 @@ Assertions:
 ```
 Preconditions:
 - Driver has SSH access to target host
-- v2/manifests/single-node-push.yaml exists
+- manifests/single-node-push.yaml exists
 
 Manifest:
   nodes:
@@ -955,6 +957,7 @@ Assertions:
 
 | Date | Change |
 |------|--------|
+| 2026-02-07 | Align with updated epics: Status → Active; manifest v1/v2 framing updated (v2 is current, v1 is legacy); phased implementation adds release status; #113/#120 marked complete; ST-1/ST-2 assertions updated (config phase implemented) |
 | 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |
 | 2026-02-07 | ST-1 available (Sprint #201 delivered config phase); update pull mode text |
 | 2026-02-06 | Update for scenario consolidation (#195): mark `TofuApply/DestroyRemoteAction` retired; update legacy scenarios table to current verb commands |
