@@ -114,7 +114,7 @@ See [.claude/CLAUDE.md](.claude/CLAUDE.md) for full skill documentation.
 3. **Opinionated defaults** - Sensible choices for homelab (SDN, cloud-init, security profiles)
 4. **Testable infrastructure** - Nested PVE integration testing validates the full stack
 
-## Configuration Flow (v0.13+)
+## Configuration Flow
 
 site-config is the single source of truth:
 
@@ -122,13 +122,15 @@ site-config is the single source of truth:
 site-config/
 ├── site.yaml       # Site-wide defaults (timezone, packages)
 ├── postures/       # Security postures (dev, prod, local)
-├── envs/           # Deployment topologies with posture FK
+├── specs/          # Node specifications (what to become)
+├── presets/        # VM size presets (cores, memory, disk)
+├── manifests/      # Deployment topologies (v2 graph nodes)
 └── secrets.yaml    # API tokens, SSH keys, passwords
         │
         ▼
 ConfigResolver (iac-driver)
         │
-        ├── resolve_env()          → tfvars.json  → tofu
+        ├── resolve_inline_vm()    → tfvars.json  → tofu
         └── resolve_ansible_vars() → ansible-vars → ansible
 ```
 

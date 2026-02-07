@@ -403,7 +403,7 @@ Requirements → Tests traceability. See [requirements-catalog.md](requirements-
 cd iac-driver
 make test              # Run all unit tests
 pytest tests/ -v       # Verbose output
-pytest tests/test_config_resolver.py -k "test_resolve_env"  # Specific test
+pytest tests/test_config_resolver.py -k "test_resolve_inline_vm"  # Specific test
 ```
 
 ### Running Integration Tests
