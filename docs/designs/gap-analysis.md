@@ -15,7 +15,7 @@ This document tracks the design documentation landscape for the homestak lifecyc
 |----------|--------|----------|
 | [node-lifecycle.md](node-lifecycle.md) | Complete | Single-node lifecycle phases, spec schema, auth model, execution models |
 | [node-orchestration.md](node-orchestration.md) | Complete | Multi-node patterns, topology, manifests, system tests |
-| [spec-server.md](spec-server.md) | Complete | `homestak serve` HTTP server, auth flow, error codes |
+| [server-daemon.md](server-daemon.md) | Complete | Server daemon: HTTPS, auth, spec/repo serving, daemonization |
 | [spec-client.md](spec-client.md) | Complete | `homestak spec get` client, state directory, error handling |
 
 ## Missing Design Docs

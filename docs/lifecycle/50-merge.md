@@ -63,7 +63,7 @@ Closes #<issue-number>
 
 For sprint PRs, use the same conventional commit title format as trunk PRs:
 
-**Title:** `feat(controller): Add unified controller daemon with spec/repo serving`
+**Title:** `feat(server): Add server daemon with spec/repo serving`
 
 Sprint context goes in the description body, not the title.
 

@@ -132,7 +132,7 @@ Nodes discover their spec and converge autonomously.
 ```
 Driver                           Target
 ──────                           ──────
-1. ./run.sh serve (controller daemon)
+1. Start server
 2. tofu apply (inject identity + endpoint)
                                  3. Boot with identity
                                  4. homestak spec get
@@ -344,7 +344,10 @@ parent: father               # Parent node (for VMs)
 **Driver CLI** (`./run.sh` — iac-driver, verb-based subcommands):
 
 ```bash
-./run.sh serve                              # Start controller daemon
+./run.sh server start                       # Start server (daemon)
+./run.sh server stop                        # Stop server
+./run.sh server status                      # Check server health
+./run.sh serve                              # Start server (foreground, dev)
 ./run.sh create -M <manifest> -H <host>     # Create nodes per manifest
 ./run.sh destroy -M <manifest> -H <host>    # Destroy nodes per manifest
 ./run.sh test -M <manifest> -H <host>       # Roundtrip validation
@@ -404,7 +407,7 @@ iac-driver/
 │   ├── scenarios/          # Standalone workflows (pve-setup, *-vm-roundtrip)
 │   ├── actions/            # Reusable primitives (tofu, ansible, SSH, etc.)
 │   ├── manifest_opr/       # Operator engine (graph walker, verb CLI)
-│   ├── controller/         # Unified controller daemon (specs + repos)
+│   ├── server/             # Server daemon (specs + repos)
 │   ├── resolver/           # FK resolution (spec, config)
 │   ├── config_apply.py     # Config phase: spec → ansible vars → apply
 │   └── cli.py              # Verb commands (create, destroy, test, config, serve)
@@ -418,7 +421,7 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/ia
 
 ## Related Documents
 
-- [spec-server.md](spec-server.md) — Server design
+- [server-daemon.md](server-daemon.md) — Server daemon design
 - [spec-client.md](spec-client.md) — Client design
 - [phase-interfaces.md](phase-interfaces.md) — Phase interface contracts (run/destroy phase details)
 - [node-orchestration.md](node-orchestration.md) — Multi-node orchestration
@@ -430,6 +433,7 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/ia
 
 | Date | Change |
 |------|--------|
+| 2026-02-08 | Terminology: controller → server (aligns with server-daemon.md rename) |
 | 2026-02-07 | Align with updated epics: pull model step 5 no longer "(future)"; replace aspirational `lifecycle/` directory with actual implementation structure |
 | 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |
 | 2026-02-07 | Status → Active; replace Implementation Status section with epic reference (avoid staleness) |
