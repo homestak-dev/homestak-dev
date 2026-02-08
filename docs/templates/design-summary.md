@@ -74,7 +74,7 @@ class NewConfig:
 
 ### Test Plan
 
-**Scenario:** [e.g., `./run.sh test -M n1-basic -H father`]
+**Scenario:** [e.g., `./run.sh test -M n1-push -H father`]
 
 **Steps:**
 1. Step 1

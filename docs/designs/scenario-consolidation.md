@@ -14,12 +14,12 @@ This document describes the consolidation of 9 legacy scenarios and 3 remote act
 
 | Retired Scenario | Replacement |
 |------------------|-------------|
-| `vm-constructor` | `./run.sh create -M n1-basic -H <host>` |
-| `vm-destructor` | `./run.sh destroy -M n1-basic -H <host>` |
-| `vm-roundtrip` | `./run.sh test -M n1-basic -H <host>` |
-| `nested-pve-constructor` | `./run.sh create -M n2-quick -H <host>` |
-| `nested-pve-destructor` | `./run.sh destroy -M n2-quick -H <host>` |
-| `nested-pve-roundtrip` | `./run.sh test -M n2-quick -H <host>` |
+| `vm-constructor` | `./run.sh create -M n1-push -H <host>` |
+| `vm-destructor` | `./run.sh destroy -M n1-push -H <host>` |
+| `vm-roundtrip` | `./run.sh test -M n1-push -H <host>` |
+| `nested-pve-constructor` | `./run.sh create -M n2-tiered -H <host>` |
+| `nested-pve-destructor` | `./run.sh destroy -M n2-tiered -H <host>` |
+| `nested-pve-roundtrip` | `./run.sh test -M n2-tiered -H <host>` |
 | `recursive-pve-constructor` | `./run.sh create -M <manifest> -H <host>` |
 | `recursive-pve-destructor` | `./run.sh destroy -M <manifest> -H <host>` |
 | `recursive-pve-roundtrip` | `./run.sh test -M <manifest> -H <host>` |
@@ -110,7 +110,7 @@ RecursiveScenarioAction(
 | `src/actions/tofu.py` | Remove `TofuApplyRemoteAction`, `TofuDestroyRemoteAction` |
 | `src/actions/ssh.py` | Remove `SyncReposToVMAction` |
 | `src/scenarios/__init__.py` | Remove retired scenario imports |
-| `src/scenarios/spec_vm.py` | Fix `EnsureImageAction` import path |
+| `src/scenarios/vm_roundtrip.py` | Fix `EnsureImageAction` import path |
 | `src/cli.py` | Add `RETIRED_SCENARIOS` migration hints |
 
 ### Deleted
@@ -131,7 +131,7 @@ These scenarios remain as they serve purposes outside the manifest model:
 | `user-setup` | User management (not manifest-based) |
 | `packer-*` | Image building (not manifest-based) |
 | `bootstrap-install` | Bootstrap validation (not manifest-based) |
-| `spec-vm-roundtrip` | Spec discovery integration test |
+| `push-vm-roundtrip / pull-vm-roundtrip` | Spec discovery integration test |
 
 ## Related Documents
 
