@@ -345,9 +345,9 @@ parent: father               # Parent node (for VMs)
 
 ```bash
 ./run.sh server start                       # Start server (daemon)
+./run.sh server start --foreground          # Start server (foreground, dev)
 ./run.sh server stop                        # Stop server
 ./run.sh server status                      # Check server health
-./run.sh serve                              # Start server (foreground, dev)
 ./run.sh create -M <manifest> -H <host>     # Create nodes per manifest
 ./run.sh destroy -M <manifest> -H <host>    # Destroy nodes per manifest
 ./run.sh test -M <manifest> -H <host>       # Roundtrip validation
