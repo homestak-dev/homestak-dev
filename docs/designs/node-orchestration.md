@@ -657,7 +657,7 @@ bootstrap/                         bootstrap/
                                    iac-driver/
 iac-driver/                        ├── src/
 ├── src/                           │   ├── resolver/ (unified FK)
-│   ├── config_resolver.py         │   ├── controller/ (spec+repo server)
+│   ├── config_resolver.py         │   ├── server/ (spec+repo server)
 │   ├── scenarios/*.py ──retired──►│   ├── manifest_opr/ (operator engine)
 │                                  │   └── cli.py (verb commands)
 │                                  └── run.sh
@@ -666,7 +666,7 @@ iac-driver/                        ├── src/
 **Status:** The serve/resolver migration completed in Sprint #199 (bootstrap#38). Scenario retirement completed in Sprint #195 (iac-driver#145). The architecture above reflects current state.
 
 **Key points:**
-- **iac-driver** owns all lifecycle code: orchestration (manifests, controller) and implementation (spec get, config)
+- **iac-driver** owns all lifecycle code: orchestration (manifests, server) and implementation (spec get, config)
 - **bootstrap** stays minimal: installation scripts, `spec_client.py`, and a thin `homestak` wrapper that delegates to iac-driver
 - Target VMs have iac-driver installed (via bootstrap), so all commands are available
 - `homestak` CLI remains the user-facing command on targets, but delegates to iac-driver internals
@@ -935,6 +935,7 @@ Assertions:
 ## Related Documents
 
 - [node-lifecycle.md](node-lifecycle.md) — Single-node lifecycle phases
+- [server-daemon.md](server-daemon.md) — Server daemon design (robustness, CLI, daemonization)
 - [phase-interfaces.md](phase-interfaces.md) — Phase interface contracts
 - [requirements-catalog.md](requirements-catalog.md) — Structured requirements with IDs
 - [test-strategy.md](test-strategy.md) — Test hierarchy and system test catalog
@@ -944,6 +945,7 @@ Assertions:
 
 | Date | Change |
 |------|--------|
+| 2026-02-08 | Terminology: controller → server in architecture diagram (aligns with server-daemon.md); add server-daemon.md to Related Documents |
 | 2026-02-07 | Align with updated epics: Status → Active; manifest v1/v2 framing updated (v2 is current, v1 is legacy); phased implementation adds release status; #113/#120 marked complete; ST-1/ST-2 assertions updated (config phase implemented) |
 | 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |
 | 2026-02-07 | ST-1 available (Sprint #201 delivered config phase); update pull mode text |

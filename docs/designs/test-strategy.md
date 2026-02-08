@@ -62,7 +62,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 
 **Location:** `iac-driver/src/scenarios/` (current)
 
-**Execution:** `./run.sh --scenario <name> --host <host>`
+**Execution:** `./run.sh scenario <name> -H <host>`
 
 **Validation focus:** Single-host operations, component boundaries.
 
@@ -70,7 +70,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 | Scenario | Components Tested | Duration |
 |----------|-------------------|----------|
 | `./run.sh test -M n1-push -H <host>` | tofu + PVE API + SSH | ~2m |
-| `push-vm-roundtrip` | controller + spec_client + tofu | ~2m |
+| `push-vm-roundtrip` | server + spec_client + tofu | ~2m |
 | `pve-setup` | ansible + PVE host | ~3m |
 | `user-setup` | ansible (users role) | ~30s |
 | `bootstrap-install` | bootstrap + validation | ~2m |
@@ -79,7 +79,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 **Unified controller additions (iac-driver#146):**
 | Scenario | Components Tested | Duration |
 |----------|-------------------|----------|
-| `controller-repos` | controller + git clone | ~30s |
+| `controller-repos` | server + git clone | ~30s |
 
 **Characteristics:**
 - Require real PVE host (not mocked)
@@ -374,8 +374,8 @@ The unified controller sprint (iac-driver#146) **enables** multiple system tests
 
 | System Test | Contribution |
 |-------------|----------------------|
-| ST-1 | Spec server infrastructure (controller/specs.py) |
-| ST-2 | Repos serving for push execution (controller/repos.py) |
+| ST-1 | Spec server infrastructure (server/specs.py) |
+| ST-2 | Repos serving for push execution (server/repos.py) |
 | ST-5 | Mixed mode support via posture-based auth |
 
 ## Coverage Matrix
@@ -436,6 +436,7 @@ pytest tests/test_config_resolver.py -k "test_resolve_inline_vm"  # Specific tes
 
 | Date | Change |
 |------|--------|
+| 2026-02-08 | Terminology: controller → server in component descriptions and file paths (aligns with server-daemon.md) |
 | 2026-02-06 | Update for scenario consolidation (#195): retired scenarios replaced with verb commands; ST-2/3/4 now available; system tests no longer "future" |
 | 2026-02-05 | Replace ordinal sprint labels with issue references; update for #143+#144 combination |
 | 2026-02-05 | Updated CLI references to verb-based subcommands; updated ST-7 validate commands |

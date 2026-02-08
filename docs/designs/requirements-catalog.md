@@ -23,7 +23,7 @@ REQ-{CATEGORY}-{NUMBER}
 Categories:
 - CRE: Create/Provisioning
 - CFG: Configuration (config phase)
-- CTL: Controller (unified HTTP server)
+- CTL: Server (unified HTTP server, formerly "controller")
 - EXE: Execution (command running, timeouts)
 - NET: Networking (SSH, API access)
 - OBS: Observability (logging, reporting)
@@ -106,26 +106,36 @@ Requirements for the config phase: sources, resolution, state management.
 
 ---
 
-## CTL: Controller
+## CTL: Server
 
-Requirements for the unified controller daemon (specs + repos serving).
+Requirements for the unified server daemon (specs + repos serving). Previously named "controller" — renamed in iac-driver#177 because the component is a passive server (nodes pull from it), not a controller.
 
 | ID | Requirement | Priority | Status | Source | Design Doc | Test |
 |----|-------------|----------|--------|--------|------------|------|
-| REQ-CTL-001 | Single daemon serving both specs and repos | P0 | Proposed | design | #148 | test_ctrl_server.py |
-| REQ-CTL-002 | Single port for all endpoints (default: 44443) | P0 | Proposed | design | #148 | test_ctrl_server.py |
-| REQ-CTL-003 | Posture-based auth for /spec/* (network, site_token, node_token) | P0 | Proposed | design | #148 | test_ctrl_auth.py |
-| REQ-CTL-004 | Token auth for /repos/* (Bearer token) | P0 | Proposed | design | #148 | test_ctrl_auth.py |
-| REQ-CTL-005 | Daemon lifecycle: PID file, SIGTERM graceful shutdown, SIGHUP cache clear | P0 | Proposed | design | #148 | test_ctrl_server.py |
-| REQ-CTL-006 | Git dumb HTTP protocol for repos serving | P0 | Proposed | design | #148 | test_ctrl_repos.py |
-| REQ-CTL-007 | `_working` branch for uncommitted changes | P0 | Proposed | design | #148 | test_ctrl_repos.py |
-| REQ-CTL-008 | /health endpoint (no auth) | P1 | Proposed | design | #148 | test_ctrl_server.py |
-| REQ-CTL-009 | /repos endpoint lists available repos | P1 | Proposed | design | #148 | test_ctrl_repos.py |
-| REQ-CTL-010 | Spec caching with SIGHUP invalidation | P1 | Proposed | design | #148 | test_ctrl_specs.py |
-| REQ-CTL-011 | TLS required for all connections | P0 | Proposed | design | #148 | test_ctrl_server.py |
-| REQ-CTL-012 | Self-signed cert auto-generation | P0 | Proposed | design | #148 | test_ctrl_tls.py |
-| REQ-CTL-013 | site-config cert support | P1 | Proposed | design | #148 | - (design only) |
-| REQ-CTL-014 | Cert fingerprint logging on startup | P2 | Proposed | design | #148 | test_ctrl_server.py |
+| REQ-CTL-001 | Single daemon serving both specs and repos | P0 | Validated | design | server-daemon.md | test_ctrl_server.py |
+| REQ-CTL-002 | Single port for all endpoints (default: 44443) | P0 | Validated | design | server-daemon.md | test_ctrl_server.py |
+| REQ-CTL-003 | Posture-based auth for /spec/* (network, site_token, node_token) | P0 | Validated | design | server-daemon.md | test_ctrl_auth.py |
+| REQ-CTL-004 | Token auth for /repos/* (Bearer token) | P0 | Validated | design | server-daemon.md | test_ctrl_auth.py |
+| REQ-CTL-005 | Daemon lifecycle: PID file, SIGTERM graceful shutdown, SIGHUP cache clear | P0 | Accepted | design | server-daemon.md | test_ctrl_server.py |
+| REQ-CTL-006 | Git dumb HTTP protocol for repos serving | P0 | Validated | design | server-daemon.md | test_ctrl_repos.py |
+| REQ-CTL-007 | `_working` branch for uncommitted changes | P0 | Validated | design | server-daemon.md | test_ctrl_repos.py |
+| REQ-CTL-008 | /health endpoint (no auth) | P1 | Validated | design | server-daemon.md | test_ctrl_server.py |
+| REQ-CTL-009 | /repos endpoint lists available repos | P1 | Validated | design | server-daemon.md | test_ctrl_repos.py |
+| REQ-CTL-010 | Spec caching with SIGHUP invalidation | P1 | Validated | design | server-daemon.md | test_ctrl_specs.py |
+| REQ-CTL-011 | TLS required for all connections | P0 | Validated | design | server-daemon.md | test_ctrl_server.py |
+| REQ-CTL-012 | Self-signed cert auto-generation | P0 | Validated | design | server-daemon.md | test_ctrl_tls.py |
+| REQ-CTL-013 | site-config cert support | P1 | Proposed | design | server-daemon.md | - (design only) |
+| REQ-CTL-014 | Cert fingerprint logging on startup | P2 | Validated | design | server-daemon.md | test_ctrl_server.py |
+| REQ-CTL-015 | Exec chain: `run.sh` execs python3 directly (no bash wrapper in PID chain) | P0 | Accepted | design | server-daemon.md | `server start` + `server stop` |
+| REQ-CTL-016 | Double-fork daemonization: setsid, detach from terminal/SSH | P0 | Accepted | design | server-daemon.md | `server start` via SSH |
+| REQ-CTL-017 | Health-check startup gate: parent blocks until /health responds | P0 | Accepted | design | server-daemon.md | `server start` |
+| REQ-CTL-018 | Port-qualified PID file at FHS path (`/var/run/homestak/server-{port}.pid`) | P0 | Accepted | design | server-daemon.md | `server start` |
+| REQ-CTL-019 | Stale PID detection: dead process → clean up and restart | P1 | Accepted | design | server-daemon.md | Scenario 5 |
+| REQ-CTL-020 | `server stop`: SIGTERM → 5s wait → SIGKILL escalation | P0 | Accepted | design | server-daemon.md | `server stop` |
+| REQ-CTL-021 | `server status`: JSON output, exit codes (0=healthy, 1=not running, 2=unhealthy) | P1 | Accepted | design | server-daemon.md | `server status --json` |
+| REQ-CTL-022 | Daemon logging to FHS path (`/var/log/homestak/server.log`), no fallback | P1 | Accepted | design | server-daemon.md | `server start` |
+| REQ-CTL-023 | Operator auto-lifecycle: ensure server for all manifest verbs | P0 | Accepted | design | server-daemon.md | `test -M n1-pull` |
+| REQ-CTL-024 | Idempotent start (detect healthy → reuse) and stop (detect not running → success) | P1 | Accepted | design | server-daemon.md | Scenario 4 |
 
 ---
 
@@ -309,8 +319,8 @@ Requirements for code quality, naming, structure, and cleanup.
 | REQ-NFR-006 | Scenario names follow `noun-verb` pattern | P2 | Accepted | impl | - | - |
 | REQ-NFR-007 | Phase names follow `verb_noun` pattern | P2 | Accepted | impl | - | - |
 | REQ-NFR-008 | Action classes follow `VerbNounAction` pattern | P2 | Accepted | impl | - | - |
-| REQ-NFR-009 | Plumbing code uses reasonable abbreviations (e.g., `ctrl` for controller, `cfg` for config) | P2 | Accepted | design | - | - |
-| REQ-NFR-010 | Test files abbreviate long prefixes (e.g., `test_ctrl_*` not `test_controller_*`) | P2 | Accepted | design | - | - |
+| REQ-NFR-009 | Plumbing code uses reasonable abbreviations (e.g., `srv` for server, `cfg` for config) | P2 | Accepted | design | - | - |
+| REQ-NFR-010 | Test files abbreviate long prefixes (e.g., `test_srv_*` not `test_server_*`) | P2 | Accepted | design | - | - |
 
 ---
 
@@ -346,7 +356,12 @@ Mapping test coverage to requirements.
 | ST-5 | REQ-LIF-005, REQ-ORC-002, 006 |
 | ST-7 | REQ-ORC-004, 009 |
 | ST-8 | REQ-TST-004, 005 |
-| `test -M n1-pull` | REQ-CRE-013, REQ-CFG-016, 017, 019, REQ-EXE-011, REQ-LIF-002, REQ-ORC-010 |
+| `test -M n1-pull` | REQ-CRE-013, REQ-CFG-016, 017, 019, REQ-EXE-011, REQ-LIF-002, REQ-ORC-010, REQ-CTL-023 |
+| `server start` | REQ-CTL-005, 015, 016, 017, 018, 022, 024 |
+| `server stop` | REQ-CTL-005, 015, 020, 024 |
+| `server status` | REQ-CTL-021 |
+| Scenario 4 (idempotency) | REQ-CTL-024 |
+| Scenario 5 (stale recovery) | REQ-CTL-019 |
 
 ---
 
@@ -354,6 +369,7 @@ Mapping test coverage to requirements.
 
 | Date | Change |
 |------|--------|
+| 2026-02-08 | iac-driver#177 overlay: Renamed CTL category (Controller → Server); updated CTL-001–014 status to `validated` with server-daemon.md refs; added CTL-015–024 (exec chain, daemonization, PID management, server stop/status, logging, operator lifecycle, idempotency); updated NFR-009/010 abbreviations (ctrl → srv); updated traceability matrix |
 | 2026-02-06 | Sprint #201 (Config Phase): Added REQ-CRE-013, REQ-CFG-016–019, REQ-EXE-011, REQ-ORC-010–011; updated REQ-LIF-002 to `accepted` with config-phase.md ref; cleaned `-v2` manifest suffixes; added `test -M n1-pull` traceability |
 | 2026-02-06 | Sprint #199 overlay: REQ-LIF-006 test ref updated (`spec validate` → `make validate` in site-config); REQ-NFR-005 satisfied (serve.py, spec_resolver.py deleted) |
 | 2026-02-05 | Updated REQ-ORC-003 to verb-based CLI pattern |

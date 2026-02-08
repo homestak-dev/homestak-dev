@@ -285,7 +285,7 @@ Add `./run.sh config` to the existing runcmd block:
       - systemctl start qemu-guest-agent
 %{if var.spec_server != ""}
       - |
-        # Bootstrap from controller + config on first boot (v0.48+)
+        # Bootstrap from server + config on first boot (v0.48+)
         if [ ! -f /usr/local/etc/homestak/state/config-complete.json ]; then
           . /etc/profile.d/homestak.sh
           curl -fsSk "$HOMESTAK_SPEC_SERVER/bootstrap.git/install.sh" | \
@@ -296,7 +296,7 @@ Add `./run.sh config` to the existing runcmd block:
 %{endif}
 ```
 
-**Note:** The runcmd first bootstraps from the controller (curls `install.sh`, clones repos via HTTPS with `HOMESTAK_REF=_working` to get the controller's working branch). `SKIP_SITE_CONFIG=1` skips site-config clone since VMs receive pre-resolved specs. Then `./run.sh config --fetch --insecure` fetches the spec and applies config locally.
+**Note:** The runcmd first bootstraps from the server (curls `install.sh`, clones repos via HTTPS with `HOMESTAK_REF=_working` to get the server's working branch). `SKIP_SITE_CONFIG=1` skips site-config clone since VMs receive pre-resolved specs. Then `./run.sh config --fetch --insecure` fetches the spec and applies config locally.
 
 ## Integration Points
 
@@ -305,9 +305,9 @@ Add `./run.sh config` to the existing runcmd block:
 ```
 site-config                  iac-driver                     ansible
 ┌──────────────┐             ┌────────────────┐             ┌────────────────┐
-│ specs/       │──resolve──▶ │ controller     │             │ roles:         │
-│ postures/    │             │ (./run.sh      │             │ base, users,   │
-│ secrets.yaml │             │  serve)        │             │ security       │
+│ specs/       │──resolve──▶ │ server         │             │ roles:         │
+│ postures/    │             │                │             │ base, users,   │
+│ secrets.yaml │             │                │             │ security       │
 └──────────────┘             └───────┬────────┘             └───────▲────────┘
                                      │ serve                        │
                              ┌───────▼────────┐                     │
@@ -321,7 +321,7 @@ site-config                  iac-driver                     ansible
                              └─────────────────┘
 ```
 
-`./run.sh config --fetch` runs ON the VM. The `--fetch` flag uses `spec_client.py` to fetch the spec from the controller, then `config_apply.py` maps spec to ansible vars and runs roles locally.
+`./run.sh config --fetch` runs ON the VM. The `--fetch` flag uses `spec_client.py` to fetch the spec from the server, then `config_apply.py` maps spec to ansible vars and runs roles locally.
 
 ### Integration Boundaries
 
@@ -377,18 +377,18 @@ Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. FHS paths (`/usr
 **Scenario:** `pull-vm-roundtrip` (iac-driver#156)
 
 ```bash
-./run.sh --scenario pull-vm-roundtrip --host father
+./run.sh scenario pull-vm-roundtrip -H father
 ```
 
 **Steps:**
-1. Start controller (`./run.sh serve`)
+1. Start server
 2. Provision VM with `execution.mode: pull` manifest
 3. Wait for cloud-init to run `spec get` + `./run.sh config`
 4. Verify spec.yaml exists on VM
 5. Verify config-complete.json exists on VM
 6. Verify packages installed (spot check)
 7. Verify user created with SSH key
-8. Destroy VM and stop controller
+8. Destroy VM and stop server
 
 **Fallback validation:**
 ```bash

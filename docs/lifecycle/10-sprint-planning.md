@@ -91,7 +91,7 @@ If root cause is uncertain, budget investigation time in the sprint and note it 
 | iac-driver#176 | Standard | not_started | Root cause unconfirmed — budget investigation |
 ```
 
-**Why this matters:** iac-driver#176 was filed as "DNS resolution failure" but the actual root cause was a stale controller process. Without triage, design work began on the wrong solution. See also: [Bug Validation](20-design.md#bug-validation) in the design phase.
+**Why this matters:** iac-driver#176 was filed as "DNS resolution failure" but the actual root cause was a stale server process. Without triage, design work began on the wrong solution. See also: [Bug Validation](20-design.md#bug-validation) in the design phase.
 
 **Always include a doc cleanup issue.** Every sprint should have a Simple-tier "Update docs and cross-refs" issue in homestak-dev to cover CLAUDE.md updates, CHANGELOG entries, and cross-repo reference fixes. Create it during planning so it's not forgotten at the end. See [ISSUE-GUIDELINES.md](../ISSUE-GUIDELINES.md#issue-placement) for issue placement conventions.
 

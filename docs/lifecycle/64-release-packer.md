@@ -54,7 +54,7 @@ Add note to packer release description: "Images: See `latest` release"
 
 ```bash
 cd ~/homestak-dev/iac-driver
-./run.sh --scenario packer-build-fetch --remote <build-host-ip>
+./run.sh scenario packer-build-fetch -H <build-host-ip>
 # Images downloaded to /tmp/packer-images/
 ```
 

@@ -250,7 +250,7 @@ gh pr status
 
 ```bash
 # List scenarios
-./run.sh --list-scenarios
+./run.sh scenario --help
 
 # Quick validation
 ./run.sh test -M n1-push -H father
@@ -259,7 +259,7 @@ gh pr status
 ./run.sh test -M n2-tiered -H father
 
 # Preflight only
-./run.sh --preflight --host father
+./run.sh --preflight -H father
 ```
 
 ### release.sh

@@ -8,7 +8,7 @@
 
 ## Problem Statement
 
-Nodes need to fetch their specifications from the spec server (`homestak serve`) and persist them locally. The `homestak spec get` command provides the client-side of the config phase.
+Nodes need to fetch their specifications from the server (iac-driver) and persist them locally. The `homestak spec get` command provides the client-side of the config phase.
 
 **Success criteria:**
 - Client fetches spec from server via HTTP
@@ -120,7 +120,7 @@ Map server error codes to client behavior:
 
 ## Integration Points
 
-1. **Server (`homestak serve`)** - HTTP API from Sprint #161
+1. **Server (iac-driver)** - HTTP API, see [server-daemon.md](server-daemon.md)
 2. **Path discovery** - Reuse `discover_etc_path()` pattern
 3. **State directory** - New `/usr/local/etc/homestak/state/`
 4. **Config completion (v0.48)** - `./run.sh config` reads `state/spec.yaml` and applies via ansible (iac-driver#147)
@@ -213,8 +213,8 @@ Per `20-design.md`, verify both installation modes:
 **Integration test:** Cross-host fetch
 
 ```bash
-# On father (server)
-homestak serve --port 44443 &
+# On father (server, via iac-driver)
+./run.sh server start --port 44443
 
 # On dev VM (client)
 homestak spec get --server https://father:44443 --identity base
@@ -230,7 +230,7 @@ cat /usr/local/etc/homestak/state/spec.yaml
 
 | Category | Check | Status |
 |----------|-------|--------|
-| Server | `homestak serve` implemented | Ready (Sprint #161) |
+| Server | iac-driver server daemon | Ready |
 | Specs | specs/ files exist | Ready |
 | Postures | postures/ files exist | Ready |
 | Network | Client can reach server | Test at validation |
@@ -267,6 +267,6 @@ cat /usr/local/etc/homestak/state/spec.yaml
 
 ## Related Documents
 
-- [spec-server.md](spec-server.md) - Server design (Sprint #161)
+- [server-daemon.md](server-daemon.md) - Server daemon design (iac-driver#177)
 - [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) - Architecture evolution epic
 - [homestak-dev#153](https://github.com/homestak-dev/homestak-dev/issues/153) - v0.44 Release Planning
