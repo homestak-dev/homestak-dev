@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Add bug triage step to sprint planning lifecycle (#213)
+- Add bug validation section to design phase (#213)
+- Add milestone-based status update triggers to implementation phase (#213)
+- Add cross-reference guidance to implementation and sprint close phases (#213)
 - Add CI workflow with bats tests and shellcheck lint (#190)
 - Add config phase design doc (`docs/designs/config-phase.md`) for Sprint #201
 - Add scenario consolidation design doc (`docs/designs/scenario-consolidation.md`) for Sprint #195

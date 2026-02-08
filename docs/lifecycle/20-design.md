@@ -10,7 +10,7 @@ Not every issue needs full design. Use this guide:
 |------------|---------------|
 | New feature | Yes - full design |
 | Enhancement to existing feature | Yes - abbreviated |
-| Bug fix with clear root cause | No - just fix it |
+| Bug fix with clear root cause | No - just fix it (but see [Bug Validation](#bug-validation)) |
 | Documentation update | No |
 | Refactoring | Yes - identify test coverage first |
 | Performance optimization | Yes - establish baseline first |
@@ -33,6 +33,19 @@ See [00-overview.md](00-overview.md) for tier definitions.
 - Approved sprint backlog item
 - Existing codebase and architecture
 - Related documentation
+
+## Bug Validation
+
+Before designing a fix for any bug, verify the root cause — even if the issue seems clear. The initial diagnosis may be wrong.
+
+**Steps:**
+1. **Reproduce the issue** — trigger the bug in a controlled environment and confirm the symptoms
+2. **Root cause analysis** — investigate before proposing a fix; don't assume the first theory is correct
+3. **Update the issue** — if the root cause differs from the initial report, correct the title and description
+
+**Example:** iac-driver#176 was filed as "DNS resolution failure" but live debugging revealed the actual root cause was a stale controller process. Design work on a DNS fix would have been wasted effort.
+
+**When to skip:** If you already confirmed root cause during [Bug Triage](10-sprint-planning.md#bug-triage) in sprint planning, a brief re-verification is sufficient.
 
 ## Activities
 
