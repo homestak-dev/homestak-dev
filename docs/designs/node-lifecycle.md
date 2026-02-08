@@ -140,7 +140,7 @@ Driver                           Target
    GET /spec/{identity}          │
    ─────────────────────────────▶
    200 OK + spec                 │
-                                 5. Apply spec locally (future)
+                                 5. Apply spec locally
                                  6. PLATFORM READY
 ```
 
@@ -394,24 +394,22 @@ The current architecture has embedded assumptions that may conflict with the lif
 
 These considerations apply primarily to pull execution. Push and hybrid models continue to work with existing assumptions.
 
-### Coexistence Strategy
+### Implementation Structure
 
-Both architectures coexist during development:
+Both push and pull execution models are implemented within the existing `src/` tree:
 
 ```
 iac-driver/
-├── src/                    # Current architecture (push + hybrid)
-│   ├── scenarios/
-│   └── actions/
+├── src/
+│   ├── scenarios/          # Standalone workflows (pve-setup, spec-vm-*)
+│   ├── actions/            # Reusable primitives (tofu, ansible, SSH, etc.)
+│   ├── manifest_opr/       # Operator engine (graph walker, verb CLI)
+│   ├── controller/         # Unified controller daemon (specs + repos)
+│   ├── resolver/           # FK resolution (spec, config)
+│   ├── config_apply.py     # Config phase: spec → ansible vars → apply
+│   └── cli.py              # Verb commands (create, destroy, test, config, serve)
 │
-├── lifecycle/              # New architecture (pull) - future
-│   ├── core/
-│   │   ├── create.py
-│   │   ├── config.py
-│   │   └── run.py
-│   └── primitives/         # Extracted from src/actions/
-│
-└── run.sh                  # Entry point (routes appropriately)
+└── run.sh                  # Entry point
 ```
 
 ## Implementation Status
@@ -432,6 +430,7 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/ia
 
 | Date | Change |
 |------|--------|
+| 2026-02-07 | Align with updated epics: pull model step 5 no longer "(future)"; replace aspirational `lifecycle/` directory with actual implementation structure |
 | 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |
 | 2026-02-07 | Status → Active; replace Implementation Status section with epic reference (avoid staleness) |
 | 2026-02-05 | Update CLI Pattern section: distinguish driver CLI (`./run.sh`) from target CLI (`homestak`); remove premature `homestak config` porcelain reference |
