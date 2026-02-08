@@ -210,6 +210,7 @@ The release phase (60) checks for this evidence before proceeding.
 
 - [ ] All scope issues verified closed
 - [ ] Validation results documented in sprint log
+- [ ] Related design docs in `docs/designs/` reviewed and updated if needed
 - [ ] Sprint retrospective completed
 - [ ] Release issue updated with outcomes
 - [ ] Decision log archived (Exploratory tier)

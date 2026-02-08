@@ -391,7 +391,7 @@ The `resume` command outputs:
 | File | Purpose |
 |------|---------|
 | [00-overview.md](docs/lifecycle/00-overview.md) | Work types, phase matrix, multi-repo structure |
-| [10-planning.md](docs/lifecycle/10-planning.md) | Sprint scoping and backlog formation |
+| [10-sprint-planning.md](docs/lifecycle/10-sprint-planning.md) | Sprint scoping and backlog formation |
 | [20-design.md](docs/lifecycle/20-design.md) | Pre-implementation design and validation planning |
 | [30-implementation.md](docs/lifecycle/30-implementation.md) | Development, testing, CHANGELOG updates |
 | [40-validation.md](docs/lifecycle/40-validation.md) | Integration testing requirements |

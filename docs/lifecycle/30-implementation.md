@@ -60,6 +60,22 @@ Implement changes following:
 - Working state at each commit when possible
 - Address one concern per commit
 
+### 2b. Status Updates (Sprint Path)
+
+For sprint-path work, update scope issues and the sprint issue at milestones — don't batch updates to the end.
+
+| Trigger | Update scope issue | Update sprint issue |
+|---------|-------------------|-------------------|
+| Start working on a scope issue | Mark `in_progress` | Update sprint log |
+| Implementation complete for a scope issue | Comment with summary | Update scope table status |
+| Tests passing for a scope issue | Attach test results (step 3) | — |
+| All scope issues complete | — | Ready for validation |
+
+**Cross-reference guidance:**
+- Use the most granular issue reference available: "fixed in iac-driver#176" not "fixed in sprint" or "fixed in release v0.50"
+- Don't reference releases that haven't shipped — a release in planning is not a fact
+- When updating scope issues, check if `docs/designs/` has a related design doc that needs updating
+
 ### 3. Unit Testing
 
 - Write or update unit tests for changed code
