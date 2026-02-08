@@ -76,12 +76,12 @@ Items identified during iac-driver#141 analysis for NFR (Non-Functional Requirem
 
 | Current | Issue | Target |
 |---------|-------|--------|
-| ~~`vm-constructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh create -M n1-basic -H <host>` |
-| ~~`vm-destructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh destroy -M n1-basic -H <host>` |
-| ~~`vm-roundtrip`~~ | ~~Test pattern encoded in name~~ | **Retired** — `./run.sh test -M n1-basic -H <host>` |
-| ~~`nested-pve-constructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh create -M n2-quick -H <host>` |
-| ~~`nested-pve-destructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh destroy -M n2-quick -H <host>` |
-| ~~`nested-pve-roundtrip`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh test -M n2-quick -H <host>` |
+| ~~`vm-constructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh create -M n1-push -H <host>` |
+| ~~`vm-destructor`~~ | ~~Action encoded in name~~ | **Retired** — `./run.sh destroy -M n1-push -H <host>` |
+| ~~`vm-roundtrip`~~ | ~~Test pattern encoded in name~~ | **Retired** — `./run.sh test -M n1-push -H <host>` |
+| ~~`nested-pve-constructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh create -M n2-tiered -H <host>` |
+| ~~`nested-pve-destructor`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh destroy -M n2-tiered -H <host>` |
+| ~~`nested-pve-roundtrip`~~ | ~~Hardcoded 2-level~~ | **Retired** — `./run.sh test -M n2-tiered -H <host>` |
 | ~~`recursive-pve-*`~~ | ~~Old manifest format~~ | **Retired** — `./run.sh create/destroy/test -M <manifest> -H <host>` |
 
 ### Directory Structure (iac-driver)

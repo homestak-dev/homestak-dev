@@ -69,8 +69,8 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 **Current scenarios:**
 | Scenario | Components Tested | Duration |
 |----------|-------------------|----------|
-| `./run.sh test -M n1-basic -H <host>` | tofu + PVE API + SSH | ~2m |
-| `spec-vm-push-roundtrip` | controller + spec_client + tofu | ~2m |
+| `./run.sh test -M n1-push -H <host>` | tofu + PVE API + SSH | ~2m |
+| `push-vm-roundtrip` | controller + spec_client + tofu | ~2m |
 | `pve-setup` | ansible + PVE host | ~3m |
 | `user-setup` | ansible (users role) | ~30s |
 | `bootstrap-install` | bootstrap + validation | ~2m |
@@ -359,10 +359,10 @@ Manifest:
 
 | System Test | Current Equivalent | Gap | Blocked By |
 |-------------|-------------------|-----|------------|
-| ST-1 | `spec-vm-pull-roundtrip` | **Available** — full pull mode config phase (iac-driver#156) | - |
-| ST-2 | `./run.sh test -M n1-basic` | **Available** — operator handles flat VM lifecycle | - |
-| ST-3 | `./run.sh test -M n2-quick` | **Available** — operator handles tiered PVE+VM | - |
-| ST-4 | `./run.sh test -M n3-full` | **Available** — operator delegates via SSH | - |
+| ST-1 | `pull-vm-roundtrip` | **Available** — full pull mode config phase (iac-driver#156) | - |
+| ST-2 | `./run.sh test -M n1-push` | **Available** — operator handles flat VM lifecycle | - |
+| ST-3 | `./run.sh test -M n2-tiered` | **Available** — operator handles tiered PVE+VM | - |
+| ST-4 | `./run.sh test -M n3-deep` | **Available** — operator delegates via SSH | - |
 | ST-5 | None | New capability (mixed execution modes) | Future |
 | ST-6 | None | New capability (parallel peer creation) | Future |
 | ST-7 | None | New capability (manifest validation) | Future |
@@ -389,8 +389,8 @@ Requirements → Tests traceability. See [requirements-catalog.md](requirements-
 | REQ-ORC-001 (manifests) | test_manifest.py | - | ST-2 through ST-6 |
 | REQ-ORC-002 (push/pull/hybrid) | - | - | ST-1, ST-2, ST-5 |
 | REQ-ORC-003 (CLI --manifest) | - | - | All except ST-1, ST-7 |
-| REQ-CRE-001 (VM ID allocation) | test_config_resolver.py | `./run.sh test -M n1-basic` | ST-2 |
-| REQ-CRE-002 (serial device) | - | `./run.sh test -M n1-basic` | ST-2 |
+| REQ-CRE-001 (VM ID allocation) | test_config_resolver.py | `./run.sh test -M n1-push` | ST-2 |
+| REQ-CRE-002 (serial device) | - | `./run.sh test -M n1-push` | ST-2 |
 | REQ-CFG-001 (site-config source) | test_config_resolver.py | - | - |
 | REQ-EXE-001 (timeouts) | test_common.py | - | - |
 | REQ-EXE-003 (idempotency) | - | - | ST-8 |
@@ -410,13 +410,13 @@ pytest tests/test_config_resolver.py -k "test_resolve_inline_vm"  # Specific tes
 
 ```bash
 # Single component test (flat VM lifecycle)
-./run.sh test -M n1-basic -H father
+./run.sh test -M n1-push -H father
 
 # With verbose output
-./run.sh test -M n1-basic -H father --verbose
+./run.sh test -M n1-push -H father --verbose
 
 # Dry run (preview)
-./run.sh test -M n1-basic -H father --dry-run
+./run.sh test -M n1-push -H father --dry-run
 ```
 
 ### Running System Tests

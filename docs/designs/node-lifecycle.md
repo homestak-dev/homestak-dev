@@ -401,7 +401,7 @@ Both push and pull execution models are implemented within the existing `src/` t
 ```
 iac-driver/
 ├── src/
-│   ├── scenarios/          # Standalone workflows (pve-setup, spec-vm-*)
+│   ├── scenarios/          # Standalone workflows (pve-setup, *-vm-roundtrip)
 │   ├── actions/            # Reusable primitives (tofu, ansible, SSH, etc.)
 │   ├── manifest_opr/       # Operator engine (graph walker, verb CLI)
 │   ├── controller/         # Unified controller daemon (specs + repos)
