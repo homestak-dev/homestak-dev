@@ -607,7 +607,7 @@ This design document represents a significant architectural evolution. Related i
 |------------------|---------|
 | Unified FK resolution | Manifests use same FK pattern as specs |
 | Spec server in iac-driver | Server can serve both specs AND manifests |
-| `./run.sh serve` entry point | Aligns with verb-based CLI pattern (`./run.sh create/destroy/test`) |
+| `./run.sh server start` entry point | Aligns with verb-based CLI pattern (`./run.sh create/destroy/test`) |
 | ConfigResolver + SpecResolver consolidation | Single resolver handles manifests and specs |
 
 ### Phased Implementation

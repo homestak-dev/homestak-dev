@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- Update cross-repo docs for server daemon rename: controller → server (#227)
+
 ### Added
 - Add bug triage step to sprint planning lifecycle (#213)
 - Add bug validation section to design phase (#213)
