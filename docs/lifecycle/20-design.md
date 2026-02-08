@@ -222,8 +222,8 @@ Before writing code, know how you'll prove it works.
 
 | Change Type | Validation Approach |
 |-------------|---------------------|
-| Packer template | Build image → `./run.sh test -M n1-basic` or `n2-quick` |
-| Tofu module | `./run.sh test -M n1-basic -H <host>` |
+| Packer template | Build image → `./run.sh test -M n1-push` or `n2-tiered` |
+| Tofu module | `./run.sh test -M n1-push -H <host>` |
 | iac-driver action | Scenario that exercises the action |
 | Ansible role | Run playbook on test VM, verify behavior |
 | CLI command | Full command flow, including edge cases |
@@ -235,12 +235,12 @@ Before writing code, know how you'll prove it works.
 ```markdown
 ## Test Plan
 
-**Scenario:** `./run.sh test -M n1-basic -H father`
+**Scenario:** `./run.sh test -M n1-push -H father`
 
 **Steps:**
 1. Build image with changes: `./build.sh debian-13-custom`
 2. Publish to PVE: `./publish.sh`
-3. Run validation: `./run.sh test -M n1-basic -H father`
+3. Run validation: `./run.sh test -M n1-push -H father`
 
 **Expected result:** VM boots, SSH accessible, guest agent responds
 

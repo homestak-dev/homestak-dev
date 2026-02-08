@@ -110,13 +110,13 @@ ConfigResolver merges YAML layers and outputs tfvars.json for tofu.
 ## Quick Reference
 
 # Deploy via iac-driver (recommended)
-./run.sh test -M n1-basic -H father
+./run.sh test -M n1-push -H father
 
 # Direct commands (debugging only)
 tofu plan -var-file=/tmp/tfvars.json
 
 # Run integration tests
-./run.sh test -M n2-quick -H father
+./run.sh test -M n2-tiered -H father
 ```
 
 *Why it works:* Shows the recommended path first, alternatives second. Comments explain when to use each.

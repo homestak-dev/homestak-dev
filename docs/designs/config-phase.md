@@ -374,10 +374,10 @@ Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. FHS paths (`/usr
 
 ### Integration Test
 
-**Scenario:** `spec-vm-pull-roundtrip` (iac-driver#156)
+**Scenario:** `pull-vm-roundtrip` (iac-driver#156)
 
 ```bash
-./run.sh --scenario spec-vm-pull-roundtrip --host father
+./run.sh --scenario pull-vm-roundtrip --host father
 ```
 
 **Steps:**
@@ -392,7 +392,7 @@ Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. FHS paths (`/usr
 
 **Fallback validation:**
 ```bash
-./run.sh test -M n1-basic -H father
+./run.sh test -M n1-push -H father
 ```
 Push mode regression — must still work.
 
@@ -466,7 +466,7 @@ nodes:
 | `config-apply.yml` playbook | Done | ansible d3407fe |
 | Cloud-init runcmd extension | Done | tofu 676f5bc |
 | `n1-pull.yaml` test manifest | Done | site-config 02c4108 |
-| `spec-vm-pull-roundtrip` scenario | Done | iac-driver 3c2017b |
+| `pull-vm-roundtrip` scenario | Done | iac-driver 3c2017b |
 | `edge.yaml` spec | Done | site-config 0b0faed |
 
 **Post-merge fixes (iac-driver#163, v0.48+):**
@@ -475,7 +475,7 @@ nodes:
 |-----------|-----|--------|
 | `controller/repos.py` | Bare repo HEAD→_working so `git clone` gets uncommitted changes | iac-driver#165 |
 | `config_apply.py` | Set ANSIBLE_CONFIG env var for cloud-init environments | iac-driver#165 |
-| `scenarios/spec_vm.py` | Increase wait_spec timeout 90→150s (bootstrap ~100s) | iac-driver#165 |
+| `scenarios/vm_roundtrip.py` | Increase wait_spec timeout 90→150s (bootstrap ~100s) | iac-driver#165 |
 | `tofu/envs/generic/main.tf` | Add `HOMESTAK_REF=_working` to cloud-init runcmd | tofu#40 |
 | `tofu/envs/generic/main.tf` | Fix SSH key indent (6→10) in cloud-init user-data | tofu#40 |
 | `users/defaults/main.yml` | Add `local_user_shell` default for users role | ansible#37 |

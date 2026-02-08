@@ -264,24 +264,11 @@ A manifest describes **what** to build without prescribing **how** to build it:
 - Cardinality (how many of each)
 - Constraints and dependencies
 
-### Schema v1 (Legacy)
+### Schema v1 (Removed)
 
-The v1 manifest schema uses linear `levels[]` and is coupled to push execution. It remains supported for backward compatibility but v2 is the primary format:
+The v1 manifest schema used linear `levels[]` and was coupled to push execution. It was removed in iac-driver#181. Only v2 is supported.
 
-```yaml
-# Legacy: linear levels, push-only
-schema_version: 1
-name: n2-quick
-levels:
-  - name: nested-pve
-    vm_preset: large
-    vmid: 99011
-    image: debian-13-pve
-    post_scenario: pve-setup           # Push-specific
-    post_scenario_args: ["--local"]    # Push-specific
-```
-
-### Schema v2 (Current)
+### Schema v2
 
 Manifests define topology, execution model, and node instances:
 
@@ -318,8 +305,8 @@ With topology and execution mode externalized to the manifest, the CLI uses verb
 
 ```bash
 # Legacy: scenario name encodes action + topology style
-./run.sh --scenario recursive-pve-constructor --manifest n2-quick --host father
-./run.sh --scenario recursive-pve-destructor --manifest n2-quick --host father
+./run.sh --scenario recursive-pve-constructor --manifest n2-tiered --host father
+./run.sh --scenario recursive-pve-destructor --manifest n2-tiered --host father
 
 # Current: verb-based subcommands
 ./run.sh create -M nested-test -H father
@@ -564,9 +551,9 @@ After scenario consolidation (Sprint homestak-dev#195), VM lifecycle uses verb c
 | `./run.sh destroy -M <manifest> -H <host>` | destroy | Push |
 | `./run.sh test -M <manifest> -H <host>` | create → verify → destroy | Push |
 | `pve-setup` | config (to existing host) | Push |
-| `spec-vm-push-roundtrip` | create → specify (push) | Push (verify spec server) |
+| `push-vm-roundtrip` | create → specify (push) | Push (verify spec server) |
 
-The `spec-vm-push-roundtrip` scenario validates that spec server env vars are injected and reachable via SSH. The `spec-vm-pull-roundtrip` scenario validates the full pull-mode config phase (iac-driver#147/#156, completed in Sprint homestak-dev#201).
+The `push-vm-roundtrip` scenario validates that spec server env vars are injected and reachable via SSH. The `pull-vm-roundtrip` scenario validates the full pull-mode config phase (iac-driver#147/#156, completed in Sprint homestak-dev#201).
 
 ### Mode Selection
 
@@ -936,10 +923,10 @@ Assertions:
 
 | System Test | Current Equivalent | Gap |
 |-------------|-------------------|-----|
-| ST-1 | `spec-vm-pull-roundtrip` | **Available** (Sprint homestak-dev#201) |
-| ST-2 | `./run.sh test -M n1-basic` | **Available** |
-| ST-3 | `./run.sh test -M n2-quick` | **Available** |
-| ST-4 | `./run.sh test -M n3-full` | **Available** |
+| ST-1 | `pull-vm-roundtrip` | **Available** (Sprint homestak-dev#201) |
+| ST-2 | `./run.sh test -M n1-push` | **Available** |
+| ST-3 | `./run.sh test -M n2-tiered` | **Available** |
+| ST-4 | `./run.sh test -M n3-deep` | **Available** |
 | ST-5 | None | New capability (mixed execution modes) |
 | ST-6 | None | New capability (parallel peers) |
 | ST-7 | None | New capability (manifest validation) |
