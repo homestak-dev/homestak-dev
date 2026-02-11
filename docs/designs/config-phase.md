@@ -291,12 +291,12 @@ Add `./run.sh config` to the existing runcmd block:
           curl -fsSk "$HOMESTAK_SPEC_SERVER/bootstrap.git/install.sh" | \
             HOMESTAK_SOURCE="$HOMESTAK_SPEC_SERVER" HOMESTAK_REF=_working HOMESTAK_INSECURE=1 SKIP_SITE_CONFIG=1 bash
           /usr/local/lib/homestak/iac-driver/run.sh config --fetch --insecure \
-            >>/var/log/homestak-config.log 2>&1 || true
+            >>/var/log/homestak/config.log 2>&1 || true
         fi
 %{endif}
 ```
 
-**Note:** The runcmd first bootstraps from the server (curls `install.sh`, clones repos via HTTPS with `HOMESTAK_REF=_working` to get the server's working branch). `SKIP_SITE_CONFIG=1` skips site-config clone since VMs receive pre-resolved specs. Then `./run.sh config --fetch --insecure` fetches the spec and applies config locally.
+**Note:** Cloud-init sources `/etc/profile.d/homestak.sh` which provides `HOMESTAK_SPEC_SERVER` and `HOMESTAK_TOKEN` (a provisioning token minted at create time — see [provisioning-token.md](provisioning-token.md)). The runcmd bootstraps from the server (curls `install.sh`, clones repos via HTTPS with `HOMESTAK_REF=_working`). `SKIP_SITE_CONFIG=1` skips site-config clone since VMs receive pre-resolved specs via token. Then `./run.sh config --fetch --insecure` presents the token, fetches the spec, and applies config locally.
 
 ## Integration Points
 

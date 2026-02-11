@@ -13,7 +13,7 @@ Nodes need to fetch their specifications from the server (iac-driver) and persis
 **Success criteria:**
 - Client fetches spec from server via HTTP
 - CLI flags work for manual testing: `--server`, `--identity`, `--token`
-- Env vars work for automated path: `HOMESTAK_SPEC_SERVER`, `HOMESTAK_IDENTITY`, `HOMESTAK_AUTH_TOKEN`
+- Env vars work for automated path: `HOMESTAK_SPEC_SERVER`, `HOMESTAK_TOKEN`
 - Fetched spec persisted to `/usr/local/etc/homestak/state/`
 - Error responses handled with defined codes
 
@@ -44,12 +44,11 @@ Nodes need to fetch their specifications from the server (iac-driver) and persis
 
 ```bash
 # Manual invocation (for testing/debugging)
-homestak spec get --server https://father:44443 --identity dev1 [--token mytoken]
+homestak spec get --server https://father:44443 --identity dev1
 
 # Automated invocation (via env vars, for cloud-init path)
 HOMESTAK_SPEC_SERVER=https://father:44443 \
-HOMESTAK_IDENTITY=dev1 \
-HOMESTAK_AUTH_TOKEN=mytoken \
+HOMESTAK_TOKEN=<provisioning-token> \
 homestak spec get
 
 # Additional flags
@@ -65,8 +64,8 @@ homestak spec get
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `HOMESTAK_SPEC_SERVER` | Server URL (e.g., `https://father:44443`) | Yes (if no --server) |
-| `HOMESTAK_IDENTITY` | Node identity (e.g., `dev1`) | Yes (if no --identity) |
-| `HOMESTAK_AUTH_TOKEN` | Bearer token for auth | If posture requires |
+| `HOMESTAK_TOKEN` | Provisioning token (HMAC-signed, carries spec FK + identity) | Yes (automated path) |
+| `HOMESTAK_IDENTITY` | Node identity for manual testing (e.g., `dev1`) | Manual only (if no --identity) |
 
 ### State Directory Structure
 
@@ -127,6 +126,8 @@ Map server error codes to client behavior:
 
 ## Data Flow
 
+**Note:** The automated path (cloud-init) uses provisioning tokens — see [provisioning-token.md](provisioning-token.md). The `homestak spec get` CLI retains `--identity` for manual testing/debugging.
+
 ```
 homestak spec get
        │
@@ -134,14 +135,14 @@ homestak spec get
 Parse CLI flags / env vars
        │
        ├── --server / HOMESTAK_SPEC_SERVER
-       ├── --identity / HOMESTAK_IDENTITY
-       └── --token / HOMESTAK_AUTH_TOKEN
+       ├── --token / HOMESTAK_TOKEN (provisioning token, automated path)
+       └── --identity / HOMESTAK_IDENTITY (manual testing only)
        │
        ▼
 Build HTTP request
        │
-       ├── URL: {server}/spec/{identity}
-       └── Header: Authorization: Bearer {token} (if provided)
+       ├── URL: {server}/spec/{hostname}
+       └── Header: Authorization: Bearer {token}
        │
        ▼
 Send request to server
@@ -157,10 +158,11 @@ Send request to server
        │                         ▼
        │                   Exit 0
        │
-       └── Error (4xx/5xx) → Parse error JSON
+       └── Error (4xx/5xx) → Log error
                                    │
                                    ▼
-                             Display error message
+                             Write fail marker (if permanent)
+                             or retry with backoff (if transient)
                                    │
                                    ▼
                              Exit 1/2/3

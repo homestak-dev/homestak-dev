@@ -133,16 +133,18 @@ Nodes discover their spec and converge autonomously.
 Driver                           Target
 ──────                           ──────
 1. Start server
-2. tofu apply (inject identity + endpoint)
-                                 3. Boot with identity
-                                 4. homestak spec get
-   ◀─────────────────────────────┤
-   GET /spec/{identity}          │
+2. tofu apply (inject HOMESTAK_TOKEN via cloud-init)
+                                 3. Boot with provisioning token
+                                 4. GET /spec/{hostname}
+   ◀─────────────────────────────┤   Authorization: Bearer <token>
+   verify HMAC, extract spec FK  │
    ─────────────────────────────▶
-   200 OK + spec                 │
+   200 OK + resolved spec        │
                                  5. Apply spec locally
                                  6. PLATFORM READY
 ```
+
+**Note:** The provisioning token is an HMAC-signed artifact minted by the operator at create time. It encodes the spec FK (`s` claim) and node identity (`n` claim), replacing the previous `HOMESTAK_IDENTITY` + `HOMESTAK_AUTH_TOKEN` env vars. See [provisioning-token.md](provisioning-token.md) for full design.
 
 **Strengths:** Autonomous recovery, scales to many nodes, works across network boundaries (no SSH needed), continuous convergence.
 
