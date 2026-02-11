@@ -48,11 +48,11 @@ knows: manifest, node,             knows: hostname               knows: specs, p
 | Current | Token approach |
 |---------|---------------|
 | `HOMESTAK_IDENTITY` | Embedded as `n` claim |
-| `HOMESTAK_AUTH_TOKEN` | The token itself IS the auth |
+| `HOMESTAK_AUTH_TOKEN` | Removed — the token itself IS the auth |
 | Identity→spec mapping (broken) | Spec FK embedded as `s` claim |
 | Posture-based auth dispatch | Unified: valid HMAC = authorized |
 
-Three env vars collapse to two: `HOMESTAK_SPEC_SERVER` + `HOMESTAK_TOKEN`.
+Three env vars (`HOMESTAK_SPEC_SERVER`, `HOMESTAK_IDENTITY`, `HOMESTAK_AUTH_TOKEN`) collapse to two: `HOMESTAK_SPEC_SERVER` + `HOMESTAK_TOKEN`. `HOMESTAK_AUTH_TOKEN` is eliminated entirely — the provisioning token subsumes both identity and authorization.
 
 ### Architectural Properties
 
@@ -467,7 +467,7 @@ ssh edge "/usr/local/lib/homestak/iac-driver/run.sh config --fetch --insecure"
 | iac-driver | `src/server/specs.py` | Require provisioning token, extract `s` claim for spec lookup |
 | iac-driver | `src/config_apply.py` | Update `--fetch` to use `HOMESTAK_TOKEN`, add structured logging, fail marker |
 | bootstrap | `lib/spec_client.py` | Read `HOMESTAK_TOKEN`, send as Bearer, add structured logging |
-| tofu | `envs/generic/main.tf` | Inject `HOMESTAK_TOKEN` (remove `HOMESTAK_IDENTITY`, `HOMESTAK_AUTH_TOKEN`) |
+| tofu | `envs/generic/main.tf` | Inject `HOMESTAK_TOKEN` only (remove `HOMESTAK_IDENTITY` and `HOMESTAK_AUTH_TOKEN`) |
 | site-config | `secrets.yaml` | Add `auth.signing_key`, remove `site_token` and `node_tokens` |
 
 ### Design Doc Updates
@@ -477,7 +477,7 @@ ssh edge "/usr/local/lib/homestak/iac-driver/run.sh config --fetch --insecure"
 | `phase-interfaces.md` | Create→Config contract: add token as output, spec FK no longer assumed from identity |
 | `node-lifecycle.md` | Pull model diagram: `HOMESTAK_TOKEN` replaces identity-based lookup |
 | `spec-client.md` | Data flow: token presentation replaces identity URL construction |
-| `config-phase.md` | Cloud-init runcmd: `HOMESTAK_TOKEN` replaces `HOMESTAK_IDENTITY` + `HOMESTAK_AUTH_TOKEN` |
+| `config-phase.md` | Cloud-init runcmd: `HOMESTAK_TOKEN` replaces `HOMESTAK_IDENTITY` and `HOMESTAK_AUTH_TOKEN` |
 
 ## Design Decisions
 
@@ -728,7 +728,7 @@ Server maintains a revocation list (separate from consumption ledger). Tokens ca
 2. **`config_resolver.py`: Token minting** — `_mint_provisioning_token()` replaces `_resolve_auth_token()`
 3. **`server/auth.py`: Token verification** — `verify_provisioning_token()` with HMAC check
 4. **`server/specs.py`: Spec endpoint** — require token, extract `s` claim, serve correct spec
-5. **`tofu/main.tf`: Cloud-init** — inject `HOMESTAK_TOKEN` (remove `HOMESTAK_IDENTITY`, `HOMESTAK_AUTH_TOKEN`)
+5. **`tofu/main.tf`: Cloud-init** — inject `HOMESTAK_TOKEN` only (remove `HOMESTAK_IDENTITY` and `HOMESTAK_AUTH_TOKEN`)
 6. **`spec_client.py` / `config_apply.py`**: Read `HOMESTAK_TOKEN`, present as Bearer, structured logging, fail marker
 7. **Remove legacy auth** — delete `validate_spec_auth()`, `_resolve_auth_token()`, posture-based auth dispatch
 8. **Unit tests** — minting, verification, retry logic, logging, edge cases
@@ -750,6 +750,7 @@ Server maintains a revocation list (separate from consumption ledger). Tokens ca
 
 | Date | Change |
 |------|--------|
+| 2026-02-11 | Drop HOMESTAK_AUTH_TOKEN entirely — provisioning token subsumes both identity and authorization |
 | 2026-02-11 | Elaborate signing key: lifecycle, distribution chain, nested PVE, relationship to age key |
 | 2026-02-11 | Remove backward compat: token required, legacy auth removed, no fallback paths |
 | 2026-02-11 | Comprehensive error logging: all errors logged (transient retries + permanent failures), structured log format |
