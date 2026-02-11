@@ -29,9 +29,8 @@ The create phase provisions infrastructure and injects the information needed fo
 
 | Output from Create | Type | Used by Config |
 |-------------------|------|----------------|
-| VM identity (hostname, vmid) | Required | Spec lookup key |
+| Provisioning token | Required (pull) | Spec lookup + authorization (HMAC-signed, contains spec FK + identity) |
 | Spec server URL | Required (pull) | Where to fetch spec |
-| Auth token | Conditional | Authorization for spec fetch |
 | Network connectivity | Required | HTTP/HTTPS to spec server |
 | Automation user | Required | User to run config commands |
 | SSH keys | Required | Access for push execution |
@@ -42,22 +41,15 @@ Create injects these values via cloud-init to `/etc/profile.d/homestak.sh`:
 
 ```bash
 export HOMESTAK_SPEC_SERVER=https://father:44443
-export HOMESTAK_IDENTITY=dev1
-export HOMESTAK_AUTH_TOKEN=...  # Only if posture requires
+export HOMESTAK_TOKEN=<provisioning-token>
 ```
 
-### Auth Token by Posture
-
-| Posture | Auth Method | Token Value |
-|---------|-------------|-------------|
-| dev/local | network | (empty) |
-| stage | site_token | Shared token from secrets |
-| prod | node_token | Per-VM unique token from secrets |
+The provisioning token is an HMAC-signed artifact minted by the operator at create time. It encodes the spec FK (`s` claim) and node identity (`n` claim), replacing the previous `HOMESTAK_IDENTITY` and `HOMESTAK_AUTH_TOKEN` env vars. See [provisioning-token.md](provisioning-token.md) for full design.
 
 ### Validation
 
 Config phase validates these inputs:
-- `HOMESTAK_IDENTITY` is set (required)
+- `HOMESTAK_TOKEN` is set and well-formed (pull mode)
 - `HOMESTAK_SPEC_SERVER` is reachable (pull mode)
 - SSH access works (push mode)
 

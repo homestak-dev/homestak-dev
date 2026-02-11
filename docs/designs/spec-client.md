@@ -127,6 +127,8 @@ Map server error codes to client behavior:
 
 ## Data Flow
 
+**Note:** The automated path (cloud-init) uses provisioning tokens — see [provisioning-token.md](provisioning-token.md). The `homestak spec get` CLI retains `--identity` and `--token` flags for manual testing/debugging.
+
 ```
 homestak spec get
        │
@@ -134,14 +136,15 @@ homestak spec get
 Parse CLI flags / env vars
        │
        ├── --server / HOMESTAK_SPEC_SERVER
-       ├── --identity / HOMESTAK_IDENTITY
-       └── --token / HOMESTAK_AUTH_TOKEN
+       ├── --token / HOMESTAK_TOKEN (provisioning token, automated path)
+       ├── --identity / HOMESTAK_IDENTITY (manual testing only)
+       └── --auth-token / HOMESTAK_AUTH_TOKEN (manual testing only)
        │
        ▼
 Build HTTP request
        │
-       ├── URL: {server}/spec/{identity}
-       └── Header: Authorization: Bearer {token} (if provided)
+       ├── URL: {server}/spec/{hostname}
+       └── Header: Authorization: Bearer {token}
        │
        ▼
 Send request to server
@@ -157,10 +160,11 @@ Send request to server
        │                         ▼
        │                   Exit 0
        │
-       └── Error (4xx/5xx) → Parse error JSON
+       └── Error (4xx/5xx) → Log error
                                    │
                                    ▼
-                             Display error message
+                             Write fail marker (if permanent)
+                             or retry with backoff (if transient)
                                    │
                                    ▼
                              Exit 1/2/3
