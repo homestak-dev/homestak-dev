@@ -144,7 +144,7 @@ ssh root@father "for d in /usr/local/lib/homestak/*/; do git -C \$d checkout mas
 ssh root@father "cd /usr/local/etc/homestak && git checkout master"
 ```
 
-See [#232](https://github.com/homestak-dev/homestak-dev/issues/232) for planned `homestak update --branch` automation.
+Use `homestak update --branch <name>` to automate this (bootstrap#49).
 
 ### 5. Execute Validation
 
