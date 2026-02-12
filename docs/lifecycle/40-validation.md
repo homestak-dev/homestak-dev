@@ -106,7 +106,7 @@ Before running validation:
 |--------------|---------------|
 | Node configuration | `ls site-config/nodes/$(hostname).yaml` |
 | API token | `grep api_tokens site-config/secrets.yaml` |
-| Secrets decrypted | `ls site-config/secrets.yaml` |
+| Secrets decrypted | `head -1 site-config/secrets.yaml` (must NOT start with `sops:`) |
 | Packer images | `ls /var/lib/vz/template/iso/debian-*-custom.img` |
 | Nested virtualization | `cat /sys/module/kvm_intel/parameters/nested` |
 
@@ -237,13 +237,16 @@ HOST=$(hostname)
 # 1. Check node config exists
 ls site-config/nodes/${HOST}.yaml 2>/dev/null || echo "MISSING: node config"
 
-# 2. Check API token exists
+# 2. Check secrets decrypted (not SOPS-encrypted)
+head -1 site-config/secrets.yaml | grep -q "^sops:" && echo "ENCRYPTED: run 'make decrypt' in site-config" || echo "OK: secrets decrypted"
+
+# 3. Check API token exists
 grep -q "${HOST}:" site-config/secrets.yaml && echo "OK: API token" || echo "MISSING: API token"
 
-# 3. Check packer images
+# 4. Check packer images
 ls /var/lib/vz/template/iso/debian-*-custom.img 2>/dev/null || echo "MISSING: packer images"
 
-# 4. Check nested virtualization
+# 5. Check nested virtualization
 cat /sys/module/kvm_intel/parameters/nested | grep -q Y && echo "OK: nested virt" || echo "WARNING: no nested virt"
 ```
 
@@ -251,6 +254,7 @@ cat /sys/module/kvm_intel/parameters/nested | grep -q Y && echo "OK: nested virt
 
 | Issue | Solution |
 |-------|----------|
+| `secrets.yaml encrypted` | Run `make decrypt` in site-config (file exists but starts with `sops:`) |
 | `API token not found` | Generate with `pveum`, add to secrets.yaml |
 | `node config missing` | Run `make node-config` on PVE host |
 | `packer images missing` | Run `./publish.sh` or download from release |
