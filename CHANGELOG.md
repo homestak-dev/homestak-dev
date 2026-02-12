@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+- Add FHS branch alignment guidance to validation docs (#231)
+- Add provisioning token design doc (#231)
+
 ### Changed
 - Update cross-repo docs for server daemon rename: controller → server (#227)
 
