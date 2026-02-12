@@ -70,7 +70,7 @@ The server daemon is central to manifest orchestration — spec discovery, pull-
 | `src/controller/cli.py` | `src/server/cli.py` |
 | `src/controller/server.py` | `src/server/server.py` |
 | `src/controller/tls.py` | `src/server/tls.py` |
-| `src/controller/auth.py` | `src/server/auth.py` |
+| `src/controller/auth.py` | `src/server/auth.py` (auth model updated: posture-based → HMAC provisioning token per [provisioning-token.md](provisioning-token.md)) |
 | `src/controller/specs.py` | `src/server/specs.py` |
 | `src/controller/repos.py` | `src/server/repos.py` |
 
@@ -339,7 +339,7 @@ Inner PVE hosts need servers for subtree delegation. The operator already starts
 
 ### Bootstrap / Cloud-Init
 
-No changes. Cloud-init VMs call `./run.sh config --fetch` which talks to the server over HTTPS. The server's daemonization is transparent to clients.
+No changes. Cloud-init VMs call `./run.sh config --fetch` which talks to the server over HTTPS. Authentication uses the provisioning token (`HOMESTAK_TOKEN`) injected via cloud-init — see [provisioning-token.md](provisioning-token.md). The server's daemonization is transparent to clients.
 
 ## Risk Assessment
 
@@ -443,9 +443,17 @@ kill -9 $(cat /var/run/homestak/server-44443.pid)  # Simulate crash
 - [spec-client.md](spec-client.md) — `homestak spec get` client (talks to this server)
 - [config-phase.md](config-phase.md) — Config phase (`./run.sh config --fetch` uses server)
 - [requirements-catalog.md](requirements-catalog.md) — REQ-CTL-* requirements
+- [provisioning-token.md](provisioning-token.md) — Provisioning token design (HMAC auth for spec endpoint)
 - [test-strategy.md](test-strategy.md) — Test coverage matrix
 - [iac-driver#177](https://github.com/homestak-dev/iac-driver/issues/177) — Implementation issue
 - [iac-driver#184](https://github.com/homestak-dev/iac-driver/issues/184) — CLI restructure (depends on #177)
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-02-11 | Sprint #231 (Provisioning Token): Note auth model shift in auth.py (posture-based → HMAC); add provisioning token reference to Bootstrap/Cloud-Init section; add provisioning-token.md to related docs |
+| 2026-02-08 | Initial document |
 
 ## Open Questions
 
