@@ -41,7 +41,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 | File | Lines | Coverage Focus |
 |------|-------|----------------|
 | `test_ctrl_server.py` | ~400 | HTTPS server, daemon lifecycle, signals |
-| `test_ctrl_auth.py` | ~300 | Posture + token auth middleware |
+| `test_ctrl_auth.py` | ~300 | Provisioning token verification (HMAC, claims, identity match) |
 | `test_ctrl_specs.py` | ~400 | Spec endpoint, caching, SIGHUP |
 | `test_ctrl_repos.py` | ~400 | Git protocol, `_working` branch |
 | `test_ctrl_tls.py` | ~200 | Self-signed cert generation, fingerprint |
@@ -129,13 +129,16 @@ Manifest:
 ```
 
 **Steps:**
-1. Driver provisions VM with identity + spec_server env vars
-2. VM boots, runs `homestak spec get`
-3. VM applies spec locally (`./run.sh config`, v0.48+)
-4. Verify: VM reaches platform ready state
-5. Destroy VM
+1. ConfigResolver mints provisioning token with `s` claim (spec FK)
+2. Driver provisions VM with `HOMESTAK_TOKEN` via cloud-init
+3. VM boots, `./run.sh config --fetch` presents token to server
+4. Server verifies HMAC, extracts `s` claim, serves resolved spec
+5. VM applies spec locally, writes platform-ready marker
+6. Operator polls for marker, verifies SSH access
+7. Destroy VM
 
 **Assertions:**
+- Token `s` claim resolves to correct spec (not hostname-based lookup)
 - Spec fetched from server (check `/usr/local/etc/homestak/state/spec.yaml`)
 - SSH access works with keys from spec
 - Packages from spec installed
@@ -359,11 +362,11 @@ Manifest:
 
 | System Test | Current Equivalent | Gap | Blocked By |
 |-------------|-------------------|-----|------------|
-| ST-1 | `pull-vm-roundtrip` | **Available** — full pull mode config phase (iac-driver#156) | - |
+| ST-1 | `pull-vm-roundtrip` | **Available** — full pull mode with provisioning token (iac-driver#187) | - |
 | ST-2 | `./run.sh test -M n1-push` | **Available** — operator handles flat VM lifecycle | - |
 | ST-3 | `./run.sh test -M n2-tiered` | **Available** — operator handles tiered PVE+VM | - |
 | ST-4 | `./run.sh test -M n3-deep` | **Available** — operator delegates via SSH | - |
-| ST-5 | None | New capability (mixed execution modes) | Future |
+| ST-5 | None | Provisioning token enables pull-side auth; still needs mixed-mode manifest support | Future |
 | ST-6 | None | New capability (parallel peer creation) | Future |
 | ST-7 | None | New capability (manifest validation) | Future |
 | ST-8 | Partial | Scenarios are mostly idempotent but not formally tested | Core |
@@ -376,7 +379,7 @@ The unified controller sprint (iac-driver#146) **enables** multiple system tests
 |-------------|----------------------|
 | ST-1 | Spec server infrastructure (server/specs.py) |
 | ST-2 | Repos serving for push execution (server/repos.py) |
-| ST-5 | Mixed mode support via posture-based auth |
+| ST-5 | Mixed mode support (pull nodes use provisioning token, push nodes bypass) |
 
 ## Coverage Matrix
 
@@ -394,6 +397,17 @@ Requirements → Tests traceability. See [requirements-catalog.md](requirements-
 | REQ-CFG-001 (site-config source) | test_config_resolver.py | - | - |
 | REQ-EXE-001 (timeouts) | test_common.py | - | - |
 | REQ-EXE-003 (idempotency) | - | - | ST-8 |
+| REQ-SEC-011 (signing key in secrets) | test_config_resolver.py | `test -M n1-pull` | ST-1 |
+| REQ-SEC-012 (missing key hard error) | test_config_resolver.py | - | - |
+| REQ-SEC-013 (constant-time HMAC) | test_ctrl_auth.py | - | - |
+| REQ-CTL-025 (token required) | test_ctrl_auth.py | `test -M n1-pull` | ST-1 |
+| REQ-CTL-026 (spec from `s` claim) | test_ctrl_auth.py | `test -M n1-pull` | ST-1 |
+| REQ-CTL-027 (identity match) | test_ctrl_auth.py | - | - |
+| REQ-CRE-014 (token minting) | test_config_resolver.py | `test -M n1-pull` | ST-1 |
+| REQ-CRE-015 (cloud-init injection) | - | `test -M n1-pull` | ST-1 |
+| REQ-REC-009 (retry backoff) | test_spec_client.py | - | - |
+| REQ-REC-010 (fail marker) | test_spec_client.py | - | - |
+| REQ-OBS-013 (fetch logging) | test_spec_client.py | `test -M n1-pull` | ST-1 |
 
 ## Test Execution Guidelines
 
@@ -436,6 +450,7 @@ pytest tests/test_config_resolver.py -k "test_resolve_inline_vm"  # Specific tes
 
 | Date | Change |
 |------|--------|
+| 2026-02-11 | Sprint #231 (Provisioning Token): Updated test_ctrl_auth.py scope (posture → HMAC); updated ST-1 steps for token flow; added 12 coverage matrix rows for new requirements; updated ST-5 gap status |
 | 2026-02-08 | Terminology: controller → server in component descriptions and file paths (aligns with server-daemon.md) |
 | 2026-02-06 | Update for scenario consolidation (#195): retired scenarios replaced with verb commands; ST-2/3/4 now available; system tests no longer "future" |
 | 2026-02-05 | Replace ordinal sprint labels with issue references; update for #143+#144 combination |

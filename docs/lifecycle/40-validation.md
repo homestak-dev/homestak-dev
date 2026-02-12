@@ -117,6 +117,35 @@ cd iac-driver
 ./run.sh --preflight --host father
 ```
 
+### 4a. FHS Branch Alignment (Remote Hosts)
+
+When running integration tests against a remote FHS host (e.g., father at `/usr/local/lib/homestak/`), **all repos must be on the correct branch**. Sprint code on your dev machine won't take effect unless the remote host's repos also have the sprint changes.
+
+**Verify branch alignment:**
+```bash
+# Check which branches are checked out on the remote host
+ssh root@father "for d in /usr/local/lib/homestak/*/; do echo \"\$(basename \$d): \$(git -C \$d branch --show-current)\"; done"
+```
+
+**Deploy sprint branches to remote host:**
+```bash
+# For each repo with sprint changes:
+ssh root@father "cd /usr/local/lib/homestak/<repo> && git fetch origin sprint/<name> && git checkout sprint/<name>"
+
+# Don't forget site-config:
+ssh root@father "cd /usr/local/etc/homestak && git fetch origin sprint/<name> && git checkout sprint/<name>"
+```
+
+**Common mistake:** Deploying 3 of 4 repos and forgetting the 4th. Always verify all affected repos are aligned before running scenarios.
+
+**After validation:** Restore the remote host to master:
+```bash
+ssh root@father "for d in /usr/local/lib/homestak/*/; do git -C \$d checkout master 2>/dev/null; done"
+ssh root@father "cd /usr/local/etc/homestak && git checkout master"
+```
+
+See [#232](https://github.com/homestak-dev/homestak-dev/issues/232) for planned `homestak update --branch` automation.
+
 ### 5. Execute Validation
 
 **Using iac-driver:**

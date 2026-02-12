@@ -192,9 +192,10 @@ Nodes initiate their own configuration; driver provides specs on demand.
 Driver                                  Target
 ──────                                  ──────
 1. Runs spec server
-2. Provisions node with identity
-                                        3. Boots, discovers identity
-                                        4. Fetches spec from server
+2. Provisions node with provisioning
+   token (carries spec FK + identity)
+                                        3. Boots, presents token to server
+                                        4. Server verifies HMAC, serves spec
                                         5. Applies spec locally
                                         6. Converges to desired state
 ```
@@ -226,9 +227,10 @@ Driver triggers action; target node executes autonomously.
 ```
 Driver                                  Target
 ──────                                  ──────
-1. Provisions node with identity
+1. Provisions node with provisioning
+   token (carries spec FK + identity)
 2. Signals "converge now"
-                                        3. Fetches spec
+                                        3. Presents token, fetches spec
                                         4. Applies spec
                                         5. Reports result
 ```
@@ -525,7 +527,7 @@ Not all phases support both execution models equally:
 | Phase | Push | Pull | Notes |
 |-------|------|------|-------|
 | **create** | ✓ Primary | ✗ | Node doesn't exist yet; must be externally provisioned |
-| **config** | ✓ SSH+Ansible | ✓ Fetch+converge | Push injects and applies; pull fetches spec and converges locally |
+| **config** | ✓ SSH+Ansible | ✓ Token+fetch+converge | Push injects and applies; pull presents provisioning token, fetches spec, converges locally |
 | **run** | ✓ SSH+command | ✓ Job queue | Push: SSH commands; Pull: retrieve and execute instructions |
 | **destroy** | ✓ Primary | △ Self-terminate | External cleanup required; node can self-terminate but parent must reclaim resources |
 
@@ -698,13 +700,16 @@ Manifest:
 
 Steps:
 1. ./run.sh create -M single-node -H father
-2. Driver provisions VM with identity + spec_server env vars
-3. VM boots, runs `homestak spec get`
-4. VM applies spec locally (`./run.sh config`)
-5. Verify: VM reaches platform ready state
-6. ./run.sh destroy -M single-node -H father
+2. ConfigResolver mints provisioning token with `s` claim (spec FK)
+3. Driver provisions VM with HOMESTAK_TOKEN + HOMESTAK_SPEC_SERVER via cloud-init
+4. VM boots, presents token to server (`./run.sh config --fetch`)
+5. Server verifies HMAC, extracts `s` claim, serves resolved spec
+6. VM applies spec locally, writes config-complete marker
+7. Verify: VM reaches platform ready state
+8. ./run.sh destroy -M single-node -H father
 
 Assertions:
+- Token `s` claim resolves to correct spec (not hostname-based lookup)
 - VM fetched spec from server (check /usr/local/etc/homestak/state/spec.yaml)
 - SSH access works with keys from spec
 - Packages from spec are installed
@@ -831,13 +836,14 @@ Manifest:
 Steps:
 1. ./run.sh create -M mixed-mode -H father
 2. inner-pve created via push (driver configures)
-3. app-vm created, fetches spec via pull (autonomous)
-4. Both reach platform ready
+3. app-vm provisioned with provisioning token (minted at create time)
+4. app-vm boots, presents token, fetches spec via pull (autonomous)
+5. Both reach platform ready
 
 Assertions:
 - inner-pve configured by driver (push)
-- app-vm fetched spec from server (pull)
-- Spec server served app-vm's spec with correct auth
+- app-vm fetched spec from server (pull) using provisioning token
+- Token `s` claim resolved to correct spec for app-vm
 ```
 
 ### ST-6: Flat Topology (Multiple Peers)
@@ -939,12 +945,14 @@ Assertions:
 - [phase-interfaces.md](phase-interfaces.md) — Phase interface contracts
 - [requirements-catalog.md](requirements-catalog.md) — Structured requirements with IDs
 - [test-strategy.md](test-strategy.md) — Test hierarchy and system test catalog
+- [provisioning-token.md](provisioning-token.md) — Provisioning token design (HMAC auth for pull-mode spec fetch)
 - [gap-analysis.md](gap-analysis.md) — Design gap tracking
 
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-02-11 | Sprint #231 (Provisioning Token): Update pull/hybrid execution sequences for token flow; update ST-1 steps for HMAC token auth; update ST-5 for token minting; update config phase row in execution model table; add provisioning-token.md to related docs |
 | 2026-02-08 | Terminology: controller → server in architecture diagram (aligns with server-daemon.md); add server-daemon.md to Related Documents |
 | 2026-02-07 | Align with updated epics: Status → Active; manifest v1/v2 framing updated (v2 is current, v1 is legacy); phased implementation adds release status; #113/#120 marked complete; ST-1/ST-2 assertions updated (config phase implemented) |
 | 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |

@@ -75,6 +75,8 @@ Requirements for the create phase: VM allocation, identity injection, image mana
 | REQ-CRE-011 | Create constraints (cores, memory, disk) bound future purpose | P2 | Proposed | design | node-lifecycle.md | - |
 | REQ-CRE-012 | VM IDs should use 5-digit convention (10000+ dev, 99900+ test) | P2 | Validated | design | - | site-config |
 | REQ-CRE-013 | Cloud-init runcmd chains `spec get` → `./run.sh config` on first boot | P0 | Accepted | design | config-phase.md | `test -M n1-pull` |
+| REQ-CRE-014 | Provisioning token minted at create time by ConfigResolver | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
+| REQ-CRE-015 | Token injected via cloud-init as `HOMESTAK_TOKEN` env var | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
 
 ---
 
@@ -114,7 +116,7 @@ Requirements for the unified server daemon (specs + repos serving). Previously n
 |----|-------------|----------|--------|--------|------------|------|
 | REQ-CTL-001 | Single daemon serving both specs and repos | P0 | Validated | design | server-daemon.md | test_ctrl_server.py |
 | REQ-CTL-002 | Single port for all endpoints (default: 44443) | P0 | Validated | design | server-daemon.md | test_ctrl_server.py |
-| REQ-CTL-003 | Posture-based auth for /spec/* (network, site_token, node_token) | P0 | Validated | design | server-daemon.md | test_ctrl_auth.py |
+| REQ-CTL-003 | ~~Posture-based auth for /spec/*~~ Deprecated: replaced by provisioning token (REQ-CTL-025) | P0 | Deprecated | design | server-daemon.md | test_ctrl_auth.py |
 | REQ-CTL-004 | Token auth for /repos/* (Bearer token) | P0 | Validated | design | server-daemon.md | test_ctrl_auth.py |
 | REQ-CTL-005 | Daemon lifecycle: PID file, SIGTERM graceful shutdown, SIGHUP cache clear | P0 | Accepted | design | server-daemon.md | test_ctrl_server.py |
 | REQ-CTL-006 | Git dumb HTTP protocol for repos serving | P0 | Validated | design | server-daemon.md | test_ctrl_repos.py |
@@ -136,6 +138,9 @@ Requirements for the unified server daemon (specs + repos serving). Previously n
 | REQ-CTL-022 | Daemon logging to FHS path (`/var/log/homestak/server.log`), no fallback | P1 | Accepted | design | server-daemon.md | `server start` |
 | REQ-CTL-023 | Operator auto-lifecycle: ensure server for all manifest verbs | P0 | Accepted | design | server-daemon.md | `test -M n1-pull` |
 | REQ-CTL-024 | Idempotent start (detect healthy → reuse) and stop (detect not running → success) | P1 | Accepted | design | server-daemon.md | Scenario 4 |
+| REQ-CTL-025 | Spec endpoint requires provisioning token (no unauthenticated access, no legacy auth fallback) | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
+| REQ-CTL-026 | Server extracts spec FK from token `s` claim (not from URL identity) | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
+| REQ-CTL-027 | Server validates token `n` claim matches URL identity (defense in depth) | P1 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
 
 ---
 
@@ -215,6 +220,7 @@ Requirements for logging, reporting, and progress indication.
 | REQ-OBS-010 | Scenario runtime estimates (expected_runtime attribute) | P2 | Validated | impl | - | test_scenario_attributes.py |
 | REQ-OBS-011 | PTY allocation for streaming (-t flag in SSH) | P1 | Validated | impl | - | - |
 | REQ-OBS-012 | JSON output to stdout, logs to stderr (separation) | P0 | Validated | impl | - | - |
+| REQ-OBS-013 | All spec-fetch attempts logged (including transient retries) to `/var/log/homestak/config.log` | P1 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
 
 ---
 
@@ -232,6 +238,8 @@ Requirements for error handling, failure modes, and recovery patterns.
 | REQ-REC-006 | Destructors should work without prior context | P1 | Validated | impl | - | - |
 | REQ-REC-007 | Keep-on-failure for debugging (--keep-on-failure) | P1 | Validated | design | - | test_cli.py |
 | REQ-REC-008 | Clean temp files between runs | P1 | Accepted | test | - | - |
+| REQ-REC-009 | Transient spec-fetch errors retry with exponential backoff (5 attempts, ~2.5 min) | P1 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
+| REQ-REC-010 | Permanent spec-fetch errors write fail marker (`config-failed.json`) with null-safe fields | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
 
 ---
 
@@ -251,6 +259,9 @@ Requirements for secret management, SSH key handling, and access control.
 | REQ-SEC-008 | FHS installations require sudo | P1 | Validated | test | - | - |
 | REQ-SEC-009 | Automation user has passwordless sudo | P1 | Validated | design | - | - |
 | REQ-SEC-010 | Root login controlled by posture | P0 | Validated | design | - | - |
+| REQ-SEC-011 | Signing key (256-bit HMAC) stored in secrets.yaml, encrypted at rest by SOPS | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
+| REQ-SEC-012 | Missing signing_key is a hard error at mint time (no silent fallback) | P0 | Accepted | design | provisioning-token.md | test_config_resolver.py |
+| REQ-SEC-013 | HMAC verification uses constant-time comparison (`hmac.compare_digest`) | P0 | Accepted | design | provisioning-token.md | test_ctrl_auth.py |
 
 ---
 
@@ -266,8 +277,8 @@ Requirements for the 4-phase lifecycle model from node-lifecycle.md.
 | REQ-LIF-004 | Destroy phase handles graceful shutdown | P1 | Proposed | design | phase-interfaces.md | - |
 | REQ-LIF-005 | Push, pull, and hybrid are co-equal execution models | P0 | Accepted | design | node-lifecycle.md | ST-1, ST-2, ST-5 |
 | REQ-LIF-006 | Spec schema defines "what to become" (packages, services, users) | P0 | Validated | design | node-lifecycle.md | `make validate` (site-config) |
-| REQ-LIF-007 | Auth model: network/site_token/node_token by posture | P0 | Validated | design | node-lifecycle.md | push-vm-roundtrip |
-| REQ-LIF-008 | Identity injected via cloud-init env vars | P0 | Validated | design | node-lifecycle.md | push-vm-roundtrip |
+| REQ-LIF-007 | ~~Auth model: network/site_token/node_token by posture~~ Deprecated: replaced by provisioning token (REQ-CTL-025, REQ-SEC-011) | P0 | Deprecated | design | node-lifecycle.md | push-vm-roundtrip |
+| REQ-LIF-008 | Provisioning token injected via cloud-init as `HOMESTAK_TOKEN` env var (replaces `HOMESTAK_IDENTITY` + `HOMESTAK_AUTH_TOKEN`) | P0 | Validated | design | node-lifecycle.md, provisioning-token.md | `test -M n1-pull` |
 
 ---
 
@@ -330,7 +341,7 @@ Mapping test coverage to requirements.
 
 | Test | Requirements Covered |
 |------|---------------------|
-| `test_config_resolver.py` | REQ-CFG-001, 003, 004, 005, REQ-SEC-003, 007 |
+| `test_config_resolver.py` | REQ-CFG-001, 003, 004, 005, REQ-SEC-003, 007, 012, REQ-CRE-014 |
 | `test_common.py` | REQ-EXE-001, 002, 003, 005, 008, 009, 010, REQ-NET-001, 002, 006, 012, 013 |
 | `test_actions.py` | REQ-CFG-009, REQ-REC-001 |
 | `test_cli.py` | REQ-CFG-012, REQ-OBS-004, 007, 009, 012, REQ-REC-005, 007 |
@@ -340,23 +351,23 @@ Mapping test coverage to requirements.
 | `test_scenario_attributes.py` | REQ-OBS-010 |
 | `test_ctrl_server.py` | REQ-CTL-001, 002, 005, 008, 011, 014 |
 | `test_ctrl_tls.py` | REQ-CTL-012 |
-| `test_ctrl_auth.py` | REQ-CTL-003, 004 |
+| `test_ctrl_auth.py` | ~~REQ-CTL-003~~, 004, REQ-CTL-025, 026, 027, REQ-SEC-013 |
 | `test_ctrl_specs.py` | REQ-CTL-010 |
 | `test_ctrl_repos.py` | REQ-CTL-006, 007, 009 |
 | `test_resolver_base.py` | REQ-CFG-003, 004, REQ-SEC-007 |
 | `test_spec_resolver.py` | REQ-LIF-006 |
-| `test_spec_client.py` | REQ-LIF-007, 008 |
+| `test_spec_client.py` | ~~REQ-LIF-007~~, REQ-LIF-008, REQ-REC-009, 010, REQ-OBS-013 |
 | `test -M n1-push` | REQ-CRE-001, 002, 004, 005, 006, 010 |
-| `push-vm-roundtrip` | REQ-CRE-003, REQ-LIF-007, 008, REQ-CTL-001, 003 |
+| `push-vm-roundtrip` | REQ-CRE-003, REQ-LIF-008, REQ-CTL-001 |
 | `controller-repos` | REQ-CTL-004, 006, 007 |
 | `test -M n2-tiered` | REQ-NET-007, 008, REQ-CFG-013, 014, 015 |
-| ST-1 | REQ-LIF-001, 002, 005, REQ-CTL-001, 003 |
+| ST-1 | REQ-LIF-001, 002, 005, REQ-CTL-001 |
 | ST-2 | REQ-LIF-001, REQ-ORC-003, REQ-CTL-004, 006 |
 | ST-3, ST-4 | REQ-ORC-005 |
 | ST-5 | REQ-LIF-005, REQ-ORC-002, 006 |
 | ST-7 | REQ-ORC-004, 009 |
 | ST-8 | REQ-TST-004, 005 |
-| `test -M n1-pull` | REQ-CRE-013, REQ-CFG-016, 017, 019, REQ-EXE-011, REQ-LIF-002, REQ-ORC-010, REQ-CTL-023 |
+| `test -M n1-pull` | REQ-CRE-013, 014, 015, REQ-CFG-016, 017, 019, REQ-EXE-011, REQ-LIF-002, REQ-LIF-008, REQ-ORC-010, REQ-CTL-023, 025, 026, 027, REQ-SEC-011, REQ-REC-009, 010, REQ-OBS-013 |
 | `server start` | REQ-CTL-005, 015, 016, 017, 018, 022, 024 |
 | `server stop` | REQ-CTL-005, 015, 020, 024 |
 | `server status` | REQ-CTL-021 |
@@ -369,6 +380,7 @@ Mapping test coverage to requirements.
 
 | Date | Change |
 |------|--------|
+| 2026-02-11 | Sprint #231 (Provisioning Token): Deprecated REQ-CTL-003, REQ-LIF-007 (replaced by token auth); updated REQ-LIF-008 (HOMESTAK_TOKEN); added REQ-CRE-014–015, REQ-CTL-025–027, REQ-SEC-011–013, REQ-REC-009–010, REQ-OBS-013; updated traceability matrix |
 | 2026-02-08 | iac-driver#177 overlay: Renamed CTL category (Controller → Server); updated CTL-001–014 status to `validated` with server-daemon.md refs; added CTL-015–024 (exec chain, daemonization, PID management, server stop/status, logging, operator lifecycle, idempotency); updated NFR-009/010 abbreviations (ctrl → srv); updated traceability matrix |
 | 2026-02-06 | Sprint #201 (Config Phase): Added REQ-CRE-013, REQ-CFG-016–019, REQ-EXE-011, REQ-ORC-010–011; updated REQ-LIF-002 to `accepted` with config-phase.md ref; cleaned `-v2` manifest suffixes; added `test -M n1-pull` traceability |
 | 2026-02-06 | Sprint #199 overlay: REQ-LIF-006 test ref updated (`spec validate` → `make validate` in site-config); REQ-NFR-005 satisfied (serve.py, spec_resolver.py deleted) |
