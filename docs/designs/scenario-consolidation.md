@@ -130,7 +130,6 @@ These scenarios remain as they serve purposes outside the manifest model:
 | `pve-setup` | Host configuration (not manifest-based) |
 | `user-setup` | User management (not manifest-based) |
 | `packer-*` | Image building (not manifest-based) |
-| `bootstrap-install` | Bootstrap validation (not manifest-based) |
 | `push-vm-roundtrip / pull-vm-roundtrip` | Spec discovery integration test |
 
 ## Related Documents
