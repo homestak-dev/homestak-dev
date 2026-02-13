@@ -214,9 +214,9 @@ Not all hosts have the same capabilities. Key distinctions:
 | mother | Yes | Yes | Secondary PVE host |
 | dev machines | Maybe | No | May lack nested virtualization |
 
-**Packer builds require QEMU/KVM.** Use `packer-build-fetch` scenario to build on capable hosts:
+**Packer builds require QEMU/KVM.** Build on capable hosts using `packer/build.sh` directly or via SSH:
 ```bash
-./run.sh --scenario packer-build-fetch --remote father
+ssh father 'cd /usr/local/lib/homestak/packer && ./build.sh'
 ```
 
 ## Bootstrap Pattern

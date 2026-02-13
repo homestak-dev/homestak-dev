@@ -53,9 +53,9 @@ Add note to packer release description: "Images: See `latest` release"
 #### 1. Build Images
 
 ```bash
-cd ~/homestak-dev/iac-driver
-./run.sh scenario packer-build-fetch -H <build-host-ip>
-# Images downloaded to /tmp/packer-images/
+# Build on capable host, then fetch images
+ssh <build-host-ip> 'cd /usr/local/lib/homestak/packer && ./build.sh'
+scp <build-host-ip>:/usr/local/lib/homestak/packer/images/*/*.qcow2 /tmp/packer-images/
 ```
 
 #### 2. Update Latest Release

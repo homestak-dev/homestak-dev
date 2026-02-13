@@ -65,10 +65,10 @@ Not every change needs full integration testing. Match validation effort to chan
 | Documentation only | None (review) | 0 |
 | CLI argument/help text | Unit tests only | seconds |
 | CLI with new behavior | Manual command test | ~1 min |
-| Documentation, CLI, process | `./run.sh test -M n1-push -H <host>` | ~2 min |
-| Tofu/ansible changes | `./run.sh test -M n1-push -H <host>` | ~2 min |
-| Manifest/operator code | `./run.sh test -M n2-tiered -H <host>` | ~9 min |
-| PVE/nested/packer changes | `./run.sh test -M n2-tiered -H <host>` | ~9 min |
+| Documentation, CLI, process | `./run.sh manifest test -M n1-push -H <host>` | ~2 min |
+| Tofu/ansible changes | `./run.sh manifest test -M n1-push -H <host>` | ~2 min |
+| Manifest/operator code | `./run.sh manifest test -M n2-tiered -H <host>` | ~9 min |
+| PVE/nested/packer changes | `./run.sh manifest test -M n2-tiered -H <host>` | ~9 min |
 
 **Size to Fit principle:** Use the lightest validation that proves the change works. Don't run 9-minute nested-pve scenarios for a CLI help text fix.
 
@@ -90,10 +90,10 @@ Certain changes require validation **before merge**:
 
 | Change Type | Required Validation |
 |-------------|---------------------|
-| Packer template changes | Build image, run `./run.sh test -M n1-push` or `n2-tiered` |
+| Packer template changes | Build image, run `./run.sh manifest test -M n1-push` or `n2-tiered` |
 | Boot/startup optimizations | Measure actual timing before and after |
 | Cloud-init modifications | Full VM lifecycle test |
-| Tofu module changes | `./run.sh test -M n1-push -H <host>` |
+| Tofu module changes | `./run.sh manifest test -M n1-push -H <host>` |
 | Ansible role changes | Run playbook on test VM |
 | iac-driver action changes | Scenario that exercises the action |
 | CLI commands | Full command flow |
@@ -154,21 +154,21 @@ Use `homestak update --branch <name>` to automate this (bootstrap#49).
 cd ~/homestak-dev/iac-driver
 
 # Quick validation (~2 min)
-./run.sh test -M n1-push -H father
+./run.sh manifest test -M n1-push -H father
 
 # Tiered validation (~9 min)
-./run.sh test -M n2-tiered -H father
+./run.sh manifest test -M n2-tiered -H father
 
 # Full 3-level validation (~15 min)
-./run.sh test -M n3-deep -H father
+./run.sh manifest test -M n3-deep -H father
 ```
 
-**Constructor/destructor separately (for debugging):**
+**Apply/destroy separately (for debugging):**
 
 ```bash
-./run.sh create -M n2-tiered -H father
+./run.sh manifest apply -M n2-tiered -H father
 # ... inspect inner PVE ...
-./run.sh destroy -M n2-tiered -H father --yes
+./run.sh manifest destroy -M n2-tiered -H father --yes
 ```
 
 ### 6. Document Results
@@ -178,7 +178,7 @@ Post validation results to the sprint issue:
 ```markdown
 ## Validation - YYYY-MM-DD
 
-**Scenario:** `./run.sh test -M n1-push -H father`
+**Scenario:** `./run.sh manifest test -M n1-push -H father`
 **Host:** father
 **Result:** PASSED
 

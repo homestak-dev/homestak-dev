@@ -44,7 +44,7 @@ As sprints complete, update the release issue:
 
 ### Sprint 155: Documentation (closed)
 - homestak-dev#45
-- Validation: PASSED (`./run.sh test -M n1-push -H father`)
+- Validation: PASSED (`./run.sh manifest test -M n1-push -H father`)
 
 ## Release Readiness
 - [x] Sprint 152 validation evidence
