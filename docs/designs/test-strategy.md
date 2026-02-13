@@ -37,14 +37,14 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 
 **Total:** 12 files, ~5,500 lines (including conftest.py)
 
-**Unified controller additions (iac-driver#146):**
+**Server additions (iac-driver#146, renamed controller → server in #177):**
 | File | Lines | Coverage Focus |
 |------|-------|----------------|
-| `test_ctrl_server.py` | ~400 | HTTPS server, daemon lifecycle, signals |
-| `test_ctrl_auth.py` | ~300 | Provisioning token verification (HMAC, claims, identity match) |
-| `test_ctrl_specs.py` | ~400 | Spec endpoint, caching, SIGHUP |
-| `test_ctrl_repos.py` | ~400 | Git protocol, `_working` branch |
-| `test_ctrl_tls.py` | ~200 | Self-signed cert generation, fingerprint |
+| `test_server_httpd.py` | ~400 | HTTPS server, daemon lifecycle, signals |
+| `test_server_auth.py` | ~300 | Provisioning token verification (HMAC, claims, identity match) |
+| `test_server_specs.py` | ~400 | Spec endpoint, caching, SIGHUP |
+| `test_server_repos.py` | ~400 | Git protocol, `_working` branch |
+| `test_server_tls.py` | ~200 | Self-signed cert generation, fingerprint |
 | `test_resolver_base.py` | ~300 | Shared FK resolution utilities |
 | `test_spec_resolver.py` | ~400 | SpecResolver (migrated from bootstrap) |
 | `test_spec_client.py` | ~300 | HTTP client, error handling, state |
@@ -73,13 +73,7 @@ This document defines the test hierarchy for homestak's lifecycle architecture, 
 | `push-vm-roundtrip` | server + spec_client + tofu | ~2m |
 | `pve-setup` | ansible + PVE host | ~3m |
 | `user-setup` | ansible (users role) | ~30s |
-| `bootstrap-install` | bootstrap + validation | ~2m |
 | `packer-build` | packer + QEMU | ~3m |
-
-**Unified controller additions (iac-driver#146):**
-| Scenario | Components Tested | Duration |
-|----------|-------------------|----------|
-| `controller-repos` | server + git clone | ~30s |
 
 **Characteristics:**
 - Require real PVE host (not mocked)
@@ -373,7 +367,7 @@ Manifest:
 
 ### Unified Controller (iac-driver#146) Contribution to System Tests
 
-The unified controller sprint (iac-driver#146) **enables** multiple system tests:
+The server sprint (iac-driver#146, renamed controller → server in #177) **enables** multiple system tests:
 
 | System Test | Contribution |
 |-------------|----------------------|
