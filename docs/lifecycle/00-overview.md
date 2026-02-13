@@ -222,9 +222,8 @@ Integration testing uses iac-driver scenarios:
 
 | Scenario | Purpose | Duration |
 |----------|---------|----------|
-| `./run.sh test -M n1-push -H <host>` | Quick validation (provision → boot → verify → destroy) | ~2 min |
-| `./run.sh test -M n2-tiered -H <host>` | Tiered validation (PVE + nested VM) | ~9 min |
-| `packer-build-fetch` | Build and retrieve packer images | ~5 min |
+| `./run.sh manifest test -M n1-push -H <host>` | Quick validation (provision → boot → verify → destroy) | ~2 min |
+| `./run.sh manifest test -M n2-tiered -H <host>` | Tiered validation (PVE + nested VM) | ~9 min |
 
 ## Related Documents
 

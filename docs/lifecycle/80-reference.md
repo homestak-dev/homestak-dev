@@ -253,10 +253,10 @@ gh pr status
 ./run.sh scenario --help
 
 # Quick validation
-./run.sh test -M n1-push -H father
+./run.sh manifest test -M n1-push -H father
 
 # Tiered validation
-./run.sh test -M n2-tiered -H father
+./run.sh manifest test -M n2-tiered -H father
 
 # Preflight only
 ./run.sh --preflight -H father
@@ -358,10 +358,9 @@ Types: `fix`, `feat`, `docs`, `test`, `refactor`, `chore`
 
 | Scenario | Use When | Duration |
 |----------|----------|----------|
-| `./run.sh test -M n1-push -H <host>` | Standard changes, docs, CLI | ~2 min |
-| `./run.sh test -M n2-tiered -H <host>` | Tiered/PVE/packer changes | ~9 min |
-| `./run.sh test -M n3-deep -H <host>` | Full 3-level nesting | ~15 min |
-| `packer-build-fetch` | Packer template changes | ~5 min |
+| `./run.sh manifest test -M n1-push -H <host>` | Standard changes, docs, CLI | ~2 min |
+| `./run.sh manifest test -M n2-tiered -H <host>` | Tiered/PVE/packer changes | ~9 min |
+| `./run.sh manifest test -M n3-deep -H <host>` | Full 3-level nesting | ~15 min |
 
 ## Repository Order
 

@@ -91,7 +91,7 @@ For sprint-path work, update scope issues and the sprint issue at milestones —
 | New Python module | Yes | Test logic in isolation |
 | Shell script functions | Yes (bats) | Test argument handling, output |
 | Ansible role | No | Use integration test (playbook run) |
-| Tofu module | No | Use integration test (`./run.sh test -M n1-push`) |
+| Tofu module | No | Use integration test (`./run.sh manifest test -M n1-push`) |
 | Documentation only | No | Review is sufficient |
 | Configuration changes | No | Integration test validates |
 

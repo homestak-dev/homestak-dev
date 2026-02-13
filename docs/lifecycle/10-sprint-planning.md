@@ -138,16 +138,16 @@ Select based on sprint scope:
 
 | Sprint Scope | Scenario | When to Use |
 |--------------|----------|-------------|
-| Documentation, CLI, process | `./run.sh test -M n1-push -H <host>` | No IaC code changes |
-| Tofu/ansible changes | `./run.sh test -M n1-push -H <host>` | Standard VM provisioning |
-| Manifest/operator changes | `./run.sh test -M n2-tiered -H <host>` | Tiered topology code |
-| PVE/nested/packer changes | `./run.sh test -M n2-tiered -H <host>` | Full stack validation |
+| Documentation, CLI, process | `./run.sh manifest test -M n1-push -H <host>` | No IaC code changes |
+| Tofu/ansible changes | `./run.sh manifest test -M n1-push -H <host>` | Standard VM provisioning |
+| Manifest/operator changes | `./run.sh manifest test -M n2-tiered -H <host>` | Tiered topology code |
+| PVE/nested/packer changes | `./run.sh manifest test -M n2-tiered -H <host>` | Full stack validation |
 
 Document in sprint issue:
 
 ```markdown
 ## Validation
-**Scenario:** `./run.sh test -M n2-tiered -H father`
+**Scenario:** `./run.sh manifest test -M n2-tiered -H father`
 **Host:** father
 **Rationale:** Sprint includes nested-pve changes
 ```
