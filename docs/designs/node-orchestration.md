@@ -792,6 +792,8 @@ Assertions:
 
 **Validates:** #140 (N-level), tiered depth
 
+**Status:** Available — `--self-addr` propagates routable address at depth 2+ ([iac-driver#200](https://github.com/homestak-dev/iac-driver/issues/200)).
+
 ```
 Manifest:
   nodes:
@@ -811,6 +813,7 @@ Assertions:
 - Creation order: level-1 → level-2 → level-3
 - Destruction order: level-3 → level-2 → level-1
 - Each level independently functional
+- Server propagation chain: each PVE level serves repos to its children
 ```
 
 ### ST-5: Mixed Execution Modes
@@ -932,7 +935,7 @@ Assertions:
 | ST-1 | `pull-vm-roundtrip` | **Available** (Sprint homestak-dev#201) |
 | ST-2 | `./run.sh test -M n1-push` | **Available** |
 | ST-3 | `./run.sh test -M n2-tiered` | **Available** |
-| ST-4 | `./run.sh test -M n3-deep` | **Available** |
+| ST-4 | `./run.sh test -M n3-deep` | **Available** — `--self-addr` propagates routable address (iac-driver#200) |
 | ST-5 | None | New capability (mixed execution modes) |
 | ST-6 | None | New capability (parallel peers) |
 | ST-7 | None | New capability (manifest validation) |
@@ -952,6 +955,7 @@ Assertions:
 
 | Date | Change |
 |------|--------|
+| 2026-02-13 | Sprint #243 (Branch Propagation): ST-4 unblocked — `--self-addr` fix (iac-driver#200); update status and gap table |
 | 2026-02-11 | Sprint #231 (Provisioning Token): Update pull/hybrid execution sequences for token flow; update ST-1 steps for HMAC token auth; update ST-5 for token minting; update config phase row in execution model table; add provisioning-token.md to related docs |
 | 2026-02-08 | Terminology: controller → server in architecture diagram (aligns with server-daemon.md); add server-daemon.md to Related Documents |
 | 2026-02-07 | Align with updated epics: Status → Active; manifest v1/v2 framing updated (v2 is current, v1 is legacy); phased implementation adds release status; #113/#120 marked complete; ST-1/ST-2 assertions updated (config phase implemented) |

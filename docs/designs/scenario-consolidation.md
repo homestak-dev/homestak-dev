@@ -80,6 +80,8 @@ The subtree manifest is serialized to JSON and passed via SSH:
 ./run.sh create --manifest-json '<json>' -H <hostname> --json-output
 ```
 
+**HOMESTAK_SOURCE propagation:** `RecursiveScenarioAction._build_serve_repos_prefix()` reads `HOMESTAK_SOURCE`, `HOMESTAK_TOKEN`, and `HOMESTAK_REF` from `os.environ` and prepends them to the SSH command. Each PVE level's executor sets `HOMESTAK_SOURCE` to its own server address via `_set_source_env()`, creating a chain: father → root-pve → leaf-pve. At depth 2+, `_set_source_env` uses `_detect_external_ip()` when `ssh_host` is `localhost` to ensure a routable address ([iac-driver#200](https://github.com/homestak-dev/iac-driver/issues/200)).
+
 ### RecursiveScenarioAction Extension
 
 Added `raw_command` field. When set, replaces the default `homestak scenario <name>` command:
