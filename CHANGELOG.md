@@ -6,6 +6,9 @@
 - Add FHS branch alignment guidance to validation docs (#231)
 - Add provisioning token design doc (#231)
 
+### Documentation
+- Update CLI references for noun-action pattern in lifecycle docs (#239)
+
 ### Changed
 - Update cross-repo docs for server daemon rename: controller → server (#227)
 
