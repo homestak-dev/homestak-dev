@@ -183,28 +183,28 @@ Manifest:
 Manifest:
   pattern: tiered
   nodes:
-    - name: inner-pve
+    - name: root-pve
       spec: pve
       preset: vm-large
       parent: null
 
-    - name: test-vm
+    - name: edge
       spec: base
       preset: vm-small
-      parent: inner-pve
+      parent: root-pve
 ```
 
 **Steps:**
-1. Create inner-pve on driver host
-2. inner-pve reaches platform ready (PVE installed)
-3. Create test-vm on inner-pve
-4. test-vm reaches platform ready
+1. Create root-pve on driver host
+2. root-pve reaches platform ready (PVE installed)
+3. Create edge on root-pve
+4. edge reaches platform ready
 5. Destroy in reverse order
 
 **Assertions:**
 - Parent created before children
 - Children destroyed before parent
-- SSH chain works: driver → inner-pve → test-vm
+- SSH chain works: driver → root-pve → edge
 
 ### ST-4: Tiered Topology (3-level)
 
@@ -252,19 +252,19 @@ Manifest:
   execution:
     default_mode: pull
   nodes:
-    - name: inner-pve
+    - name: root-pve
       spec: pve
       execution:
         mode: push        # Override
 
     - name: app-vm
       spec: base
-      parent: inner-pve
+      parent: root-pve
       # Inherits: pull
 ```
 
 **Assertions:**
-- inner-pve configured by driver (push)
+- root-pve configured by driver (push)
 - app-vm fetched spec from server (pull)
 - Spec server served app-vm's spec with correct auth
 

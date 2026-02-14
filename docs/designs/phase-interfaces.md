@@ -177,10 +177,10 @@ Each manifest-node combination has isolated state:
 
 ```
 .states/
-├── nested-test-inner-pve/
+├── nested-test-root-pve/
 │   ├── data/             # TF_DATA_DIR (plugins, modules)
 │   └── terraform.tfstate # Tofu state
-└── nested-test-test-vm/
+└── nested-test-edge/
     ├── data/
     └── terraform.tfstate
 ```
@@ -208,8 +208,8 @@ Each manifest-node combination has isolated state:
   "started": "2026-02-03T10:00:00Z",
   "status": "in_progress",
   "nodes": {
-    "inner-pve": {"status": "complete", "vmid": 99011},
-    "test-vm": {"status": "in_progress", "phase": "config"}
+    "root-pve": {"status": "complete", "vmid": 99011},
+    "edge": {"status": "in_progress", "phase": "config"}
   }
 }
 ```

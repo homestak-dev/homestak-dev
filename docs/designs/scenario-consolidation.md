@@ -41,7 +41,7 @@ Running a retired scenario name prints a migration hint and exits with code 1.
 The operator handles root nodes (depth 0) locally. PVE nodes with children are delegated:
 
 ```
-Outer host (father)                    Inner PVE (root-pve)
+Driver host (father)                   PVE node (root-pve)
 ────────────────────                   ─────────────────────
 Operator creates root-pve (depth 0)
   → tofu apply, start, wait IP
@@ -57,15 +57,15 @@ When the operator creates a PVE node that has children, it runs these phases bef
 
 | Phase | Action | Purpose |
 |-------|--------|---------|
-| bootstrap | `BootstrapAction` | curl\|bash installer on inner host |
+| bootstrap | `BootstrapAction` | curl\|bash installer on target PVE node |
 | copy_secrets | `CopySecretsAction` | SCP secrets.yaml |
 | inject_ssh_key | `InjectSSHKeyAction` | Outer host key → inner secrets |
 | copy_private_key | `CopySSHPrivateKeyAction` | Private key for inner → child SSH |
-| pve-setup | `RecursiveScenarioAction` | Run pve-setup on inner host |
+| pve-setup | `RecursiveScenarioAction` | Run pve-setup on target PVE node |
 | configure_bridge | `ConfigureNetworkBridgeAction` | Create vmbr0 from eth0 |
 | generate_node_config | `GenerateNodeConfigAction` | `make node-config FORCE=1` |
 | create_api_token | `CreateApiTokenAction` | pveum token + inject into secrets |
-| inject_self_ssh_key | `InjectSelfSSHKeyAction` | Inner host's own key |
+| inject_self_ssh_key | `InjectSelfSSHKeyAction` | PVE node's own key |
 | download_images | `DownloadGitHubReleaseAction` | Images needed by children |
 
 ### Subtree Delegation

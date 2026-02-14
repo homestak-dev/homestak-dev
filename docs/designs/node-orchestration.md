@@ -106,7 +106,7 @@ host-a
 **Nested** (tiered, 2-level):
 ```
 host-a
-└── inner-host
+└── pve-host
     ├── node-1
     └── node-2
 ```
@@ -284,7 +284,7 @@ execution:
   default_mode: pull                   # Document-wide default
 
 nodes:
-  - name: inner-pve
+  - name: root-pve
     type: vm
     spec: pve
     preset: vm-large
@@ -292,12 +292,12 @@ nodes:
     execution:
       mode: push                       # Override: push for this node
 
-  - name: test
+  - name: edge
     type: vm
     spec: base
     preset: vm-small
     image: debian-12-custom
-    parent: inner-pve                  # Tiered relationship
+    parent: root-pve                   # Tiered relationship
     # Inherits default_mode: pull
 ```
 
@@ -329,9 +329,9 @@ Within a manifest, execution mode flows from document default with per-node over
 ```
 Document default_mode: pull
     │
-    ├── inner-pve: mode: push (explicit override)
+    ├── root-pve: mode: push (explicit override)
     │       │
-    │       └── test: (inherits default: pull)
+    │       └── edge: (inherits default: pull)
     │
     └── monitor: mode: push (explicit override)
 ```
@@ -342,7 +342,7 @@ This allows mixed-mode deployments: push for infrastructure nodes, pull for appl
 
 With manifests owning topology + execution, what role does `site-config/v2/nodes/` play?
 
-**The identity problem:** A node's filename is its primary key (`pve.yaml` → `pve`). This makes nodes instances, not templates. You can't instantiate "pve" twice — you'd need `inner-pve.yaml`, `outer-pve.yaml`, defeating reusability.
+**The identity problem:** A node's filename is its primary key (`pve.yaml` → `pve`). This makes nodes instances, not templates. You can't instantiate "pve" twice — you'd need `root-pve.yaml`, `leaf-pve.yaml`, defeating reusability.
 
 **What's actually reusable:**
 - `specs/` — what to become (packages, services) ✓
@@ -355,7 +355,7 @@ With manifests owning topology + execution, what role does `site-config/v2/nodes
 ```yaml
 # manifests/nested-test.yaml
 nodes:
-  - name: inner-pve           # Instance identity (unique per manifest)
+  - name: root-pve            # Instance identity (unique per manifest)
     type: vm
     spec: pve                 # FK to specs/pve.yaml
     preset: vm-large          # FK to presets/vm-large.yaml
@@ -363,12 +363,12 @@ nodes:
     execution:
       mode: push
 
-  - name: test
+  - name: edge
     type: vm
     spec: base
     preset: vm-small
     image: debian-12-custom
-    parent: inner-pve         # Topology relationship
+    parent: root-pve          # Topology relationship
 ```
 
 **Resulting structure:**
@@ -760,32 +760,32 @@ Manifest:
   execution:
     default_mode: push
   nodes:
-    - name: inner-pve
+    - name: root-pve
       type: vm
       spec: pve
       preset: vm-large
       parent: null
 
-    - name: test-vm
+    - name: edge
       type: vm
       spec: base
       preset: vm-small
-      parent: inner-pve
+      parent: root-pve
 
 Steps:
 1. ./run.sh create -M nested-test -H father
-2. Driver creates inner-pve on father
-3. inner-pve reaches platform ready (PVE installed)
-4. Driver creates test-vm on inner-pve
-5. test-vm reaches platform ready
+2. Driver creates root-pve on father
+3. root-pve reaches platform ready (PVE installed)
+4. Driver creates edge on root-pve
+5. edge reaches platform ready
 6. ./run.sh destroy -M nested-test -H father
-7. Destroy order: test-vm first, then inner-pve
+7. Destroy order: edge first, then root-pve
 
 Assertions:
 - Parent created before children
 - Children destroyed before parent
 - Each node independently reaches platform ready
-- SSH chain works: driver → inner-pve → test-vm
+- SSH chain works: driver → root-pve → edge
 ```
 
 ### ST-4: Tiered Topology (3-level)
@@ -825,7 +825,7 @@ Manifest:
   execution:
     default_mode: pull
   nodes:
-    - name: inner-pve
+    - name: root-pve
       spec: pve
       parent: null
       execution:
@@ -833,18 +833,18 @@ Manifest:
 
     - name: app-vm
       spec: base
-      parent: inner-pve
+      parent: root-pve
       # Inherits: pull    # Apps converge autonomously
 
 Steps:
 1. ./run.sh create -M mixed-mode -H father
-2. inner-pve created via push (driver configures)
+2. root-pve created via push (driver configures)
 3. app-vm provisioned with provisioning token (minted at create time)
 4. app-vm boots, presents token, fetches spec via pull (autonomous)
 5. Both reach platform ready
 
 Assertions:
-- inner-pve configured by driver (push)
+- root-pve configured by driver (push)
 - app-vm fetched spec from server (pull) using provisioning token
 - Token `s` claim resolved to correct spec for app-vm
 ```

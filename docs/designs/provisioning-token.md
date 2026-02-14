@@ -155,9 +155,9 @@ secrets.yaml (operator workspace, decrypted)
     ├── ConfigResolver loads at `resolve_inline_vm()` time
     │   └── operator mints tokens during `tofu apply`
     │
-    └── nested PVE: ansible copy-files.yml syncs site-config to inner host
-        └── inner PVE has signing_key ──► can verify tokens for its children
-            └── inner operator can mint tokens for subtree delegation
+    └── delegated PVE node: ansible copy-files.yml syncs site-config to child PVE
+        └── child PVE has signing_key ──► can verify tokens for its children
+            └── child operator can mint tokens for subtree delegation
 ```
 
 **Key property:** The recursion works naturally at any depth. Each PVE host in the tree has `secrets.yaml` → has `signing_key` → can both mint and verify tokens for its children.

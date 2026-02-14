@@ -335,7 +335,7 @@ The operator gains server lifecycle awareness for all manifest verbs. This is ad
 
 ### Nested PVE and Server Propagation Chain
 
-Inner PVE hosts need servers for subtree delegation. The operator starts a server on each PVE level via `_ensure_server()`, creating a propagation chain:
+PVE hosts with children need servers for subtree delegation. The operator starts a server on each PVE level via `_ensure_server()`, creating a propagation chain:
 
 ```
 father:44443 → root-pve:44443 → leaf-pve:44443
@@ -343,7 +343,7 @@ father:44443 → root-pve:44443 → leaf-pve:44443
 
 Each level serves repos and specs to its children, not to the root directly.
 
-**Address resolution (iac-driver#200):** When `_ensure_server()` runs on an inner PVE, `self.config.ssh_host` may resolve to `localhost` (from `nested-pve.yaml: api_endpoint: https://localhost:8006`). `_set_source_env()` detects loopback addresses and uses `_detect_external_ip()` (Python socket) to determine the host's network-facing IP. This ensures `HOMESTAK_SOURCE` contains a routable address for child hosts.
+**Address resolution (iac-driver#200):** When `_ensure_server()` runs on a delegated PVE node, `self.config.ssh_host` may resolve to `localhost` (from `nested-pve.yaml: api_endpoint: https://localhost:8006`). `_set_source_env()` detects loopback addresses and uses `_detect_external_ip()` (Python socket) to determine the host's network-facing IP. This ensures `HOMESTAK_SOURCE` contains a routable address for child hosts.
 
 **spec_server override (iac-driver#200):** At depth 2+, `TofuApplyAction` overrides `spec_server` in the resolved tfvars with `HOMESTAK_SOURCE` when set. This ensures cloud-init runcmd on child VMs bootstraps from the immediate parent's server, not the hardcoded site.yaml value.
 
@@ -469,5 +469,5 @@ kill -9 $(cat /var/run/homestak/server-44443.pid)  # Simulate crash
 ## Open Questions
 
 1. **Port collision:** If two users on the same host run `./run.sh server start`, port-qualified PID files handle this. But should we warn about port conflicts at startup?
-2. **Signal propagation in nested PVE:** When the outer operator stops the inner PVE server via SSH, does SIGTERM propagate correctly through the subtree delegation chain?
+2. **Signal propagation in tiered PVE:** When the parent operator stops a child PVE node's server via SSH, does SIGTERM propagate correctly through the subtree delegation chain?
 3. **Test coverage:** Should `daemon.py` have unit tests (mocking fork/exec), or is integration testing sufficient?
