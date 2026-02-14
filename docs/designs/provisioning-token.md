@@ -347,14 +347,14 @@ Permanent failure:
 **Server-side log:** `/var/log/homestak/server.log`
 
 ```
-2026-02-11T12:00:01Z [INFO]  GET /spec/edge from=10.0.12.155
+2026-02-11T12:00:01Z [INFO]  GET /spec/edge from=198.51.100.155
 2026-02-11T12:00:01Z [INFO]  token verified: n=edge s=base iat=2026-02-11T11:50:00Z
 2026-02-11T12:00:01Z [INFO]  serving spec=base (resolved, 847 bytes)
 ```
 
 Failed request:
 ```
-2026-02-11T12:00:01Z [INFO]  GET /spec/edge from=10.0.12.155
+2026-02-11T12:00:01Z [INFO]  GET /spec/edge from=198.51.100.155
 2026-02-11T12:00:01Z [WARN]  token verification failed: E301 Invalid token signature node=edge
 ```
 

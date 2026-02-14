@@ -176,7 +176,7 @@ src/
 ```markdown
 ## Example
 
-HOMESTAK_SOURCE=http://10.0.12.61:8000 ./install.sh
+HOMESTAK_SOURCE=http://198.51.100.61:8000 ./install.sh
 ```
 
 *Why to avoid:* Leaks infrastructure details, may confuse readers who try to use them. Better:

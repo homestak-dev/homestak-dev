@@ -282,9 +282,9 @@ identity:
   domain: homestak.local
 
 network:
-  ip: 10.0.12.100
-  gateway: 10.0.12.1
-  dns: [10.0.12.1, 1.1.1.1]
+  ip: 198.51.100.100
+  gateway: 198.51.100.1
+  dns: [198.51.100.1, 1.1.1.1]
 
 access:
   posture: dev               # FK to postures/

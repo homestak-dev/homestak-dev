@@ -200,7 +200,7 @@ Consistent terminology across all repos:
 ## Conventions
 
 - **VM IDs**: 5-digit (10000+ dev, 20000+ k8s, 99900+ integration test)
-- **Networks**: dev 10.10.10.0/24, k8s 10.10.20.0/24, management 10.0.12.0/24
+- **Networks**: dev 10.10.10.0/24, k8s 10.10.20.0/24, management 198.51.100.0/24
 - **Hostnames**: `{cluster}{instance}` (dev1, kubeadm1, router)
 - **Environments**: dev (permissive) vs prod (hardened)
 
