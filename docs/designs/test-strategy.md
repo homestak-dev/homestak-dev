@@ -346,7 +346,7 @@ Manifest:
 | ST-1 | Flat | Pull | 1 | Config phase, spec fetch | config-apply.md |
 | ST-2 | Flat | Push | 1 | Push execution path | cli.py --manifest |
 | ST-3 | Tiered | Push | 2 | Parent-child ordering | cli.py --manifest |
-| ST-4 | Tiered | Push | 3 | N-level nesting | cli.py --manifest |
+| ST-4 | Tiered | Push | 3 | N-level nesting | - |
 | ST-5 | Tiered | Mixed | 2 | Mode coexistence | cli.py --manifest |
 | ST-6 | Flat | Push | 1 (x3) | Parallel creation | cli.py --manifest |
 | ST-7 | N/A | N/A | N/A | Schema/FK validation | manifest-schema-v2.md |
@@ -359,7 +359,7 @@ Manifest:
 | ST-1 | `pull-vm-roundtrip` | **Available** — full pull mode with provisioning token (iac-driver#187) | - |
 | ST-2 | `./run.sh test -M n1-push` | **Available** — operator handles flat VM lifecycle | - |
 | ST-3 | `./run.sh test -M n2-tiered` | **Available** — operator handles tiered PVE+VM | - |
-| ST-4 | `./run.sh test -M n3-deep` | **Available** — operator delegates via SSH | - |
+| ST-4 | `./run.sh test -M n3-deep` | **Available** — `--self-addr` propagates routable address at depth 2+ (iac-driver#200) | - |
 | ST-5 | None | Provisioning token enables pull-side auth; still needs mixed-mode manifest support | Future |
 | ST-6 | None | New capability (parallel peer creation) | Future |
 | ST-7 | None | New capability (manifest validation) | Future |
@@ -444,6 +444,7 @@ pytest tests/test_config_resolver.py -k "test_resolve_inline_vm"  # Specific tes
 
 | Date | Change |
 |------|--------|
+| 2026-02-13 | Sprint #243 (Branch Propagation): ST-4 unblocked — `--self-addr` fix (iac-driver#200) |
 | 2026-02-11 | Sprint #231 (Provisioning Token): Updated test_ctrl_auth.py scope (posture → HMAC); updated ST-1 steps for token flow; added 12 coverage matrix rows for new requirements; updated ST-5 gap status |
 | 2026-02-08 | Terminology: controller → server in component descriptions and file paths (aligns with server-daemon.md) |
 | 2026-02-06 | Update for scenario consolidation (#195): retired scenarios replaced with verb commands; ST-2/3/4 now available; system tests no longer "future" |

@@ -333,9 +333,19 @@ No more `Popen` fire-and-forget. No more `ss -tlnp | grep`. No more 3s sleep.
 
 The operator gains server lifecycle awareness for all manifest verbs. This is additive — the overhead is negligible and ensures the server is always available.
 
-### Nested PVE
+### Nested PVE and Server Propagation Chain
 
-Inner PVE hosts need servers for subtree delegation. The operator already starts servers on inner PVE via `StartServerAction`. With `server start`, this becomes reliable over SSH without FD inheritance workarounds.
+Inner PVE hosts need servers for subtree delegation. The operator starts a server on each PVE level via `_ensure_server()`, creating a propagation chain:
+
+```
+father:44443 → root-pve:44443 → leaf-pve:44443
+```
+
+Each level serves repos and specs to its children, not to the root directly.
+
+**Address resolution (iac-driver#200):** When `_ensure_server()` runs on an inner PVE, `self.config.ssh_host` may resolve to `localhost` (from `nested-pve.yaml: api_endpoint: https://localhost:8006`). `_set_source_env()` detects loopback addresses and uses `_detect_external_ip()` (Python socket) to determine the host's network-facing IP. This ensures `HOMESTAK_SOURCE` contains a routable address for child hosts.
+
+**spec_server override (iac-driver#200):** At depth 2+, `TofuApplyAction` overrides `spec_server` in the resolved tfvars with `HOMESTAK_SOURCE` when set. This ensures cloud-init runcmd on child VMs bootstraps from the immediate parent's server, not the hardcoded site.yaml value.
 
 ### Bootstrap / Cloud-Init
 
@@ -452,6 +462,7 @@ kill -9 $(cat /var/run/homestak/server-44443.pid)  # Simulate crash
 
 | Date | Change |
 |------|--------|
+| 2026-02-13 | Sprint #243 (Branch Propagation): Add server propagation chain and address resolution (iac-driver#200); document `_detect_external_ip` and spec_server override for depth 2+ |
 | 2026-02-11 | Sprint #231 (Provisioning Token): Note auth model shift in auth.py (posture-based → HMAC); add provisioning token reference to Bootstrap/Cloud-Init section; add provisioning-token.md to related docs |
 | 2026-02-08 | Initial document |
 

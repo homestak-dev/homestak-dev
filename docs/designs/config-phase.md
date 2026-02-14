@@ -298,6 +298,8 @@ Add `./run.sh config` to the existing runcmd block:
 
 **Note:** Cloud-init sources `/etc/profile.d/homestak.sh` which provides `HOMESTAK_SPEC_SERVER` and `HOMESTAK_TOKEN` (a provisioning token minted at create time — see [provisioning-token.md](provisioning-token.md)). The runcmd bootstraps from the server (curls `install.sh`, clones repos via HTTPS with `HOMESTAK_REF=_working`). `SKIP_SITE_CONFIG=1` skips site-config clone since VMs receive pre-resolved specs via token. Then `./run.sh config --fetch --insecure` presents the token, fetches the spec, and applies config locally.
 
+**Depth 2+ override ([iac-driver#200](https://github.com/homestak-dev/iac-driver/issues/200)):** At depth 2+, `spec_server` in tfvars must point to the immediate parent's server, not the root host from site.yaml. `TofuApplyAction` overrides `spec_server` with `HOMESTAK_SOURCE` when set, so cloud-init bootstraps from the propagation chain (e.g., root-pve:44443 instead of father:44443).
+
 ## Integration Points
 
 ### Cross-Repo Data Flow
