@@ -160,11 +160,11 @@ When a feature spans multiple components or repos, trace the data and control fl
 | What data crosses component boundaries? | Config files, secrets, SSH keys |
 | What paths are used at each stage? | FHS `/usr/local/lib/homestak/` vs `$HOMESTAK_LIB` for dev |
 | What assumptions does each component make? | "FHS paths exist" vs "env vars set for dev" |
-| What happens at N+1 depth/scale? | Inner PVE runs tofu - where does it find envs? |
+| What happens at N+1 depth/scale? | PVE node runs tofu - where does it find envs? |
 
 **Diagram the flow:**
 ```
-Outer Host                    Inner PVE                     Leaf VM
+Driver Host                   PVE Node                      Leaf VM
 ┌──────────┐                  ┌──────────┐                  ┌──────────┐
 │ run.sh   │ ──SSH+rsync───▶  │ site-cfg │ ──tofu apply──▶ │ created  │
 │ site-cfg │                  │ (where?) │                  │          │

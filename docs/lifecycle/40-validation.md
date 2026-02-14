@@ -167,7 +167,7 @@ cd ~/homestak-dev/iac-driver
 
 ```bash
 ./run.sh manifest apply -M n2-tiered -H father
-# ... inspect inner PVE ...
+# ... inspect PVE node ...
 ./run.sh manifest destroy -M n2-tiered -H father --yes
 ```
 
