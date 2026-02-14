@@ -360,9 +360,9 @@ Manifest:
 | ST-2 | `./run.sh test -M n1-push` | **Available** — operator handles flat VM lifecycle | - |
 | ST-3 | `./run.sh test -M n2-tiered` | **Available** — operator handles tiered PVE+VM | - |
 | ST-4 | `./run.sh test -M n3-deep` | **Available** — `--self-addr` propagates routable address at depth 2+ (iac-driver#200) | - |
-| ST-5 | None | Provisioning token enables pull-side auth; still needs mixed-mode manifest support | Future |
+| ST-5 | `./run.sh test -M n2-mixed` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, site-config#67) | - |
 | ST-6 | None | New capability (parallel peer creation) | Future |
-| ST-7 | None | New capability (manifest validation) | Future |
+| ST-7 | `./run.sh manifest validate -M <name> -H <host>` | **Available** — validates manifest FKs against site-config (iac-driver#207) | - |
 | ST-8 | Partial | Scenarios are mostly idempotent but not formally tested | Core |
 
 ### Unified Controller (iac-driver#146) Contribution to System Tests

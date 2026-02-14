@@ -820,33 +820,46 @@ Assertions:
 
 **Validates:** #140 (push/pull coexistence), mode inheritance
 
+**Manifest:** `site-config/manifests/n2-mixed.yaml`
+
+```yaml
+schema_version: 2
+name: n2-mixed
+description: "Mixed-mode: PVE node (push) + pull-mode leaf VM (ST-5)"
+pattern: tiered
+execution:
+  default_mode: push
+nodes:
+  - name: root-pve
+    type: pve
+    spec: pve
+    preset: vm-large
+    image: debian-13-pve
+    vmid: 99011
+    disk: 64
+  - name: edge
+    type: vm
+    spec: base
+    preset: vm-small
+    image: debian-12
+    vmid: 99021
+    parent: root-pve
+    execution:
+      mode: pull
 ```
-Manifest:
-  execution:
-    default_mode: pull
-  nodes:
-    - name: root-pve
-      spec: pve
-      parent: null
-      execution:
-        mode: push        # Override: infrastructure via push
 
-    - name: app-vm
-      spec: base
-      parent: root-pve
-      # Inherits: pull    # Apps converge autonomously
-
+```
 Steps:
-1. ./run.sh create -M mixed-mode -H father
-2. root-pve created via push (driver configures)
-3. app-vm provisioned with provisioning token (minted at create time)
-4. app-vm boots, presents token, fetches spec via pull (autonomous)
+1. ./run.sh test -M n2-mixed -H father
+2. root-pve created and configured via push (operator runs ansible over SSH)
+3. edge provisioned with provisioning token (minted at create time)
+4. edge boots, presents token, fetches spec via pull (autonomous)
 5. Both reach platform ready
 
 Assertions:
-- root-pve configured by driver (push)
-- app-vm fetched spec from server (pull) using provisioning token
-- Token `s` claim resolved to correct spec for app-vm
+- root-pve configured by driver (push) — no spec injection in cloud-init
+- edge fetched spec from server (pull) using provisioning token
+- Token `s` claim resolved to correct spec for edge
 ```
 
 ### ST-6: Flat Topology (Multiple Peers)
@@ -883,18 +896,17 @@ Assertions:
 
 ### ST-7: Manifest Validation
 
-**Validates:** Schema enforcement, FK resolution
+**Validates:** Schema enforcement, FK resolution (iac-driver#207)
 
 ```
 Steps:
-1. `./run.sh validate -M valid` → exit 0
-2. `./run.sh validate -M invalid-schema` → exit 1, schema error
-3. `./run.sh validate -M invalid-fk` → exit 1, unresolved FK
+1. `./run.sh manifest validate -M n1-push -H father` → exit 0 (valid)
+2. `./run.sh manifest validate -M invalid-fk -H father` → exit 1 (unresolved FK)
 
 Assertions:
-- Valid manifests pass
-- Schema violations caught (missing required fields, wrong types)
+- Valid manifests pass (all FKs resolve to existing site-config entities)
 - Unresolved FKs caught (spec: nonexistent, preset: unknown)
+- Schema validation via site-config's validate-schemas.sh
 ```
 
 ### ST-8: Action Idempotency
@@ -936,9 +948,9 @@ Assertions:
 | ST-2 | `./run.sh test -M n1-push` | **Available** |
 | ST-3 | `./run.sh test -M n2-tiered` | **Available** |
 | ST-4 | `./run.sh test -M n3-deep` | **Available** — `--self-addr` propagates routable address (iac-driver#200) |
-| ST-5 | None | New capability (mixed execution modes) |
+| ST-5 | `./run.sh test -M n2-mixed` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, site-config#67) |
 | ST-6 | None | New capability (parallel peers) |
-| ST-7 | None | New capability (manifest validation) |
+| ST-7 | `./run.sh manifest validate -M <name> -H <host>` | **Available** — validates manifest FKs against site-config (iac-driver#207) |
 | ST-8 | Partial (scenarios are mostly idempotent) | Formal validation |
 
 ## Related Documents
@@ -955,6 +967,7 @@ Assertions:
 
 | Date | Change |
 |------|--------|
+| 2026-02-14 | Sprint #249 (Config Phase Completion): ST-5 available — n2-mixed manifest (iac-driver#206, site-config#67); ST-7 available — manifest validate verb (iac-driver#207) |
 | 2026-02-13 | Sprint #243 (Branch Propagation): ST-4 unblocked — `--self-addr` fix (iac-driver#200); update status and gap table |
 | 2026-02-11 | Sprint #231 (Provisioning Token): Update pull/hybrid execution sequences for token flow; update ST-1 steps for HMAC token auth; update ST-5 for token minting; update config phase row in execution model table; add provisioning-token.md to related docs |
 | 2026-02-08 | Terminology: controller → server in architecture diagram (aligns with server-daemon.md); add server-daemon.md to Related Documents |
