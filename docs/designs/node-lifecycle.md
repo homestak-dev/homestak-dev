@@ -435,6 +435,7 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/ia
 
 | Date | Change |
 |------|--------|
+| 2026-02-14 | Sprint #249: Push-mode config implemented (iac-driver#206); both push and pull modes now available |
 | 2026-02-08 | Terminology: controller → server (aligns with server-daemon.md rename) |
 | 2026-02-07 | Align with updated epics: pull model step 5 no longer "(future)"; replace aspirational `lifecycle/` directory with actual implementation structure |
 | 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |

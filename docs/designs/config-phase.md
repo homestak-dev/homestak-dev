@@ -28,21 +28,23 @@ This issue formalizes the config phase:
 ```
                    Push Mode                              Pull Mode
                    ─────────                              ─────────
-Driver             1. tofu apply                          1. tofu apply
+Driver             1. tofu apply (no spec injection)      1. tofu apply (with HOMESTAK_TOKEN)
                    2. start VM                            2. start VM
                    3. wait IP                             3. wait IP
                    4. wait SSH                            4. wait SSH
-                   5. SSH → ./run.sh config               5. poll for config-complete
-                      ↓
-VM                 6. reads spec.yaml                     5a. cloud-init runcmd:
-                   7. maps to ansible vars                    ./run.sh config --fetch
-                   8. runs ansible roles                  5b. fetches spec, applies config
-                   9. writes config-complete              5c. writes config-complete
+                   5. refresh apt cache                   5. poll for config-complete
+                   6. ansible-playbook over SSH
+                   7. write config-complete marker
                       ↓                                      ↓
-Driver             10. verify marker                      6. marker found → done
+VM                                                        5a. cloud-init runcmd:
+                                                              ./run.sh config fetch --insecure
+                                                          5b. fetches spec, applies config
+                                                          5c. writes config-complete
+                      ↓                                      ↓
+Driver             8. verify marker                       6. marker found → done
 ```
 
-Both paths run the same iac-driver config implementation. The difference is who triggers it.
+Both paths apply the same ansible roles (base, users, security). Push mode runs ansible from the controller over SSH; pull mode runs it locally on the VM via cloud-init.
 
 ### Key Components Affected
 
@@ -143,7 +145,6 @@ New playbook `ansible/playbooks/config-apply.yml`:
 ---
 - name: Apply specification
   hosts: all
-  connection: local
   roles:
     - homestak.debian.base
     - homestak.debian.users
@@ -197,9 +198,8 @@ elif exec_mode == 'pull':
     # Pull: VM self-configures, just poll for completion
     self._wait_for_config_complete(exec_node, ip, context)
 else:
-    # Push (default): driver triggers config
-    # (future: SSH in and run ./run.sh config)
-    pass  # No config push implemented yet; just provision + verify
+    # Push (default): driver runs ansible from controller over SSH
+    self._push_config(exec_node, ip, context)
 ```
 
 New method `_wait_for_config_complete()`:
@@ -486,7 +486,16 @@ nodes:
 **Known issues:**
 - ~~iac-driver#166: `StartSpecServerAction` SSH FD inheritance~~ — **Fixed** (Sprint #209): close inherited FDs > 2 before exec
 
-**Deferred (as planned):**
-- Push-mode SSH config (existing push uses tofu+ansible; additive)
+**Sprint #249 (Config Phase Completion, homestak-dev#249):**
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Push-mode config (`_push_config`) | Done | Operator runs ansible from controller over SSH (iac-driver#206) |
+| Manifest validate verb | Done | `./run.sh manifest validate -M <name> -H <host>` (iac-driver#207) |
+| n2-mixed manifest (ST-5) | Done | Push-mode PVE + pull-mode VM (site-config#67) |
+| Push-mode cloud-init race fix | Done | Skip spec injection for push-mode nodes |
+| Packer apt cache fix | Done | Stop removing apt lists in cleanup (packer#47) |
+
+**Deferred:**
 - PVE+pull manifest validation (edge case, non-critical)
 - `HOMESTAK_INSECURE` env var for spec_client
