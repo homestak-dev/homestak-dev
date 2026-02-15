@@ -827,10 +827,6 @@ cmd_packer() {
                 action="remove"
                 shift
                 ;;
-            --dry-run)
-                dry_run=true
-                shift
-                ;;
             --execute)
                 dry_run=false
                 shift
@@ -845,6 +841,7 @@ cmd_packer() {
                 ;;
             --force)
                 force=true
+                dry_run=false
                 shift
                 ;;
             --all)
@@ -917,7 +914,7 @@ cmd_packer() {
             if [[ "$changed" == "true" ]]; then
                 echo -e "${YELLOW}Templates have changed.${NC}"
                 echo "Build new images: cd packer && ./build.sh"
-                echo "Then upload:      release.sh packer --upload --execute --all"
+                echo "Then upload: release.sh packer --upload --execute --all"
             else
                 echo -e "${GREEN}No template changes.${NC}"
                 echo "Images on 'latest' release are current."
@@ -937,7 +934,7 @@ cmd_packer() {
                 if [[ "$dry_run" == "true" ]]; then
                     echo ""
                     echo "═══════════════════════════════════════════════════════════════"
-                    echo "  DRY-RUN COMPLETE - No changes made"
+                    echo "  PREVIEW - No changes made"
                     echo "  Run with --execute to upload images"
                     echo "═══════════════════════════════════════════════════════════════"
                 fi
@@ -961,7 +958,7 @@ cmd_packer() {
                 if [[ "$dry_run" == "true" ]]; then
                     echo ""
                     echo "═══════════════════════════════════════════════════════════════"
-                    echo "  DRY-RUN COMPLETE - No changes made"
+                    echo "  PREVIEW - No changes made"
                     echo "  Run with --execute to remove assets"
                     echo "═══════════════════════════════════════════════════════════════"
                 fi
@@ -1713,7 +1710,7 @@ Options:
   --no-issue         Skip issue requirement for hotfix releases (init only)
   --dry-run          Show what would be done without executing
   --execute          Execute the operation
-  --force            Override validation gate / force upload (packer --upload)
+  --force            Override validation gate / force upload (implies --execute)
   --rollback         Rollback tags/releases on failure
   --reset            Reset tags to HEAD (delete and recreate, v0.x only)
   --reset-repo REPO  Reset tag for single repo only
@@ -1756,14 +1753,13 @@ Examples:
   release.sh publish --execute --yes               # Skip confirmation prompt
   release.sh packer --check
   release.sh packer --check --version 0.45
-  release.sh packer --upload --dry-run --all               # Preview all uploads
+  release.sh packer --upload --all                         # Preview all uploads
   release.sh packer --upload --execute --all               # Upload all, skip unchanged
-  release.sh packer --upload --execute --all --force       # Upload all, force overwrite
+  release.sh packer --upload --force --all                 # Upload all, force overwrite
   release.sh packer --upload --execute debian-12 pve-9     # Upload specific templates
   release.sh packer --upload --execute --all --images /tmp/images  # Custom images dir
-  release.sh packer --remove --dry-run --all               # Preview removal of all assets
+  release.sh packer --remove --all                         # Preview removal of all assets
   release.sh packer --remove --execute debian-12           # Remove assets matching prefix
-  release.sh packer --remove --execute debian-12-custom    # Remove stale old-named assets
   release.sh packer --remove --execute --all               # Remove ALL assets from latest
   release.sh retrospective                       # Show retrospective status
   release.sh retrospective --done                # Mark retrospective complete

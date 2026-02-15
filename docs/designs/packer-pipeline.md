@@ -90,12 +90,13 @@ VM provisioned with image
 
 1. `build.sh` downloads the base Debian cloud image to `cache/` (cached)
 2. Boots a QEMU VM with cloud-init (NoCloud datasource)
-3. Runs `apt-get update && apt-get upgrade -y` to apply all available security patches
+3. Runs `apt-get update && apt-get upgrade -y && apt-get autoremove -y`
 4. Installs `qemu-guest-agent` and template-specific packages
 5. Runs `detect-versions.sh` to capture version metadata
 6. Runs template-specific `cleanup.sh`
-7. Outputs `{name}.qcow2` to `images/{name}/`
-8. Generates `{name}.qcow2.sha256`
+7. Compresses output with `qemu-img convert -c -O qcow2` (reclaims sparse space)
+8. Outputs `{name}.qcow2` to `images/{name}/`
+9. Generates `{name}.qcow2.sha256`
 
 ### PVE Image Build
 
@@ -203,14 +204,16 @@ latest release assets:
 └── pve-9.qcow2.sha256
 ```
 
-Files >2GB are automatically split into ~1.9GB parts during upload.
+Files >2 GiB are automatically split into parts just under GitHub's 2 GiB asset limit during upload.
 
 ### Asset Management
 
 ```bash
-release.sh packer --upload --execute --all        # Upload all, skip unchanged
-release.sh packer --upload --execute --all --force # Upload all, force overwrite
+release.sh packer --upload --all                   # Preview uploads
+release.sh packer --upload --execute --all         # Upload all, skip unchanged
+release.sh packer --upload --force --all           # Upload all, force overwrite
 release.sh packer --upload --execute debian-12     # Upload specific template
+release.sh packer --remove --all                   # Preview removals
 release.sh packer --remove --execute debian-12     # Remove assets matching prefix
 release.sh packer --remove --execute --all         # Remove ALL assets from latest
 ```

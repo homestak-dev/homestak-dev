@@ -158,7 +158,7 @@ teardown() {
 }
 
 @test "packer --upload requires --all or template names" {
-    run "$RELEASE_SH" packer --upload --execute
+    run "$RELEASE_SH" packer --upload
     [ "$status" -eq 1 ]
     assert_output_contains "Specify --all or template names"
 }
@@ -186,7 +186,7 @@ teardown() {
 }
 
 @test "packer --remove requires --all or name prefixes" {
-    run "$RELEASE_SH" packer --remove --execute
+    run "$RELEASE_SH" packer --remove
     [ "$status" -eq 1 ]
     assert_output_contains "Specify --all or asset name prefixes"
 }
