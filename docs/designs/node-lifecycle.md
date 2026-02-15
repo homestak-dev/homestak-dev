@@ -325,7 +325,7 @@ Node templates define infrastructure for compute nodes:
 ```yaml
 type: vm
 spec: pve                    # FK to specs/
-image: debian-13-pve
+image: pve-9
 preset: vm-large             # FK to presets/
 disk: 64                     # Override preset
 parent: father               # Parent node (for VMs)

@@ -251,7 +251,7 @@ Before writing code, know how you'll prove it works.
 **Scenario:** `./run.sh manifest test -M n1-push -H father`
 
 **Steps:**
-1. Build image with changes: `./build.sh debian-13-custom`
+1. Build image with changes: `./build.sh debian-13`
 2. Publish to PVE: `./publish.sh`
 3. Run validation: `./run.sh manifest test -M n1-push -H father`
 

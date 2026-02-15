@@ -288,7 +288,7 @@ nodes:
     type: vm
     spec: pve
     preset: vm-large
-    image: debian-13-pve
+    image: pve-9
     execution:
       mode: push                       # Override: push for this node
 
@@ -296,7 +296,7 @@ nodes:
     type: vm
     spec: base
     preset: vm-small
-    image: debian-12-custom
+    image: debian-12
     parent: root-pve                   # Tiered relationship
     # Inherits default_mode: pull
 ```
@@ -359,7 +359,7 @@ nodes:
     type: vm
     spec: pve                 # FK to specs/pve.yaml
     preset: vm-large          # FK to presets/vm-large.yaml
-    image: debian-13-pve
+    image: pve-9
     execution:
       mode: push
 
@@ -367,7 +367,7 @@ nodes:
     type: vm
     spec: base
     preset: vm-small
-    image: debian-12-custom
+    image: debian-12
     parent: root-pve          # Topology relationship
 ```
 
@@ -834,7 +834,7 @@ nodes:
     type: pve
     spec: pve
     preset: vm-large
-    image: debian-13-pve
+    image: pve-9
     vmid: 99011
     disk: 64
   - name: edge

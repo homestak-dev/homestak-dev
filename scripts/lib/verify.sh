@@ -8,12 +8,12 @@
 # Expected packer assets (in 'latest' release)
 # Note: Images live in 'latest' release; versioned releases are typically tag-only
 EXPECTED_PACKER_ASSETS=(
-    "debian-12-custom.qcow2"
-    "debian-12-custom.qcow2.sha256"
-    "debian-13-custom.qcow2"
-    "debian-13-custom.qcow2.sha256"
-    "debian-13-pve.qcow2"
-    "debian-13-pve.qcow2.sha256"
+    "debian-12.qcow2"
+    "debian-12.qcow2.sha256"
+    "debian-13.qcow2"
+    "debian-13.qcow2.sha256"
+    "pve-9.qcow2"
+    "pve-9.qcow2.sha256"
 )
 
 # -----------------------------------------------------------------------------

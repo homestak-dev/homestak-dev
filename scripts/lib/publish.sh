@@ -7,9 +7,9 @@
 
 # Packer images to upload
 PACKER_IMAGES=(
-    "debian-12-custom.qcow2"
-    "debian-13-custom.qcow2"
-    "debian-13-pve.qcow2"
+    "debian-12.qcow2"
+    "debian-13.qcow2"
+    "pve-9.qcow2"
 )
 
 # Flag to track if GHA workflow handled 'latest' sync (set by publish_ensure_packer_assets)
@@ -559,10 +559,10 @@ publish_update_latest() {
         done
 
         # Handle split files - generate checksum for reassembled image
-        if [[ -f "$tmp_dir/debian-13-pve.qcow2.partaa" && ! -f "$tmp_dir/debian-13-pve.qcow2.sha256" ]]; then
-            cat "$tmp_dir"/debian-13-pve.qcow2.part* > "$tmp_dir/debian-13-pve-reassembled.qcow2"
-            sha256sum "$tmp_dir/debian-13-pve-reassembled.qcow2" | awk '{print $1}' > "$tmp_dir/debian-13-pve.qcow2.sha256"
-            rm -f "$tmp_dir/debian-13-pve-reassembled.qcow2"
+        if [[ -f "$tmp_dir/pve-9.qcow2.partaa" && ! -f "$tmp_dir/pve-9.qcow2.sha256" ]]; then
+            cat "$tmp_dir"/pve-9.qcow2.part* > "$tmp_dir/pve-9-reassembled.qcow2"
+            sha256sum "$tmp_dir/pve-9-reassembled.qcow2" | awk '{print $1}' > "$tmp_dir/pve-9.qcow2.sha256"
+            rm -f "$tmp_dir/pve-9-reassembled.qcow2"
         fi
 
         # Upload to latest
