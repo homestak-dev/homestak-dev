@@ -167,7 +167,7 @@ packer_upload_to_latest() {
         # Determine if splitting is needed (GitHub 2GB limit)
         local size
         size=$(stat -c%s "$image_path" 2>/dev/null || stat -f%z "$image_path" 2>/dev/null)
-        local threshold=$((1900 * 1024 * 1024))  # 1.9 GiB
+        local threshold=$((2 * 1024 * 1024 * 1024 - 1))  # 2 GiB - 1 byte
 
         if [[ "$size" -gt "$threshold" ]]; then
             # Split and upload parts
@@ -177,11 +177,11 @@ packer_upload_to_latest() {
             if [[ "$dry_run" == "true" ]]; then
                 local human_size
                 human_size=$(numfmt --to=iec "$size" 2>/dev/null || echo "${size} bytes")
-                log_info "[would split] ${tmpl}.qcow2 (${human_size}) into ~1.9GB parts"
-                log_info "[would upload] ${tmpl}.qcow2.part* + ${tmpl}.qcow2.sha256 to latest"
+                local num_parts=$(( (size + threshold - 1) / threshold ))
+                log_info "[would upload] ${tmpl}.qcow2 (${human_size}) → split into ${num_parts} parts + .sha256"
             else
                 log_info "Splitting ${tmpl}.qcow2 ($(numfmt --to=iec "$size" 2>/dev/null || echo "${size} bytes"))..."
-                (cd "$tmp_split" && split -b 1900m "$image_path" "${tmpl}.qcow2.part")
+                (cd "$tmp_split" && split -b 2147483647 "$image_path" "${tmpl}.qcow2.part")
 
                 for part in "$tmp_split"/${tmpl}.qcow2.part*; do
                     [[ -f "$part" ]] || continue
@@ -200,7 +200,9 @@ packer_upload_to_latest() {
         else
             # Upload single file
             if [[ "$dry_run" == "true" ]]; then
-                log_info "[would upload] ${tmpl}.qcow2 to latest"
+                local human_size
+                human_size=$(numfmt --to=iec "$size" 2>/dev/null || echo "${size} bytes")
+                log_info "[would upload] ${tmpl}.qcow2 (${human_size}) + .sha256"
             else
                 log_info "Uploading ${tmpl}.qcow2..."
                 if ! gh release upload latest "$image_path" --repo homestak-dev/packer --clobber; then
@@ -211,9 +213,7 @@ packer_upload_to_latest() {
         fi
 
         # Upload checksum
-        if [[ "$dry_run" == "true" ]]; then
-            log_info "[would upload] ${tmpl}.qcow2.sha256 to latest"
-        else
+        if [[ "$dry_run" != "true" ]]; then
             log_info "Uploading ${tmpl}.qcow2.sha256..."
             if ! gh release upload latest "$checksum_path" --repo homestak-dev/packer --clobber; then
                 log_error "Failed to upload ${tmpl}.qcow2.sha256"
