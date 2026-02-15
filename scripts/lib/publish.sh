@@ -244,13 +244,9 @@ packer_upload_to_latest() {
 
 packer_remove_from_latest() {
     local dry_run="$1"
-    shift
-    local -a templates=("$@")
-
-    # Validate template names
-    if ! packer_validate_templates "${templates[@]}"; then
-        return 1
-    fi
+    local remove_all="$2"
+    shift 2
+    local -a prefixes=("$@")
 
     # Check latest release exists
     if ! gh release view latest --repo homestak-dev/packer &>/dev/null; then
@@ -258,45 +254,62 @@ packer_remove_from_latest() {
         return 1
     fi
 
-    local total_removed=0
+    # Get all asset names from the release
+    local all_assets
+    all_assets=$(gh release view latest --repo homestak-dev/packer \
+        --json assets --jq ".assets[].name" 2>/dev/null || true)
 
-    for tmpl in "${templates[@]}"; do
-        # Find matching assets (single file, split parts, and checksum)
-        local matching_assets
-        matching_assets=$(gh release view latest --repo homestak-dev/packer \
-            --json assets --jq ".assets[].name" 2>/dev/null | grep "^${tmpl}\.qcow2" || true)
+    if [[ -z "$all_assets" ]]; then
+        log_info "No assets on latest release"
+        return 0
+    fi
 
-        if [[ -z "$matching_assets" ]]; then
-            log_warn "No assets found for ${tmpl} on latest"
-            continue
-        fi
+    # Build list of assets to remove
+    local -a assets_to_remove=()
 
-        echo "$matching_assets" | while read -r asset; do
-            if [[ "$dry_run" == "true" ]]; then
-                log_info "[would delete] $asset from latest"
-            else
-                log_info "Deleting: $asset"
-                if ! gh release delete-asset latest "$asset" --repo homestak-dev/packer --yes; then
-                    log_error "Failed to delete $asset"
+    if [[ "$remove_all" == "true" ]]; then
+        # Remove all assets
+        while IFS= read -r asset; do
+            assets_to_remove+=("$asset")
+        done <<< "$all_assets"
+    else
+        # Remove assets matching name prefixes ({prefix}.qcow2*)
+        for prefix in "${prefixes[@]}"; do
+            while IFS= read -r asset; do
+                if [[ "$asset" == "${prefix}.qcow2"* ]]; then
+                    assets_to_remove+=("$asset")
                 fi
-            fi
+            done <<< "$all_assets"
         done
+    fi
 
-        # Count removed assets
-        local count
-        count=$(echo "$matching_assets" | wc -l)
-        total_removed=$((total_removed + count))
+    if [[ ${#assets_to_remove[@]} -eq 0 ]]; then
+        if [[ "$remove_all" == "true" ]]; then
+            log_info "No assets on latest release"
+        else
+            log_warn "No assets found matching: ${prefixes[*]}"
+        fi
+        return 0
+    fi
+
+    for asset in "${assets_to_remove[@]}"; do
+        if [[ "$dry_run" == "true" ]]; then
+            log_info "[would delete] $asset from latest"
+        else
+            log_info "Deleting: $asset"
+            if ! gh release delete-asset latest "$asset" --repo homestak-dev/packer --yes; then
+                log_error "Failed to delete $asset"
+            fi
+        fi
     done
+
+    local total_removed=${#assets_to_remove[@]}
 
     if [[ "$dry_run" == "true" ]]; then
         log_info "Would remove $total_removed asset(s) from latest"
     else
-        if [[ $total_removed -gt 0 ]]; then
-            log_success "Removed $total_removed asset(s) from latest"
-            audit_log "PACKER_REMOVE" "cli" "Removed $total_removed asset(s) from latest"
-        else
-            log_info "No matching assets found to remove"
-        fi
+        log_success "Removed $total_removed asset(s) from latest"
+        audit_log "PACKER_REMOVE" "cli" "Removed $total_removed asset(s) from latest"
     fi
 
     return 0

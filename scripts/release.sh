@@ -885,10 +885,18 @@ cmd_packer() {
         fi
     fi
 
-    # --upload and --remove require --all or template names
-    if [[ "$action" == "upload" || "$action" == "remove" ]]; then
+    # --upload requires --all or template names
+    if [[ "$action" == "upload" ]]; then
         if [[ ${#templates[@]} -eq 0 ]]; then
             log_error "Specify --all or template names (e.g., debian-12 pve-9)"
+            exit 1
+        fi
+    fi
+
+    # --remove requires --all or name prefixes
+    if [[ "$action" == "remove" ]]; then
+        if [[ "$use_all" != "true" && ${#template_args[@]} -eq 0 ]]; then
+            log_error "Specify --all or asset name prefixes (e.g., debian-12 debian-12-custom)"
             exit 1
         fi
     fi
@@ -942,10 +950,14 @@ cmd_packer() {
 
         remove)
             echo "Target: latest release"
-            echo "Templates: ${templates[*]}"
+            if [[ "$use_all" == "true" ]]; then
+                echo "Scope: all assets"
+            else
+                echo "Prefixes: ${template_args[*]}"
+            fi
             echo ""
 
-            if packer_remove_from_latest "$dry_run" "${templates[@]}"; then
+            if packer_remove_from_latest "$dry_run" "$use_all" "${template_args[@]}"; then
                 if [[ "$dry_run" == "true" ]]; then
                     echo ""
                     echo "═══════════════════════════════════════════════════════════════"
@@ -1749,9 +1761,10 @@ Examples:
   release.sh packer --upload --execute --all --force       # Upload all, force overwrite
   release.sh packer --upload --execute debian-12 pve-9     # Upload specific templates
   release.sh packer --upload --execute --all --images /tmp/images  # Custom images dir
-  release.sh packer --remove --dry-run --all               # Preview removal
-  release.sh packer --remove --execute debian-12           # Remove specific template
-  release.sh packer --remove --execute --all               # Remove all image assets
+  release.sh packer --remove --dry-run --all               # Preview removal of all assets
+  release.sh packer --remove --execute debian-12           # Remove assets matching prefix
+  release.sh packer --remove --execute debian-12-custom    # Remove stale old-named assets
+  release.sh packer --remove --execute --all               # Remove ALL assets from latest
   release.sh retrospective                       # Show retrospective status
   release.sh retrospective --done                # Mark retrospective complete
   release.sh close --dry-run

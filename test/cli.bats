@@ -185,16 +185,18 @@ teardown() {
     assert_output_contains "not found"
 }
 
-@test "packer --remove requires --all or template names" {
+@test "packer --remove requires --all or name prefixes" {
     run "$RELEASE_SH" packer --remove --execute
     [ "$status" -eq 1 ]
-    assert_output_contains "Specify --all or template names"
+    assert_output_contains "Specify --all or asset name prefixes"
 }
 
-@test "packer --remove rejects unknown template" {
-    run "$RELEASE_SH" packer --remove --execute bad-template
-    [ "$status" -eq 1 ]
-    assert_output_contains "Unknown template: bad-template"
+@test "packer --remove accepts arbitrary name prefixes" {
+    # --remove does NOT validate against PACKER_IMAGES (it's a remote operation)
+    # Should reach the gh API call (not fail on template validation)
+    run "$RELEASE_SH" packer --remove --execute old-stale-name
+    # Will fail because gh can't reach GitHub in test env, but should NOT say "Unknown template"
+    assert_output_not_contains "Unknown template"
 }
 
 @test "help shows packer --upload examples" {

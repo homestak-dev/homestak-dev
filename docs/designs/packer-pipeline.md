@@ -211,8 +211,8 @@ Files >2GB are automatically split into ~1.9GB parts during upload.
 release.sh packer --upload --execute --all        # Upload all, skip unchanged
 release.sh packer --upload --execute --all --force # Upload all, force overwrite
 release.sh packer --upload --execute debian-12     # Upload specific template
-release.sh packer --remove --execute debian-12     # Remove specific template
-release.sh packer --remove --execute --all         # Remove all image assets
+release.sh packer --remove --execute debian-12     # Remove assets matching prefix
+release.sh packer --remove --execute --all         # Remove ALL assets from latest
 ```
 
 ### Bootstrap Image Download
