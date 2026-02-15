@@ -66,13 +66,13 @@ cd packer && ./build.sh
 
 ```bash
 # Preview what would be uploaded
-./scripts/release.sh packer --upload --dry-run --all
+./scripts/release.sh packer --upload --all
 
 # Upload all images (skips unchanged)
 ./scripts/release.sh packer --upload --execute --all
 
-# Force re-upload all images (ignore checksums)
-./scripts/release.sh packer --upload --execute --all --force
+# Force re-upload all images (ignore checksums, implies --execute)
+./scripts/release.sh packer --upload --force --all
 
 # Upload specific templates only
 ./scripts/release.sh packer --upload --execute debian-12 pve-9
@@ -95,7 +95,7 @@ Remove individual image assets from `latest` if needed:
 
 ```bash
 # Preview
-./scripts/release.sh packer --remove --dry-run debian-12
+./scripts/release.sh packer --remove debian-12
 
 # Execute
 ./scripts/release.sh packer --remove --execute debian-12

@@ -104,7 +104,7 @@ The `scripts/release.sh` CLI automates release operations:
 ./scripts/release.sh validate --host father
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute --yes
-./scripts/release.sh publish --execute --workflow github --yes
+./scripts/release.sh publish --execute --yes
 ./scripts/release.sh verify
 ./scripts/release.sh close --execute --yes
 
