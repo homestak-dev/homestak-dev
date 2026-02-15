@@ -273,9 +273,10 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 | `tag --execute [--yes]` | Create and push tags (--yes skips confirmation) |
 | `tag --reset` | Reset tags to HEAD (v0.x only) |
 | `publish --dry-run` | Preview release creation |
-| `publish --execute --workflow [--yes]` | Create GitHub releases (--workflow required) |
+| `publish --execute [--yes]` | Create GitHub releases |
 | `packer --check` | Check for template changes |
-| `packer --copy` | Copy images from previous release |
+| `packer --upload {--all \| template...}` | Upload local images to `latest` release |
+| `packer --remove {--all \| template...}` | Remove image assets from `latest` release |
 | `full --dry-run` | Preview complete release workflow |
 | `full --execute` | Execute end-to-end release |
 | `verify [--json]` | Verify all releases exist (--json for machine-readable) |
@@ -295,7 +296,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 ./scripts/release.sh validate --stage --remote father
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute --yes
-./scripts/release.sh publish --execute --workflow github --yes
+./scripts/release.sh publish --execute --yes
 ./scripts/release.sh verify
 # ... complete AAR, housekeeping ...
 ./scripts/release.sh retrospective --done

@@ -178,6 +178,18 @@ The `latest` release is the primary source for packer images. Versioned releases
 
 See [64-release-packer.md](../lifecycle/64-release-packer.md) for the release phase workflow.
 
+### Upload Workflow
+
+`build.sh` always outputs a single `.qcow2` per template. Splitting for GitHub's 2GB asset limit happens at upload time via `release.sh packer --upload`:
+
+```bash
+# Build locally (outputs images/{name}/{name}.qcow2)
+cd packer && ./build.sh
+
+# Upload to latest release (auto-splits >2GB images)
+cd .. && ./scripts/release.sh packer --upload --execute --all
+```
+
 ### Release Assets
 
 ```
@@ -186,12 +198,22 @@ latest release assets:
 ├── debian-12.qcow2.sha256
 ├── debian-13.qcow2
 ├── debian-13.qcow2.sha256
-├── pve-9.qcow2.partaa       # Split if >2GB
+├── pve-9.qcow2.partaa       # Auto-split at upload time (>2GB)
 ├── pve-9.qcow2.partab
 └── pve-9.qcow2.sha256
 ```
 
-Files >2GB are split due to GitHub release file size limits.
+Files >2GB are automatically split into ~1.9GB parts during upload.
+
+### Asset Management
+
+```bash
+release.sh packer --upload --execute --all        # Upload all, skip unchanged
+release.sh packer --upload --execute --all --force # Upload all, force overwrite
+release.sh packer --upload --execute debian-12     # Upload specific template
+release.sh packer --remove --execute debian-12     # Remove assets matching prefix
+release.sh packer --remove --execute --all         # Remove ALL assets from latest
+```
 
 ### Bootstrap Image Download
 

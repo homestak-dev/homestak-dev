@@ -6,11 +6,11 @@ Handle packer images for the release.
 
 ## Purpose
 
-Determine whether packer images need rebuilding and update the `latest` release accordingly.
+Determine whether packer images need rebuilding and ensure the `latest` release has current images.
 
 ## Latest-Centric Approach
 
-The `latest` release is the primary source for packer images. Versioned releases typically have NO image assets - they're tag-only releases that inherit images from `latest`.
+The `latest` release is the primary source for packer images. Versioned releases have NO image assets - they're tag-only releases that inherit images from `latest`.
 
 ## Decision Tree
 
@@ -18,7 +18,7 @@ The `latest` release is the primary source for packer images. Versioned releases
 Packer templates changed?
 ├── No → Skip this phase (most releases)
 └── Yes → Rebuild images
-         └── Update 'latest' release
+         └── Upload to 'latest' release
 ```
 
 ## When to Rebuild Images
@@ -46,52 +46,63 @@ Most releases skip image handling:
 # Output: No template changes detected
 ```
 
-Add note to packer release description: "Images: See `latest` release"
+Images on `latest` are already current. No action needed.
 
 ### Option B: Images Changed
 
 #### 1. Build Images
 
 ```bash
-# Build on capable host, then fetch images
-ssh <build-host-ip> 'cd /usr/local/lib/homestak/packer && ./build.sh'
-scp <build-host-ip>:/usr/local/lib/homestak/packer/images/*/*.qcow2 /tmp/packer-images/
+# Build on capable host
+ssh father 'cd /usr/local/lib/homestak/packer && ./build.sh'
 ```
 
-#### 2. Update Latest Release
-
-Using release CLI:
-
+Or build locally if QEMU/KVM is available:
 ```bash
-./scripts/release.sh packer --copy --source v0.45 --execute
+cd packer && ./build.sh
 ```
 
-Or manually:
+#### 2. Upload to Latest Release
 
 ```bash
-cd ~/homestak-dev/packer
+# Preview what would be uploaded
+./scripts/release.sh packer --upload --dry-run --all
 
-# Move latest tag
-git tag -f latest v0.45
-git push origin latest --force
+# Upload all images (skips unchanged)
+./scripts/release.sh packer --upload --execute --all
 
-# Recreate latest release with new images
-gh release delete latest --repo homestak-dev/packer --yes
-gh release create latest --prerelease \
-  --title "Latest Images" \
-  --notes "Points to v0.45" \
-  --repo homestak-dev/packer \
-  /tmp/packer-images/*.qcow2 \
-  /tmp/packer-images/*.sha256
+# Force re-upload all images (ignore checksums)
+./scripts/release.sh packer --upload --execute --all --force
+
+# Upload specific templates only
+./scripts/release.sh packer --upload --execute debian-12 pve-9
+
+# Upload from custom images directory
+./scripts/release.sh packer --upload --execute --all --images /tmp/packer-images
 ```
 
 ### 3. Image Checklist (When Rebuilding)
 
 - [ ] debian-12.qcow2 + .sha256
 - [ ] debian-13.qcow2 + .sha256
-- [ ] pve-9.qcow2 + .sha256 (or split parts if >2GB)
+- [ ] pve-9.qcow2 + .sha256 (auto-split if >2GB)
 
-**Note:** Images >2GB must be split due to GitHub limits.
+**Note:** Images >2GB are automatically split during upload due to GitHub limits.
+
+### Asset Management
+
+Remove individual image assets from `latest` if needed:
+
+```bash
+# Preview
+./scripts/release.sh packer --remove --dry-run debian-12
+
+# Execute
+./scripts/release.sh packer --remove --execute debian-12
+
+# Remove all
+./scripts/release.sh packer --remove --execute --all
+```
 
 ## Related
 
@@ -107,7 +118,7 @@ See [packer-pipeline.md](../designs/packer-pipeline.md) for naming conventions, 
 - [ ] Template changes checked
 - [ ] Decision documented in release issue
 - [ ] If unchanged: noted in release description
-- [ ] If changed: images rebuilt and uploaded
+- [ ] If changed: images rebuilt and uploaded to `latest`
 
 ## Next Phase
 

@@ -3,10 +3,20 @@
 ## Unreleased
 
 ### Added
+- Add `packer --upload` command for uploading local images to `latest` release (#258)
+- Add `packer --remove` command for deleting image assets from `latest` release (#258)
 - Add FHS branch alignment guidance to validation docs (#231)
 - Add provisioning token design doc (#231)
 
+### Changed
+- Simplify `publish --execute` — no longer copies images to versioned releases (#258)
+
+### Removed
+- Remove `packer --copy` command and related flags (#258)
+- Remove `--images` and `--workflow` flags from `publish` command (#258)
+
 ### Documentation
+- Update packer-pipeline.md and 64-release-packer.md for new upload/remove workflow (#258)
 - Update CLI references for noun-action pattern in lifecycle docs (#239)
 
 ### Changed

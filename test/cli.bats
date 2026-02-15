@@ -146,3 +146,63 @@ teardown() {
 @test "missing jq is detected" {
     skip "PATH manipulation test unreliable - dependency check verified manually"
 }
+
+# -----------------------------------------------------------------------------
+# Packer command tests
+# -----------------------------------------------------------------------------
+
+@test "packer --check requires version" {
+    run "$RELEASE_SH" packer --check
+    [ "$status" -eq 1 ]
+    assert_output_contains "No version specified"
+}
+
+@test "packer --upload requires --all or template names" {
+    run "$RELEASE_SH" packer --upload --execute
+    [ "$status" -eq 1 ]
+    assert_output_contains "Specify --all or template names"
+}
+
+@test "packer --upload does not require --version" {
+    # --upload should fail for missing templates, NOT for missing version
+    run "$RELEASE_SH" packer --upload --execute --all
+    # Will fail because images dir doesn't exist, but should NOT say "No version specified"
+    assert_output_not_contains "No version specified"
+}
+
+@test "packer --upload rejects unknown template" {
+    # Create the images dir so validation reaches template checking
+    mkdir -p "${WORKSPACE_DIR}/packer/images"
+    run "$RELEASE_SH" packer --upload --execute bad-template
+    [ "$status" -eq 1 ]
+    assert_output_contains "Unknown template: bad-template"
+}
+
+@test "packer --upload --all with missing images dir fails" {
+    export WORKSPACE_DIR="/tmp/nonexistent-workspace-$$"
+    run "$RELEASE_SH" packer --upload --execute --all
+    [ "$status" -eq 1 ]
+    assert_output_contains "not found"
+}
+
+@test "packer --remove requires --all or name prefixes" {
+    run "$RELEASE_SH" packer --remove --execute
+    [ "$status" -eq 1 ]
+    assert_output_contains "Specify --all or asset name prefixes"
+}
+
+@test "packer --remove accepts arbitrary name prefixes" {
+    # --remove does NOT validate against PACKER_IMAGES (it's a remote operation)
+    # Should reach the gh API call (not fail on template validation)
+    run "$RELEASE_SH" packer --remove --execute old-stale-name
+    # Will fail because gh can't reach GitHub in test env, but should NOT say "Unknown template"
+    assert_output_not_contains "Unknown template"
+}
+
+@test "help shows packer --upload examples" {
+    run "$RELEASE_SH" help
+    [ "$status" -eq 0 ]
+    assert_output_contains "packer --upload"
+    assert_output_contains "packer --remove"
+    assert_output_not_contains "packer --copy"
+}
