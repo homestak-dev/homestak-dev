@@ -43,10 +43,8 @@ Review:
 With approval:
 
 ```bash
-./scripts/release.sh publish --execute --workflow github --yes
+./scripts/release.sh publish --execute --yes
 ```
-
-The `--workflow github` flag uses server-side operations (~2 min vs ~30 min local).
 
 Or manually per repo:
 

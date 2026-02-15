@@ -68,7 +68,7 @@ gh issue close 152 --repo homestak-dev/homestak-dev
 
 # Publish [GATE]
 ./scripts/release.sh publish --dry-run
-./scripts/release.sh publish --execute --workflow github --yes
+./scripts/release.sh publish --execute --yes
 
 # Verify
 ./scripts/release.sh verify
@@ -271,7 +271,7 @@ gh pr status
 ./scripts/release.sh validate --host father
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute
-./scripts/release.sh publish --execute --workflow github
+./scripts/release.sh publish --execute
 ./scripts/release.sh verify
 ./scripts/release.sh close --execute
 

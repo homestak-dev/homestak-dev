@@ -10,6 +10,8 @@
 
 ### Changed
 - Simplify `publish --execute` — no longer copies images to versioned releases (#258)
+- Simplify `packer --upload/--remove` flags — drop `--dry-run` (default is preview), `--force` implies `--execute` (#258)
+- Set upload split threshold to 2 GiB - 1 byte (GitHub rejects exactly 2 GiB) (#258)
 
 ### Removed
 - Remove `packer --copy` command and related flags (#258)
@@ -17,6 +19,7 @@
 
 ### Documentation
 - Update packer-pipeline.md and 64-release-packer.md for new upload/remove workflow (#258)
+- Remove stale `--workflow` references from lifecycle docs (#260)
 - Update CLI references for noun-action pattern in lifecycle docs (#239)
 
 ### Changed
