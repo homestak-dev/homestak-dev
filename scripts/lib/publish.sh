@@ -12,9 +12,6 @@ PACKER_IMAGES=(
     "pve-9.qcow2"
 )
 
-# Flag to track if GHA workflow handled 'latest' sync (set by publish_ensure_packer_assets)
-WORKFLOW_HANDLED_LATEST=false
-
 # -----------------------------------------------------------------------------
 # Packer Template Change Detection
 # -----------------------------------------------------------------------------
@@ -49,219 +46,257 @@ packer_templates_changed() {
     fi
 }
 
-packer_get_latest_release() {
-    # Get the latest packer release that has image assets (excluding current version)
-    local current_version="$1"
-    local tags
-    tags=$(gh release list --repo homestak-dev/packer --limit 10 | awk '{print $1}')
+# -----------------------------------------------------------------------------
+# Packer Upload to Latest
+# -----------------------------------------------------------------------------
 
-    for tag in $tags; do
-        # Skip current version and 'latest' tag
-        [[ "$tag" == "v${current_version}" ]] && continue
-        [[ "$tag" == "latest" ]] && continue
+# Validate template names against PACKER_IMAGES
+packer_validate_templates() {
+    local -a templates=("$@")
+    local valid=true
 
-        # Check if this release has assets
-        local asset_count
-        asset_count=$(gh release view "$tag" --repo homestak-dev/packer --json assets --jq '.assets | length' 2>/dev/null)
-        if [[ "$asset_count" -gt 0 ]]; then
-            echo "$tag"
-            return 0
+    for tmpl in "${templates[@]}"; do
+        local found=false
+        for img in "${PACKER_IMAGES[@]}"; do
+            local img_name="${img%.qcow2}"
+            if [[ "$tmpl" == "$img_name" ]]; then
+                found=true
+                break
+            fi
+        done
+        if [[ "$found" != "true" ]]; then
+            log_error "Unknown template: $tmpl"
+            log_error "Valid templates: $(printf '%s ' "${PACKER_IMAGES[@]}" | sed 's/\.qcow2//g')"
+            valid=false
         fi
     done
-    echo ""
+
+    [[ "$valid" == "true" ]]
 }
 
-packer_dispatch_copy_images() {
-    local version="$1"
-    local source_release="$2"
-    local dry_run="${3:-true}"
-    local wait="${4:-false}"
-    local timeout="${5:-600}"  # 10 minutes default
+packer_upload_to_latest() {
+    local images_dir="$1"
+    local dry_run="$2"
+    local force="$3"
+    shift 3
+    local -a templates=("$@")
 
-    if [[ -z "$source_release" ]]; then
-        source_release=$(packer_get_latest_release "$version")
-    fi
-
-    if [[ -z "$source_release" ]]; then
-        log_error "No source release found with image assets"
+    # Validate images directory
+    if [[ ! -d "$images_dir" ]]; then
+        log_error "Images directory not found: $images_dir"
         return 1
     fi
 
-    log_info "Copying images from $source_release to v${version}"
-
-    # Build notes for copied images (#148)
-    local copy_notes="No template changes - images copied from ${source_release}"
-
-    local workflow="copy-images.yml"
-    # Workflow handles both versioned release and 'latest' sync (#146)
-    local cmd="gh workflow run $workflow --repo homestak-dev/packer -f source_release=$source_release -f target_release=v${version} -f notes=\"${copy_notes}\" -f sync_latest=true"
-
-    if [[ "$dry_run" == "true" ]]; then
-        echo "    ${cmd}"
-        return 0
-    fi
-
-    # Check if workflow exists (gh workflow list outputs: NAME STATUS ID)
-    if ! gh workflow list --repo homestak-dev/packer 2>/dev/null | grep -q "^Copy Images"; then
-        log_warn "Workflow '$workflow' not found in packer repo"
-        log_info "Images must be copied manually or workflow created"
+    # Validate template names
+    if ! packer_validate_templates "${templates[@]}"; then
         return 1
     fi
 
-    # Dispatch the workflow
-    audit_cmd "$cmd" "gh"
-    if ! eval "$cmd"; then
-        log_error "Failed to dispatch copy-images workflow"
-        return 1
-    fi
-
-    log_success "Workflow dispatched"
-
-    if [[ "$wait" != "true" ]]; then
-        log_info "Monitor at: https://github.com/homestak-dev/packer/actions"
-        return 0
-    fi
-
-    # Wait for workflow completion
-    log_info "Waiting for workflow to complete (timeout: ${timeout}s)..."
-
-    local start_time=$SECONDS
-    local run_id=""
-
-    # Wait a moment for the run to appear
-    sleep 3
-
-    # Find the most recent run of the workflow
-    while [[ -z "$run_id" && $((SECONDS - start_time)) -lt 30 ]]; do
-        run_id=$(gh run list --repo homestak-dev/packer --workflow "$workflow" \
-            --json databaseId,status,createdAt \
-            --jq 'sort_by(.createdAt) | reverse | .[0].databaseId' 2>/dev/null)
-        if [[ -z "$run_id" ]]; then
-            sleep 2
+    # Ensure latest release exists
+    if ! gh release view latest --repo homestak-dev/packer &>/dev/null; then
+        if [[ "$dry_run" == "true" ]]; then
+            log_info "[would create] 'latest' release in packer"
+        else
+            log_info "Creating 'latest' release in packer..."
+            if ! gh release create latest --repo homestak-dev/packer \
+                --title "Latest Images" --notes "Packer images" --prerelease; then
+                log_error "Failed to create 'latest' release"
+                return 1
+            fi
         fi
-    done
-
-    if [[ -z "$run_id" ]]; then
-        log_error "Could not find workflow run"
-        return 1
     fi
 
-    log_info "Workflow run ID: $run_id"
+    local uploaded=0
+    local skipped=0
 
-    # Poll for completion
-    while [[ $((SECONDS - start_time)) -lt $timeout ]]; do
-        local status conclusion
-        status=$(gh run view "$run_id" --repo homestak-dev/packer --json status --jq '.status' 2>/dev/null)
-        conclusion=$(gh run view "$run_id" --repo homestak-dev/packer --json conclusion --jq '.conclusion' 2>/dev/null)
+    for tmpl in "${templates[@]}"; do
+        local image_path="${images_dir}/${tmpl}/${tmpl}.qcow2"
+        local checksum_path="${images_dir}/${tmpl}/${tmpl}.qcow2.sha256"
 
-        if [[ "$status" == "completed" ]]; then
-            if [[ "$conclusion" == "success" ]]; then
-                log_success "Workflow completed successfully"
-                return 0
+        if [[ ! -f "$image_path" ]]; then
+            log_error "Image not found: $image_path"
+            return 1
+        fi
+
+        if [[ ! -f "$checksum_path" ]]; then
+            log_error "Checksum not found: $checksum_path (run build.sh to generate)"
+            return 1
+        fi
+
+        # Check if upload can be skipped (unless --force)
+        if [[ "$force" != "true" ]]; then
+            local local_checksum
+            local_checksum=$(awk '{print $1}' "$checksum_path")
+
+            # Download remote checksum for comparison
+            local remote_checksum=""
+            local tmp_remote
+            tmp_remote=$(mktemp)
+            if gh release download latest --repo homestak-dev/packer \
+                --pattern "${tmpl}.qcow2.sha256" --dir "$(dirname "$tmp_remote")" \
+                --output "$tmp_remote" 2>/dev/null; then
+                remote_checksum=$(awk '{print $1}' "$tmp_remote")
+            fi
+            rm -f "$tmp_remote"
+
+            if [[ -n "$remote_checksum" && "$local_checksum" == "$remote_checksum" ]]; then
+                log_info "${tmpl}: unchanged (checksum match), skipping"
+                ((skipped++))
+                continue
+            fi
+        fi
+
+        # Clean up existing remote assets for this template before uploading
+        local existing_assets
+        existing_assets=$(gh release view latest --repo homestak-dev/packer \
+            --json assets --jq ".assets[].name" 2>/dev/null | grep "^${tmpl}\.qcow2" || true)
+
+        if [[ -n "$existing_assets" ]]; then
+            if [[ "$dry_run" == "true" ]]; then
+                echo "$existing_assets" | while read -r asset; do
+                    log_info "[would delete] $asset from latest"
+                done
             else
-                log_error "Workflow failed with conclusion: $conclusion"
-                log_error "View details: gh run view $run_id --repo homestak-dev/packer"
+                echo "$existing_assets" | while read -r asset; do
+                    log_info "Deleting old asset: $asset"
+                    gh release delete-asset latest "$asset" --repo homestak-dev/packer --yes 2>/dev/null || true
+                done
+            fi
+        fi
+
+        # Determine if splitting is needed (GitHub 2GB limit)
+        local size
+        size=$(stat -c%s "$image_path" 2>/dev/null || stat -f%z "$image_path" 2>/dev/null)
+        local threshold=$((1900 * 1024 * 1024))  # 1.9 GiB
+
+        if [[ "$size" -gt "$threshold" ]]; then
+            # Split and upload parts
+            local tmp_split
+            tmp_split=$(mktemp -d)
+
+            if [[ "$dry_run" == "true" ]]; then
+                local human_size
+                human_size=$(numfmt --to=iec "$size" 2>/dev/null || echo "${size} bytes")
+                log_info "[would split] ${tmpl}.qcow2 (${human_size}) into ~1.9GB parts"
+                log_info "[would upload] ${tmpl}.qcow2.part* + ${tmpl}.qcow2.sha256 to latest"
+            else
+                log_info "Splitting ${tmpl}.qcow2 ($(numfmt --to=iec "$size" 2>/dev/null || echo "${size} bytes"))..."
+                (cd "$tmp_split" && split -b 1900m "$image_path" "${tmpl}.qcow2.part")
+
+                for part in "$tmp_split"/${tmpl}.qcow2.part*; do
+                    [[ -f "$part" ]] || continue
+                    local part_name
+                    part_name=$(basename "$part")
+                    log_info "Uploading $part_name..."
+                    if ! gh release upload latest "$part" --repo homestak-dev/packer --clobber; then
+                        log_error "Failed to upload $part_name"
+                        rm -rf "$tmp_split"
+                        return 1
+                    fi
+                done
+            fi
+
+            rm -rf "$tmp_split"
+        else
+            # Upload single file
+            if [[ "$dry_run" == "true" ]]; then
+                log_info "[would upload] ${tmpl}.qcow2 to latest"
+            else
+                log_info "Uploading ${tmpl}.qcow2..."
+                if ! gh release upload latest "$image_path" --repo homestak-dev/packer --clobber; then
+                    log_error "Failed to upload ${tmpl}.qcow2"
+                    return 1
+                fi
+            fi
+        fi
+
+        # Upload checksum
+        if [[ "$dry_run" == "true" ]]; then
+            log_info "[would upload] ${tmpl}.qcow2.sha256 to latest"
+        else
+            log_info "Uploading ${tmpl}.qcow2.sha256..."
+            if ! gh release upload latest "$checksum_path" --repo homestak-dev/packer --clobber; then
+                log_error "Failed to upload ${tmpl}.qcow2.sha256"
                 return 1
             fi
         fi
 
-        local elapsed=$((SECONDS - start_time))
-        echo -ne "\r  Status: $status (${elapsed}s elapsed)    "
-        sleep 5
+        ((uploaded++))
     done
 
-    echo ""
-    log_error "Workflow timed out after ${timeout}s"
-    log_error "Check status: gh run view $run_id --repo homestak-dev/packer"
-    return 1
+    if [[ "$dry_run" == "true" ]]; then
+        log_info "Would upload $uploaded template(s), skip $skipped unchanged"
+    else
+        if [[ $uploaded -gt 0 ]]; then
+            log_success "Uploaded $uploaded template(s) to latest ($skipped unchanged)"
+            audit_log "PACKER_UPLOAD" "cli" "Uploaded $uploaded template(s) to latest"
+        else
+            log_info "All $skipped template(s) unchanged, nothing to upload"
+        fi
+    fi
+
+    return 0
 }
 
-packer_copy_images_local() {
-    local version="$1"
-    local source_release="$2"
-    local dry_run="${3:-true}"
+# -----------------------------------------------------------------------------
+# Packer Remove from Latest
+# -----------------------------------------------------------------------------
 
-    if [[ -z "$source_release" ]]; then
-        source_release=$(packer_get_latest_release "$version")
-    fi
+packer_remove_from_latest() {
+    local dry_run="$1"
+    shift
+    local -a templates=("$@")
 
-    if [[ -z "$source_release" ]]; then
-        log_error "No source release found with image assets"
+    # Validate template names
+    if ! packer_validate_templates "${templates[@]}"; then
         return 1
     fi
 
-    log_info "Copying images from $source_release to v${version} locally"
-
-    # Create temp directory for images
-    local tmp_dir
-    tmp_dir=$(mktemp -d)
-    trap 'rm -rf "$tmp_dir"' EXIT
-
-    # Download assets from source release
-    # Include images (.qcow2) and per-image checksums (.sha256)
-    # Exclude legacy SHA256SUMS (consolidated format, deprecated)
-    local assets
-    assets=$(gh release view "$source_release" --repo homestak-dev/packer --json assets --jq '.assets[].name' 2>/dev/null | grep -v '^SHA256SUMS$')
-
-    if [[ -z "$assets" ]]; then
-        log_error "No assets found in source release $source_release"
+    # Check latest release exists
+    if ! gh release view latest --repo homestak-dev/packer &>/dev/null; then
+        log_error "No 'latest' release found in packer"
         return 1
     fi
 
-    # Separate images for validation
-    local images
-    images=$(echo "$assets" | grep '\.qcow2$' || true)
+    local total_removed=0
 
-    if [[ -z "$images" ]]; then
-        log_error "No image files found in source release $source_release"
-        return 1
-    fi
+    for tmpl in "${templates[@]}"; do
+        # Find matching assets (single file, split parts, and checksum)
+        local matching_assets
+        matching_assets=$(gh release view latest --repo homestak-dev/packer \
+            --json assets --jq ".assets[].name" 2>/dev/null | grep "^${tmpl}\.qcow2" || true)
 
-    # Download all assets (images + checksums)
-    for asset in $assets; do
-        local download_cmd="gh release download $source_release --repo homestak-dev/packer --pattern \"$asset\" --dir \"$tmp_dir\""
-
-        if [[ "$dry_run" == "true" ]]; then
-            echo "    ${download_cmd}"
-        else
-            log_info "Downloading $asset..."
-            if ! eval "$download_cmd"; then
-                log_error "Failed to download $asset"
-                return 1
-            fi
+        if [[ -z "$matching_assets" ]]; then
+            log_warn "No assets found for ${tmpl} on latest"
+            continue
         fi
+
+        echo "$matching_assets" | while read -r asset; do
+            if [[ "$dry_run" == "true" ]]; then
+                log_info "[would delete] $asset from latest"
+            else
+                log_info "Deleting: $asset"
+                if ! gh release delete-asset latest "$asset" --repo homestak-dev/packer --yes; then
+                    log_error "Failed to delete $asset"
+                fi
+            fi
+        done
+
+        # Count removed assets
+        local count
+        count=$(echo "$matching_assets" | wc -l)
+        total_removed=$((total_removed + count))
     done
 
-    # Upload all downloaded files (images + per-image checksums)
-    # Note: We no longer generate SHA256SUMS - using per-image .sha256 files instead
-    local upload_files
     if [[ "$dry_run" == "true" ]]; then
-        upload_files="$assets"
+        log_info "Would remove $total_removed asset(s) from latest"
     else
-        upload_files=$(ls "$tmp_dir")
-    fi
-
-    for file in $upload_files; do
-        local upload_cmd="gh release upload v${version} \"${tmp_dir}/${file}\" --repo homestak-dev/packer --clobber"
-
-        if [[ "$dry_run" == "true" ]]; then
-            echo "    ${upload_cmd}"
+        if [[ $total_removed -gt 0 ]]; then
+            log_success "Removed $total_removed asset(s) from latest"
+            audit_log "PACKER_REMOVE" "cli" "Removed $total_removed asset(s) from latest"
         else
-            [[ ! -f "${tmp_dir}/${file}" ]] && continue
-
-            log_info "Uploading $file..."
-            if ! eval "$upload_cmd"; then
-                log_error "Failed to upload $file"
-                return 1
-            fi
+            log_info "No matching assets found to remove"
         fi
-    done
-
-    if [[ "$dry_run" != "true" ]]; then
-        local img_count checksum_count
-        img_count=$(echo "$images" | wc -w)
-        checksum_count=$(find "$tmp_dir" -maxdepth 1 -name '*.sha256' 2>/dev/null | wc -l)
-        log_success "Copied $img_count images + $checksum_count checksums from $source_release to v${version}"
     fi
 
     return 0
@@ -409,177 +444,6 @@ publish_create_single() {
     return 0
 }
 
-publish_upload_packer_images() {
-    local version="$1"
-    local images_dir="$2"
-    local dry_run="${3:-true}"
-
-    if [[ -z "$images_dir" ]]; then
-        log_info "No images directory specified, skipping packer uploads"
-        return 0
-    fi
-
-    if [[ ! -d "$images_dir" ]]; then
-        log_error "Images directory not found: $images_dir"
-        return 1
-    fi
-
-    local uploaded=0
-    for img in "${PACKER_IMAGES[@]}"; do
-        local img_path="${images_dir}/${img}"
-        if [[ -f "$img_path" ]]; then
-            local cmd="gh release upload v${version} \"${img_path}\" --repo homestak-dev/packer --clobber"
-            if [[ "$dry_run" == "true" ]]; then
-                echo "    ${cmd}"
-            else
-                audit_cmd "$cmd" "gh"
-                if ! eval "$cmd"; then
-                    log_error "Failed to upload $img"
-                    return 1
-                fi
-            fi
-            ((uploaded++))
-        else
-            log_warn "Image not found: $img_path"
-        fi
-    done
-
-    if [[ $uploaded -eq 0 ]]; then
-        log_warn "No packer images found to upload"
-    fi
-
-    return 0
-}
-
-publish_ensure_packer_assets() {
-    local version="$1"
-    local dry_run="${2:-true}"
-    local workflow="${3:-local}"
-
-    # Check if packer release has any assets
-    local asset_count
-    asset_count=$(gh release view "v${version}" --repo homestak-dev/packer --json assets --jq '.assets | length' 2>/dev/null || echo "0")
-
-    if [[ "$asset_count" -gt 0 ]]; then
-        log_info "Packer release already has $asset_count asset(s), skipping auto-copy"
-        return 0
-    fi
-
-    log_info "Packer release has no assets, copying from previous release..."
-    log_info "Using workflow: ${workflow}"
-
-    # Find source release
-    local source_release
-    source_release=$(packer_get_latest_release "$version")
-
-    if [[ -z "$source_release" ]]; then
-        log_warn "No previous release with assets found - packer release will have no images"
-        log_warn "Build images with: cd packer && ./build.sh"
-        log_warn "Then upload with: release.sh publish --images /path/to/images"
-        return 0  # Not a fatal error
-    fi
-
-    # Copy images using specified workflow
-    if [[ "$workflow" == "github" ]]; then
-        # Use GHA workflow (server-side, faster)
-        # Workflow also syncs to 'latest' release, eliminating redundant local sync (#146)
-        if packer_dispatch_copy_images "$version" "$source_release" "$dry_run" "true" "600"; then
-            if [[ "$dry_run" != "true" ]]; then
-                log_success "Packer images copied from $source_release via GHA workflow"
-                log_success "Workflow also synced assets to 'latest' release"
-                WORKFLOW_HANDLED_LATEST=true
-            fi
-            return 0
-        else
-            log_warn "GHA workflow failed - falling back to local copy"
-            # Fall through to local copy
-        fi
-    fi
-
-    # Use local copy (default or fallback)
-    if packer_copy_images_local "$version" "$source_release" "$dry_run"; then
-        if [[ "$dry_run" != "true" ]]; then
-            log_success "Packer images copied from $source_release locally"
-        fi
-        return 0
-    else
-        log_warn "Failed to copy packer images - manual upload may be required"
-        return 0  # Not a fatal error
-    fi
-}
-
-publish_update_latest() {
-    local version="$1"
-    local dry_run="${2:-true}"
-
-    # Update latest tag to point to new release
-    local delete_cmd="gh release delete latest --repo homestak-dev/packer --yes"
-    local delete_tag_cmd="git -C ${WORKSPACE_DIR}/packer push origin :refs/tags/latest"
-    local create_cmd="gh release create latest --repo homestak-dev/packer --title \"Latest Release\" --notes \"Points to v${version}\" --latest"
-
-    if [[ "$dry_run" == "true" ]]; then
-        echo "    ${delete_cmd} (if exists)"
-        echo "    ${delete_tag_cmd} (if exists)"
-        echo "    ${create_cmd}"
-        echo "    (copy assets from v${version} to latest)"
-        return 0
-    fi
-
-    # Delete existing latest release/tag if present
-    audit_cmd "$delete_cmd (cleanup)" "gh"
-    eval "$delete_cmd" 2>/dev/null || true
-
-    audit_cmd "$delete_tag_cmd (cleanup)" "git"
-    eval "$delete_tag_cmd" 2>/dev/null || true
-
-    # Create new latest release
-    audit_cmd "$create_cmd" "gh"
-    if ! eval "$create_cmd"; then
-        log_warn "Could not create latest release (may need manual update)"
-        return 0
-    fi
-
-    # Copy assets from versioned release to latest
-    local tmp_dir="/tmp/packer-latest-sync"
-    rm -rf "$tmp_dir"
-    mkdir -p "$tmp_dir"
-
-    log_info "Copying assets from v${version} to latest..."
-
-    # Download assets from versioned release
-    if gh release download "v${version}" --repo homestak-dev/packer --dir "$tmp_dir" --pattern "*.qcow2*" 2>/dev/null; then
-        # Generate checksums if missing
-        for img in "$tmp_dir"/*.qcow2; do
-            [[ -f "$img" ]] || continue
-            local base
-            base=$(basename "$img")
-            if [[ ! -f "$tmp_dir/${base}.sha256" ]]; then
-                sha256sum "$img" | awk '{print $1}' > "$tmp_dir/${base}.sha256"
-            fi
-        done
-
-        # Handle split files - generate checksum for reassembled image
-        if [[ -f "$tmp_dir/pve-9.qcow2.partaa" && ! -f "$tmp_dir/pve-9.qcow2.sha256" ]]; then
-            cat "$tmp_dir"/pve-9.qcow2.part* > "$tmp_dir/pve-9-reassembled.qcow2"
-            sha256sum "$tmp_dir/pve-9-reassembled.qcow2" | awk '{print $1}' > "$tmp_dir/pve-9.qcow2.sha256"
-            rm -f "$tmp_dir/pve-9-reassembled.qcow2"
-        fi
-
-        # Upload to latest
-        local assets=("$tmp_dir"/*.qcow2 "$tmp_dir"/*.qcow2.part* "$tmp_dir"/*.sha256)
-        for asset in "${assets[@]}"; do
-            [[ -f "$asset" ]] || continue
-            gh release upload latest "$asset" --repo homestak-dev/packer --clobber 2>/dev/null || true
-        done
-        log_success "Assets synced to latest release"
-    else
-        log_warn "No assets in v${version} to copy to latest"
-    fi
-
-    rm -rf "$tmp_dir"
-    return 0
-}
-
 # -----------------------------------------------------------------------------
 # Main Publish Runner
 # -----------------------------------------------------------------------------
@@ -588,9 +452,7 @@ run_publish() {
     local version="$1"
     local dry_run="${2:-true}"
     local force="${3:-false}"
-    local images_dir="${4:-}"
-    local workflow="${5:-local}"
-    local yes_flag="${6:-false}"
+    local yes_flag="${4:-false}"
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
@@ -600,7 +462,6 @@ run_publish() {
     else
         echo "  Mode: EXECUTE"
     fi
-    echo "  Packer workflow: ${workflow}"
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
 
@@ -631,27 +492,21 @@ run_publish() {
 
     # Show actions
     echo "Actions to execute:"
-    local cmd_count=${#REPOS[@]}
     for repo in "${REPOS[@]}"; do
         echo "  - Create GitHub release v${version} in ${repo}"
     done
-    if [[ -n "$images_dir" ]]; then
-        echo "  - Upload packer images"
-        echo "  - Update 'latest' tag in packer"
-        ((cmd_count+=2))
-    else
-        if [[ "$workflow" == "github" ]]; then
-            echo "  - Ensure packer release has images (via GHA workflow)"
-            echo "    (workflow also syncs to 'latest' - no separate transfer)"
-            ((cmd_count+=1))
-        else
-            echo "  - Ensure packer release has images (via local copy - ~13GB transfer)"
-            echo "  - Update 'latest' tag in packer"
-            ((cmd_count+=2))
-        fi
-    fi
     echo ""
-    echo "Total: ${cmd_count} operations"
+    echo "Total: ${#REPOS[@]} operations"
+    echo ""
+
+    # Check packer latest release has images
+    local packer_asset_count
+    packer_asset_count=$(gh release view latest --repo homestak-dev/packer --json assets --jq '.assets | length' 2>/dev/null || echo "0")
+    if [[ "$packer_asset_count" -gt 0 ]]; then
+        echo -e "Packer images: ${GREEN}${packer_asset_count} asset(s) on latest${NC}"
+    else
+        echo -e "Packer images: ${YELLOW}No assets on latest — run 'release.sh packer --upload' to upload${NC}"
+    fi
     echo ""
 
     if [[ "$dry_run" == "true" ]]; then
@@ -662,29 +517,6 @@ run_publish() {
             publish_create_single "$repo" "$version" "true"
             echo ""
         done
-
-        if [[ -n "$images_dir" ]]; then
-            echo "  packer images:"
-            publish_upload_packer_images "$version" "$images_dir" "true"
-            echo ""
-            echo "  latest tag:"
-            publish_update_latest "$version" "true"
-            echo ""
-        else
-            echo "  packer auto-ensure (workflow: ${workflow}):"
-            if [[ "$workflow" == "github" ]]; then
-                echo "    (Would use GHA workflow copy-images.yml - server-side, fast)"
-                echo "    (Would copy images + sync to 'latest' + update notes in one workflow)"
-                echo "    (Would skip local latest sync - workflow handles it)"
-            else
-                echo "    (Would use local download/upload - ~13GB transfer)"
-                echo "    (Would check if packer release has assets, copy from previous release if not)"
-                echo ""
-                echo "  latest tag:"
-                publish_update_latest "$version" "true"
-            fi
-            echo ""
-        fi
 
         echo "═══════════════════════════════════════════════════════════════"
         echo "  DRY-RUN COMPLETE - No changes made"
@@ -726,36 +558,6 @@ run_publish() {
         echo ""
         log_error "Release creation failed"
         return 1
-    fi
-
-    # Upload packer images if specified, otherwise ensure assets exist
-    if [[ -n "$images_dir" ]]; then
-        echo ""
-        echo "Uploading packer images..."
-        if ! publish_upload_packer_images "$version" "$images_dir" "false"; then
-            log_error "Failed to upload packer images"
-            return 1
-        fi
-
-        echo ""
-        echo "Updating latest tag..."
-        publish_update_latest "$version" "false"
-    else
-        # Auto-ensure packer has images (copy from previous release if needed)
-        echo ""
-        echo "Ensuring packer release has images (workflow: ${workflow})..."
-        WORKFLOW_HANDLED_LATEST=false  # Reset flag
-        publish_ensure_packer_assets "$version" "false" "$workflow"
-
-        # Skip local latest sync if GHA workflow already handled it (#146)
-        if [[ "$WORKFLOW_HANDLED_LATEST" == "true" ]]; then
-            echo ""
-            log_info "Skipping local latest sync (GHA workflow handled it)"
-        else
-            echo ""
-            echo "Updating latest tag..."
-            publish_update_latest "$version" "false"
-        fi
     fi
 
     echo ""

@@ -743,8 +743,6 @@ cmd_tag() {
 cmd_publish() {
     local dry_run=true
     local force=false
-    local images_dir=""
-    local workflow=""  # No default - require explicit choice
     local yes_flag=false
 
     while [[ $# -gt 0 ]]; do
@@ -761,18 +759,6 @@ cmd_publish() {
                 force=true
                 shift
                 ;;
-            --images)
-                images_dir="$2"
-                shift 2
-                ;;
-            --workflow)
-                workflow="$2"
-                if [[ "$workflow" != "github" && "$workflow" != "local" ]]; then
-                    log_error "Invalid --workflow value: $workflow (must be 'github' or 'local')"
-                    exit 1
-                fi
-                shift 2
-                ;;
             --yes|-y)
                 yes_flag=true
                 shift
@@ -783,12 +769,6 @@ cmd_publish() {
                 ;;
         esac
     done
-
-    # Require --workflow for --execute mode
-    if [[ "$dry_run" == "false" && -z "$workflow" ]]; then
-        log_error "--workflow required: specify --workflow github (fast, recommended) or --workflow local"
-        exit 1
-    fi
 
     # Require release in progress
     if ! state_exists; then
@@ -809,7 +789,7 @@ cmd_publish() {
     state_set_phase_status "releases" "in_progress"
 
     # Run publish
-    if run_publish "$version" "$dry_run" "$force" "$images_dir" "$workflow" "$yes_flag"; then
+    if run_publish "$version" "$dry_run" "$force" "$yes_flag"; then
         if [[ "$dry_run" == "false" ]]; then
             state_set_phase_status "releases" "complete"
             audit_log "PUBLISH" "cli" "Releases v${version} created in ${#REPOS[@]} repos"
@@ -828,10 +808,10 @@ cmd_packer() {
     local action="check"
     local dry_run=true
     local version=""
-    local source=""
-    local use_workflow=false
-    local wait_workflow=true
-    local timeout=600
+    local images_dir="${WORKSPACE_DIR}/packer/images"
+    local force=false
+    local use_all=false
+    local -a template_args=()
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -839,8 +819,12 @@ cmd_packer() {
                 action="check"
                 shift
                 ;;
-            --copy)
-                action="copy"
+            --upload)
+                action="upload"
+                shift
+                ;;
+            --remove)
+                action="remove"
                 shift
                 ;;
             --dry-run)
@@ -855,128 +839,124 @@ cmd_packer() {
                 version="$2"
                 shift 2
                 ;;
-            --source)
-                source="$2"
+            --images)
+                images_dir="$2"
                 shift 2
                 ;;
-            --workflow)
-                use_workflow=true
+            --force)
+                force=true
                 shift
                 ;;
-            --no-wait)
-                wait_workflow=false
+            --all)
+                use_all=true
                 shift
                 ;;
-            --timeout)
-                timeout="$2"
-                shift 2
-                ;;
-            *)
+            -*)
                 log_error "Unknown option: $1"
                 exit 1
+                ;;
+            *)
+                template_args+=("$1")
+                shift
                 ;;
         esac
     done
 
-    # Get version from state if not provided
-    if [[ -z "$version" ]]; then
-        if state_exists && state_validate; then
-            version=$(state_get_version)
-        else
-            log_error "No version specified and no release in progress"
-            log_error "Use: release.sh packer --copy --version X.Y"
-            log_error "Or: release.sh init --version X.Y"
+    # Build template list
+    local -a templates=()
+    if [[ "$use_all" == "true" ]]; then
+        for img in "${PACKER_IMAGES[@]}"; do
+            templates+=("${img%.qcow2}")
+        done
+    else
+        templates=("${template_args[@]}")
+    fi
+
+    # --check requires --version (from flag or state)
+    if [[ "$action" == "check" ]]; then
+        if [[ -z "$version" ]]; then
+            if state_exists && state_validate; then
+                version=$(state_get_version)
+            else
+                log_error "No version specified and no release in progress"
+                log_error "Use: release.sh packer --check --version X.Y"
+                exit 1
+            fi
+        fi
+    fi
+
+    # --upload and --remove require --all or template names
+    if [[ "$action" == "upload" || "$action" == "remove" ]]; then
+        if [[ ${#templates[@]} -eq 0 ]]; then
+            log_error "Specify --all or template names (e.g., debian-12 pve-9)"
             exit 1
         fi
     fi
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
-    echo "  PACKER IMAGES: v${version}"
+    echo "  PACKER IMAGES"
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
 
     case "$action" in
         check)
-            echo "Checking for template changes..."
+            echo "Checking for template changes (v${version})..."
             local changed
             changed=$(packer_templates_changed "$version")
             echo ""
 
             if [[ "$changed" == "true" ]]; then
                 echo -e "${YELLOW}Templates have changed.${NC}"
-                echo "Options:"
-                echo "  1. Build new images: cd packer && ./build.sh"
-                echo "  2. Skip images for this release (not recommended)"
-                echo ""
-                echo "After building, upload with:"
-                echo "  release.sh publish --images /path/to/images"
+                echo "Build new images: cd packer && ./build.sh"
+                echo "Then upload:      release.sh packer --upload --execute --all"
             else
                 echo -e "${GREEN}No template changes.${NC}"
-                echo "Images can be copied from previous release:"
-                echo "  release.sh packer --copy --dry-run"
-                echo "  release.sh packer --copy --execute"
+                echo "Images on 'latest' release are current."
             fi
             ;;
 
-        copy)
-            # Use provided source or find latest with images
-            if [[ -z "$source" ]]; then
-                source=$(packer_get_latest_release "$version")
-            fi
-
-            if [[ -z "$source" ]]; then
-                log_error "No previous release with images found"
-                log_error "Specify source with: --source v0.19"
-                exit 1
-            fi
-
-            echo "Source release: $source"
-            echo "Target release: v${version}"
-            if [[ "$use_workflow" == "true" ]]; then
-                echo "Method: GitHub Actions workflow"
-            else
-                echo "Method: Local (gh CLI)"
+        upload)
+            echo "Target: latest release"
+            echo "Images: $images_dir"
+            echo "Templates: ${templates[*]}"
+            if [[ "$force" == "true" ]]; then
+                echo "Force: yes (skip checksum comparison)"
             fi
             echo ""
 
-            if [[ "$dry_run" == "true" ]]; then
-                echo "Commands that would be executed:"
-                echo ""
-                if [[ "$use_workflow" == "true" ]]; then
-                    packer_dispatch_copy_images "$version" "$source" "true"
-                else
-                    packer_copy_images_local "$version" "$source" "true"
+            if packer_upload_to_latest "$images_dir" "$dry_run" "$force" "${templates[@]}"; then
+                if [[ "$dry_run" == "true" ]]; then
+                    echo ""
+                    echo "═══════════════════════════════════════════════════════════════"
+                    echo "  DRY-RUN COMPLETE - No changes made"
+                    echo "  Run with --execute to upload images"
+                    echo "═══════════════════════════════════════════════════════════════"
                 fi
-                echo ""
-                echo "═══════════════════════════════════════════════════════════════"
-                echo "  DRY-RUN COMPLETE - No changes made"
-                echo "  Run with --execute to copy images"
-                echo "═══════════════════════════════════════════════════════════════"
             else
-                local copy_result=0
-                if [[ "$use_workflow" == "true" ]]; then
-                    if ! packer_dispatch_copy_images "$version" "$source" "false" "$wait_workflow" "$timeout"; then
-                        copy_result=1
-                    fi
-                else
-                    if ! packer_copy_images_local "$version" "$source" "false"; then
-                        copy_result=1
-                    fi
-                fi
+                echo ""
+                log_error "Upload failed"
+                exit 1
+            fi
+            ;;
 
-                if [[ "$copy_result" -eq 0 ]]; then
+        remove)
+            echo "Target: latest release"
+            echo "Templates: ${templates[*]}"
+            echo ""
+
+            if packer_remove_from_latest "$dry_run" "${templates[@]}"; then
+                if [[ "$dry_run" == "true" ]]; then
                     echo ""
                     echo "═══════════════════════════════════════════════════════════════"
-                    echo -e "  RESULT: ${GREEN}SUCCESS${NC}"
-                    echo "  Images copied from $source to v${version}"
+                    echo "  DRY-RUN COMPLETE - No changes made"
+                    echo "  Run with --execute to remove assets"
                     echo "═══════════════════════════════════════════════════════════════"
-                    audit_log "PACKER_COPY" "cli" "Images copied from $source to v${version}"
-                else
-                    echo ""
-                    log_error "Failed to copy images"
-                    exit 1
                 fi
+            else
+                echo ""
+                log_error "Remove failed"
+                exit 1
             fi
             ;;
     esac
@@ -1158,7 +1138,6 @@ cmd_full() {
     local scenario="vm-roundtrip"
     local skip_validate=false
     local dry_run=true
-    local images_dir=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -1173,10 +1152,6 @@ cmd_full() {
             --skip-validate)
                 skip_validate=true
                 shift
-                ;;
-            --images)
-                images_dir="$2"
-                shift 2
                 ;;
             --dry-run)
                 dry_run=true
@@ -1327,7 +1302,7 @@ cmd_full() {
                 ;;
 
             publish)
-                if ! run_publish "$version" "false" "false" "$images_dir"; then
+                if ! run_publish "$version" "false" "false" "true"; then
                     log_error "Publish failed"
                     return 1
                 fi
@@ -1337,36 +1312,14 @@ cmd_full() {
                 ;;
 
             packer)
-                # Check if templates changed
-                local changed
-                changed=$(packer_templates_changed "$version")
-
-                if [[ "$changed" == "true" ]]; then
-                    echo -e "${YELLOW}Packer templates have changed.${NC}"
-                    if [[ -n "$images_dir" ]]; then
-                        echo "Using provided images from: $images_dir"
-                        # Images will be uploaded during publish
-                    else
-                        echo "No --images directory specified."
-                        echo "Either build images or skip packer asset upload."
-                        echo ""
-                        read -p "Skip packer images for this release? [y/N] " -r
-                        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                            log_error "Aborted - please build images first"
-                            return 1
-                        fi
-                    fi
+                # Check packer latest release has images
+                local packer_assets
+                packer_assets=$(gh release view latest --repo homestak-dev/packer --json assets --jq '.assets | length' 2>/dev/null || echo "0")
+                if [[ "$packer_assets" -gt 0 ]]; then
+                    echo -e "${GREEN}Packer images: $packer_assets asset(s) on latest${NC}"
                 else
-                    echo "No template changes - copying images from previous release..."
-                    local source
-                    source=$(packer_get_latest_release "$version")
-                    if [[ -n "$source" ]]; then
-                        if ! packer_copy_images_local "$version" "$source" "false"; then
-                            log_warn "Failed to copy packer images"
-                        fi
-                    else
-                        log_warn "No previous release with images found"
-                    fi
+                    echo -e "${YELLOW}No packer images on latest release.${NC}"
+                    echo "Upload with: release.sh packer --upload --execute --all"
                 fi
                 ;;
 
@@ -1743,12 +1696,12 @@ Commands:
 Options:
   --help, -h         Show this help message
   --version          Show CLI version (use as first argument)
-  --version X.Y      Release version (required for init)
+  --version X.Y      Release version (required for init, packer --check)
   --issue N          GitHub issue to track release progress (required for init)
   --no-issue         Skip issue requirement for hotfix releases (init only)
   --dry-run          Show what would be done without executing
   --execute          Execute the operation
-  --force            Override validation gate requirement
+  --force            Override validation gate / force upload (packer --upload)
   --rollback         Rollback tags/releases on failure
   --reset            Reset tags to HEAD (delete and recreate, v0.x only)
   --reset-repo REPO  Reset tag for single repo only
@@ -1759,9 +1712,8 @@ Options:
   --packer-release   Packer release tag for image downloads (validate only)
   --manifest NAME    Manifest name for recursive-pve scenarios (validate only)
   --host HOST        Check host readiness (preflight only, repeatable)
-  --workflow MODE    Packer image copy method: 'github' (fast, recommended) or 'local' (required for --execute)
-  --no-wait          Don't wait for workflow completion (packer only)
-  --timeout N        Workflow wait timeout in seconds (default: 600)
+  --images DIR       Packer images directory (packer --upload, default: packer/images)
+  --all              Target all packer templates (packer --upload/--remove)
   --lines N          Number of audit log lines to show (default: 20)
   --below-version    Delete releases below this version (sunset only)
   --json             Machine-readable JSON output (status, verify, preflight)
@@ -1788,15 +1740,18 @@ Examples:
   release.sh tag --reset --execute
   release.sh tag --reset-repo packer --execute
   release.sh publish --dry-run
-  release.sh publish --execute --workflow github   # Fast, recommended
-  release.sh publish --execute --workflow local    # Slow, downloads ~13GB
-  release.sh publish --execute --workflow github --yes  # Skip confirmation
+  release.sh publish --execute
+  release.sh publish --execute --yes               # Skip confirmation prompt
   release.sh packer --check
-  release.sh packer --copy --dry-run
-  release.sh packer --copy --execute
-  release.sh packer --copy --version 0.20 --source v0.19
-  release.sh packer --copy --workflow --execute
-  release.sh packer --copy --workflow --no-wait --execute
+  release.sh packer --check --version 0.45
+  release.sh packer --upload --dry-run --all               # Preview all uploads
+  release.sh packer --upload --execute --all               # Upload all, skip unchanged
+  release.sh packer --upload --execute --all --force       # Upload all, force overwrite
+  release.sh packer --upload --execute debian-12 pve-9     # Upload specific templates
+  release.sh packer --upload --execute --all --images /tmp/images  # Custom images dir
+  release.sh packer --remove --dry-run --all               # Preview removal
+  release.sh packer --remove --execute debian-12           # Remove specific template
+  release.sh packer --remove --execute --all               # Remove all image assets
   release.sh retrospective                       # Show retrospective status
   release.sh retrospective --done                # Mark retrospective complete
   release.sh close --dry-run
