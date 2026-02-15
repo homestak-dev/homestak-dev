@@ -133,8 +133,8 @@ packer_upload_to_latest() {
             local tmp_remote
             tmp_remote=$(mktemp)
             if gh release download latest --repo homestak-dev/packer \
-                --pattern "${tmpl}.qcow2.sha256" --dir "$(dirname "$tmp_remote")" \
-                --output "$tmp_remote" 2>/dev/null; then
+                --pattern "${tmpl}.qcow2.sha256" \
+                --output "$tmp_remote" --clobber 2>/dev/null; then
                 remote_checksum=$(awk '{print $1}' "$tmp_remote")
             fi
             rm -f "$tmp_remote"
