@@ -48,7 +48,7 @@ Copy this template to the release issue after completing the release.
 | tofu | vX.Y | |
 | ansible | vX.Y | |
 | bootstrap | vX.Y | |
-| packer | vX.Y | Images: debian-12-custom, debian-13-custom |
+| packer | vX.Y | Images: debian-12, debian-13, pve-9 |
 | iac-driver | vX.Y | |
 
 ### Validation Report

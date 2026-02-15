@@ -87,11 +87,15 @@ gh release create latest --prerelease \
 
 ### 3. Image Checklist (When Rebuilding)
 
-- [ ] debian-12-custom.qcow2 + .sha256
-- [ ] debian-13-custom.qcow2 + .sha256
-- [ ] debian-13-pve.qcow2 + .sha256 (or split parts if >2GB)
+- [ ] debian-12.qcow2 + .sha256
+- [ ] debian-13.qcow2 + .sha256
+- [ ] pve-9.qcow2 + .sha256 (or split parts if >2GB)
 
 **Note:** Images >2GB must be split due to GitHub limits.
+
+## Related
+
+See [packer-pipeline.md](../designs/packer-pipeline.md) for naming conventions, build workflow, and caching strategy.
 
 ## Outputs
 
