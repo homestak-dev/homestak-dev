@@ -36,8 +36,8 @@ done
 | Repo | Expected Assets |
 |------|-----------------|
 | All (except packer) | 0 (tag-only) |
-| packer (if images changed) | 6 (3 images + 3 checksums) |
-| packer (if images unchanged) | 0 (tag-only) |
+| packer (if images changed) | `debian-12.qcow2`, `debian-13.qcow2`, `pve-9.qcow2` (auto-split if >2GB) + `.sha256` checksums |
+| packer (if images unchanged) | 0 (tag-only, images stay on `latest` release) |
 
 ### 3. Post-Release Smoke Test
 

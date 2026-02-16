@@ -107,7 +107,7 @@ Before running validation:
 | Node configuration | `ls site-config/nodes/$(hostname).yaml` |
 | API token | `grep api_tokens site-config/secrets.yaml` |
 | Secrets decrypted | `head -1 site-config/secrets.yaml` (must NOT start with `sops:`) |
-| Packer images | `ls /var/lib/vz/template/iso/debian-*-custom.img` |
+| Packer images | `ls /var/lib/vz/template/iso/{debian-12,debian-13,pve-9}.img` |
 | Nested virtualization | `cat /sys/module/kvm_intel/parameters/nested` |
 
 Or use preflight check:
@@ -244,7 +244,7 @@ head -1 site-config/secrets.yaml | grep -q "^sops:" && echo "ENCRYPTED: run 'mak
 grep -q "${HOST}:" site-config/secrets.yaml && echo "OK: API token" || echo "MISSING: API token"
 
 # 4. Check packer images
-ls /var/lib/vz/template/iso/debian-*-custom.img 2>/dev/null || echo "MISSING: packer images"
+ls /var/lib/vz/template/iso/{debian-12,debian-13,pve-9}.img 2>/dev/null || echo "MISSING: packer images"
 
 # 5. Check nested virtualization
 cat /sys/module/kvm_intel/parameters/nested | grep -q Y && echo "OK: nested virt" || echo "WARNING: no nested virt"
