@@ -249,9 +249,6 @@ gh pr status
 ### iac-driver
 
 ```bash
-# List scenarios
-./run.sh scenario --help
-
 # Quick validation
 ./run.sh manifest test -M n1-push -H father
 

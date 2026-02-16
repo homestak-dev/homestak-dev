@@ -13,9 +13,11 @@ Nodes need to fetch their specifications from the server (iac-driver) and persis
 **Success criteria:**
 - Client fetches spec from server via HTTP
 - CLI flags work for manual testing: `--server`, `--identity`, `--token`
-- Env vars work for automated path: `HOMESTAK_SPEC_SERVER`, `HOMESTAK_TOKEN`
+- Env vars work for automated path: `HOMESTAK_SERVER`, `HOMESTAK_TOKEN`
 - Fetched spec persisted to `/usr/local/etc/homestak/state/`
 - Error responses handled with defined codes
+
+> **Note (v0.50):** The automated path now uses provisioning tokens (`HOMESTAK_TOKEN`) which carry the spec FK and identity in HMAC-signed claims. The `--identity` flag and `HOMESTAK_IDENTITY` env var remain for manual testing only. See [provisioning-token.md](provisioning-token.md) for the token design.
 
 ## Proposed Solution
 
@@ -47,7 +49,7 @@ Nodes need to fetch their specifications from the server (iac-driver) and persis
 homestak spec get --server https://father:44443 --identity dev1
 
 # Automated invocation (via env vars, for cloud-init path)
-HOMESTAK_SPEC_SERVER=https://father:44443 \
+HOMESTAK_SERVER=https://father:44443 \
 HOMESTAK_TOKEN=<provisioning-token> \
 homestak spec get
 
@@ -63,7 +65,7 @@ homestak spec get
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `HOMESTAK_SPEC_SERVER` | Server URL (e.g., `https://father:44443`) | Yes (if no --server) |
+| `HOMESTAK_SERVER` | Server URL (e.g., `https://father:44443`) | Yes (if no --server) |
 | `HOMESTAK_TOKEN` | Provisioning token (HMAC-signed, carries spec FK + identity) | Yes (automated path) |
 | `HOMESTAK_IDENTITY` | Node identity for manual testing (e.g., `dev1`) | Manual only (if no --identity) |
 
@@ -134,7 +136,7 @@ homestak spec get
        ▼
 Parse CLI flags / env vars
        │
-       ├── --server / HOMESTAK_SPEC_SERVER
+       ├── --server / HOMESTAK_SERVER
        ├── --token / HOMESTAK_TOKEN (provisioning token, automated path)
        └── --identity / HOMESTAK_IDENTITY (manual testing only)
        │

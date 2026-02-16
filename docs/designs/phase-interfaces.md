@@ -40,7 +40,7 @@ The create phase provisions infrastructure and injects the information needed fo
 Create injects these values via cloud-init to `/etc/profile.d/homestak.sh`:
 
 ```bash
-export HOMESTAK_SPEC_SERVER=https://father:44443
+export HOMESTAK_SERVER=https://father:44443
 export HOMESTAK_TOKEN=<provisioning-token>
 ```
 
@@ -50,7 +50,7 @@ The provisioning token is an HMAC-signed artifact minted by the operator at crea
 
 Config phase validates these inputs:
 - `HOMESTAK_TOKEN` is set and well-formed (pull mode)
-- `HOMESTAK_SPEC_SERVER` is reachable (pull mode)
+- `HOMESTAK_SERVER` is reachable (pull mode)
 - SSH access works (push mode)
 
 ---
@@ -366,7 +366,7 @@ Each phase should validate its inputs before proceeding.
 
 | Check | Failure Action |
 |-------|----------------|
-| Identity set | Error: "HOMESTAK_IDENTITY not set" |
+| Token set | Error: "HOMESTAK_TOKEN not set" |
 | Spec server reachable | Error: "Cannot reach spec server" |
 | Spec found | Error: "Spec not found for identity" |
 | Auth valid | Error: "Authentication failed" |
