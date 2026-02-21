@@ -58,8 +58,9 @@ When the operator creates a PVE node that has children, it runs these phases bef
 | Phase | Action | Purpose |
 |-------|--------|---------|
 | bootstrap | `BootstrapAction` | curl\|bash installer on target PVE node |
-| copy_secrets | `CopySecretsAction` | SCP secrets.yaml |
-| inject_ssh_key | `InjectSSHKeyAction` | Outer host key → inner secrets |
+| copy_secrets | `CopySecretsAction` | SCP scoped secrets.yaml (excludes api_tokens) |
+| copy_site_config | `CopySiteConfigAction` | SCP site.yaml (DNS, gateway, timezone) |
+| inject_ssh_key | `InjectSSHKeyAction` | Driver host key → target secrets |
 | copy_private_key | `CopySSHPrivateKeyAction` | Private key for inner → child SSH |
 | pve-setup | `RecursiveScenarioAction` | Run pve-setup on target PVE node |
 | configure_bridge | `ConfigureNetworkBridgeAction` | Create vmbr0 from eth0 |
