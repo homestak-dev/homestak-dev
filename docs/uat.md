@@ -65,6 +65,20 @@ The test suite runs automatic preflight validation before starting. It catches:
 - Missing packer images in PVE storage (error)
 - API token and host connectivity issues (error)
 
+## Re-running UAT
+
+To reset and re-run on an existing host (e.g., after code changes):
+
+```bash
+# Reset site-config to clean state
+sudo rm /usr/local/etc/homestak/site.yaml /usr/local/etc/homestak/secrets.yaml
+
+# Pull latest code (post-checkout hook re-initializes from .example templates)
+sudo homestak update
+
+# Continue with Setup steps 2-6
+```
+
 ## Troubleshooting
 
 - **"gateway not configured"** — edit site.yaml: `defaults.gateway`
