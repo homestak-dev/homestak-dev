@@ -13,11 +13,11 @@ Internal validation checklist for verifying homestak on a fresh Debian 13 host.
 
 ```bash
 # 1. Bootstrap
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | sudo bash
 
 # 2. Configure site defaults for your network
-sudo vi /usr/local/etc/homestak/site.yaml
-# Required: defaults.gateway, defaults.dns_servers
+sudo sed -i 's/gateway: ""/gateway: 192.168.1.1/' /usr/local/etc/homestak/site.yaml
+sudo sed -i 's/dns_servers: \[\]/dns_servers: [ 192.168.1.1 ]/' /usr/local/etc/homestak/site.yaml
 # Optional: defaults.domain (e.g., home.arpa)
 
 # 3. Initialize site configuration (generates host config, SSH key)
@@ -75,6 +75,7 @@ sudo homestak update
 
 # Reset site-config to clean state and re-initialize from templates
 sudo rm -f /usr/local/etc/homestak/site.yaml /usr/local/etc/homestak/secrets.yaml
+sudo rm -f /usr/local/etc/homestak/hosts/*.yaml /usr/local/etc/homestak/nodes/*.yaml
 sudo make -C /usr/local/etc/homestak init-site init-secrets
 
 # Continue with Setup steps 2-6
