@@ -423,6 +423,7 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/ia
 
 ## Related Documents
 
+- [config-distribution.md](config-distribution.md) — How site config and secrets reach delegated PVE nodes
 - [server-daemon.md](server-daemon.md) — Server daemon design
 - [spec-client.md](spec-client.md) — Client design
 - [phase-interfaces.md](phase-interfaces.md) — Phase interface contracts (run/destroy phase details)
@@ -435,6 +436,7 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/ia
 
 | Date | Change |
 |------|--------|
+| 2026-02-22 | Add config-distribution.md reference; config distribution tracked in iac-driver#245 (push, complete) and iac-driver#248 (pull, open) |
 | 2026-02-14 | Sprint #249: Push-mode config implemented (iac-driver#206); both push and pull modes now available |
 | 2026-02-08 | Terminology: controller → server (aligns with server-daemon.md rename) |
 | 2026-02-07 | Align with updated epics: pull model step 5 no longer "(future)"; replace aspirational `lifecycle/` directory with actual implementation structure |
