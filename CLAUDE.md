@@ -200,7 +200,7 @@ Consistent terminology across all repos:
 ## Conventions
 
 - **VM IDs**: 5-digit (10000+ dev, 20000+ k8s, 99900+ integration test)
-- **Networks**: dev 10.10.10.0/24, k8s 10.10.20.0/24, management 198.51.100.0/24
+- **Networks**: dev 192.0.2.0/24 (TEST-NET-1), k8s 203.0.113.0/24 (TEST-NET-3), management 198.51.100.0/24 (TEST-NET-2)
 - **Hostnames**: `{cluster}{instance}` (dev1, kubeadm1, router)
 - **Environments**: dev (permissive) vs prod (hardened)
 
@@ -210,13 +210,13 @@ Not all hosts have the same capabilities. Key distinctions:
 
 | Host | QEMU/KVM | PVE API | Notes |
 |------|----------|---------|-------|
-| father | Yes | Yes | Primary build host for packer images |
-| mother | Yes | Yes | Secondary PVE host |
+| srv1 | Yes | Yes | Primary build host for packer images |
+| srv2 | Yes | Yes | Secondary PVE host |
 | dev machines | Maybe | No | May lack nested virtualization |
 
 **Packer builds require QEMU/KVM.** Build on capable hosts using `packer/build.sh` directly or via SSH:
 ```bash
-ssh father 'cd /usr/local/lib/homestak/packer && ./build.sh'
+ssh srv1 'cd /usr/local/lib/homestak/packer && ./build.sh'
 ```
 
 ## Bootstrap Pattern
@@ -291,9 +291,9 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 # Manual workflow
 ./scripts/release.sh init --version 0.31 --issue 115
 ./scripts/release.sh preflight
-./scripts/release.sh validate --host father
+./scripts/release.sh validate --host srv1
 # Or use --stage to validate via installed CLI (requires bootstrap on remote)
-./scripts/release.sh validate --stage --remote father
+./scripts/release.sh validate --stage --remote srv1
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute --yes
 ./scripts/release.sh publish --execute --yes
@@ -304,7 +304,7 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 
 # Or use full command for end-to-end automation
 ./scripts/release.sh full --dry-run
-./scripts/release.sh full --execute --host father
+./scripts/release.sh full --execute --host srv1
 ```
 
 ### Release Issue Tracking

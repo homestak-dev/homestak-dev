@@ -47,7 +47,7 @@ None.
 ### Artifacts
 - 9 repos tagged and released
 - Packer images: No changes (using latest)
-- Validation: manifest test -M n1-push on father (from Sprint 152)
+- Validation: manifest test -M n1-push on srv1 (from Sprint 152)
 ```
 
 ### 2. Post to Release Issue

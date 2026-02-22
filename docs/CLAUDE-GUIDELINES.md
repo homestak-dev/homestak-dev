@@ -110,13 +110,13 @@ ConfigResolver merges YAML layers and outputs tfvars.json for tofu.
 ## Quick Reference
 
 # Deploy via iac-driver (recommended)
-./run.sh test -M n1-push -H father
+./run.sh test -M n1-push -H srv1
 
 # Direct commands (debugging only)
 tofu plan -var-file=/tmp/tfvars.json
 
 # Run integration tests
-./run.sh test -M n2-tiered -H father
+./run.sh test -M n2-tiered -H srv1
 ```
 
 *Why it works:* Shows the recommended path first, alternatives second. Comments explain when to use each.
@@ -188,6 +188,17 @@ HOMESTAK_SOURCE=http://192.0.2.1:8000 ./install.sh
 ```
 
 Use RFC 5737 TEST-NET-1 (192.0.2.0/24) for IPv4 examples. For documentation that needs multiple addresses, also available: TEST-NET-2 (198.51.100.0/24) and TEST-NET-3 (203.0.113.0/24).
+
+### Avoid: Real hostnames in examples
+
+Use `srv1` and `srv2` as canonical example hostnames in documentation. These are the hostname equivalent of RFC 5737 TEST-NET addresses — clearly placeholder values.
+
+| Use | For |
+|-----|-----|
+| `srv1` | Primary PVE host examples |
+| `srv2` | Secondary PVE host examples |
+| `$USER@srv1` | SSH command examples (expands to current user) |
+| `user@host` | SSH key FK references in config examples |
 
 ## PR Checklist
 

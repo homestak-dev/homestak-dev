@@ -147,8 +147,8 @@ Document in sprint issue:
 
 ```markdown
 ## Validation
-**Scenario:** `./run.sh manifest test -M n2-tiered -H father`
-**Host:** father
+**Scenario:** `./run.sh manifest test -M n2-tiered -H srv1`
+**Host:** srv1
 **Rationale:** Sprint includes nested-pve changes
 ```
 

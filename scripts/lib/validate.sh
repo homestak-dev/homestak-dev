@@ -13,7 +13,7 @@
 IAC_DRIVER_DIR="${WORKSPACE_DIR}/iac-driver"
 DEFAULT_MANIFEST="n1-push"
 DEFAULT_SCENARIO=""
-DEFAULT_HOST="father"
+DEFAULT_HOST=""
 
 # FHS paths for stage mode
 HOMESTAK_CLI="/usr/local/bin/homestak"
@@ -268,6 +268,12 @@ run_validation() {
         echo ""
         audit_log "SKIP" "human" "Validation skipped (emergency)"
         return 0
+    fi
+
+    # Require host
+    if [[ -z "$host" ]]; then
+        log_error "No host specified. Use --host <name>."
+        return 1
     fi
 
     # Determine mode and check prerequisites

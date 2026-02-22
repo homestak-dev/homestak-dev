@@ -40,7 +40,7 @@ The create phase provisions infrastructure and injects the information needed fo
 Create injects these values via cloud-init to `/etc/profile.d/homestak.sh`:
 
 ```bash
-export HOMESTAK_SERVER=https://father:44443
+export HOMESTAK_SERVER=https://srv1:44443
 export HOMESTAK_TOKEN=<provisioning-token>
 ```
 
@@ -84,7 +84,7 @@ If the spec defines `run.trigger` and `run.interval`, config phase records this 
 
 ```yaml
 # /usr/local/etc/homestak/state/convergence.yaml
-spec_server: https://father:44443
+spec_server: https://srv1:44443
 trigger: schedule
 interval: 1h
 last_check: 2026-02-03T10:00:00Z
@@ -236,16 +236,16 @@ Each manifest-node combination has isolated state:
 **Implementation:**
 ```bash
 # Default: stop on failure
-./run.sh create -M nested-test -H father
+./run.sh create -M nested-test -H srv1
 
 # Explicit stop (same as default)
-./run.sh create -M nested-test -H father --on-error=stop
+./run.sh create -M nested-test -H srv1 --on-error=stop
 
 # Rollback on failure
-./run.sh create -M nested-test -H father --on-error=rollback
+./run.sh create -M nested-test -H srv1 --on-error=rollback
 
 # Continue despite failures
-./run.sh create -M nested-test -H father --on-error=continue
+./run.sh create -M nested-test -H srv1 --on-error=continue
 ```
 
 ### Q3: Run Phase Triggers

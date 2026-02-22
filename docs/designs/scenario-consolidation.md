@@ -41,7 +41,7 @@ Running a retired scenario name prints a migration hint and exits with code 1.
 The operator handles root nodes (depth 0) locally. PVE nodes with children are delegated:
 
 ```
-Driver host (father)                   PVE node (root-pve)
+Driver host (srv1)                   PVE node (root-pve)
 ────────────────────                   ─────────────────────
 Operator creates root-pve (depth 0)
   → tofu apply, start, wait IP
@@ -81,7 +81,7 @@ The subtree manifest is serialized to JSON and passed via SSH:
 ./run.sh create --manifest-json '<json>' -H <hostname> --json-output
 ```
 
-**HOMESTAK_SOURCE propagation:** `RecursiveScenarioAction._build_serve_repos_prefix()` reads `HOMESTAK_SOURCE`, `HOMESTAK_TOKEN`, and `HOMESTAK_REF` from `os.environ` and prepends them to the SSH command. Each PVE level's executor sets `HOMESTAK_SOURCE` to its own server address via `_set_source_env()`, creating a chain: father → root-pve → leaf-pve. At depth 2+, `_set_source_env` uses `_detect_external_ip()` when `ssh_host` is `localhost` to ensure a routable address ([iac-driver#200](https://github.com/homestak-dev/iac-driver/issues/200)).
+**HOMESTAK_SOURCE propagation:** `RecursiveScenarioAction._build_serve_repos_prefix()` reads `HOMESTAK_SOURCE`, `HOMESTAK_TOKEN`, and `HOMESTAK_REF` from `os.environ` and prepends them to the SSH command. Each PVE level's executor sets `HOMESTAK_SOURCE` to its own server address via `_set_source_env()`, creating a chain: srv1 → root-pve → leaf-pve. At depth 2+, `_set_source_env` uses `_detect_external_ip()` when `ssh_host` is `localhost` to ensure a routable address ([iac-driver#200](https://github.com/homestak-dev/iac-driver/issues/200)).
 
 ### RecursiveScenarioAction Extension
 

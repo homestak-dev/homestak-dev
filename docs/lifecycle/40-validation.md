@@ -114,34 +114,34 @@ Or use preflight check:
 
 ```bash
 cd iac-driver
-./run.sh --preflight --host father
+./run.sh --preflight --host srv1
 ```
 
 ### 4a. FHS Branch Alignment (Remote Hosts)
 
-When running integration tests against a remote FHS host (e.g., father at `/usr/local/lib/homestak/`), **all repos must be on the correct branch**. Sprint code on your dev machine won't take effect unless the remote host's repos also have the sprint changes.
+When running integration tests against a remote FHS host (e.g., srv1 at `/usr/local/lib/homestak/`), **all repos must be on the correct branch**. Sprint code on your dev machine won't take effect unless the remote host's repos also have the sprint changes.
 
 **Verify branch alignment:**
 ```bash
 # Check which branches are checked out on the remote host
-ssh root@father "for d in /usr/local/lib/homestak/*/; do echo \"\$(basename \$d): \$(git -C \$d branch --show-current)\"; done"
+ssh $USER@srv1 "for d in /usr/local/lib/homestak/*/; do echo \"\$(basename \$d): \$(git -C \$d branch --show-current)\"; done"
 ```
 
 **Deploy sprint branches to remote host:**
 ```bash
 # For each repo with sprint changes:
-ssh root@father "cd /usr/local/lib/homestak/<repo> && git fetch origin sprint/<name> && git checkout sprint/<name>"
+ssh $USER@srv1 "cd /usr/local/lib/homestak/<repo> && git fetch origin sprint/<name> && git checkout sprint/<name>"
 
 # Don't forget site-config:
-ssh root@father "cd /usr/local/etc/homestak && git fetch origin sprint/<name> && git checkout sprint/<name>"
+ssh $USER@srv1 "cd /usr/local/etc/homestak && git fetch origin sprint/<name> && git checkout sprint/<name>"
 ```
 
 **Common mistake:** Deploying 3 of 4 repos and forgetting the 4th. Always verify all affected repos are aligned before running scenarios.
 
 **After validation:** Restore the remote host to master:
 ```bash
-ssh root@father "for d in /usr/local/lib/homestak/*/; do git -C \$d checkout master 2>/dev/null; done"
-ssh root@father "cd /usr/local/etc/homestak && git checkout master"
+ssh $USER@srv1 "for d in /usr/local/lib/homestak/*/; do git -C \$d checkout master 2>/dev/null; done"
+ssh $USER@srv1 "cd /usr/local/etc/homestak && git checkout master"
 ```
 
 Use `homestak update --branch <name>` to automate this (bootstrap#49).
@@ -154,21 +154,21 @@ Use `homestak update --branch <name>` to automate this (bootstrap#49).
 cd ~/homestak-dev/iac-driver
 
 # Quick validation (~2 min)
-./run.sh manifest test -M n1-push -H father
+./run.sh manifest test -M n1-push -H srv1
 
 # Tiered validation (~9 min)
-./run.sh manifest test -M n2-tiered -H father
+./run.sh manifest test -M n2-tiered -H srv1
 
 # Full 3-level validation (~15 min)
-./run.sh manifest test -M n3-deep -H father
+./run.sh manifest test -M n3-deep -H srv1
 ```
 
 **Apply/destroy separately (for debugging):**
 
 ```bash
-./run.sh manifest apply -M n2-tiered -H father
+./run.sh manifest apply -M n2-tiered -H srv1
 # ... inspect PVE node ...
-./run.sh manifest destroy -M n2-tiered -H father --yes
+./run.sh manifest destroy -M n2-tiered -H srv1 --yes
 ```
 
 ### 6. Document Results
@@ -178,8 +178,8 @@ Post validation results to the sprint issue:
 ```markdown
 ## Validation - YYYY-MM-DD
 
-**Scenario:** `./run.sh manifest test -M n1-push -H father`
-**Host:** father
+**Scenario:** `./run.sh manifest test -M n1-push -H srv1`
+**Host:** srv1
 **Result:** PASSED
 
 **Summary:**

@@ -187,7 +187,7 @@ cmd_init() {
     echo "Next steps:"
     echo "  1. release.sh preflight"
     echo "  2. Update CHANGELOGs"
-    echo "  3. release.sh validate --manifest n1-push --host father"
+    echo "  3. release.sh validate --manifest n1-push --host srv1"
     echo "  4. release.sh tag --dry-run"
     echo "  5. release.sh tag --execute"
     echo "  6. release.sh publish --execute"
@@ -550,7 +550,7 @@ cmd_preflight() {
 
 cmd_validate() {
     local scenario=""
-    local host="father"
+    local host=""
     local skip=false
     local verbose=false
     local remote=""
@@ -1145,7 +1145,7 @@ cmd_retrospective() {
 }
 
 cmd_full() {
-    local host="father"
+    local host=""
     local scenario=""
     local manifest="n1-push"
     local skip_validate=false
@@ -1742,13 +1742,13 @@ Examples:
   release.sh init --version 0.31-hotfix --no-issue   # Hotfix without tracking issue
   release.sh status
   release.sh preflight
-  release.sh preflight --host father
-  release.sh preflight --host father --host mother
-  release.sh validate --manifest n1-push --host father
-  release.sh validate --manifest n1-push --host father --remote father
-  release.sh validate --manifest n2-tiered --host father
-  release.sh validate --scenario push-vm-roundtrip --host father  # Scenario fallback
-  release.sh validate --stage --remote father              # Stage mode via homestak CLI
+  release.sh preflight --host srv1
+  release.sh preflight --host srv1 --host srv2
+  release.sh validate --manifest n1-push --host srv1
+  release.sh validate --manifest n1-push --host srv1 --remote srv1
+  release.sh validate --manifest n2-tiered --host srv1
+  release.sh validate --scenario push-vm-roundtrip --host srv1  # Scenario fallback
+  release.sh validate --stage --remote srv1              # Stage mode via homestak CLI
   release.sh validate --skip
   release.sh tag --dry-run
   release.sh tag --execute
@@ -1778,7 +1778,7 @@ Examples:
   release.sh close --execute --yes               # Skip confirmation prompt
   release.sh close --execute --force             # Skip phase validation
   release.sh full --dry-run
-  release.sh full --execute --host father
+  release.sh full --execute --host srv1
   release.sh full --execute --skip-validate
   release.sh selftest
   release.sh selftest --verbose

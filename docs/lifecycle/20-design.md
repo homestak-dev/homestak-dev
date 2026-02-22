@@ -248,12 +248,12 @@ Before writing code, know how you'll prove it works.
 ```markdown
 ## Test Plan
 
-**Scenario:** `./run.sh manifest test -M n1-push -H father`
+**Scenario:** `./run.sh manifest test -M n1-push -H srv1`
 
 **Steps:**
 1. Build image with changes: `./build.sh debian-13`
 2. Publish to PVE: `./publish.sh`
-3. Run validation: `./run.sh manifest test -M n1-push -H father`
+3. Run validation: `./run.sh manifest test -M n1-push -H srv1`
 
 **Expected result:** VM boots, SSH accessible, guest agent responds
 

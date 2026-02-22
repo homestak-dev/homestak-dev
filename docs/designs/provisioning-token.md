@@ -327,7 +327,7 @@ The spec endpoint requires a provisioning token. No fallback paths, no legacy au
 **Client-side log:** `/var/log/homestak/config.log` (written by `./run.sh config --fetch`)
 
 ```
-2026-02-11T12:00:00Z [INFO]  spec-fetch: starting server=https://father:44443 node=edge
+2026-02-11T12:00:00Z [INFO]  spec-fetch: starting server=https://srv1:44443 node=edge
 2026-02-11T12:00:00Z [INFO]  spec-fetch: token claims v=1 n=edge s=base iat=2026-02-11T11:50:00Z
 2026-02-11T12:00:01Z [WARN]  spec-fetch: attempt 1/5 failed: ConnectionRefused (server unreachable)
 2026-02-11T12:00:11Z [WARN]  spec-fetch: attempt 2/5 failed: ConnectionRefused (server unreachable)
@@ -338,7 +338,7 @@ The spec endpoint requires a provisioning token. No fallback paths, no legacy au
 
 Permanent failure:
 ```
-2026-02-11T12:00:00Z [INFO]  spec-fetch: starting server=https://father:44443 node=edge
+2026-02-11T12:00:00Z [INFO]  spec-fetch: starting server=https://srv1:44443 node=edge
 2026-02-11T12:00:00Z [INFO]  spec-fetch: token claims v=1 n=edge s=base iat=2026-02-11T11:50:00Z
 2026-02-11T12:00:01Z [ERROR] spec-fetch: 401 E301 Invalid token signature
 2026-02-11T12:00:01Z [ERROR] spec-fetch: permanent error, writing fail marker
@@ -388,7 +388,7 @@ Permanent failure (token decodable):
   "message": "Invalid token signature",
   "node": "edge",
   "spec": "base",
-  "server": "https://father:44443",
+  "server": "https://srv1:44443",
   "attempts": 1,
   "first_attempt": "2026-02-11T12:00:00Z",
   "last_attempt": "2026-02-11T12:00:01Z",
@@ -404,7 +404,7 @@ Permanent failure (token malformed or missing):
   "message": "Malformed token: expected 2 dot-separated segments, got 1",
   "node": null,
   "spec": null,
-  "server": "https://father:44443",
+  "server": "https://srv1:44443",
   "attempts": 1,
   "first_attempt": "2026-02-11T12:00:00Z",
   "last_attempt": "2026-02-11T12:00:00Z",
@@ -420,7 +420,7 @@ Transient failure (retries exhausted):
   "message": "Connection refused after 5 attempts",
   "node": "edge",
   "spec": "base",
-  "server": "https://father:44443",
+  "server": "https://srv1:44443",
   "attempts": 5,
   "first_attempt": "2026-02-11T12:00:00Z",
   "last_attempt": "2026-02-11T12:02:30Z",
@@ -452,8 +452,8 @@ ssh edge "/usr/local/lib/homestak/iac-driver/run.sh config --fetch --insecure"
 ./run.sh config-push --host edge --spec base
 
 # Option 3: Destroy and recreate (token is fresh on new create)
-./run.sh destroy -M n1-pull -H father --yes
-./run.sh create -M n1-pull -H father
+./run.sh destroy -M n1-pull -H srv1 --yes
+./run.sh create -M n1-pull -H srv1
 ```
 
 ## Key Components Affected
@@ -699,7 +699,7 @@ Server maintains a revocation list (separate from consumption ledger). Tokens ca
 
 **Scenario: Pull-mode with provisioning token**
 ```bash
-./run.sh test -M n1-pull -H father
+./run.sh test -M n1-pull -H srv1
 # VM boots, presents token, fetches spec, self-configures
 ```
 
@@ -732,7 +732,7 @@ Server maintains a revocation list (separate from consumption ledger). Tokens ca
 6. **`spec_client.py` / `config_apply.py`**: Read `HOMESTAK_TOKEN`, present as Bearer, structured logging, fail marker
 7. **Remove legacy auth** — delete `validate_spec_auth()`, `_resolve_auth_token()`, posture-based auth dispatch
 8. **Unit tests** — minting, verification, retry logic, logging, edge cases
-9. **Integration test** — `./run.sh test -M n1-pull -H father`
+9. **Integration test** — `./run.sh test -M n1-pull -H srv1`
 10. **Token introspection CLI** — `./run.sh token inspect`
 11. **Design doc updates** — phase-interfaces, node-lifecycle, spec-client, config-phase
 

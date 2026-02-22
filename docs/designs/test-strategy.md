@@ -418,26 +418,26 @@ pytest tests/test_config_resolver.py -k "test_resolve_inline_vm"  # Specific tes
 
 ```bash
 # Single component test (flat VM lifecycle)
-./run.sh test -M n1-push -H father
+./run.sh test -M n1-push -H srv1
 
 # With verbose output
-./run.sh test -M n1-push -H father --verbose
+./run.sh test -M n1-push -H srv1 --verbose
 
 # Dry run (preview)
-./run.sh test -M n1-push -H father --dry-run
+./run.sh test -M n1-push -H srv1 --dry-run
 ```
 
 ### Running System Tests
 
 ```bash
 # Full lifecycle test
-./run.sh test -M single-node -H father
+./run.sh test -M single-node -H srv1
 
 # Create only (leave running for debugging)
-./run.sh create -M nested-test -H father
+./run.sh create -M nested-test -H srv1
 
 # Destroy after debugging
-./run.sh destroy -M nested-test -H father
+./run.sh destroy -M nested-test -H srv1
 ```
 
 ## Changelog
