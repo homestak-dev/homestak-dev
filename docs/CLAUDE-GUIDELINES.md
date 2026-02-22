@@ -191,7 +191,7 @@ Use RFC 5737 TEST-NET-1 (192.0.2.0/24) for IPv4 examples. For documentation that
 
 ### Avoid: Real hostnames in examples
 
-Use `srv1` (primary PVE host) and `srv2` (secondary) as canonical example hostnames in documentation. These are the hostname equivalent of RFC 5737 TEST-NET addresses — clearly placeholder values.
+Use `srv1` and `srv2` as canonical example hostnames in documentation. These are the hostname equivalent of RFC 5737 TEST-NET addresses — clearly placeholder values.
 
 | Use | For |
 |-----|-----|
