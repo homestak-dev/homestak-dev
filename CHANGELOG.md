@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.50 - 2026-02-22
+
 ### Added
 - Add `packer --upload` command for uploading local images to `latest` release (#258)
 - Add `packer --remove` command for deleting image assets from `latest` release (#258)
