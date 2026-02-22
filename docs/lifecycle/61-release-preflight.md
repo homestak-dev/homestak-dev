@@ -48,7 +48,7 @@ Evidence needed:
 - Result (PASSED)
 - Report link or summary
 
-**Note:** Release validation is evidence-based. Sprints run the tests; release checks they were run.
+**Note:** Release validation is evidence-based. Sprints run the tests; release checks they were run. Additionally, `release.sh validate` must run during the release itself — the state file tracks this, and tag creation (Phase 63) is blocked until validation is marked complete.
 
 ### 3. Git Fetch All Repos
 

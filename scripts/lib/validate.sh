@@ -11,7 +11,8 @@
 
 # Default values
 IAC_DRIVER_DIR="${WORKSPACE_DIR}/iac-driver"
-DEFAULT_SCENARIO="vm-roundtrip"
+DEFAULT_MANIFEST="n1-push"
+DEFAULT_SCENARIO=""
 DEFAULT_HOST="father"
 
 # FHS paths for stage mode
@@ -58,21 +59,27 @@ validate_run_scenario() {
     local packer_release="${4:-}"
     local manifest="${5:-}"
 
-    local cmd="${IAC_DRIVER_DIR}/run.sh --scenario ${scenario} --host ${host}"
+    # Build command: manifest-first, scenario as fallback
+    local cmd
+    if [[ -n "$manifest" ]]; then
+        cmd="${IAC_DRIVER_DIR}/run.sh manifest test -M ${manifest} -H ${host}"
+    elif [[ -n "$scenario" ]]; then
+        cmd="${IAC_DRIVER_DIR}/run.sh scenario run ${scenario} --host ${host}"
+    else
+        log_error "Either --manifest or --scenario must be specified"
+        return 1
+    fi
     if [[ "$verbose" == "true" ]]; then
         cmd+=" --verbose"
     fi
     if [[ -n "$packer_release" ]]; then
         cmd+=" --packer-release ${packer_release}"
     fi
-    if [[ -n "$manifest" ]]; then
-        cmd+=" --manifest ${manifest}"
-    fi
 
     log_info "Running: $cmd"
     audit_cmd "$cmd" "iac-driver"
 
-    # Run scenario and capture exit code
+    # Run and capture exit code
     # Use set +e to prevent script exit on command failure
     set +e
     eval "$cmd"
@@ -100,13 +107,14 @@ validate_run_remote() {
         packer_release_flag="--packer-release ${packer_release}"
     fi
 
-    local manifest_flag=""
+    # Build the remote command: manifest-first, scenario as fallback
+    local remote_cmd="cd ~/homestak-dev && ./scripts/release.sh validate"
     if [[ -n "$manifest" ]]; then
-        manifest_flag="--manifest ${manifest}"
+        remote_cmd+=" --manifest ${manifest}"
+    elif [[ -n "$scenario" ]]; then
+        remote_cmd+=" --scenario ${scenario}"
     fi
-
-    # Build the remote command
-    local remote_cmd="cd ~/homestak-dev && ./scripts/release.sh validate --scenario ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag} ${manifest_flag}"
+    remote_cmd+=" --host ${host} ${verbose_flag} ${packer_release_flag}"
 
     log_info "Running validation on ${remote_host}..."
     log_info "Remote command: ${remote_cmd}"
@@ -150,21 +158,27 @@ validate_run_stage_local() {
     local manifest="${5:-}"
 
     # Build the command (sudo required for FHS paths)
-    local cmd="sudo ${HOMESTAK_CLI} scenario ${scenario} --host ${host}"
+    # Manifest-first, scenario as fallback
+    local cmd
+    if [[ -n "$manifest" ]]; then
+        cmd="sudo ${HOMESTAK_CLI} manifest test -M ${manifest} -H ${host}"
+    elif [[ -n "$scenario" ]]; then
+        cmd="sudo ${HOMESTAK_CLI} scenario run ${scenario} --host ${host}"
+    else
+        log_error "Either --manifest or --scenario must be specified"
+        return 1
+    fi
     if [[ "$verbose" == "true" ]]; then
         cmd+=" --verbose"
     fi
     if [[ -n "$packer_release" ]]; then
         cmd+=" --packer-release ${packer_release}"
     fi
-    if [[ -n "$manifest" ]]; then
-        cmd+=" --manifest ${manifest}"
-    fi
 
     log_info "Running (stage): $cmd"
     audit_cmd "$cmd" "homestak"
 
-    # Run scenario and capture exit code
+    # Run and capture exit code
     set +e
     eval "$cmd"
     local exit_code=$?
@@ -191,13 +205,17 @@ validate_run_stage_remote() {
         packer_release_flag="--packer-release ${packer_release}"
     fi
 
-    local manifest_flag=""
-    if [[ -n "$manifest" ]]; then
-        manifest_flag="--manifest ${manifest}"
-    fi
-
     # Build the remote command - uses homestak CLI (sudo required for FHS paths)
-    local remote_cmd="sudo homestak scenario ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag} ${manifest_flag}"
+    # Manifest-first, scenario as fallback
+    local remote_cmd
+    if [[ -n "$manifest" ]]; then
+        remote_cmd="sudo homestak manifest test -M ${manifest} -H ${host} ${verbose_flag} ${packer_release_flag}"
+    elif [[ -n "$scenario" ]]; then
+        remote_cmd="sudo homestak scenario run ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
+    else
+        log_error "Either --manifest or --scenario must be specified"
+        return 1
+    fi
 
     log_info "Running stage validation on ${remote_host}..."
     log_info "Remote command: ${remote_cmd}"
@@ -231,7 +249,12 @@ run_validation() {
     local remote_host="${5:-}"
     local packer_release="${6:-}"
     local stage="${7:-false}"
-    local manifest="${8:-}"
+    local manifest="${8:-$DEFAULT_MANIFEST}"
+
+    # If no scenario and no manifest, use default manifest
+    if [[ -z "$scenario" && -z "$manifest" ]]; then
+        manifest="$DEFAULT_MANIFEST"
+    fi
 
     # Handle skip
     if [[ "$skip" == "true" ]]; then
@@ -262,17 +285,27 @@ run_validation() {
         fi
     fi
 
+    # Determine display label
+    local label
+    if [[ -n "$manifest" ]]; then
+        label="manifest test -M ${manifest}"
+    else
+        label="scenario ${scenario}"
+    fi
+
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
-    echo "  VALIDATION: ${scenario}"
+    echo "  VALIDATION: ${label}"
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
-    echo "  Scenario: ${scenario}"
-    echo "  Host:     ${host}"
-    echo "  Mode:     ${mode}"
     if [[ -n "$manifest" ]]; then
         echo "  Manifest: ${manifest}"
     fi
+    if [[ -n "$scenario" ]]; then
+        echo "  Scenario: ${scenario}"
+    fi
+    echo "  Host:     ${host}"
+    echo "  Mode:     ${mode}"
     if [[ -n "$remote_host" ]]; then
         echo "  Remote:   ${remote_host}"
     fi

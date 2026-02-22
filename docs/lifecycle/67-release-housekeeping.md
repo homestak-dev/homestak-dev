@@ -82,14 +82,6 @@ fi
 
 Verify "Automatically delete head branches" is enabled in GitHub settings for each repo.
 
-## Using release.sh
-
-```bash
-./scripts/release.sh housekeeping
-```
-
-Performs branch cleanup across repos.
-
 ## Outputs
 
 - Merged branches deleted

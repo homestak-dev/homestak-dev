@@ -187,7 +187,7 @@ cmd_init() {
     echo "Next steps:"
     echo "  1. release.sh preflight"
     echo "  2. Update CHANGELOGs"
-    echo "  3. release.sh validate --scenario vm-roundtrip --host father"
+    echo "  3. release.sh validate --manifest n1-push --host father"
     echo "  4. release.sh tag --dry-run"
     echo "  5. release.sh tag --execute"
     echo "  6. release.sh publish --execute"
@@ -452,10 +452,10 @@ cmd_resume() {
         preflight)
             echo "1. Run \`release.sh preflight\` to check repos"
             echo "2. Fix any issues found"
-            echo "3. Run \`release.sh validate --scenario vm-roundtrip --host <host>\`"
+            echo "3. Run \`release.sh validate --manifest n1-push --host <host>\`"
             ;;
         validation)
-            echo "1. Run \`release.sh validate --scenario vm-roundtrip --host <host>\`"
+            echo "1. Run \`release.sh validate --manifest n1-push --host <host>\`"
             echo "2. Attach validation report to release issue"
             echo "3. Run \`release.sh tag --dry-run\` to preview tags"
             ;;
@@ -549,19 +549,20 @@ cmd_preflight() {
 }
 
 cmd_validate() {
-    local scenario="vm-roundtrip"
+    local scenario=""
     local host="father"
     local skip=false
     local verbose=false
     local remote=""
     local packer_release=""
     local stage=false
-    local manifest=""
+    local manifest="n1-push"
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --scenario)
                 scenario="$2"
+                manifest=""  # Explicit scenario overrides default manifest
                 shift 2
                 ;;
             --host)
@@ -578,6 +579,7 @@ cmd_validate() {
                 ;;
             --manifest)
                 manifest="$2"
+                scenario=""  # Explicit manifest overrides any scenario
                 shift 2
                 ;;
             --skip)
@@ -1144,7 +1146,8 @@ cmd_retrospective() {
 
 cmd_full() {
     local host="father"
-    local scenario="vm-roundtrip"
+    local scenario=""
+    local manifest="n1-push"
     local skip_validate=false
     local dry_run=true
 
@@ -1156,6 +1159,12 @@ cmd_full() {
                 ;;
             --scenario)
                 scenario="$2"
+                manifest=""
+                shift 2
+                ;;
+            --manifest)
+                manifest="$2"
+                scenario=""
                 shift 2
                 ;;
             --skip-validate)
@@ -1292,12 +1301,13 @@ cmd_full() {
                 ;;
 
             validate)
-                if ! run_validation "$scenario" "$host" "false" "false" ""; then
+                if ! run_validation "$scenario" "$host" "false" "false" "" "" "false" "$manifest"; then
                     log_error "Validation failed"
                     return 1
                 fi
+                local validation_label="${manifest:-$scenario}"
                 state_set_phase_status "validation" "complete"
-                issue_update_validation "$scenario" "$host" ""
+                issue_update_validation "$validation_label" "$host" ""
                 ;;
 
             tag)
@@ -1719,7 +1729,7 @@ Options:
   --stage            Run via 'homestak scenario' CLI instead of ./run.sh (stage mode)
   --remote HOST      Run validation on remote host via SSH
   --packer-release   Packer release tag for image downloads (validate only)
-  --manifest NAME    Manifest name for recursive-pve scenarios (validate only)
+  --manifest NAME    Manifest name for manifest-based tests (default: n1-push)
   --host HOST        Check host readiness (preflight only, repeatable)
   --images DIR       Packer images directory (packer --upload, default: packer/images)
   --all              Target all packer templates (packer --upload/--remove)
@@ -1734,10 +1744,10 @@ Examples:
   release.sh preflight
   release.sh preflight --host father
   release.sh preflight --host father --host mother
-  release.sh validate --scenario vm-roundtrip --host father
-  release.sh validate --scenario vm-roundtrip --host father --remote father
-  release.sh validate --scenario nested-pve-roundtrip --host father --packer-release v0.19
-  release.sh validate --scenario recursive-pve-roundtrip --manifest n1-basic --host father
+  release.sh validate --manifest n1-push --host father
+  release.sh validate --manifest n1-push --host father --remote father
+  release.sh validate --manifest n2-tiered --host father
+  release.sh validate --scenario push-vm-roundtrip --host father  # Scenario fallback
   release.sh validate --stage --remote father              # Stage mode via homestak CLI
   release.sh validate --skip
   release.sh tag --dry-run

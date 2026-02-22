@@ -189,7 +189,7 @@ Closes #15
 
 **Claude Code commits:** Include co-author line:
 ```
-Co-Authored-By: Claude <assistant@anthropic.com>
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ```
 
 ## Human Review Checkpoint

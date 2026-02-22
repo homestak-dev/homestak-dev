@@ -180,19 +180,19 @@ gh issue close 152 --repo homestak-dev/homestak-dev
 - [ ] Packer assets correct (if applicable)
 - [ ] Post-release smoke test passed
 
-### Release AAR (67)
-
-- [ ] After Action Report completed
-- [ ] Posted to release issue
-- [ ] Follow-up issues created
-
-### Release Housekeeping (68)
+### Release Housekeeping (67)
 
 - [ ] Merged branches deleted
 - [ ] Remote tracking refs pruned
 - [ ] Unmerged branches reviewed
 
-### Retrospective (70)
+### Release AAR (68)
+
+- [ ] After Action Report completed
+- [ ] Posted to release issue
+- [ ] Follow-up issues created
+
+### Retrospective (69)
 
 - [ ] Retrospective completed
 - [ ] Lessons added to 75-lessons-learned.md

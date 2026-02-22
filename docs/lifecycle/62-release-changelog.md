@@ -85,14 +85,6 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 done
 ```
 
-## Using release.sh
-
-```bash
-./scripts/release.sh changelog --version 0.45
-```
-
-Automates CHANGELOG updates across repos.
-
 ## Outputs
 
 - All repos have versioned CHANGELOG entries
