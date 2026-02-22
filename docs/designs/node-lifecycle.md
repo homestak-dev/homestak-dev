@@ -76,8 +76,8 @@ node (abstract)
 father (pve, physical)
 ├── dev1 (vm, parent: father)
 ├── dev2 (ct, parent: father)
-└── nested-pve (vm, parent: father)
-    └── test1 (vm, parent: nested-pve)
+└── root-pve (vm, parent: father)
+    └── test1 (vm, parent: root-pve)
 ```
 
 Nodes can spawn child nodes, creating tiered infrastructure topologies.
@@ -171,12 +171,12 @@ This document uses precise terminology to distinguish three orthogonal relations
 | **Lifecycle** | Create/destroy dependency | **parent node**, **child node** |
 | **Infrastructure** | Virtualization layer | **host** (PVE), **guest** (VM/CT) |
 
-These roles often overlap. When father creates nested-pve:
+These roles often overlap. When father creates root-pve:
 - father is driver, host, AND parent node
-- nested-pve is target, guest, AND child node
+- root-pve is target, guest, AND child node
 
-When nested-pve creates test1 (inside nested-pve):
-- nested-pve becomes driver, host, parent node
+When root-pve creates test1:
+- root-pve becomes driver, host, parent node
 - test1 is target, guest, child node
 
 ### Term Reference
@@ -203,7 +203,9 @@ When nested-pve creates test1 (inside nested-pve):
 
 ## Auth Model
 
-Authentication for the config phase (pull model) varies by posture:
+> **Note (v0.50):** Spec endpoint authentication now uses HMAC-signed provisioning tokens (`HOMESTAK_TOKEN`) instead of the posture-based model below. ConfigResolver mints a per-VM token carrying the spec FK and identity; the server verifies the signature against `secrets.auth.signing_key`. See [provisioning-token.md](provisioning-token.md). The posture `auth.method` field remains vestigial — postures still drive SSH, sudo, and security settings but no longer control spec authentication.
+
+The original posture-based auth design (retained for reference):
 
 | Posture | Auth Method | Token Source | Description |
 |---------|-------------|--------------|-------------|
@@ -436,6 +438,7 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/ia
 
 | Date | Change |
 |------|--------|
+| 2026-02-22 | Note Auth Model superseded by provisioning tokens; replace `nested-pve` with `root-pve` in topology examples; fix stale env var names |
 | 2026-02-22 | Add config-distribution.md reference; config distribution tracked in iac-driver#245 (push, complete) and iac-driver#248 (pull, open) |
 | 2026-02-14 | Sprint #249: Push-mode config implemented (iac-driver#206); both push and pull modes now available |
 | 2026-02-08 | Terminology: controller → server (aligns with server-daemon.md rename) |

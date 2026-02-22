@@ -155,7 +155,7 @@ Parent (CLI caller)
 
 **Location:** `/var/run/homestak/server-{port}.pid` (FHS). No fallback — if the directory doesn't exist, fail with "host not bootstrapped."
 
-Port-qualified filename supports multiple servers on different ports (testing, nested PVE).
+Port-qualified filename supports multiple servers on different ports (testing, delegated PVE nodes).
 
 **Lifecycle:**
 - Written by daemon **after** `server.start()` succeeds (not before)
@@ -333,7 +333,7 @@ No more `Popen` fire-and-forget. No more `ss -tlnp | grep`. No more 3s sleep.
 
 The operator gains server lifecycle awareness for all manifest verbs. This is additive — the overhead is negligible and ensures the server is always available.
 
-### Nested PVE and Server Propagation Chain
+### Tiered PVE and Server Propagation Chain
 
 PVE hosts with children need servers for subtree delegation. The operator starts a server on each PVE level via `_ensure_server()`, creating a propagation chain:
 
@@ -343,7 +343,7 @@ father:44443 → root-pve:44443 → leaf-pve:44443
 
 Each level serves repos and specs to its children, not to the root directly.
 
-**Address resolution (iac-driver#200):** When `_ensure_server()` runs on a delegated PVE node, `self.config.ssh_host` may resolve to `localhost` (from `nested-pve.yaml: api_endpoint: https://localhost:8006`). `_set_source_env()` detects loopback addresses and uses `_detect_external_ip()` (Python socket) to determine the host's network-facing IP. This ensures `HOMESTAK_SOURCE` contains a routable address for child hosts.
+**Address resolution (iac-driver#200):** When `_ensure_server()` runs on a delegated PVE node, `self.config.ssh_host` may resolve to `localhost` (from the node's `api_endpoint: https://localhost:8006`). `_set_source_env()` detects loopback addresses and uses `_detect_external_ip()` (Python socket) to determine the host's network-facing IP. This ensures `HOMESTAK_SOURCE` contains a routable address for child hosts.
 
 **spec_server override (iac-driver#200):** At depth 2+, `TofuApplyAction` overrides `spec_server` in the resolved tfvars with `HOMESTAK_SOURCE` when set. This ensures cloud-init runcmd on child VMs bootstraps from the immediate parent's server, not the hardcoded site.yaml value.
 
@@ -364,7 +364,7 @@ No changes. Cloud-init VMs call `./run.sh config --fetch` which talks to the ser
 
 | Alternative | Pros | Cons | Why Not |
 |-------------|------|------|---------|
-| systemd-only | Clean lifecycle, restart on crash, journald | Not available on nested PVE, heavyweight for dev | Deferred to prod maturity |
+| systemd-only | Clean lifecycle, restart on crash, journald | Not available on delegated PVE nodes, heavyweight for dev | Deferred to prod maturity |
 | `start-stop-daemon` | Debian standard, handles daemonization | External tool dependency, less control | Double-fork gives us more control over health-check gate |
 | Keep Popen workaround, fix zombie only | Minimal change | Doesn't solve startup gate or operator gap | Insufficient — addresses symptom not root cause |
 | `screen`/`tmux` session | Easy to attach for debugging | Extra dependency, not a real daemon | Not appropriate for automated lifecycle |

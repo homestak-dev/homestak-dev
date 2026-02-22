@@ -52,7 +52,7 @@ knows: manifest, node,             knows: hostname               knows: specs, p
 | Identity→spec mapping (broken) | Spec FK embedded as `s` claim |
 | Posture-based auth dispatch | Unified: valid HMAC = authorized |
 
-Three env vars (`HOMESTAK_SPEC_SERVER`, `HOMESTAK_IDENTITY`, `HOMESTAK_AUTH_TOKEN`) collapse to two: `HOMESTAK_SPEC_SERVER` + `HOMESTAK_TOKEN`. `HOMESTAK_AUTH_TOKEN` is eliminated entirely — the provisioning token subsumes both identity and authorization.
+Three env vars (`HOMESTAK_SPEC_SERVER`, `HOMESTAK_IDENTITY`, `HOMESTAK_AUTH_TOKEN`) collapse to two: `HOMESTAK_SERVER` + `HOMESTAK_TOKEN`. `HOMESTAK_AUTH_TOKEN` is eliminated entirely — the provisioning token subsumes both identity and authorization.
 
 ### Architectural Properties
 
@@ -218,7 +218,7 @@ The minted token replaces the current `auth_token` field in the resolved VM conf
 write_files:
   - path: /etc/profile.d/homestak.sh
     content: |
-      export HOMESTAK_SPEC_SERVER=${var.spec_server}
+      export HOMESTAK_SERVER=${var.spec_server}
       export HOMESTAK_TOKEN=${vm.auth_token}
 ```
 
