@@ -421,6 +421,21 @@ Reusable templates in [docs/templates/](docs/templates/):
 | [docs/ISSUE-GUIDELINES.md](docs/ISSUE-GUIDELINES.md) | Issue creation and labeling standards |
 | [docs/CLAUDE-GUIDELINES.md](docs/CLAUDE-GUIDELINES.md) | CLAUDE.md documentation standards |
 | [docs/REPO-SETTINGS.md](docs/REPO-SETTINGS.md) | Repository configuration standards |
+| [docs/uat.md](docs/uat.md) | UAT validation checklist |
+
+### Design Documents
+
+| File | Purpose |
+|------|---------|
+| [docs/designs/config-distribution.md](docs/designs/config-distribution.md) | Config distribution to delegated PVE nodes |
+| [docs/designs/config-phase.md](docs/designs/config-phase.md) | Push/pull execution, spec-to-ansible mapping |
+| [docs/designs/node-lifecycle.md](docs/designs/node-lifecycle.md) | Single-node lifecycle (create/config/run/destroy) |
+| [docs/designs/node-orchestration.md](docs/designs/node-orchestration.md) | Topology patterns, execution models, system test catalog |
+| [docs/designs/packer-pipeline.md](docs/designs/packer-pipeline.md) | Naming conventions, build workflow, caching, release integration |
+| [docs/designs/provisioning-token.md](docs/designs/provisioning-token.md) | HMAC token format, signing, verification |
+| [docs/designs/scenario-consolidation.md](docs/designs/scenario-consolidation.md) | Scenario migration, PVE lifecycle phases |
+| [docs/designs/server-daemon.md](docs/designs/server-daemon.md) | Daemon architecture, PID management, operator integration |
+| [docs/designs/test-strategy.md](docs/designs/test-strategy.md) | Test hierarchy, system test catalog (ST-1 through ST-8) |
 
 ## Release Process
 
