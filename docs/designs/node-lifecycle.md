@@ -73,10 +73,10 @@ node (abstract)
 ### Parent-Child Topology
 
 ```
-father (pve, physical)
-├── dev1 (vm, parent: father)
-├── dev2 (ct, parent: father)
-└── root-pve (vm, parent: father)
+srv1 (pve, physical)
+├── dev1 (vm, parent: srv1)
+├── dev2 (ct, parent: srv1)
+└── root-pve (vm, parent: srv1)
     └── test1 (vm, parent: root-pve)
 ```
 
@@ -171,8 +171,8 @@ This document uses precise terminology to distinguish three orthogonal relations
 | **Lifecycle** | Create/destroy dependency | **parent node**, **child node** |
 | **Infrastructure** | Virtualization layer | **host** (PVE), **guest** (VM/CT) |
 
-These roles often overlap. When father creates root-pve:
-- father is driver, host, AND parent node
+These roles often overlap. When srv1 creates root-pve:
+- srv1 is driver, host, AND parent node
 - root-pve is target, guest, AND child node
 
 When root-pve creates test1:
@@ -294,7 +294,7 @@ access:
     - name: homestak
       sudo: true
       ssh_keys:
-        - ssh_keys.jderose   # FK to secrets.yaml
+        - ssh_keys.user@host   # FK to secrets.yaml
 
 platform:
   packages:
@@ -318,7 +318,7 @@ run:
 | Reference | Resolves To |
 |-----------|-------------|
 | `access.posture: dev` | `postures/dev.yaml` |
-| `ssh_keys.jderose` | `secrets.yaml → ssh_keys.jderose` |
+| `ssh_keys.user@host` | `secrets.yaml → ssh_keys.user@host` |
 
 ## Node Schema (v1)
 
@@ -330,7 +330,7 @@ spec: pve                    # FK to specs/
 image: pve-9
 preset: vm-large             # FK to presets/
 disk: 64                     # Override preset
-parent: father               # Parent node (for VMs)
+parent: srv1               # Parent node (for VMs)
 ```
 
 ### Type-Specific Fields

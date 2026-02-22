@@ -60,7 +60,7 @@ gh issue close 152 --repo homestak-dev/homestak-dev
 ./scripts/release.sh preflight
 
 # Validation (choose based on scope)
-./scripts/release.sh validate --host father
+./scripts/release.sh validate --host srv1
 
 # Tags [GATE]
 ./scripts/release.sh tag --dry-run
@@ -250,13 +250,13 @@ gh pr status
 
 ```bash
 # Quick validation
-./run.sh manifest test -M n1-push -H father
+./run.sh manifest test -M n1-push -H srv1
 
 # Tiered validation
-./run.sh manifest test -M n2-tiered -H father
+./run.sh manifest test -M n2-tiered -H srv1
 
 # Preflight only
-./run.sh --preflight -H father
+./run.sh --preflight -H srv1
 ```
 
 ### release.sh
@@ -265,7 +265,7 @@ gh pr status
 # Full workflow
 ./scripts/release.sh init --version 0.45 --issue 157
 ./scripts/release.sh preflight
-./scripts/release.sh validate --host father
+./scripts/release.sh validate --host srv1
 ./scripts/release.sh tag --dry-run
 ./scripts/release.sh tag --execute
 ./scripts/release.sh publish --execute

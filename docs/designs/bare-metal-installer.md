@@ -116,7 +116,7 @@ New flags for `homestak site-init`:
 
 ```bash
 homestak site-init \
-  --ssh-key-url https://github.com/jderose.keys \
+  --ssh-key-url https://github.com/<github-user>.keys \
   --spec pve \
   --posture dev
 ```
@@ -136,7 +136,7 @@ homestak site-init \
 ### SSH Key Flow
 
 ```
---ssh-key-url https://github.com/jderose.keys
+--ssh-key-url https://github.com/<github-user>.keys
        │
        ▼
   curl -fsSL <url>

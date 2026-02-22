@@ -48,8 +48,8 @@ This document uses precise terminology to distinguish three orthogonal relations
 | **Lifecycle** | Create/destroy dependency | **parent node**, **child node** |
 | **Infrastructure** | Virtualization layer | **host** (PVE), **guest** (VM/CT) |
 
-These roles often overlap. When father creates root-pve:
-- father is driver, host, AND parent node
+These roles often overlap. When srv1 creates root-pve:
+- srv1 is driver, host, AND parent node
 - root-pve is target, guest, AND child node
 
 When root-pve creates test1:
@@ -307,20 +307,20 @@ With topology and execution mode externalized to the manifest, the CLI uses verb
 
 ```bash
 # Legacy: scenario name encodes action + topology style
-./run.sh --scenario recursive-pve-constructor --manifest n2-tiered --host father
-./run.sh --scenario recursive-pve-destructor --manifest n2-tiered --host father
+./run.sh --scenario recursive-pve-constructor --manifest n2-tiered --host srv1
+./run.sh --scenario recursive-pve-destructor --manifest n2-tiered --host srv1
 
 # Current: verb-based subcommands
-./run.sh create -M nested-test -H father
-./run.sh destroy -M nested-test -H father
-./run.sh test -M nested-test -H father    # create + verify + destroy
+./run.sh create -M nested-test -H srv1
+./run.sh destroy -M nested-test -H srv1
+./run.sh test -M nested-test -H srv1    # create + verify + destroy
 ```
 
 **Benefits:**
 - No scenario proliferation (retired `vm-constructor`, `nested-pve-constructor`, etc. collapsed to `create`)
 - Topology and execution mode are externalized, not encoded in scenario names
 - CLI is more intuitive: verb is the operation, manifest is the target
-- Mode can be overridden at CLI if needed: `./run.sh create -M nested-test -H father --mode push`
+- Mode can be overridden at CLI if needed: `./run.sh create -M nested-test -H srv1 --mode push`
 
 ### Execution Mode Inheritance
 
@@ -563,10 +563,10 @@ Execution mode is defined in the manifest with optional CLI override:
 
 ```bash
 # Use manifest's defined mode
-./run.sh create -M nested-test -H father
+./run.sh create -M nested-test -H srv1
 
 # Override manifest's mode
-./run.sh create -M nested-test -H father --mode push
+./run.sh create -M nested-test -H srv1 --mode push
 ```
 
 **Mode mixing:** Different nodes can use different modes (defined in manifest). A node created via push can later operate in pull mode for the run phase. The mode is a property of the operation, not the node itself.
@@ -699,14 +699,14 @@ Manifest:
         mode: pull
 
 Steps:
-1. ./run.sh create -M single-node -H father
+1. ./run.sh create -M single-node -H srv1
 2. ConfigResolver mints provisioning token with `s` claim (spec FK)
 3. Driver provisions VM with HOMESTAK_TOKEN + HOMESTAK_SERVER via cloud-init
 4. VM boots, presents token to server (`./run.sh config --fetch`)
 5. Server verifies HMAC, extracts `s` claim, serves resolved spec
 6. VM applies spec locally, writes config-complete marker
 7. Verify: VM reaches platform ready state
-8. ./run.sh destroy -M single-node -H father
+8. ./run.sh destroy -M single-node -H srv1
 
 Assertions:
 - Token `s` claim resolves to correct spec (not hostname-based lookup)
@@ -734,11 +734,11 @@ Manifest:
         mode: push
 
 Steps:
-1. ./run.sh create -M single-node-push -H father
+1. ./run.sh create -M single-node-push -H srv1
 2. Driver provisions VM
 3. Driver SSHes to VM, runs configuration
 4. Verify: VM reaches platform ready state
-5. ./run.sh destroy -M single-node-push -H father
+5. ./run.sh destroy -M single-node-push -H srv1
 
 Assertions:
 - No spec server required
@@ -773,12 +773,12 @@ Manifest:
       parent: root-pve
 
 Steps:
-1. ./run.sh create -M nested-test -H father
-2. Driver creates root-pve on father
+1. ./run.sh create -M nested-test -H srv1
+2. Driver creates root-pve on srv1
 3. root-pve reaches platform ready (PVE installed)
 4. Driver creates edge on root-pve
 5. edge reaches platform ready
-6. ./run.sh destroy -M nested-test -H father
+6. ./run.sh destroy -M nested-test -H srv1
 7. Destroy order: edge first, then root-pve
 
 Assertions:
@@ -850,7 +850,7 @@ nodes:
 
 ```
 Steps:
-1. ./run.sh test -M n2-mixed -H father
+1. ./run.sh test -M n2-mixed -H srv1
 2. root-pve created and configured via push (operator runs ansible over SSH)
 3. edge provisioned with provisioning token (minted at create time)
 4. edge boots, presents token, fetches spec via pull (autonomous)
@@ -883,10 +883,10 @@ Manifest:
       parent: null
 
 Steps:
-1. ./run.sh create -M workers -H father
+1. ./run.sh create -M workers -H srv1
 2. All three VMs created (potentially in parallel)
 3. All reach platform ready
-4. ./run.sh destroy -M workers -H father
+4. ./run.sh destroy -M workers -H srv1
 
 Assertions:
 - No ordering dependency between peers
@@ -900,8 +900,8 @@ Assertions:
 
 ```
 Steps:
-1. `./run.sh manifest validate -M n1-push -H father` → exit 0 (valid)
-2. `./run.sh manifest validate -M invalid-fk -H father` → exit 1 (unresolved FK)
+1. `./run.sh manifest validate -M n1-push -H srv1` → exit 0 (valid)
+2. `./run.sh manifest validate -M invalid-fk -H srv1` → exit 1 (unresolved FK)
 
 Assertions:
 - Valid manifests pass (all FKs resolve to existing site-config entities)
@@ -915,11 +915,11 @@ Assertions:
 
 ```
 Steps:
-1. ./run.sh create -M single-node -H father
-2. ./run.sh create -M single-node -H father  # Re-run
+1. ./run.sh create -M single-node -H srv1
+2. ./run.sh create -M single-node -H srv1  # Re-run
 3. Verify: No error, no duplicate VM, state unchanged
-4. ./run.sh destroy -M single-node -H father
-5. ./run.sh destroy -M single-node -H father  # Re-run
+4. ./run.sh destroy -M single-node -H srv1
+5. ./run.sh destroy -M single-node -H srv1  # Re-run
 6. Verify: No error, clean exit
 
 Assertions:

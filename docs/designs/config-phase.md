@@ -298,7 +298,7 @@ Add `./run.sh config` to the existing runcmd block:
 
 **Note:** Cloud-init sources `/etc/profile.d/homestak.sh` which provides `HOMESTAK_SERVER` and `HOMESTAK_TOKEN` (a provisioning token minted at create time — see [provisioning-token.md](provisioning-token.md)). The runcmd bootstraps from the server (curls `install.sh`, clones repos via HTTPS with `HOMESTAK_REF=_working`). `SKIP_SITE_CONFIG=1` skips site-config clone since VMs receive pre-resolved specs via token. Then `./run.sh config --fetch --insecure` presents the token, fetches the spec, and applies config locally.
 
-**Depth 2+ override ([iac-driver#200](https://github.com/homestak-dev/iac-driver/issues/200)):** At depth 2+, `spec_server` in tfvars must point to the immediate parent's server, not the root host from site.yaml. `TofuApplyAction` overrides `spec_server` with `HOMESTAK_SOURCE` when set, so cloud-init bootstraps from the propagation chain (e.g., root-pve:44443 instead of father:44443).
+**Depth 2+ override ([iac-driver#200](https://github.com/homestak-dev/iac-driver/issues/200)):** At depth 2+, `spec_server` in tfvars must point to the immediate parent's server, not the root host from site.yaml. `TofuApplyAction` overrides `spec_server` with `HOMESTAK_SOURCE` when set, so cloud-init bootstraps from the propagation chain (e.g., root-pve:44443 instead of srv1:44443).
 
 ## Integration Points
 
@@ -379,7 +379,7 @@ Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. FHS paths (`/usr
 **Scenario:** `pull-vm-roundtrip` (iac-driver#156)
 
 ```bash
-./run.sh scenario pull-vm-roundtrip -H father
+./run.sh scenario pull-vm-roundtrip -H srv1
 ```
 
 **Steps:**
@@ -394,7 +394,7 @@ Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. FHS paths (`/usr
 
 **Fallback validation:**
 ```bash
-./run.sh test -M n1-push -H father
+./run.sh test -M n1-push -H srv1
 ```
 Push mode regression — must still work.
 
@@ -417,7 +417,7 @@ nodes:
 ```
 
 ```bash
-./run.sh test -M n1-pull -H father
+./run.sh test -M n1-pull -H srv1
 ```
 
 ## Implementation Order

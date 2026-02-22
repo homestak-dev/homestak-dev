@@ -95,7 +95,7 @@ This is already partially done for non-`--serve-repos` invocations (line 120: `e
 
 **Impact on remote start:** The SSH command becomes:
 ```bash
-ssh root@father "./run.sh server start --port 44443"
+ssh $USER@srv1 "./run.sh server start --port 44443"
 # Returns after health check passes — no nohup needed
 ```
 The double-fork daemonization handles detachment from the SSH session.
@@ -254,7 +254,7 @@ if self._started_server:
 1. Only if we started it (don't kill user-managed servers)
 2. SSH to host: `./run.sh server stop --port 44443`
 
-This means `./run.sh test -M n1-pull -H father` auto-starts/stops the server, while a manually-started server for development remains untouched.
+This means `./run.sh test -M n1-pull -H srv1` auto-starts/stops the server, while a manually-started server for development remains untouched.
 
 ## Key Components Affected
 
@@ -338,7 +338,7 @@ The operator gains server lifecycle awareness for all manifest verbs. This is ad
 PVE hosts with children need servers for subtree delegation. The operator starts a server on each PVE level via `_ensure_server()`, creating a propagation chain:
 
 ```
-father:44443 → root-pve:44443 → leaf-pve:44443
+srv1:44443 → root-pve:44443 → leaf-pve:44443
 ```
 
 Each level serves repos and specs to its children, not to the root directly.
@@ -383,18 +383,18 @@ curl -sk https://localhost:44443/health  # Should return {"status":"ok"}
 
 **Scenario 2: Remote start/stop via SSH**
 ```bash
-ssh root@father "./run.sh server start --port 44443"
+ssh $USER@srv1 "./run.sh server start --port 44443"
 # Should return quickly after health check passes
-ssh root@father "./run.sh server status --json --port 44443"
+ssh $USER@srv1 "./run.sh server status --json --port 44443"
 # {"running": true, "pid": ..., "healthy": true}
-ssh root@father "./run.sh server stop --port 44443"
+ssh $USER@srv1 "./run.sh server stop --port 44443"
 ```
 
 **Scenario 3: Integration validation**
 ```bash
-./run.sh test -M n1-pull -H father
+./run.sh test -M n1-pull -H srv1
 # Should auto-start server, run test, auto-stop server
-./run.sh scenario push-vm-roundtrip -H father
+./run.sh scenario push-vm-roundtrip -H srv1
 # Should use server start/stop instead of Popen workaround
 ```
 

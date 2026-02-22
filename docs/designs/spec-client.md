@@ -46,10 +46,10 @@ Nodes need to fetch their specifications from the server (iac-driver) and persis
 
 ```bash
 # Manual invocation (for testing/debugging)
-homestak spec get --server https://father:44443 --identity dev1
+homestak spec get --server https://srv1:44443 --identity dev1
 
 # Automated invocation (via env vars, for cloud-init path)
-HOMESTAK_SERVER=https://father:44443 \
+HOMESTAK_SERVER=https://srv1:44443 \
 HOMESTAK_TOKEN=<provisioning-token> \
 homestak spec get
 
@@ -65,7 +65,7 @@ homestak spec get
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `HOMESTAK_SERVER` | Server URL (e.g., `https://father:44443`) | Yes (if no --server) |
+| `HOMESTAK_SERVER` | Server URL (e.g., `https://srv1:44443`) | Yes (if no --server) |
 | `HOMESTAK_TOKEN` | Provisioning token (HMAC-signed, carries spec FK + identity) | Yes (automated path) |
 | `HOMESTAK_IDENTITY` | Node identity for manual testing (e.g., `dev1`) | Manual only (if no --identity) |
 
@@ -81,7 +81,7 @@ homestak spec get
 ### Output Format (Success)
 
 ```
-Fetching spec for 'dev1' from https://father:44443...
+Fetching spec for 'dev1' from https://srv1:44443...
 Spec fetched successfully
   Schema version: 1
   Posture: dev
@@ -217,11 +217,11 @@ Per `20-design.md`, verify both installation modes:
 **Integration test:** Cross-host fetch
 
 ```bash
-# On father (server, via iac-driver)
+# On srv1 (server, via iac-driver)
 ./run.sh server start --port 44443
 
 # On dev VM (client)
-homestak spec get --server https://father:44443 --identity base
+homestak spec get --server https://srv1:44443 --identity base
 cat /usr/local/etc/homestak/state/spec.yaml
 ```
 
