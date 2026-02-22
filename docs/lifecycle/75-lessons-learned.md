@@ -49,7 +49,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.45. Each lesson was codi
 
 - **Base64 encoding for SSH scripts** - Complex Python scripts passed through SSH need base64 encoding to avoid shell quoting issues. Heredocs and escaping fail with certain content (like SSH key material). Pattern: `echo '<base64>' | base64 -d | python3 -`.
 - **Provider lockfile caching in iac-driver** - The `.states/{env}-{node}/data/` directories cache tofu provider lockfiles. When provider version constraints change (e.g., Dependabot PRs), stale lockfiles cause validation failures. Clear state directories or add preflight check for version mismatches.
-- **Multi-level SSH key injection** - Each nesting level in recursive scenarios needs both the outer host's SSH key AND its own key injected into secrets.yaml. The outer key enables jump chains; the inner key enables the level to SSH to VMs it creates.
+- **Multi-level SSH key injection** - Each nesting level in recursive scenarios needs both the parent node's SSH key AND its own key injected into secrets.yaml. The parent key enables jump chains; the child's key enables the level to SSH to VMs it creates.
 - **GitHub issue auto-close limitations** - Multiple "Closes #N" references on the same line in commit messages may not auto-close all issues. Use separate lines or close manually after merge.
 - **Verify all PR merges before release** - Check each repo explicitly when multiple PRs are in flight. Easy to miss one (tofu#32 was missed in v0.39) when moving quickly through multi-repo releases.
 

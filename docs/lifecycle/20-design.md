@@ -370,5 +370,5 @@ Before proceeding to Implementation:
 
 - Assumed external tool behavior (`gh release list --json`)
 - No prerequisite check (SHA256SUMS existence)
-- No end-to-end test before release
+- No integration test before release
 - Result: 4 hotfixes during release
