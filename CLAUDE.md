@@ -101,7 +101,7 @@ gita shell make install-deps  # Install deps in all repos
 | Skill | Subcommands | Description |
 |-------|-------------|-------------|
 | `/sprint` | plan, init, validate, sync, merge, close | Sprint lifecycle management |
-| `/release` | plan init, plan update, execute | Release lifecycle with gates |
+| `/release` | plan init, plan update, execute, close | Release lifecycle with gates |
 | `/session` | save, resume, checkpoint | Context preservation across compactions |
 | `/issues` | - | Gather GitHub issues across all repos |
 

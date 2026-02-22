@@ -151,11 +151,9 @@ Release Issue Created (theme-first)
         ├── 64-Packer ─────────▶ Image handling
         ├── 65-Publish ────────▶ [GATE] GitHub releases
         ├── 66-Verify ─────────▶ Verification
-        ├── 67-AAR ────────────▶ After Action Report
-        └── 68-Housekeeping ───▶ Branch cleanup
-        │
-        ▼
-   70-Retrospective ──────▶ Release retrospective
+        ├── 67-Housekeeping ───▶ Branch cleanup
+        ├── 68-AAR ────────────▶ After Action Report
+        └── 69-Retrospective ──▶ Lessons learned
         │
         ▼
    Release Issue Closed

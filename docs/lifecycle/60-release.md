@@ -67,6 +67,7 @@ The release process is divided into discrete phases:
 | 66 | [Verify](66-release-verify.md) | No | Verify releases exist |
 | 67 | [Housekeeping](67-release-housekeeping.md) | No | Branch cleanup |
 | 68 | [AAR](68-release-aar.md) | No | After Action Report |
+| 69 | [Retrospective](69-release-retro.md) | No | Lessons learned, close issue |
 
 **Gates (63, 65):** Require explicit human approval before proceeding.
 
