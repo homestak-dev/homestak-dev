@@ -247,7 +247,7 @@ preflight_check_host_ssh() {
     fi
 
     # Test SSH connectivity with timeout
-    if ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no "root@${ip}" "echo ok" &>/dev/null; then
+    if ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no "${USER}@${ip}" "echo ok" &>/dev/null; then
         echo "ok"
     else
         echo "failed:${ip}"
@@ -331,7 +331,7 @@ preflight_check_host_images() {
 
     # Check for packer images on host
     local images
-    images=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no "root@${ip}" \
+    images=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no "${USER}@${ip}" \
         "ls -1 /var/lib/vz/template/iso/*.img 2>/dev/null | wc -l" 2>/dev/null)
 
     if [[ -z "$images" ]]; then
@@ -363,7 +363,7 @@ preflight_check_host_nested_virt() {
 
     # Check nested virtualization
     local nested
-    nested=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no "root@${ip}" \
+    nested=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no "${USER}@${ip}" \
         "cat /sys/module/kvm_intel/parameters/nested 2>/dev/null || cat /sys/module/kvm_amd/parameters/nested 2>/dev/null || echo 'N'" 2>/dev/null)
 
     if [[ "$nested" == "Y" || "$nested" == "1" ]]; then
