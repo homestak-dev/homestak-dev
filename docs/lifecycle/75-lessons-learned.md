@@ -1,12 +1,19 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.45. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.50. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.50
+
+- **`run_ssh()` should default to current user, not root** — Hardcoding `root` as the default SSH user created a hidden assumption that broke when running from a non-root dev machine. Using `getpass.getuser()` is more portable and explicit `ssh_user` in site.yaml handles the PVE-requires-root case.
+- **Preflight checks should use configured SSH user** — The preflight image check used `run_ssh()` default (root) instead of `config.ssh_user`. All remote operations should respect the configured SSH user.
+- **Always run unit tests before committing** — CI caught a test failure from the `run_ssh()` default change. Local `make test` would have caught it in seconds instead of a CI round-trip. This is now a blocking rule in Claude Code memory.
+- **Direct push to master is blocked by rulesets — plan accordingly** — CHANGELOG updates during release must go through branches + PRs. This adds ~10 minutes per release but maintains review discipline. Not a problem, just a time planning consideration.
 
 ## v0.45
 
@@ -232,6 +239,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.45. Each lesson was codi
 For quick reference, lessons grouped by theme:
 
 ### Validation & Testing
+- Always run unit tests before committing (v0.50)
 - Validation scenario should match release theme (v0.41)
 - Mark infrastructure tests for CI exclusion (v0.33)
 - Validation as hard gate confirmed (v0.21)
@@ -243,6 +251,7 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Direct push to master is blocked by rulesets — plan accordingly (v0.50)
 - Closed release before retrospective - fourth occurrence (v0.44)
 - Housekeeping should precede AAR (v0.44)
 - Skills load context for one phase, not the entire process (v0.41)
@@ -279,6 +288,8 @@ For quick reference, lessons grouped by theme:
 - Packer images required for unified release (v0.15)
 
 ### Technical Gotchas
+- `run_ssh()` should default to current user, not root (v0.50)
+- Preflight checks should use configured SSH user (v0.50)
 - Packer image copy inherits metadata (v0.41)
 - Verify GitHub Action versions exist (v0.33)
 - FHS installations require sudo for scenarios (v0.29)
