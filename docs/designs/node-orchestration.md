@@ -48,12 +48,12 @@ This document uses precise terminology to distinguish three orthogonal relations
 | **Lifecycle** | Create/destroy dependency | **parent node**, **child node** |
 | **Infrastructure** | Virtualization layer | **host** (PVE), **guest** (VM/CT) |
 
-These roles often overlap. When father creates nested-pve:
+These roles often overlap. When father creates root-pve:
 - father is driver, host, AND parent node
-- nested-pve is target, guest, AND child node
+- root-pve is target, guest, AND child node
 
-When nested-pve creates test1 (inside nested-pve):
-- nested-pve becomes driver, host, parent node
+When root-pve creates test1:
+- root-pve becomes driver, host, parent node
 - test1 is target, guest, child node
 
 **Semantic alignment:** The `iac-driver` repository name → `run.sh` driver script → **driver** node.
@@ -84,7 +84,7 @@ Patterns can be abstracted into topology types:
 | Topology | Structure | Edges | Example |
 |----------|-----------|-------|---------|
 | **Flat** | Single node, local children | None between peers | Single-host homelab |
-| **Tiered** | Parent-child tree | Directed (parent → child) | Nested PVE, tiered infra |
+| **Tiered** | Parent-child tree | Directed (parent → child) | Tiered PVE, multi-level infra |
 | **Hub-spoke** | Central driver + remotes | Directed (hub → spokes) | Edge deployment |
 | **Mesh** | Peer nodes, mutual relationships | Undirected | PVE cluster |
 | **Federated** | Mixed levels, cross-links | Mixed directed/undirected | Federation, hybrid cloud |
@@ -701,7 +701,7 @@ Manifest:
 Steps:
 1. ./run.sh create -M single-node -H father
 2. ConfigResolver mints provisioning token with `s` claim (spec FK)
-3. Driver provisions VM with HOMESTAK_TOKEN + HOMESTAK_SPEC_SERVER via cloud-init
+3. Driver provisions VM with HOMESTAK_TOKEN + HOMESTAK_SERVER via cloud-init
 4. VM boots, presents token to server (`./run.sh config --fetch`)
 5. Server verifies HMAC, extracts `s` claim, serves resolved spec
 6. VM applies spec locally, writes config-complete marker

@@ -893,7 +893,7 @@ cmd_packer() {
     # --remove requires --all or name prefixes
     if [[ "$action" == "remove" ]]; then
         if [[ "$use_all" != "true" && ${#template_args[@]} -eq 0 ]]; then
-            log_error "Specify --all or asset name prefixes (e.g., debian-12 debian-12-custom)"
+            log_error "Specify --all or asset name prefixes (e.g., debian-12 pve-9)"
             exit 1
         fi
     fi

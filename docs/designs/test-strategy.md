@@ -308,9 +308,9 @@ Manifest:
 **Blocks:** manifest-schema-v2.md
 
 **Steps:**
-1. `./run.sh validate -M v2/manifests/valid.yaml` → exit 0
-2. `./run.sh validate -M v2/manifests/invalid-schema.yaml` → exit 1
-3. `./run.sh validate -M v2/manifests/invalid-fk.yaml` → exit 1
+1. `./run.sh manifest validate -M valid` → exit 0
+2. `./run.sh manifest validate -M invalid-schema` → exit 1
+3. `./run.sh manifest validate -M invalid-fk` → exit 1
 
 **Assertions:**
 - Valid manifests pass

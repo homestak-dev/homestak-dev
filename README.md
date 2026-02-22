@@ -82,16 +82,12 @@ This workspace uses [gita](https://github.com/nosarthur/gita) to manage multiple
 
 ## Claude Code Skills
 
-| Skill | Phase | Description |
-|-------|-------|-------------|
+| Skill | Subcommands | Description |
+|-------|-------------|-------------|
+| `/sprint` | plan, init, validate, sync, merge, close | Sprint lifecycle management |
+| `/release` | plan init, plan update, execute | Release lifecycle with gates |
+| `/session` | save, resume, checkpoint | Context preservation across compactions |
 | `/issues` | - | Gather GitHub issues across all repos |
-| `/planning-init` | 10 | Initialize release planning |
-| `/planning-deps` | 10 | Analyze cross-repo dependencies |
-| `/planning-conflicts` | 10 | Analyze file overlap |
-| `/validate-prereqs` | 40 | Check validation host readiness |
-| `/validate-run` | 40 | Run validation scenario |
-| `/merge-pr` | 50 | Create pull requests |
-| `/release-*` | 60 | 7 release automation skills |
 
 See [.claude/CLAUDE.md](.claude/CLAUDE.md) for complete skill documentation.
 

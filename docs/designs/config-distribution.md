@@ -1,5 +1,7 @@
 # Config Distribution to Delegated PVE Nodes
 
+**Epic:** [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) (Node Lifecycle Architecture)
+
 How site configuration and secrets reach PVE nodes in multi-level deployments.
 
 ## Problem
@@ -144,6 +146,13 @@ Since specs default to `ssh_keys: all`, every VM authorizes the full accumulated
 | create_api_token | Push (SSH) | Push (SSH) | Push (SSH) |
 | inject_self_ssh_key | Push (SSH) | Push (SSH) | Push (SSH) |
 | download_image | Pull (GitHub) | Pull (GitHub) | Pull (GitHub) |
+
+## Tracking
+
+| Issue | Scope | Status |
+|-------|-------|--------|
+| [iac-driver#245](https://github.com/homestak-dev/iac-driver/issues/245) | Short-term: push site config + scope secrets | Complete |
+| [iac-driver#248](https://github.com/homestak-dev/iac-driver/issues/248) | Mid-term: `/config` endpoint for pull-mode distribution | Open |
 
 ## Related Documents
 

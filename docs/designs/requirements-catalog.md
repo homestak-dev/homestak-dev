@@ -191,8 +191,8 @@ Requirements for SSH patterns, multi-level access, and API connectivity.
 | REQ-NET-004 | VMs use automation_user (default: homestak) | P0 | Validated | design | - | - |
 | REQ-NET-005 | Jump host chains use nested SSH (not ProxyJump - PVE issue) | P1 | Validated | test | - | - |
 | REQ-NET-006 | ConnectTimeout must be per-call | P0 | Validated | impl | - | test_common.py |
-| REQ-NET-007 | Each nesting level needs outer host's SSH key (for jump chains) | P0 | Validated | test | - | nested-pve scenarios |
-| REQ-NET-008 | Each nesting level needs its own key (for child VM access) | P0 | Validated | test | - | nested-pve scenarios |
+| REQ-NET-007 | Each nesting level needs parent node's SSH key (for jump chains) | P0 | Validated | test | - | `test -M n2-tiered` |
+| REQ-NET-008 | Each nesting level needs its own key (for child VM access) | P0 | Validated | test | - | `test -M n2-tiered` |
 | REQ-NET-009 | SSH chain verification required (VerifySSHChainAction) | P1 | Validated | impl | - | - |
 | REQ-NET-010 | PVE API via SSH commands (qm, pvesh) | P0 | Validated | impl | - | - |
 | REQ-NET-011 | API token must be valid before scenarios (preflight check) | P0 | Validated | impl | - | test_validation.py |

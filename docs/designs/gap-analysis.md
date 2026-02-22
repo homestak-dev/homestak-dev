@@ -23,7 +23,7 @@ This document tracks the design documentation landscape for the homestak lifecyc
 | Document | Blocks | Priority | Description |
 |----------|--------|----------|-------------|
 | ~~`config-apply.md`~~ | ~~iac-driver (TBD)~~ | ~~P0~~ | ~~Config phase implementation to reach "platform ready" state~~ — **Completed** in iac-driver#147 (Sprint #201). See [config-phase.md](config-phase.md) |
-| ~~`manifest-schema-v2.md`~~ | ~~iac-driver#140-P2~~ | ~~P0~~ | ~~Manifest schema v2~~ — **Completed** in iac-driver#143. Schema at `site-config/v2/defs/manifest.schema.json`, implementation in `manifest.py` |
+| ~~`manifest-schema-v2.md`~~ | ~~iac-driver#140-P2~~ | ~~P0~~ | ~~Manifest schema v2~~ — **Completed** in iac-driver#143. Schema at `site-config/defs/manifest.schema.json`, implementation in `manifest.py` |
 | ~~`scenario-consolidation.md`~~ | ~~iac-driver#145~~ | ~~P1~~ | ~~Transitional doc for migrating from `*-constructor/*-destructor` to verb-based subcommands~~ — **Completed** in homestak-dev#195. See [scenario-consolidation.md](scenario-consolidation.md) |
 
 ### Document Dependencies
@@ -113,7 +113,7 @@ Track progress on closing design gaps.
 |-----|--------|--------|-------|
 | unified-controller (#148) | iac-driver#146 | **Complete** | Delivered in PR #150, #148 closed |
 | config-apply.md | iac-driver#147 | **Complete** | Delivered in Sprint homestak-dev#201. See [config-phase.md](config-phase.md) |
-| manifest-schema-v2.md | iac-driver#143 | **Complete** | Schema at `site-config/v2/defs/manifest.schema.json` |
+| manifest-schema-v2.md | iac-driver#143 | **Complete** | Schema at `site-config/defs/manifest.schema.json` |
 | scenario-consolidation.md | iac-driver#145 | **Complete** | [scenario-consolidation.md](scenario-consolidation.md) |
 | phase-interfaces.md | iac-driver#141 | **Complete** | Resolved Q1-Q6, documented all phase contracts |
 | node-orchestration.md CLI examples | iac-driver#141 | **Complete** | Updated to verb-based `./run.sh create/destroy/test` |
