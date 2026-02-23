@@ -149,7 +149,7 @@ Document in sprint issue:
 ## Validation
 **Scenario:** `./run.sh manifest test -M n2-tiered -H srv1`
 **Host:** srv1
-**Rationale:** Sprint includes nested-pve changes
+**Rationale:** Sprint includes child-pve changes
 ```
 
 ### 8. Link to Release Issue
@@ -241,7 +241,7 @@ A "bootstrapped" host needs additional setup for validation:
 | Secrets decrypted | `site-config/secrets.yaml` must be decrypted |
 | Packer images | Images published to local PVE storage |
 | SSH access | SSH key access to the validation host |
-| Nested virtualization | For nested-pve scenarios |
+| Nested virtualization | For tiered PVE scenarios |
 
 ## Outputs
 

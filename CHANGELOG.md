@@ -9,25 +9,6 @@
 - Add `packer --remove` command for deleting image assets from `latest` release (#258)
 - Add FHS branch alignment guidance to validation docs (#231)
 - Add provisioning token design doc (#231)
-
-### Changed
-- Simplify `publish --execute` — no longer copies images to versioned releases (#258)
-- Simplify `packer --upload/--remove` flags — drop `--dry-run` (default is preview), `--force` implies `--execute` (#258)
-- Set upload split threshold to 2 GiB - 1 byte (GitHub rejects exactly 2 GiB) (#258)
-
-### Removed
-- Remove `packer --copy` command and related flags (#258)
-- Remove `--images` and `--workflow` flags from `publish` command (#258)
-
-### Documentation
-- Update packer-pipeline.md and 64-release-packer.md for new upload/remove workflow (#258)
-- Remove stale `--workflow` references from lifecycle docs (#260)
-- Update CLI references for noun-action pattern in lifecycle docs (#239)
-
-### Changed
-- Update cross-repo docs for server daemon rename: controller → server (#227)
-
-### Added
 - Add bug triage step to sprint planning lifecycle (#213)
 - Add bug validation section to design phase (#213)
 - Add milestone-based status update triggers to implementation phase (#213)
@@ -37,13 +18,24 @@
 - Add scenario consolidation design doc (`docs/designs/scenario-consolidation.md`) for Sprint #195
 
 ### Changed
+- Simplify `publish --execute` — no longer copies images to versioned releases (#258)
+- Simplify `packer --upload/--remove` flags — drop `--dry-run` (default is preview), `--force` implies `--execute` (#258)
+- Set upload split threshold to 2 GiB - 1 byte (GitHub rejects exactly 2 GiB) (#258)
+- Update cross-repo docs for server daemon rename: controller → server (#227)
 - Migrate branch protection to GitHub Rulesets with OrganizationAdmin bypass (#185)
   - Replace classic branch protection on all 9 public repos
   - Add `homestak-bot` machine user for PR authorship (enables human review/approval)
   - Enable auto-merge on all repos
   - Update REPO-SETTINGS.md, CLAUDE.md, and lifecycle docs for rulesets workflow
 
+### Removed
+- Remove `packer --copy` command and related flags (#258)
+- Remove `--images` and `--workflow` flags from `publish` command (#258)
+
 ### Documentation
+- Update packer-pipeline.md and 64-release-packer.md for new upload/remove workflow (#258)
+- Remove stale `--workflow` references from lifecycle docs (#260)
+- Update CLI references for noun-action pattern in lifecycle docs (#239)
 - Update config flow diagram: `envs/` → `specs/`, `presets/`, `manifests/`; `resolve_env()` → `resolve_inline_vm()` (Sprint #212, #211)
 - Fix stale `test_resolve_env` test reference in test-strategy.md (#211)
 - Update design doc paths for v2/ consolidation (Sprint #209, #208)

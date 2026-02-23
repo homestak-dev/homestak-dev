@@ -70,7 +70,7 @@ Not every change needs full integration testing. Match validation effort to chan
 | Manifest/operator code | `./run.sh manifest test -M n2-tiered -H <host>` | ~9 min |
 | PVE/nested/packer changes | `./run.sh manifest test -M n2-tiered -H <host>` | ~9 min |
 
-**Size to Fit principle:** Use the lightest validation that proves the change works. Don't run 9-minute nested-pve scenarios for a CLI help text fix.
+**Size to Fit principle:** Use the lightest validation that proves the change works. Don't run 9-minute tiered PVE scenarios for a CLI help text fix.
 
 **When unit tests are sufficient:**
 - Argument parsing changes (test with bats)
