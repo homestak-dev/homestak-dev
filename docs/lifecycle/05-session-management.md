@@ -88,7 +88,7 @@ Use dedicated handoff sections in the sprint issue:
 
 ### Files Modified
 - `iac-driver/src/actions/recursive.py` - New action
-- `ansible/roles/nested-pve/tasks/main.yml` - SSH key handling
+- `ansible/roles/child-pve/tasks/main.yml` - SSH key handling
 
 ### Open Questions
 - Timeout for N+1 nesting levels?
