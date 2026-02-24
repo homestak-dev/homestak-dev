@@ -277,7 +277,7 @@ Manifests define topology, execution model, and node instances:
 ```yaml
 # Manifest defines topology + execution + instances
 schema_version: 2
-name: nested-test
+name: n2-tiered
 pattern: tiered
 
 execution:
@@ -311,16 +311,16 @@ With topology and execution mode externalized to the manifest, the CLI uses verb
 ./run.sh --scenario recursive-pve-destructor --manifest n2-tiered --host srv1
 
 # Current: verb-based subcommands
-./run.sh create -M nested-test -H srv1
-./run.sh destroy -M nested-test -H srv1
-./run.sh test -M nested-test -H srv1    # create + verify + destroy
+./run.sh create -M n2-tiered -H srv1
+./run.sh destroy -M n2-tiered -H srv1
+./run.sh test -M n2-tiered -H srv1    # create + verify + destroy
 ```
 
 **Benefits:**
 - No scenario proliferation (retired `vm-constructor`, `nested-pve-constructor`, etc. collapsed to `create`)
 - Topology and execution mode are externalized, not encoded in scenario names
 - CLI is more intuitive: verb is the operation, manifest is the target
-- Mode can be overridden at CLI if needed: `./run.sh create -M nested-test -H srv1 --mode push`
+- Mode can be overridden at CLI if needed: `./run.sh create -M n2-tiered -H srv1 --mode push`
 
 ### Execution Mode Inheritance
 
@@ -353,7 +353,7 @@ With manifests owning topology + execution, what role does `site-config/v2/nodes
 **Recommendation:** Eliminate standalone node files. Manifests reference specs and presets directly:
 
 ```yaml
-# manifests/nested-test.yaml
+# manifests/n2-tiered.yaml
 nodes:
   - name: root-pve            # Instance identity (unique per manifest)
     type: vm
@@ -482,7 +482,7 @@ The OSS foundation should support both models. The commercial layer builds on pu
 | "nested" (as scenario prefix) | Implies specific topology | Pattern name + execution model |
 | "hierarchical" (topology) | Awkward, verbose | "tiered" |
 | "constellation" (topology) | Awkward, unclear | "federated" |
-| "N=2" | Abstract, not descriptive | Pattern name (e.g., "nested-test") |
+| "N=2" | Abstract, not descriptive | Pattern name (e.g., "n2-tiered") |
 | "specify" / "apply" (phases) | Verbose 6-phase model | "config" (merged) |
 | "operate" / "sustain" (phases) | Verbose 6-phase model | "run" (merged) |
 
@@ -515,7 +515,7 @@ The lifecycle document describes what happens to a **single node**. This documen
 ```
 Orchestration (this doc)          Node Lifecycle (other doc)
 ────────────────────────          ──────────────────────────
-"Build a nested-test pattern"  →  Each node goes through:
+"Build a n2-tiered pattern"  →  Each node goes through:
 with tiered topology              create → config → run → destroy
 using pull execution
 ```
@@ -563,10 +563,10 @@ Execution mode is defined in the manifest with optional CLI override:
 
 ```bash
 # Use manifest's defined mode
-./run.sh create -M nested-test -H srv1
+./run.sh create -M n2-tiered -H srv1
 
 # Override manifest's mode
-./run.sh create -M nested-test -H srv1 --mode push
+./run.sh create -M n2-tiered -H srv1 --mode push
 ```
 
 **Mode mixing:** Different nodes can use different modes (defined in manifest). A node created via push can later operate in pull mode for the run phase. The mode is a property of the operation, not the node itself.
@@ -753,7 +753,7 @@ Assertions:
 ```
 Preconditions:
 - specs/pve.yaml and specs/base.yaml defined
-- manifests/nested-test.yaml exists
+- manifests/n2-tiered.yaml exists
 
 Manifest:
   pattern: tiered
@@ -773,12 +773,12 @@ Manifest:
       parent: root-pve
 
 Steps:
-1. ./run.sh create -M nested-test -H srv1
+1. ./run.sh create -M n2-tiered -H srv1
 2. Driver creates root-pve on srv1
 3. root-pve reaches platform ready (PVE installed)
 4. Driver creates edge on root-pve
 5. edge reaches platform ready
-6. ./run.sh destroy -M nested-test -H srv1
+6. ./run.sh destroy -M n2-tiered -H srv1
 7. Destroy order: edge first, then root-pve
 
 Assertions:

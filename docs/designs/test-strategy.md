@@ -434,10 +434,10 @@ pytest tests/test_config_resolver.py -k "test_resolve_inline_vm"  # Specific tes
 ./run.sh test -M single-node -H srv1
 
 # Create only (leave running for debugging)
-./run.sh create -M nested-test -H srv1
+./run.sh create -M n2-tiered -H srv1
 
 # Destroy after debugging
-./run.sh destroy -M nested-test -H srv1
+./run.sh destroy -M n2-tiered -H srv1
 ```
 
 ## Changelog
