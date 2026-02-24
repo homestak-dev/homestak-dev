@@ -119,7 +119,7 @@ The create phase produces the infrastructure identity that destroy needs to remo
 
 ### State Location
 
-Create phase stores state in `.states/{manifest}-{node}/terraform.tfstate`. Destroy reads this state to identify resources.
+Create phase stores state in `.states/{manifest}/{node}-{host}/terraform.tfstate`. Destroy reads this state to identify resources. The manifest-level namespace prevents state lock contention when running multiple manifests in parallel.
 
 ### Discovery Pattern
 
@@ -166,7 +166,7 @@ The run phase may have active work that destroy should handle gracefully.
 
 | Phase | State Location | Persistence | Notes |
 |-------|---------------|-------------|-------|
-| **Create** | `.states/{manifest}-{node}/terraform.tfstate` | Required | Tofu state, needed for destroy |
+| **Create** | `.states/{manifest}/{node}-{host}/terraform.tfstate` | Required | Tofu state, needed for destroy |
 | **Config** | `/usr/local/etc/homestak/state/spec.yaml` | Optional | For drift detection in run |
 | **Run** | Application-specific | Application-specific | Varies by workload |
 | **Destroy** | Reads Create state | Cleans up | Removes state on success |
@@ -177,12 +177,14 @@ Each manifest-node combination has isolated state:
 
 ```
 .states/
-├── nested-test-root-pve/
-│   ├── data/             # TF_DATA_DIR (plugins, modules)
-│   └── terraform.tfstate # Tofu state
-└── nested-test-edge/
-    ├── data/
-    └── terraform.tfstate
+└── n2-tiered/                    # Manifest namespace
+    ├── execution.json              # Manifest execution state
+    ├── root-pve-srv1/
+    │   ├── data/                   # TF_DATA_DIR (plugins, modules)
+    │   └── terraform.tfstate       # Tofu state
+    └── edge-srv1/
+        ├── data/
+        └── terraform.tfstate
 ```
 
 ---
@@ -202,9 +204,9 @@ Each manifest-node combination has isolated state:
 - Manifest state tracks which nodes are complete, in-progress, failed
 
 ```json
-// .states/nested-test/execution.json
+// .states/n2-tiered/execution.json
 {
-  "manifest": "nested-test",
+  "manifest": "n2-tiered",
   "started": "2026-02-03T10:00:00Z",
   "status": "in_progress",
   "nodes": {
@@ -236,16 +238,16 @@ Each manifest-node combination has isolated state:
 **Implementation:**
 ```bash
 # Default: stop on failure
-./run.sh create -M nested-test -H srv1
+./run.sh create -M n2-tiered -H srv1
 
 # Explicit stop (same as default)
-./run.sh create -M nested-test -H srv1 --on-error=stop
+./run.sh create -M n2-tiered -H srv1 --on-error=stop
 
 # Rollback on failure
-./run.sh create -M nested-test -H srv1 --on-error=rollback
+./run.sh create -M n2-tiered -H srv1 --on-error=rollback
 
 # Continue despite failures
-./run.sh create -M nested-test -H srv1 --on-error=continue
+./run.sh create -M n2-tiered -H srv1 --on-error=continue
 ```
 
 ### Q3: Run Phase Triggers
