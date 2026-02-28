@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## v0.51 - 2026-02-28
+
+### Changed
+- Extract 16 `cmd_*` functions from `release.sh` into thematic lib/ modules (#262)
+  - `lib/cmd_lifecycle.sh` — init, status, resume, audit, retrospective, close
+  - `lib/cmd_release.sh` — preflight, validate, tag, publish, verify, full
+  - `lib/cmd_tools.sh` — packer, sunset, selftest, help
+  - `lib/common.sh` — shared `require_release_state()` and `check_dependencies()`
+  - `release.sh` reduced from 1,874 lines to ~160 lines
+- Add `[HH:MM:SS]` timestamps to console log functions (`log_info`, `log_success`, `log_warn`, `log_error`) (#262)
+
+### Fixed
+- Fix `selftest` missing `--no-issue` flag on init calls (required since v0.31) (#262)
+
 ## v0.50 - 2026-02-22
 
 ### Added
