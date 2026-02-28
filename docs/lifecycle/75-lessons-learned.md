@@ -1,12 +1,19 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.50. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.51. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.51
+
+- **First release with rulesets on all repos — factor PR overhead into release time** — CHANGELOG updates required 9 separate PRs (one per repo). This adds ~15 minutes vs direct push but maintains review discipline. Batch creation (parallel branch/push/PR) mitigates the overhead.
+- **`--force` is appropriate for docs/refactor-only releases** — When a release contains no infrastructure behavior changes, skipping the validation gate with `--force` on tag/publish is reasonable. Document the rationale in the AAR.
+- **Sprint close must clean up all open PRs** — A stale sprint CHANGELOG PR in bootstrap conflicted with the release CHANGELOG PR. Sprint close should verify no open PRs remain from the sprint.
+- **`/release plan init` should add the `release` label automatically** — Issue #288 was created without it, requiring manual correction.
 
 ## v0.50
 
