@@ -225,9 +225,10 @@ The `bootstrap` repo provides capability installation via `homestak install <mod
 
 ```bash
 # Initial setup (on any Debian host)
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | sudo bash
 
-# Add capabilities as needed
+# Switch to homestak user, then add capabilities as needed
+sudo -iu homestak
 homestak install packer    # QEMU, packer, templates
 homestak install tofu      # OpenTofu
 homestak install ansible   # Ansible + collections
