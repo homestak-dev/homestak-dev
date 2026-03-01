@@ -200,7 +200,7 @@ When scripts support environment variable configuration:
 1. Document all env vars in `--help` output
 2. Use `HOMESTAK_` prefix for homestak-specific vars
 3. CLI flags override environment variables
-4. Example: `HOMESTAK_BRANCH`, `HOMESTAK_USER`
+4. Example: `HOMESTAK_BRANCH`, `HOMESTAK_APPLY`
 
 ## Implementation Examples
 
