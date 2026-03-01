@@ -16,8 +16,6 @@ DEFAULT_SCENARIO=""
 DEFAULT_HOST=""
 
 # Paths for stage mode
-HOMESTAK_CLI_PATH="/home/homestak/bin/homestak"
-HOMESTAK_CLI="sudo -iu homestak homestak"
 HOMESTAK_IAC_DRIVER="$HOME/lib/iac-driver"
 
 # -----------------------------------------------------------------------------
@@ -142,9 +140,8 @@ validate_run_remote() {
 # -----------------------------------------------------------------------------
 
 validate_check_homestak_cli() {
-    if [[ ! -x "$HOMESTAK_CLI_PATH" ]]; then
-        log_error "homestak CLI not found at ${HOMESTAK_CLI_PATH}"
-        log_error "Stage mode requires bootstrap installation"
+    if ! id homestak &>/dev/null; then
+        log_error "homestak user not found — bootstrap required"
         log_error "Use --remote <host> to run on a bootstrapped host"
         return 1
     fi
@@ -162,9 +159,9 @@ validate_run_stage_local() {
     # Manifest-first, scenario as fallback
     local cmd
     if [[ -n "$manifest" ]]; then
-        cmd="${HOMESTAK_CLI} manifest test -M ${manifest} -H ${host}"
+        cmd="sudo -iu homestak homestak manifest test -M ${manifest} -H ${host}"
     elif [[ -n "$scenario" ]]; then
-        cmd="${HOMESTAK_CLI} scenario run ${scenario} --host ${host}"
+        cmd="sudo -iu homestak homestak scenario run ${scenario} --host ${host}"
     else
         log_error "Either --manifest or --scenario must be specified"
         return 1
