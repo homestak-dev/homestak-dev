@@ -149,7 +149,7 @@ Document in sprint issue:
 ## Validation
 **Scenario:** `./run.sh manifest test -M n2-tiered -H srv1`
 **Host:** srv1
-**Rationale:** Sprint includes child-pve changes
+**Rationale:** Sprint includes PVE lifecycle changes
 ```
 
 ### 8. Link to Release Issue
