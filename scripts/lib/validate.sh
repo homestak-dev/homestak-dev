@@ -16,7 +16,8 @@ DEFAULT_SCENARIO=""
 DEFAULT_HOST=""
 
 # Paths for stage mode
-HOMESTAK_CLI="/usr/local/bin/homestak"
+HOMESTAK_CLI_PATH="/home/homestak/bin/homestak"
+HOMESTAK_CLI="sudo -iu homestak homestak"
 HOMESTAK_IAC_DRIVER="$HOME/lib/iac-driver"
 
 # -----------------------------------------------------------------------------
@@ -141,8 +142,8 @@ validate_run_remote() {
 # -----------------------------------------------------------------------------
 
 validate_check_homestak_cli() {
-    if [[ ! -x "$HOMESTAK_CLI" ]]; then
-        log_error "homestak CLI not found at ${HOMESTAK_CLI}"
+    if [[ ! -x "$HOMESTAK_CLI_PATH" ]]; then
+        log_error "homestak CLI not found at ${HOMESTAK_CLI_PATH}"
         log_error "Stage mode requires bootstrap installation"
         log_error "Use --remote <host> to run on a bootstrapped host"
         return 1
@@ -205,13 +206,13 @@ validate_run_stage_remote() {
         packer_release_flag="--packer-release ${packer_release}"
     fi
 
-    # Build the remote command - uses homestak CLI
+    # Build the remote command - runs as homestak user
     # Manifest-first, scenario as fallback
     local remote_cmd
     if [[ -n "$manifest" ]]; then
-        remote_cmd="homestak manifest test -M ${manifest} -H ${host} ${verbose_flag} ${packer_release_flag}"
+        remote_cmd="sudo -iu homestak homestak manifest test -M ${manifest} -H ${host} ${verbose_flag} ${packer_release_flag}"
     elif [[ -n "$scenario" ]]; then
-        remote_cmd="homestak scenario run ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
+        remote_cmd="sudo -iu homestak homestak scenario run ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
     else
         log_error "Either --manifest or --scenario must be specified"
         return 1

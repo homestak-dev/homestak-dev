@@ -256,8 +256,7 @@ All files are owned by the dedicated `homestak` user under `~homestak/`:
 └── cache/                     # Downloaded images
 ```
 
-A symlink at `/usr/local/bin/homestak` provides system-wide access.
-Legacy FHS paths (`/usr/local/{lib,etc}/homestak/`) are checked as fallback.
+Access via: `sudo -iu homestak` (Debian's default `~/.profile` adds `~/bin` to PATH).
 
 ## Release Automation CLI (v0.14+)
 
