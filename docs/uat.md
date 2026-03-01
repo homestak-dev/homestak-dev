@@ -12,23 +12,26 @@ Internal validation checklist for verifying homestak on a fresh Debian 13 host.
 ## Setup
 
 ```bash
-# 1. Bootstrap (as the homestak user, e.g., "homestak")
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | bash
+# 1. Bootstrap (creates homestak user, clones repos)
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | sudo bash
 
-# 2. Configure site defaults for your network
+# 2. Switch to homestak user (all subsequent commands run as homestak)
+sudo -iu homestak
+
+# 3. Configure site defaults for your network
 sed -i 's/gateway: ""/gateway: 192.168.1.1/' ~/etc/site.yaml
 sed -i 's/dns_servers: \[\]/dns_servers: [ 192.168.1.1 ]/' ~/etc/site.yaml
 # Optional: defaults.domain (e.g., home.arpa)
 
-# 3. Initialize site configuration (generates host config, SSH key)
+# 4. Initialize site configuration (generates host config, SSH key)
 homestak site-init
 
-# 4. Install PVE + configure host (generates API token, signing key, node config)
+# 5. Install PVE + configure host (generates API token, signing key, node config)
 # Note: On fresh Debian, pve-setup reboots after kernel install.
-#       Re-run the same command after reboot to complete setup.
+#       After reboot: sudo -iu homestak, then re-run homestak pve-setup
 homestak pve-setup
 
-# 5. Download and publish packer images
+# 6. Download and publish packer images
 homestak images download all --publish
 ```
 
@@ -78,7 +81,7 @@ rm -f ~/etc/site.yaml ~/etc/secrets.yaml
 rm -f ~/etc/hosts/*.yaml ~/etc/nodes/*.yaml
 make -C ~/etc init-site init-secrets
 
-# Continue with Setup steps 2-6
+# Continue with Setup steps 3-6
 ```
 
 ## Troubleshooting
