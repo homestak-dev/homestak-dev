@@ -216,7 +216,7 @@ Not all hosts have the same capabilities. Key distinctions:
 
 **Packer builds require QEMU/KVM.** Build on capable hosts using `packer/build.sh` directly or via SSH:
 ```bash
-ssh srv1 'cd /usr/local/lib/homestak/packer && ./build.sh'
+ssh srv1 'cd ~/lib/packer && ./build.sh'
 ```
 
 ## Bootstrap Pattern
@@ -225,9 +225,10 @@ The `bootstrap` repo provides capability installation via `homestak install <mod
 
 ```bash
 # Initial setup (on any Debian host)
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | sudo bash
 
-# Add capabilities as needed
+# Switch to homestak user, then add capabilities as needed
+sudo -iu homestak
 homestak install packer    # QEMU, packer, templates
 homestak install tofu      # OpenTofu
 homestak install ansible   # Ansible + collections
@@ -235,24 +236,27 @@ homestak install ansible   # Ansible + collections
 
 This pattern enables any Debian host to become a build/deploy host without manual setup.
 
-### Installation Paths (FHS-compliant, v0.24+)
+### Installation Paths (User-Owned Model)
+
+All files are owned by the dedicated `homestak` user under `~homestak/`:
 
 ```
-/usr/local/
+~homestak/                     # /home/homestak/
 ├── bin/
-│   └── homestak → ../lib/homestak/bootstrap/homestak.sh
-├── etc/
-│   └── homestak/           # site-config (configuration)
-└── lib/
-    └── homestak/           # code repos
-        ├── bootstrap/
-        ├── ansible/
-        ├── iac-driver/
-        ├── tofu/
-        └── packer/         # (optional)
+│   └── homestak → ../lib/bootstrap/homestak.sh
+├── etc/                       # site-config (configuration)
+│   └── state/                 # Runtime state (specs, markers)
+├── lib/                       # code repos
+│   ├── bootstrap/
+│   ├── ansible/
+│   ├── iac-driver/
+│   ├── tofu/
+│   └── packer/                # (optional)
+├── log/                       # Server and config logs
+└── cache/                     # Downloaded images
 ```
 
-Legacy installations at `/opt/homestak/` remain supported via CLI fallback.
+Access via: `sudo -iu homestak` (Debian's default `~/.profile` adds `~/bin` to PATH).
 
 ## Release Automation CLI (v0.14+)
 

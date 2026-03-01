@@ -83,7 +83,7 @@ The node can now fulfill its role but isn't yet doing the role's work (no applic
 If the spec defines `run.trigger` and `run.interval`, config phase records this in local state:
 
 ```yaml
-# /usr/local/etc/homestak/state/convergence.yaml
+# ~/etc/state/convergence.yaml
 spec_server: https://srv1:44443
 trigger: schedule
 interval: 1h
@@ -167,7 +167,7 @@ The run phase may have active work that destroy should handle gracefully.
 | Phase | State Location | Persistence | Notes |
 |-------|---------------|-------------|-------|
 | **Create** | `.states/{manifest}/{node}-{host}/terraform.tfstate` | Required | Tofu state, needed for destroy |
-| **Config** | `/usr/local/etc/homestak/state/spec.yaml` | Optional | For drift detection in run |
+| **Config** | `~/etc/state/spec.yaml` | Optional | For drift detection in run |
 | **Run** | Application-specific | Application-specific | Varies by workload |
 | **Destroy** | Reads Create state | Cleans up | Removes state on success |
 

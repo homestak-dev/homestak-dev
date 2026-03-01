@@ -51,7 +51,7 @@ The server daemon is central to manifest orchestration — spec discovery, pull-
 | Survives SSH disconnect | Yes | Yes | Yes |
 | Survives reboot | No | No | Yes (systemd) |
 | Restart on crash | No | No | Yes (systemd) |
-| Structured logging | FHS path | FHS path | journald |
+| Structured logging | `/var/log/` path | `/var/log/` path | journald |
 | Log rotation | No | No | Yes (logrotate) |
 
 ## Proposed Solution
@@ -153,7 +153,7 @@ Parent (CLI caller)
 
 ### 4. PID File Management
 
-**Location:** `/var/run/homestak/server-{port}.pid` (FHS). No fallback — if the directory doesn't exist, fail with "host not bootstrapped."
+**Location:** `/var/run/homestak/server-{port}.pid`. No fallback — if the directory doesn't exist, fail with "host not bootstrapped."
 
 Port-qualified filename supports multiple servers on different ports (testing, delegated PVE nodes).
 
@@ -224,7 +224,7 @@ Specs: 3 available
 
 ### 7. Logging
 
-**Location:** `/var/log/homestak/server.log` (FHS). Override with `--log <path>`. No fallback — daemon mode requires a bootstrapped host where FHS paths exist.
+**Location:** `/var/log/homestak/server.log`. Override with `--log <path>`. No fallback — daemon mode requires a bootstrapped host.
 
 **Format:** Same as current (`%(asctime)s [%(levelname)s] %(message)s`). No change needed for dev+stage.
 
@@ -421,7 +421,7 @@ kill -9 $(cat /var/run/homestak/server-44443.pid)  # Simulate crash
 4. **Add `server start/stop/status`** to `src/server/cli.py` and `src/cli.py` routing
 5. **Update actions** — rename and simplify `StartSpecServerAction` / `StopSpecServerAction`
 6. **Operator integration** — auto-lifecycle for manifest verbs and pull-mode scenarios
-7. **Logging** — FHS path, no fallback
+7. **Logging** — `/var/log/` path, no fallback
 8. **Validation** — n1-pull and pull-vm-roundtrip must pass reliably
 
 ## Deferred to Prod Maturity
@@ -439,10 +439,10 @@ kill -9 $(cat /var/run/homestak/server-44443.pid)  # Simulate crash
 | 1. Package rename | REQ-NFR-004 | Names match purpose |
 | 2. Exec chain fix | REQ-CTL-015 | New: no bash wrapper in PID chain |
 | 3. Daemon mode | REQ-CTL-005, REQ-CTL-016, REQ-CTL-017 | CTL-005 enhanced; new: double-fork, health-check gate |
-| 4. PID management | REQ-CTL-005, REQ-CTL-018, REQ-CTL-019 | CTL-005 enhanced; new: port-qualified FHS, stale detection |
+| 4. PID management | REQ-CTL-005, REQ-CTL-018, REQ-CTL-019 | CTL-005 enhanced; new: port-qualified PID file, stale detection |
 | 5. server stop | REQ-CTL-005, REQ-CTL-020 | CTL-005 enhanced; new: SIGTERM→SIGKILL escalation |
 | 6. server status | REQ-CTL-021 | New: JSON output, structured exit codes |
-| 7. Logging | REQ-CTL-022 | New: FHS path, no fallback |
+| 7. Logging | REQ-CTL-022 | New: `/var/log/` path, no fallback |
 | 8. Operator lifecycle | REQ-CTL-023 | New: auto-start/stop for manifest verbs |
 | Test plan (idempotency) | REQ-CTL-024 | New: idempotent start/stop |
 

@@ -15,9 +15,8 @@ DEFAULT_MANIFEST="n1-push"
 DEFAULT_SCENARIO=""
 DEFAULT_HOST=""
 
-# FHS paths for stage mode
-HOMESTAK_CLI="/usr/local/bin/homestak"
-HOMESTAK_IAC_DRIVER="/usr/local/lib/homestak/iac-driver"
+# Paths for stage mode
+HOMESTAK_IAC_DRIVER="$HOME/lib/iac-driver"
 
 # -----------------------------------------------------------------------------
 # Validation Functions
@@ -141,9 +140,8 @@ validate_run_remote() {
 # -----------------------------------------------------------------------------
 
 validate_check_homestak_cli() {
-    if [[ ! -x "$HOMESTAK_CLI" ]]; then
-        log_error "homestak CLI not found at ${HOMESTAK_CLI}"
-        log_error "Stage mode requires bootstrap installation"
+    if ! id homestak &>/dev/null; then
+        log_error "homestak user not found — bootstrap required"
         log_error "Use --remote <host> to run on a bootstrapped host"
         return 1
     fi
@@ -157,13 +155,13 @@ validate_run_stage_local() {
     local packer_release="${4:-}"
     local manifest="${5:-}"
 
-    # Build the command (sudo required for FHS paths)
+    # Build the command
     # Manifest-first, scenario as fallback
     local cmd
     if [[ -n "$manifest" ]]; then
-        cmd="sudo ${HOMESTAK_CLI} manifest test -M ${manifest} -H ${host}"
+        cmd="sudo -iu homestak homestak manifest test -M ${manifest} -H ${host}"
     elif [[ -n "$scenario" ]]; then
-        cmd="sudo ${HOMESTAK_CLI} scenario run ${scenario} --host ${host}"
+        cmd="sudo -iu homestak homestak scenario run ${scenario} --host ${host}"
     else
         log_error "Either --manifest or --scenario must be specified"
         return 1
@@ -205,13 +203,13 @@ validate_run_stage_remote() {
         packer_release_flag="--packer-release ${packer_release}"
     fi
 
-    # Build the remote command - uses homestak CLI (sudo required for FHS paths)
+    # Build the remote command - runs as homestak user
     # Manifest-first, scenario as fallback
     local remote_cmd
     if [[ -n "$manifest" ]]; then
-        remote_cmd="sudo homestak manifest test -M ${manifest} -H ${host} ${verbose_flag} ${packer_release_flag}"
+        remote_cmd="sudo -iu homestak homestak manifest test -M ${manifest} -H ${host} ${verbose_flag} ${packer_release_flag}"
     elif [[ -n "$scenario" ]]; then
-        remote_cmd="sudo homestak scenario run ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
+        remote_cmd="sudo -iu homestak homestak scenario run ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
     else
         log_error "Either --manifest or --scenario must be specified"
         return 1
@@ -231,7 +229,7 @@ validate_run_stage_remote() {
     local report_dir="${IAC_DRIVER_DIR}/reports"
     mkdir -p "$report_dir"
 
-    log_info "Copying reports from ${remote_host} (FHS path)..."
+    log_info "Copying reports from ${remote_host}..."
     scp -q "${remote_host}:${HOMESTAK_IAC_DRIVER}/reports/*.md" "${report_dir}/" 2>/dev/null || true
 
     return $exit_code

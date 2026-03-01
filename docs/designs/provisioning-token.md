@@ -149,7 +149,7 @@ secrets.yaml (operator workspace, decrypted)
     │
     ├── SOPS encrypted ──► git push ──► all operator machines (git pull + decrypt)
     │
-    ├── bootstrap ──► /usr/local/etc/homestak/secrets.yaml (decrypted at runtime)
+    ├── bootstrap ──► ~/etc/secrets.yaml (decrypted at runtime)
     │   └── iac-driver server loads signing_key at startup ──► verifies tokens
     │
     ├── ConfigResolver loads at `resolve_inline_vm()` time
@@ -333,7 +333,7 @@ The spec endpoint requires a provisioning token. No fallback paths, no legacy au
 2026-02-11T12:00:11Z [WARN]  spec-fetch: attempt 2/5 failed: ConnectionRefused (server unreachable)
 2026-02-11T12:00:31Z [INFO]  spec-fetch: attempt 3/5 succeeded: 200 OK
 2026-02-11T12:00:31Z [INFO]  spec-fetch: spec received spec=base schema_version=1 packages=5 users=1
-2026-02-11T12:00:31Z [INFO]  spec-fetch: saved to /usr/local/etc/homestak/state/spec.yaml
+2026-02-11T12:00:31Z [INFO]  spec-fetch: saved to ~/etc/state/spec.yaml
 ```
 
 Permanent failure:
@@ -376,7 +376,7 @@ After 5 failed attempts (~2.5 minutes total): write fail marker and stop. Each a
 
 ### Fail Marker
 
-Path: `/usr/local/etc/homestak/state/config-failed.json`
+Path: `~/etc/state/config-failed.json`
 
 Fields that depend on token decoding (`node`, `spec`) are `null` when the token is malformed or missing. The marker always includes whatever context is available.
 
@@ -430,7 +430,7 @@ Transient failure (retries exhausted):
 
 **Operator visibility:**
 - `WaitForFileAction` on `config-complete.json` times out → node marked failed in operator
-- SSH inspection: `cat /usr/local/etc/homestak/state/config-failed.json`
+- SSH inspection: `cat ~/etc/state/config-failed.json`
 - Full log: `cat /var/log/homestak/config.log`
 - Server logs: failed requests logged with client IP and error code
 
@@ -438,15 +438,15 @@ Transient failure (retries exhausted):
 
 ```bash
 # Inspect failure (structured)
-ssh edge cat /usr/local/etc/homestak/state/config-failed.json
+ssh edge cat ~/etc/state/config-failed.json
 
 # Inspect failure (full log)
 ssh edge cat /var/log/homestak/config.log
 
 # Option 1: Re-mint and inject fresh token
 ssh edge "echo 'export HOMESTAK_TOKEN=<new-token>' > /etc/profile.d/homestak.sh"
-ssh edge "rm -f /usr/local/etc/homestak/state/config-failed.json"
-ssh edge "/usr/local/lib/homestak/iac-driver/run.sh config --fetch --insecure"
+ssh edge "rm -f ~/etc/state/config-failed.json"
+ssh edge "~/lib/iac-driver/run.sh config --fetch --insecure"
 
 # Option 2: Push config directly (bypass pull)
 ./run.sh config-push --host edge --spec base

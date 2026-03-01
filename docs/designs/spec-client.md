@@ -14,7 +14,7 @@ Nodes need to fetch their specifications from the server (iac-driver) and persis
 - Client fetches spec from server via HTTP
 - CLI flags work for manual testing: `--server`, `--identity`, `--token`
 - Env vars work for automated path: `HOMESTAK_SERVER`, `HOMESTAK_TOKEN`
-- Fetched spec persisted to `/usr/local/etc/homestak/state/`
+- Fetched spec persisted to `~/etc/state/`
 - Error responses handled with defined codes
 
 > **Note (v0.50):** The automated path now uses provisioning tokens (`HOMESTAK_TOKEN`) which carry the spec FK and identity in HMAC-signed claims. The `--identity` flag and `HOMESTAK_IDENTITY` env var remain for manual testing only. See [provisioning-token.md](provisioning-token.md) for the token design.
@@ -72,7 +72,7 @@ homestak spec get
 ### State Directory Structure
 
 ```
-/usr/local/etc/homestak/state/
+~/etc/state/
 ├── spec.yaml           # Current spec (most recent fetch)
 ├── spec.yaml.prev      # Previous spec (for rollback/diff)
 └── fetch.log           # Fetch history (timestamp, server, result)
@@ -86,7 +86,7 @@ Spec fetched successfully
   Schema version: 1
   Posture: dev
   Packages: 5
-Saved to: /usr/local/etc/homestak/state/spec.yaml
+Saved to: ~/etc/state/spec.yaml
 ```
 
 ### Output Format (Error)
@@ -123,7 +123,7 @@ Map server error codes to client behavior:
 
 1. **Server (iac-driver)** - HTTP API, see [server-daemon.md](server-daemon.md)
 2. **Path discovery** - Reuse `discover_etc_path()` pattern
-3. **State directory** - New `/usr/local/etc/homestak/state/`
+3. **State directory** - `~/etc/state/`
 4. **Config completion (v0.48)** - `./run.sh config` reads `state/spec.yaml` and applies via ansible (iac-driver#147)
 
 ## Data Flow
@@ -176,8 +176,7 @@ Per `20-design.md`, verify both installation modes:
 
 | Mode | State Path |
 |------|------------|
-| FHS | `/usr/local/etc/homestak/state/` |
-| Legacy | `/opt/homestak/site-config/state/` |
+| User-owned | `~/etc/state/` |
 
 **Implementation:** Use `discover_etc_path()` and append `/state/`. Create directory if not exists.
 
@@ -222,7 +221,7 @@ Per `20-design.md`, verify both installation modes:
 
 # On dev VM (client)
 homestak spec get --server https://srv1:44443 --identity base
-cat /usr/local/etc/homestak/state/spec.yaml
+cat ~/etc/state/spec.yaml
 ```
 
 **Expected results:**

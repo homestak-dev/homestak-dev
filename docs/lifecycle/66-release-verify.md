@@ -45,7 +45,8 @@ Test bootstrap installation:
 
 ```bash
 # On a clean system or VM
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/v0.45/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/v0.45/install.sh | sudo bash
+sudo -iu homestak
 homestak --version  # Should show v0.45
 ```
 

@@ -88,7 +88,7 @@ Requirements for the config phase: sources, resolution, state management.
 |----|-------------|----------|--------|--------|------------|------|
 | REQ-CFG-001 | site-config is single source of truth | P0 | Validated | design | - | test_config_resolver.py |
 | REQ-CFG-002 | Secrets must be decrypted before use (SOPS + age) | P0 | Validated | design | - | site-config hooks |
-| REQ-CFG-003 | ConfigResolver must auto-discover site-config (env → sibling → FHS → legacy) | P0 | Validated | impl | - | test_config_resolver.py |
+| REQ-CFG-003 | ConfigResolver must auto-discover site-config (env → sibling → user-owned) | P0 | Validated | impl | - | test_config_resolver.py |
 | REQ-CFG-004 | Config merge order: preset → template → env → overrides | P0 | Validated | design | - | test_config_resolver.py |
 | REQ-CFG-005 | All inheritance resolved in Python (consumers get flat config) | P0 | Validated | design | - | test_config_resolver.py |
 | REQ-CFG-006 | YAML manipulation must use proper libraries (not sed/echo) | P1 | Accepted | test | - | - |
@@ -131,11 +131,11 @@ Requirements for the unified server daemon (specs + repos serving). Previously n
 | REQ-CTL-015 | Exec chain: `run.sh` execs python3 directly (no bash wrapper in PID chain) | P0 | Accepted | design | server-daemon.md | `server start` + `server stop` |
 | REQ-CTL-016 | Double-fork daemonization: setsid, detach from terminal/SSH | P0 | Accepted | design | server-daemon.md | `server start` via SSH |
 | REQ-CTL-017 | Health-check startup gate: parent blocks until /health responds | P0 | Accepted | design | server-daemon.md | `server start` |
-| REQ-CTL-018 | Port-qualified PID file at FHS path (`/var/run/homestak/server-{port}.pid`) | P0 | Accepted | design | server-daemon.md | `server start` |
+| REQ-CTL-018 | Port-qualified PID file (`/var/run/homestak/server-{port}.pid`) | P0 | Accepted | design | server-daemon.md | `server start` |
 | REQ-CTL-019 | Stale PID detection: dead process → clean up and restart | P1 | Accepted | design | server-daemon.md | Scenario 5 |
 | REQ-CTL-020 | `server stop`: SIGTERM → 5s wait → SIGKILL escalation | P0 | Accepted | design | server-daemon.md | `server stop` |
 | REQ-CTL-021 | `server status`: JSON output, exit codes (0=healthy, 1=not running, 2=unhealthy) | P1 | Accepted | design | server-daemon.md | `server status --json` |
-| REQ-CTL-022 | Daemon logging to FHS path (`/var/log/homestak/server.log`), no fallback | P1 | Accepted | design | server-daemon.md | `server start` |
+| REQ-CTL-022 | Daemon logging to `/var/log/homestak/server.log`, no fallback | P1 | Accepted | design | server-daemon.md | `server start` |
 | REQ-CTL-023 | Operator auto-lifecycle: ensure server for all manifest verbs | P0 | Accepted | design | server-daemon.md | `test -M n1-pull` |
 | REQ-CTL-024 | Idempotent start (detect healthy → reuse) and stop (detect not running → success) | P1 | Accepted | design | server-daemon.md | Scenario 4 |
 | REQ-CTL-025 | Spec endpoint requires provisioning token (no unauthenticated access, no legacy auth fallback) | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
@@ -256,7 +256,7 @@ Requirements for secret management, SSH key handling, and access control.
 | REQ-SEC-005 | Keys injected via cloud-init (ssh_authorized_keys) | P0 | Validated | design | - | - |
 | REQ-SEC-006 | Private keys copied for nested levels | P1 | Validated | test | - | - |
 | REQ-SEC-007 | Key references use FK pattern (secrets.ssh_keys.{name}) | P0 | Validated | design | - | test_config_resolver.py |
-| REQ-SEC-008 | FHS installations require sudo | P1 | Validated | test | - | - |
+| REQ-SEC-008 | System-level operations require sudo | P1 | Validated | test | - | - |
 | REQ-SEC-009 | Automation user has passwordless sudo | P1 | Validated | design | - | - |
 | REQ-SEC-010 | Root login controlled by posture | P0 | Validated | design | - | - |
 | REQ-SEC-011 | Signing key (256-bit HMAC) stored in secrets.yaml, encrypted at rest by SOPS | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
