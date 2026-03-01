@@ -235,24 +235,28 @@ homestak install ansible   # Ansible + collections
 
 This pattern enables any Debian host to become a build/deploy host without manual setup.
 
-### Installation Paths (FHS-compliant, v0.24+)
+### Installation Paths (User-Owned Model)
+
+All files are owned by the dedicated `homestak` user under `~homestak/`:
 
 ```
-/usr/local/
+~homestak/                     # /home/homestak/
 ├── bin/
-│   └── homestak → ../lib/homestak/bootstrap/homestak.sh
-├── etc/
-│   └── homestak/           # site-config (configuration)
-└── lib/
-    └── homestak/           # code repos
-        ├── bootstrap/
-        ├── ansible/
-        ├── iac-driver/
-        ├── tofu/
-        └── packer/         # (optional)
+│   └── homestak → ../lib/bootstrap/homestak.sh
+├── etc/                       # site-config (configuration)
+│   └── state/                 # Runtime state (specs, markers)
+├── lib/                       # code repos
+│   ├── bootstrap/
+│   ├── ansible/
+│   ├── iac-driver/
+│   ├── tofu/
+│   └── packer/                # (optional)
+├── log/                       # Server and config logs
+└── cache/                     # Downloaded images
 ```
 
-Legacy installations at `/opt/homestak/` remain supported via CLI fallback.
+A symlink at `/usr/local/bin/homestak` provides system-wide access.
+Legacy FHS paths (`/usr/local/{lib,etc}/homestak/`) are checked as fallback.
 
 ## Release Automation CLI (v0.14+)
 
