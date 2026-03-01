@@ -120,7 +120,7 @@ class ConfigApply:
 - **State dir:** `$HOMESTAK_ETC/state/` or `~/etc/state/`
 - **Ansible dir:** `$HOMESTAK_LIB/ansible/` or `~/lib/ansible/`
 
-**Dev environment:** Set `HOMESTAK_LIB` to point to your workspace (e.g., `HOMESTAK_LIB=/home/user/homestak-dev`). There is no sibling directory discovery — the config command is designed for bootstrapped hosts where user-owned paths exist.
+**Dev environment:** Set `HOMESTAK_LIB` to point to your workspace (e.g., `HOMESTAK_LIB=~/homestak-dev`). There is no sibling directory discovery — the config command is designed for bootstrapped hosts where user-owned paths exist.
 
 ### Spec-to-Ansible Vars Mapping
 
