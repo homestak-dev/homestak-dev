@@ -710,7 +710,7 @@ Steps:
 
 Assertions:
 - Token `s` claim resolves to correct spec (not hostname-based lookup)
-- VM fetched spec from server (check /usr/local/etc/homestak/state/spec.yaml)
+- VM fetched spec from server (check ~/etc/state/spec.yaml)
 - SSH access works with keys from spec
 - Packages from spec are installed
 ```

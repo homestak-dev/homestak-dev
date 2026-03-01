@@ -80,7 +80,7 @@ Both paths apply the same ansible roles (base, users, security). Push mode runs 
 
 **Spec source resolution:**
 1. `--spec /path/to/spec.yaml` (explicit)
-2. `/usr/local/etc/homestak/state/spec.yaml` (default, from `homestak spec get`)
+2. `~/etc/state/spec.yaml` (default, from `homestak spec get`)
 
 **Exit codes:**
 - `0` — Success (platform ready)
@@ -115,12 +115,12 @@ class ConfigApply:
         return result
 ```
 
-**Path discovery:** `config_apply.py` discovers paths via environment variables or FHS defaults:
+**Path discovery:** `config_apply.py` discovers paths via environment variables or user-owned defaults:
 
-- **State dir:** `$HOMESTAK_ETC/state/` or `/usr/local/etc/homestak/state/`
-- **Ansible dir:** `$HOMESTAK_LIB/ansible/` or `/usr/local/lib/homestak/ansible/`
+- **State dir:** `$HOMESTAK_ETC/state/` or `~/etc/state/`
+- **Ansible dir:** `$HOMESTAK_LIB/ansible/` or `~/lib/ansible/`
 
-**Dev environment:** Set `HOMESTAK_LIB` to point to your workspace (e.g., `HOMESTAK_LIB=/home/user/homestak-dev`). There is no sibling directory discovery — the config command is designed for bootstrapped hosts where FHS paths exist.
+**Dev environment:** Set `HOMESTAK_LIB` to point to your workspace (e.g., `HOMESTAK_LIB=/home/user/homestak-dev`). There is no sibling directory discovery — the config command is designed for bootstrapped hosts where user-owned paths exist.
 
 ### Spec-to-Ansible Vars Mapping
 
@@ -168,7 +168,7 @@ New playbook `ansible/playbooks/config-apply.yml`:
 
 ### Platform-Ready Marker
 
-Path: `/usr/local/etc/homestak/state/config-complete.json`
+Path: `~/etc/state/config-complete.json`
 
 ```json
 {
@@ -211,7 +211,7 @@ def _wait_for_config_complete(self, exec_node, ip, context, timeout=300):
     wait_spec = WaitForFileAction(
         name=f'wait-spec-{exec_node.name}',
         host_key=f'{exec_node.name}_ip',
-        file_path='/usr/local/etc/homestak/state/spec.yaml',
+        file_path='~/etc/state/spec.yaml',
         timeout=timeout,
         interval=10,
     )
@@ -223,7 +223,7 @@ def _wait_for_config_complete(self, exec_node, ip, context, timeout=300):
     wait_config = WaitForFileAction(
         name=f'wait-config-{exec_node.name}',
         host_key=f'{exec_node.name}_ip',
-        file_path='/usr/local/etc/homestak/state/config-complete.json',
+        file_path='~/etc/state/config-complete.json',
         timeout=timeout,
         interval=10,
     )
@@ -286,11 +286,11 @@ Add `./run.sh config` to the existing runcmd block:
 %{if var.spec_server != ""}
       - |
         # Bootstrap from server + config on first boot (v0.48+)
-        if [ ! -f /usr/local/etc/homestak/state/config-complete.json ]; then
+        if [ ! -f ~/etc/state/config-complete.json ]; then
           . /etc/profile.d/homestak.sh
           curl -fsSk "$HOMESTAK_SERVER/bootstrap.git/install.sh" | \
             HOMESTAK_SOURCE="$HOMESTAK_SERVER" HOMESTAK_REF=_working HOMESTAK_INSECURE=1 SKIP_SITE_CONFIG=1 bash
-          /usr/local/lib/homestak/iac-driver/run.sh config --fetch --insecure \
+          ~/lib/iac-driver/run.sh config --fetch --insecure \
             >>/var/log/homestak/config.log 2>&1 || true
         fi
 %{endif}
@@ -337,14 +337,14 @@ site-config                  iac-driver                     ansible
 
 ### Path Mode Verification
 
-Config phase runs on bootstrapped VMs at FHS paths:
-- Spec: `/usr/local/etc/homestak/state/spec.yaml`
-- Marker: `/usr/local/etc/homestak/state/config-complete.json`
-- iac-driver: `/usr/local/lib/homestak/iac-driver/`
-- Ansible: `/usr/local/lib/homestak/ansible/`
-- Playbook: `/usr/local/lib/homestak/ansible/playbooks/config-apply.yml`
+Config phase runs on bootstrapped VMs at user-owned paths (~homestak/):
+- Spec: `~/etc/state/spec.yaml`
+- Marker: `~/etc/state/config-complete.json`
+- iac-driver: `~/lib/iac-driver/`
+- Ansible: `~/lib/ansible/`
+- Playbook: `~/lib/ansible/playbooks/config-apply.yml`
 
-Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. FHS paths (`/usr/local/lib/homestak/`) are the default. Legacy `/opt/homestak/` is not supported by the config command — only by iac-driver's `get_site_config_dir()` for site-config discovery.
+Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. User-owned paths (`~/lib/`) are the default.
 
 ## Risk Assessment
 
@@ -453,7 +453,7 @@ nodes:
 - iac-driver already has ConfigResolver, ansible integration, and action patterns
 - Avoids duplicating YAML→ansible mapping logic in bootstrap
 - bootstrap stays as thin porcelain; iac-driver is the engine
-- Cloud-init calls iac-driver directly: `/usr/local/lib/homestak/iac-driver/run.sh config`
+- Cloud-init calls iac-driver directly: `~/lib/iac-driver/run.sh config`
 - `homestak spec get` (bootstrap) fetches the spec; `./run.sh config` (iac-driver) applies it — clean separation of concerns
 
 ## Implementation Status

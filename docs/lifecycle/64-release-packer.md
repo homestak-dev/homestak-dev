@@ -54,7 +54,7 @@ Images on `latest` are already current. No action needed.
 
 ```bash
 # Build on capable host
-ssh srv1 'cd /usr/local/lib/homestak/packer && ./build.sh'
+ssh srv1 'cd ~/lib/packer && ./build.sh'
 ```
 
 Or build locally if QEMU/KVM is available:

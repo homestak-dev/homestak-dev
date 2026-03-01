@@ -90,7 +90,7 @@ Added `raw_command` field. When set, replaces the default `homestak scenario <na
 ```python
 RecursiveScenarioAction(
     name='delegate-subtree',
-    raw_command='cd /usr/local/lib/homestak/iac-driver && ./run.sh create --manifest-json ...',
+    raw_command='cd ~/lib/iac-driver && ./run.sh create --manifest-json ...',
     host_attr='pve_ip',
     context_keys=['edge_ip', 'edge_vm_id'],
 )

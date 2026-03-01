@@ -133,7 +133,7 @@ Manifest:
 
 **Assertions:**
 - Token `s` claim resolves to correct spec (not hostname-based lookup)
-- Spec fetched from server (check `/usr/local/etc/homestak/state/spec.yaml`)
+- Spec fetched from server (check `~/etc/state/spec.yaml`)
 - SSH access works with keys from spec
 - Packages from spec installed
 - Services from spec running

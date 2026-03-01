@@ -216,7 +216,7 @@ Not all hosts have the same capabilities. Key distinctions:
 
 **Packer builds require QEMU/KVM.** Build on capable hosts using `packer/build.sh` directly or via SSH:
 ```bash
-ssh srv1 'cd /usr/local/lib/homestak/packer && ./build.sh'
+ssh srv1 'cd ~/lib/packer && ./build.sh'
 ```
 
 ## Bootstrap Pattern

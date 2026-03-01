@@ -53,7 +53,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.51. Each lesson was codi
 
 ## v0.40
 
-- **Integration boundary blindness** - Design focused on new code (manifests, recursive actions) but didn't trace execution through existing subsystems. The nested-pve ansible role hardcodes `/opt/homestak/` but FHS installations use `/usr/local/etc/homestak/`. This blocked n3-full validation. Added "Integration Boundary Analysis" section to 20-design.md with explicit tracing checklist.
+- **Integration boundary blindness** - Design focused on new code (manifests, recursive actions) but didn't trace execution through existing subsystems. The nested-pve ansible role hardcoded `/opt/homestak/` but production installations used `/usr/local/etc/homestak/` (now `~/etc/`). This blocked n3-full validation. Added "Integration Boundary Analysis" section to 20-design.md with explicit tracing checklist.
 - **Known constraints not applied** - We knew GitHub has a 2GB file limit and that debian-13-pve.qcow2 is ~6GB (that's why we split it). But `DownloadGitHubReleaseAction` wasn't audited for this constraint. Added "Known Constraints Registry" to 20-design.md.
 - **N+1 analysis principle** - "It works for N=2" doesn't mean "it works for N=3". Each additional nesting level can surface path, memory, or timeout issues not visible at lower depths. Added "N+1 Analysis" section to 20-design.md.
 - **Audit existing components for new use cases** - When reusing existing actions/roles in new contexts, explicitly audit their assumptions. The download action assumed single files; split file support had to be added mid-release.
@@ -97,8 +97,8 @@ Accumulated insights from homestak-dev releases v0.8-v0.51. Each lesson was codi
 
 ## v0.29
 
-- **FHS installations require sudo for scenarios** - Bootstrap installs to `/usr/local/lib/homestak/` as root, so `homestak scenario` and `homestak playbook` commands need sudo. Document this requirement prominently.
-- **Legacy path migration requires fresh bootstrap** - Hosts with `/opt/homestak/` (pre-v0.26) need complete removal and re-bootstrap to get FHS paths with correct ownership. `rm -rf /opt/homestak && curl ... | sudo bash` is the cleanest fix.
+- **Root-owned installations required sudo for scenarios** - Bootstrap previously installed to `/usr/local/lib/homestak/` as root, so commands needed sudo. The user-owned model (`~/lib/`) eliminates this requirement.
+- **Legacy path migration requires fresh bootstrap** - Hosts with `/opt/homestak/` (pre-v0.26) or `/usr/local/lib/homestak/` (pre-v0.52) need complete removal and re-bootstrap to get user-owned paths. `rm -rf /opt/homestak && curl ... | bash` is the cleanest fix.
 - **Clean temp files between validation runs** - Leftover `/tmp/*.tfvars.json` files from previous runs can cause permission errors if ownership differs. Consider using unique temp file names or cleaning up after runs.
 - **YAML manipulation in shell scripts is fragile** - The site-init SSH key injection broke YAML indentation. Use proper YAML libraries (Python yaml module) for modifications instead of sed/echo appends.
 - **Closing before retrospective: third occurrence** - Same process error as v0.25 and v0.26. The `close` command's reminder checklist isn't preventing this. Need to either block close until retrospective is posted, or require `--force` to close without retrospective.
@@ -299,7 +299,7 @@ For quick reference, lessons grouped by theme:
 - Preflight checks should use configured SSH user (v0.50)
 - Packer image copy inherits metadata (v0.41)
 - Verify GitHub Action versions exist (v0.33)
-- FHS installations require sudo for scenarios (v0.29)
+- Root-owned installations required sudo for scenarios (v0.29)
 - Legacy path migration requires fresh bootstrap (v0.29)
 - Clean temp files between validation runs (v0.29)
 - YAML manipulation in shell scripts is fragile (v0.29)

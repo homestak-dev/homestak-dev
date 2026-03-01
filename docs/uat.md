@@ -5,31 +5,31 @@ Internal validation checklist for verifying homestak on a fresh Debian 13 host.
 ## Prerequisites
 
 - Fresh Debian 13 (Trixie) installation
-- Root access
+- User account with sudo access (or root for bootstrap)
 - Internet connection
 - QEMU/KVM with nested virtualization enabled
 
 ## Setup
 
 ```bash
-# 1. Bootstrap
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | sudo bash
+# 1. Bootstrap (as the homestak user, e.g., "homestak")
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | bash
 
 # 2. Configure site defaults for your network
-sudo sed -i 's/gateway: ""/gateway: 192.168.1.1/' /usr/local/etc/homestak/site.yaml
-sudo sed -i 's/dns_servers: \[\]/dns_servers: [ 192.168.1.1 ]/' /usr/local/etc/homestak/site.yaml
+sed -i 's/gateway: ""/gateway: 192.168.1.1/' ~/etc/site.yaml
+sed -i 's/dns_servers: \[\]/dns_servers: [ 192.168.1.1 ]/' ~/etc/site.yaml
 # Optional: defaults.domain (e.g., home.arpa)
 
 # 3. Initialize site configuration (generates host config, SSH key)
-sudo homestak site-init
+homestak site-init
 
 # 4. Install PVE + configure host (generates API token, signing key, node config)
 # Note: On fresh Debian, pve-setup reboots after kernel install.
 #       Re-run the same command after reboot to complete setup.
-sudo homestak pve-setup
+homestak pve-setup
 
 # 5. Download and publish packer images
-sudo homestak images download all --publish
+homestak images download all --publish
 ```
 
 ## Test Suite
@@ -37,12 +37,12 @@ sudo homestak images download all --publish
 Run from the host console:
 
 ```bash
-cd /usr/local/lib/homestak/iac-driver
-sudo ./run.sh manifest test -M n1-push -H $(hostname -s) --verbose
-sudo ./run.sh manifest test -M n1-pull -H $(hostname -s) --verbose
-sudo ./run.sh manifest test -M n2-tiered -H $(hostname -s) --verbose
-sudo ./run.sh manifest test -M n2-mixed -H $(hostname -s) --verbose
-sudo ./run.sh manifest test -M n3-deep -H $(hostname -s) --verbose
+cd ~/lib/iac-driver
+./run.sh manifest test -M n1-push -H $(hostname -s) --verbose
+./run.sh manifest test -M n1-pull -H $(hostname -s) --verbose
+./run.sh manifest test -M n2-tiered -H $(hostname -s) --verbose
+./run.sh manifest test -M n2-mixed -H $(hostname -s) --verbose
+./run.sh manifest test -M n3-deep -H $(hostname -s) --verbose
 ```
 
 ## Test Descriptions
@@ -71,12 +71,12 @@ To reset and re-run on an existing host (e.g., after code changes):
 
 ```bash
 # Pull latest code
-sudo homestak update
+homestak update
 
 # Reset site-config to clean state and re-initialize from templates
-sudo rm -f /usr/local/etc/homestak/site.yaml /usr/local/etc/homestak/secrets.yaml
-sudo rm -f /usr/local/etc/homestak/hosts/*.yaml /usr/local/etc/homestak/nodes/*.yaml
-sudo make -C /usr/local/etc/homestak init-site init-secrets
+rm -f ~/etc/site.yaml ~/etc/secrets.yaml
+rm -f ~/etc/hosts/*.yaml ~/etc/nodes/*.yaml
+make -C ~/etc init-site init-secrets
 
 # Continue with Setup steps 2-6
 ```
@@ -85,7 +85,6 @@ sudo make -C /usr/local/etc/homestak init-site init-secrets
 
 - **"gateway not configured"** — edit site.yaml: `defaults.gateway`
 - **"dns_servers not configured"** — edit site.yaml: `defaults.dns_servers`
-- **"No SSH keys in secrets.yaml"** — run `sudo homestak site-init`
-- **"Packer image not found"** — run `sudo homestak images download all --publish`
+- **"No SSH keys in secrets.yaml"** — run `homestak site-init`
+- **"Packer image not found"** — run `homestak images download all --publish`
 - **"Unknown host"** — ensure `homestak pve-setup` completed (generates nodes/*.yaml)
-- **Permission denied** — use `sudo` (see bootstrap#75 for future improvement)
