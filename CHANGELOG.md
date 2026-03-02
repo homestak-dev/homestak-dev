@@ -6,6 +6,9 @@
 
 - **Sudo-less migration**: Update `validate.sh` stage-mode commands to remove `sudo`; update CLAUDE.md installation paths from FHS to user-owned model (bootstrap#75)
 
+### Added
+- Design doc: `docs/designs/operator-local-exec.md` — operator local execution + dead code cleanup (iac-driver#267, iac-driver#275)
+
 ## v0.51 - 2026-02-28
 
 ### Changed
