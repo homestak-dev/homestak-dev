@@ -1,12 +1,19 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.51. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.52. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.52
+
+- **Scoped releases need cherry-pick CHANGELOG stamps** — When releasing a subset of commits on master (e.g., sprint #292 but not #296), create a temporary branch from the boundary commit, stamp the CHANGELOG there, tag that commit, then delete the branch. The tag points to a commit off master's lineage, but `release.sh publish` handles it fine since it creates releases from tags regardless of branch.
+- **Manual tagging requires state file updates** — `release.sh` tracks tag phase completion in `.release-state.json`. When tagging manually (bypassing `release.sh tag`), update the state file before running `publish`. A Python one-liner works: set `phases.tags.status` to `complete` and each repo's `tag` to `complete`.
+- **Clean sprint demarcation enables scoped releases** — Sprint #292 and #296 had zero commit interleaving on master because all #292 PRs merged before #296 work began. This made historical tagging feasible. Overlapping sprints would make scoped releases impractical.
+- **Next release must consolidate CHANGELOGs** — Master's CHANGELOGs still say "Unreleased" for both #292 and #296 entries. v0.53 CHANGELOG stamping must handle two version sections: stamp #292 content as v0.52, #296 content as v0.53.
 
 ## v0.51
 
@@ -258,6 +265,9 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- Scoped releases need cherry-pick CHANGELOG stamps (v0.52)
+- Manual tagging requires state file updates (v0.52)
+- Next release must consolidate CHANGELOGs (v0.52)
 - Direct push to master is blocked by rulesets — plan accordingly (v0.50)
 - Closed release before retrospective - fourth occurrence (v0.44)
 - Housekeeping should precede AAR (v0.44)
@@ -320,6 +330,7 @@ For quick reference, lessons grouped by theme:
 - GitHub 2GB release asset limit (v0.9)
 
 ### Planning & Design
+- Clean sprint demarcation enables scoped releases (v0.52)
 - Exploratory features expand scope (v0.41)
 - Integration boundary blindness (v0.40)
 - Known constraints not applied (v0.40)
