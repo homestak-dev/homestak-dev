@@ -1,12 +1,17 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.52. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.53. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.53
+
+- **CHANGELOG reconciliation is the cost of scoped releases** — When v0.52 was tagged off-branch, master's CHANGELOGs didn't reflect it. v0.53 had to retroactively split "Unreleased" entries into v0.52 and v0.53 sections across all 9 repos. Manageable but adds ~15 minutes of careful attribution work.
+- **Establish terminology early, enforce in reviews** — "Sudo-less migration" vs "User-owned path model" naming drift occurred because the sprint issue didn't establish canonical terminology. A brief "Terminology" section in sprint issues would prevent this. Caught during release CHANGELOG review, requiring a follow-up fix PR.
 
 ## v0.52
 
@@ -265,6 +270,8 @@ For quick reference, lessons grouped by theme:
 - Create formal test plans for risky changes (v0.13)
 
 ### Process Discipline
+- CHANGELOG reconciliation is the cost of scoped releases (v0.53)
+- Establish terminology early, enforce in reviews (v0.53)
 - Scoped releases need cherry-pick CHANGELOG stamps (v0.52)
 - Manual tagging requires state file updates (v0.52)
 - Next release must consolidate CHANGELOGs (v0.52)
