@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.53 - 2026-03-06
+
+No changes.
+
+## v0.52 - 2026-03-02
+
 ### Breaking
 
 - **Sudo-less migration**: Update `validate.sh` stage-mode commands to remove `sudo`; update CLAUDE.md installation paths from FHS to user-owned model (bootstrap#75)
