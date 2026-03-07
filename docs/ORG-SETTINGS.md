@@ -102,6 +102,12 @@ For orgs with external contributors (homestak-apps especially):
 
 ### 5. Default Repository Settings
 
+**Default branch name** (browser only — API does not support this):
+
+Settings → Repositories → Default branch → set to `master`
+
+- `https://github.com/organizations/<org>/settings/repository-defaults`
+
 Configure org-level defaults (Settings → Member privileges):
 
 | Setting | Value | Notes |
