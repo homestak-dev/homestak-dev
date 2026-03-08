@@ -19,8 +19,8 @@ preflight_check_repo_clean() {
     local repo="$1"
     local repo_path
 
-    # homestak-dev is the workspace itself, not a sibling
-    if [[ "$repo" == "homestak-dev" ]]; then
+    # meta is the workspace root, not a subdirectory
+    if [[ "$repo" == "meta" ]]; then
         repo_path="${WORKSPACE_DIR}"
     else
         repo_path="${WORKSPACE_DIR}/${repo}"
@@ -46,8 +46,8 @@ preflight_check_tag_exists() {
     local version="$2"
     local repo_path
 
-    # homestak-dev is the workspace itself, not a sibling
-    if [[ "$repo" == "homestak-dev" ]]; then
+    # meta is the workspace root, not a subdirectory
+    if [[ "$repo" == "meta" ]]; then
         repo_path="${WORKSPACE_DIR}"
     else
         repo_path="${WORKSPACE_DIR}/${repo}"
@@ -72,8 +72,8 @@ preflight_check_changelog() {
     local repo="$1"
     local repo_path
 
-    # homestak-dev is the workspace itself, not a sibling
-    if [[ "$repo" == "homestak-dev" ]]; then
+    # meta is the workspace root, not a subdirectory
+    if [[ "$repo" == "meta" ]]; then
         repo_path="${WORKSPACE_DIR}"
     else
         repo_path="${WORKSPACE_DIR}/${repo}"
@@ -108,8 +108,8 @@ preflight_check_gh_auth() {
 }
 
 preflight_check_secrets() {
-    local secrets_file="${WORKSPACE_DIR}/site-config/secrets.yaml"
-    local encrypted_file="${WORKSPACE_DIR}/site-config/secrets.yaml.enc"
+    local secrets_file="${WORKSPACE_DIR}/config/secrets.yaml"
+    local encrypted_file="${WORKSPACE_DIR}/config/secrets.yaml.enc"
 
     # Fast path: already decrypted
     if [[ -f "$secrets_file" ]]; then
@@ -217,7 +217,7 @@ preflight_clear_provider_cache() {
 
 preflight_check_host_node_config() {
     local host="$1"
-    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
+    local node_file="${WORKSPACE_DIR}/config/nodes/${host}.yaml"
 
     if [[ -f "$node_file" ]]; then
         echo "exists"
@@ -228,7 +228,7 @@ preflight_check_host_node_config() {
 
 preflight_check_host_ssh() {
     local host="$1"
-    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
+    local node_file="${WORKSPACE_DIR}/config/nodes/${host}.yaml"
 
     # Get IP from node config
     local ip=""
@@ -256,8 +256,8 @@ preflight_check_host_ssh() {
 
 preflight_check_host_api() {
     local host="$1"
-    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
-    local secrets_file="${WORKSPACE_DIR}/site-config/secrets.yaml"
+    local node_file="${WORKSPACE_DIR}/config/nodes/${host}.yaml"
+    local secrets_file="${WORKSPACE_DIR}/config/secrets.yaml"
 
     # Get API endpoint from node config
     local api_endpoint=""
@@ -313,7 +313,7 @@ preflight_check_host_api() {
 
 preflight_check_host_images() {
     local host="$1"
-    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
+    local node_file="${WORKSPACE_DIR}/config/nodes/${host}.yaml"
 
     # Get IP from node config
     local ip=""
@@ -345,7 +345,7 @@ preflight_check_host_images() {
 
 preflight_check_host_nested_virt() {
     local host="$1"
-    local node_file="${WORKSPACE_DIR}/site-config/nodes/${host}.yaml"
+    local node_file="${WORKSPACE_DIR}/config/nodes/${host}.yaml"
 
     # Get IP from node config
     local ip=""
@@ -643,19 +643,19 @@ EOF
         echo "Secrets:"
         case "$secrets_status" in
             decrypted)
-                echo -e "  ${GREEN}✓${NC} site-config/secrets.yaml present"
+                echo -e "  ${GREEN}✓${NC} config/secrets.yaml present"
                 ;;
             auto_decrypted)
-                echo -e "  ${GREEN}✓${NC} site-config/secrets.yaml auto-decrypted"
+                echo -e "  ${GREEN}✓${NC} config/secrets.yaml auto-decrypted"
                 ;;
             decrypt_failed)
-                echo -e "  ${RED}✗${NC} site-config/secrets.yaml decrypt failed (check age key)"
+                echo -e "  ${RED}✗${NC} config/secrets.yaml decrypt failed (check age key)"
                 ;;
             missing)
-                echo -e "  ${RED}✗${NC} site-config/secrets.yaml.enc not found"
+                echo -e "  ${RED}✗${NC} config/secrets.yaml.enc not found"
                 ;;
             *)
-                echo -e "  ${RED}✗${NC} site-config/secrets.yaml status unknown"
+                echo -e "  ${RED}✗${NC} config/secrets.yaml status unknown"
                 ;;
         esac
 
@@ -704,7 +704,7 @@ EOF
                 if [[ "$node_status" == "exists" ]]; then
                     echo -e "    ${GREEN}✓${NC} Node config exists"
                 else
-                    echo -e "    ${RED}✗${NC} Node config missing (site-config/nodes/${host}.yaml)"
+                    echo -e "    ${RED}✗${NC} Node config missing (config/nodes/${host}.yaml)"
                 fi
 
                 # SSH

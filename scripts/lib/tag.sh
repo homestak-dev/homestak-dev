@@ -26,7 +26,7 @@ tag_check_preconditions() {
     # Check all repos are clean
     for repo in "${REPOS[@]}"; do
         local repo_path
-        if [[ "$repo" == "homestak-dev" ]]; then
+        if [[ "$repo" == "meta" ]]; then
             repo_path="${WORKSPACE_DIR}"
         else
             repo_path="${WORKSPACE_DIR}/${repo}"
@@ -47,7 +47,7 @@ tag_check_preconditions() {
     # Check no existing tags
     for repo in "${REPOS[@]}"; do
         local repo_path
-        if [[ "$repo" == "homestak-dev" ]]; then
+        if [[ "$repo" == "meta" ]]; then
             repo_path="${WORKSPACE_DIR}"
         else
             repo_path="${WORKSPACE_DIR}/${repo}"
@@ -84,7 +84,7 @@ tag_create_single() {
     local dry_run="${3:-true}"
 
     local repo_path
-    if [[ "$repo" == "homestak-dev" ]]; then
+    if [[ "$repo" == "meta" ]]; then
         repo_path="${WORKSPACE_DIR}"
     else
         repo_path="${WORKSPACE_DIR}/${repo}"
@@ -124,7 +124,7 @@ tag_rollback_single() {
     local version="$2"
 
     local repo_path
-    if [[ "$repo" == "homestak-dev" ]]; then
+    if [[ "$repo" == "meta" ]]; then
         repo_path="${WORKSPACE_DIR}"
     else
         repo_path="${WORKSPACE_DIR}/${repo}"
@@ -150,7 +150,7 @@ tag_reset_single() {
     local dry_run="${3:-true}"
 
     local repo_path
-    if [[ "$repo" == "homestak-dev" ]]; then
+    if [[ "$repo" == "meta" ]]; then
         repo_path="${WORKSPACE_DIR}"
     else
         repo_path="${WORKSPACE_DIR}/${repo}"
@@ -407,7 +407,7 @@ run_tag_reset() {
     local errors=()
     for repo in "${repos_to_reset[@]}"; do
         local repo_path
-        if [[ "$repo" == "homestak-dev" ]]; then
+        if [[ "$repo" == "meta" ]]; then
             repo_path="${WORKSPACE_DIR}"
         else
             repo_path="${WORKSPACE_DIR}/${repo}"

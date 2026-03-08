@@ -24,9 +24,9 @@ verify_tag_exists() {
     local repo="$1"
     local version="$2"
 
-    # homestak-dev IS the workspace, not a subdirectory
+    # meta IS the workspace, not a subdirectory
     local repo_dir
-    if [[ "$repo" == "homestak-dev" ]]; then
+    if [[ "$repo" == "meta" ]]; then
         repo_dir="${WORKSPACE_DIR}"
     else
         repo_dir="${WORKSPACE_DIR}/${repo}"
@@ -48,8 +48,8 @@ verify_tags() {
 
     for repo in "${REPOS[@]}"; do
         local repo_dir
-        # homestak-dev IS the workspace, not a subdirectory
-        if [[ "$repo" == "homestak-dev" ]]; then
+        # meta IS the workspace, not a subdirectory
+        if [[ "$repo" == "meta" ]]; then
             repo_dir="${WORKSPACE_DIR}"
         else
             repo_dir="${WORKSPACE_DIR}/${repo}"

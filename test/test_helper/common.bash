@@ -169,8 +169,8 @@ create_test_state() {
   "repos": {
     ".github": {"tag": "pending", "release": "pending"},
     ".claude": {"tag": "pending", "release": "pending"},
-    "homestak-dev": {"tag": "pending", "release": "pending"},
-    "site-config": {"tag": "pending", "release": "pending"},
+    "meta": {"tag": "pending", "release": "pending"},
+    "config": {"tag": "pending", "release": "pending"},
     "tofu": {"tag": "pending", "release": "pending"},
     "ansible": {"tag": "pending", "release": "pending"},
     "bootstrap": {"tag": "pending", "release": "pending"},
@@ -204,8 +204,8 @@ create_test_state_with_progress() {
   "repos": {
     ".github": {"tag": "pending", "release": "pending"},
     ".claude": {"tag": "pending", "release": "pending"},
-    "homestak-dev": {"tag": "pending", "release": "pending"},
-    "site-config": {"tag": "pending", "release": "pending"},
+    "meta": {"tag": "pending", "release": "pending"},
+    "config": {"tag": "pending", "release": "pending"},
     "tofu": {"tag": "pending", "release": "pending"},
     "ansible": {"tag": "pending", "release": "pending"},
     "bootstrap": {"tag": "pending", "release": "pending"},

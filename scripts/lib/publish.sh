@@ -336,7 +336,7 @@ publish_check_preconditions() {
     # Check all repos have tags
     for repo in "${REPOS[@]}"; do
         local repo_path
-        if [[ "$repo" == "homestak-dev" ]]; then
+        if [[ "$repo" == "meta" ]]; then
             repo_path="${WORKSPACE_DIR}"
         else
             repo_path="${WORKSPACE_DIR}/${repo}"
@@ -427,7 +427,7 @@ publish_create_single() {
 
     # Get changelog excerpt if available
     local repo_path
-    if [[ "$repo" == "homestak-dev" ]]; then
+    if [[ "$repo" == "meta" ]]; then
         repo_path="${WORKSPACE_DIR}"
     else
         repo_path="${WORKSPACE_DIR}/${repo}"

@@ -423,9 +423,9 @@ cmd_selftest() {
     state_set_phase_status "validation" "complete"
     # Check if repos have uncommitted changes (tag requires clean repos)
     local has_uncommitted=false
-    for repo in homestak-dev bootstrap iac-driver; do
+    for repo in meta bootstrap iac-driver; do
         local repo_path
-        if [[ "$repo" == "homestak-dev" ]]; then
+        if [[ "$repo" == "meta" ]]; then
             repo_path="${WORKSPACE_DIR}"
         else
             repo_path="${WORKSPACE_DIR}/${repo}"
