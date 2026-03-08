@@ -27,7 +27,7 @@ Release when:
 Create a release issue early:
 
 ```bash
-gh issue create --repo homestak-dev/homestak-dev \
+gh issue create --repo homestak-dev/meta \
   --title "Release: v0.45 - Lifecycle Overhaul" \
   --label "release"
 ```
@@ -162,7 +162,7 @@ Keep 5 most recent releases. After each release:
 
 ```bash
 # Check count
-count=$(gh release list --repo homestak-dev/homestak-dev --limit 100 | wc -l)
+count=$(gh release list --repo homestak-dev/meta --limit 100 | wc -l)
 if [[ $count -gt 5 ]]; then
   echo "Consider: ./scripts/release.sh sunset --below-version X.Y"
 fi

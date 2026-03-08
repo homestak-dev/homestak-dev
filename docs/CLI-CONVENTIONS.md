@@ -65,8 +65,8 @@ Internal utilities and setup scripts.
 | Script | Location |
 |--------|----------|
 | `install.sh` | `bootstrap/install.sh` |
-| `host-config.sh` | `site-config/scripts/host-config.sh` |
-| `node-config.sh` | `site-config/scripts/node-config.sh` |
+| `host-config.sh` | `config/scripts/host-config.sh` |
+| `node-config.sh` | `config/scripts/node-config.sh` |
 | `setup-tools.sh` | `iac-driver/scripts/setup-tools.sh` |
 | `wait-for-guest-agent.sh` | `iac-driver/scripts/wait-for-guest-agent.sh` |
 

@@ -64,16 +64,21 @@ install-deps-all:
 
 setup: install-deps
 	@echo "Cloning child repos..."
-	@for repo in .claude .github ansible bootstrap iac-driver packer site-config tofu; do \
-		[ -d "$$repo" ] || git clone https://github.com/homestak-dev/$$repo.git; \
-	done
+	@[ -d ".claude" ]     || git clone https://github.com/homestak-dev/.claude.git
+	@[ -d ".github" ]     || git clone https://github.com/homestak-dev/.github.git
+	@[ -d "ansible" ]     || git clone https://github.com/homestak-iac/ansible.git
+	@[ -d "bootstrap" ]   || git clone https://github.com/homestak/bootstrap.git
+	@[ -d "iac-driver" ]  || git clone https://github.com/homestak-iac/iac-driver.git
+	@[ -d "packer" ]      || git clone https://github.com/homestak-iac/packer.git
+	@[ -d "config" ]    || git clone https://github.com/homestak/config.git
+	@[ -d "tofu" ]        || git clone https://github.com/homestak-iac/tofu.git
 	@echo "Registering repos with gita..."
-	@gita add .claude .github ansible bootstrap iac-driver packer site-config tofu homestak-dev
+	@gita add .claude .github ansible bootstrap iac-driver packer config tofu .
 	@echo ""
 	@$(MAKE) check-deps || true
 	@echo ""
-	@echo "Configuring site-config git hooks..."
-	@cd site-config && make setup
+	@echo "Configuring config git hooks..."
+	@cd config && make setup
 	@echo ""
 	@echo "Setup complete. Run 'gita ll' to verify."
 

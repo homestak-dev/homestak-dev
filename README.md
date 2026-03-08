@@ -8,7 +8,7 @@ For end-user documentation, see the [organization profile](https://github.com/ho
 
 ```bash
 # Clone the parent repo
-git clone https://github.com/homestak-dev/homestak-dev.git
+git clone https://github.com/homestak-dev/meta.git homestak-dev
 cd homestak-dev
 
 # Full workspace setup
@@ -45,7 +45,7 @@ homestak-dev/              # This repo (workspace parent)
 ├── bootstrap/             # Entry point - curl|bash installer
 ├── iac-driver/            # Orchestration engine
 ├── packer/                # Image templates
-├── site-config/           # Secrets and configuration
+├── config/                # Secrets and configuration (homestak/config)
 └── tofu/                  # VM provisioning modules
 ```
 

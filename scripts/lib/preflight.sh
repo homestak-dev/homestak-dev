@@ -124,7 +124,7 @@ preflight_check_secrets() {
     fi
 
     # Attempt auto-decrypt
-    if make -C "${WORKSPACE_DIR}/site-config" decrypt &>/dev/null; then
+    if make -C "${WORKSPACE_DIR}/config" decrypt &>/dev/null; then
         # Verify decryption succeeded
         if [[ -f "$secrets_file" ]]; then
             echo "auto_decrypted"

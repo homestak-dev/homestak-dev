@@ -455,8 +455,8 @@ kill -9 $(cat /var/run/homestak/server-44443.pid)  # Simulate crash
 - [requirements-catalog.md](requirements-catalog.md) — REQ-CTL-* requirements
 - [provisioning-token.md](provisioning-token.md) — Provisioning token design (HMAC auth for spec endpoint)
 - [test-strategy.md](test-strategy.md) — Test coverage matrix
-- [iac-driver#177](https://github.com/homestak-dev/iac-driver/issues/177) — Implementation issue
-- [iac-driver#184](https://github.com/homestak-dev/iac-driver/issues/184) — CLI restructure (depends on #177)
+- [iac-driver#177](https://github.com/homestak-iac/iac-driver/issues/177) — Implementation issue
+- [iac-driver#184](https://github.com/homestak-iac/iac-driver/issues/184) — CLI restructure (depends on #177)
 
 ## Changelog
 

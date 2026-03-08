@@ -10,6 +10,15 @@
   - Replace ~20 hardcoded `homestak-dev/` prefixes across 5 lib files
 - Drop `.sh` extension from executable scripts (#313)
   - `scripts/release.sh` → `scripts/release`
+- Update all cross-references for multi-org migration (#316)
+  - `REPOS` array: `homestak-dev` → `meta`, `site-config` → `config`
+  - `REPO_ORGS` updated for all 9 repos across 3 orgs
+  - `REPO_DIRS` mapping and `repo_dir()` for local directory resolution
+  - Rename local `site-config/` directory to `config/`
+  - Makefile: per-repo clone URLs for multi-org structure
+  - CLAUDE.md: org table, imports, terminology, bootstrap URL
+  - Lifecycle and design docs: GitHub issue/command URLs updated
+  - REPO-SETTINGS.md: template commands use `ORG/REPO_NAME`
 
 ## v0.53 - 2026-03-06
 

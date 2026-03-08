@@ -744,7 +744,7 @@ Server maintains a revocation list (separate from consumption ledger). Tokens ca
 - [config-phase.md](config-phase.md) — Config phase and cloud-init
 - [server-daemon.md](server-daemon.md) — Server daemon design
 - [requirements-catalog.md](requirements-catalog.md) — REQ-CTL-* requirements
-- [iac-driver#185](https://github.com/homestak-dev/iac-driver/issues/185) — Scope issue: identity != spec
+- [iac-driver#185](https://github.com/homestak-iac/iac-driver/issues/185) — Scope issue: identity != spec
 
 ## Changelog
 

@@ -10,7 +10,10 @@ This file provides guidance to Claude Code when working with this project.
 
 | Organization | Purpose |
 |--------------|---------|
-| **homestak-dev** | Open-source IaC components (this repo) |
+| **homestak** | Core: bootstrap installer, config |
+| **homestak-iac** | IaC components: ansible, iac-driver, tofu, packer |
+| **homestak-dev** | Meta: release scripts, docs, process, Claude Code config |
+| **homestak-apps** | Application deployment (future) |
 | **homestak-com** | Commercial offering: verified releases, remote monitoring/management, cloud backup, high availability, community and live support |
 
 The open-source foundation enables the commercial layer, not the other way around.
@@ -40,18 +43,18 @@ Current focus is VM provisioning and PVE host configuration. Future scope includ
 This is a polyrepo workspace managed with [gita](https://github.com/nosarthur/gita).
 
 ```
-homestak-dev/              # This repo (workspace parent)
-├── .claude/               # Claude Code configuration and skills (SEPARATE REPO)
-├── .github/               # GitHub org config (SEPARATE REPO)
+homestak-dev/              # This repo (workspace parent, aka "meta")
+├── .claude/               # Claude Code configuration and skills (SEPARATE REPO: homestak-dev/.claude)
+├── .github/               # GitHub org config (SEPARATE REPO: homestak-dev/.github)
 ├── scripts/               # Release automation CLI
 │   ├── release            # Main CLI entry point
 │   └── lib/               # Modular library functions
-├── ansible/               # Playbooks for host configuration
-├── bootstrap/             # Entry point - curl|bash installer, homestak CLI
-├── iac-driver/            # Orchestration engine - scenario-based workflows
-├── packer/                # Custom Debian cloud images (optional)
-├── site-config/           # Site-specific secrets and configuration
-└── tofu/                  # OpenTofu modules for VM provisioning
+├── ansible/               # Playbooks for host configuration (homestak-iac/ansible)
+├── bootstrap/             # Entry point - curl|bash installer, homestak CLI (homestak/bootstrap)
+├── iac-driver/            # Orchestration engine - scenario-based workflows (homestak-iac/iac-driver)
+├── packer/                # Custom Debian cloud images (homestak-iac/packer)
+├── config/                # Site-specific secrets and configuration (homestak/config)
+└── tofu/                  # OpenTofu modules for VM provisioning (homestak-iac/tofu)
 ```
 
 **Important:** `.claude/` and `.github/` are **separate git repositories**, not subdirectories of homestak-dev. They have their own branches, commits, and release tags. When making changes to skills or org config, remember to:
@@ -67,7 +70,7 @@ Each component has its own `CLAUDE.md` with detailed context (auto-loaded via im
 @bootstrap/CLAUDE.md
 @iac-driver/CLAUDE.md
 @packer/CLAUDE.md
-@site-config/CLAUDE.md
+@config/CLAUDE.md
 @tofu/CLAUDE.md
 
 ## Workspace Management
@@ -116,10 +119,10 @@ See [.claude/CLAUDE.md](.claude/CLAUDE.md) for full skill documentation.
 
 ## Configuration Flow
 
-site-config is the single source of truth:
+config (homestak/config) is the single source of truth:
 
 ```
-site-config/
+config/
 ├── site.yaml       # Site-wide defaults (timezone, packages)
 ├── secrets.yaml    # API tokens, SSH keys, passwords
 ├── defs/           # JSON Schema definitions
@@ -137,7 +140,7 @@ ConfigResolver (iac-driver)
         └── resolve_ansible_vars() → ansible-vars → ansible
 ```
 
-This eliminates configuration drift between components - all settings flow from site-config.
+This eliminates configuration drift between components - all settings flow from config.
 
 ## Design Principles
 
@@ -145,7 +148,7 @@ This eliminates configuration drift between components - all settings flow from 
 - **Repeatability over flexibility** - Prefer conventions that "just work" over infinite configurability
 - **Local-first execution** - Run on the host being configured to avoid SSH connection issues
 - **Idempotent operations** - Safe to run multiple times
-- **Secrets in code, encrypted** - SOPS + age in site-config repo, git hooks for auto-encrypt/decrypt
+- **Secrets in code, encrypted** - SOPS + age in config repo, git hooks for auto-encrypt/decrypt
 - **Component independence** - Each repo installs its own dependencies via `make install-deps`
 - **Process consistency** - When presenting options to the user, flag any option that deviates from established processes (lifecycle docs, RELEASE.md). Do not present process-inconsistent options as equal alternatives without noting the inconsistency.
 
@@ -194,7 +197,7 @@ Consistent terminology across all repos:
 | integration test | E2E test, end-to-end test | Our tests validate component integration, not user journeys |
 | scenario | workflow, pipeline | Scenarios are iac-driver's unit of orchestration |
 | action | task, step | Actions are reusable primitives in iac-driver |
-| site-config | config, secrets | Specific repo name; "config" is ambiguous |
+| config (repo) | site-config | Repo was renamed from site-config to config (homestak/config) |
 | tofu | terraform | We use OpenTofu, not Terraform |
 
 ## Conventions
@@ -225,7 +228,7 @@ The `bootstrap` repo provides capability installation via `homestak install <mod
 
 ```bash
 # Initial setup (on any Debian host)
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install | sudo bash
+curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/master/install | sudo bash
 
 # Switch to homestak user, then add capabilities as needed
 sudo -iu homestak
@@ -386,7 +389,7 @@ The `resume` command outputs:
 | [bootstrap/CLAUDE.md](bootstrap/CLAUDE.md) | CLI, installation |
 | [iac-driver/CLAUDE.md](iac-driver/CLAUDE.md) | Scenarios, actions, testing |
 | [packer/CLAUDE.md](packer/CLAUDE.md) | Templates, build workflow |
-| [site-config/CLAUDE.md](site-config/CLAUDE.md) | Config schema, secrets |
+| [config/CLAUDE.md](config/CLAUDE.md) | Config schema, secrets (homestak/config) |
 | [tofu/CLAUDE.md](tofu/CLAUDE.md) | Modules, environments |
 
 ### Development Lifecycle

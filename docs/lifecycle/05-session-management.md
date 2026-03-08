@@ -218,7 +218,7 @@ If context is lost unexpectedly:
 
 ```bash
 # Check sprint issue for state
-gh issue view 152 --repo homestak-dev/homestak-dev
+gh issue view 152 --repo homestak-dev/meta
 
 # Check branch state across repos
 gita shell "git status"

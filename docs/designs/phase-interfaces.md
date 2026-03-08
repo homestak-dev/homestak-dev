@@ -1,7 +1,7 @@
 # Phase Interface Contracts
 
 **Sprint:** 0 (Lifecycle Decomposition)
-**Issue:** [iac-driver#141](https://github.com/homestak-dev/iac-driver/issues/141)
+**Issue:** [iac-driver#141](https://github.com/homestak-iac/iac-driver/issues/141)
 **Related:** [node-lifecycle.md](node-lifecycle.md), [node-orchestration.md](node-orchestration.md)
 **Status:** Active
 **Date:** 2026-02-03

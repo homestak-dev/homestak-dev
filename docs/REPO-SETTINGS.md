@@ -1,6 +1,6 @@
 # Repository Settings Reference
 
-Standard settings for homestak-dev repositories. Use this as a template when creating new repos.
+Standard settings for homestak repositories across all orgs (homestak, homestak-iac, homestak-dev). Use `ORG/REPO` in CLI commands below (e.g., `homestak-iac/ansible`, `homestak/bootstrap`).
 
 ## Repository Settings
 
@@ -63,7 +63,7 @@ All public repos use GitHub Rulesets (not classic branch protection):
 
 **CLI to apply:**
 ```bash
-gh api repos/homestak-dev/REPO_NAME/rulesets --method POST --input - <<'EOF'
+gh api repos/ORG/REPO_NAME/rulesets --method POST --input - <<'EOF'
 {
   "name": "master-protection",
   "target": "branch",
@@ -105,7 +105,7 @@ Enable these security features:
 
 **CLI to enable:**
 ```bash
-gh api repos/homestak-dev/REPO_NAME/vulnerability-alerts -X PUT
+gh api repos/ORG/REPO_NAME/vulnerability-alerts -X PUT
 ```
 
 ### Issue Labels
@@ -142,13 +142,13 @@ In addition to GitHub's defaults, these custom labels are used across homestak-d
 
 **CLI to create labels:**
 ```bash
-gh label create epic --repo homestak-dev/REPO_NAME --description "Epic issue tracking multiple sub-tasks" --color 3B0A80
-gh label create refactor --repo homestak-dev/REPO_NAME --description "Code refactoring or cleanup" --color FEF2C0
-gh label create sprint --repo homestak-dev/REPO_NAME --description "Sprint planning and tracking issues" --color 1D76DB
-gh label create release --repo homestak-dev/REPO_NAME --description "Release planning and coordination" --color 0E8A16
-gh label create testing --repo homestak-dev/REPO_NAME --description "Test coverage or testing infrastructure" --color BFD4F2
-gh label create security --repo homestak-dev/REPO_NAME --description "Security-related issues" --color D93F0B
-gh label create breaking-change --repo homestak-dev/REPO_NAME --description "Changes requiring migration or version bump" --color B60205
+gh label create epic --repo ORG/REPO_NAME --description "Epic issue tracking multiple sub-tasks" --color 3B0A80
+gh label create refactor --repo ORG/REPO_NAME --description "Code refactoring or cleanup" --color FEF2C0
+gh label create sprint --repo ORG/REPO_NAME --description "Sprint planning and tracking issues" --color 1D76DB
+gh label create release --repo ORG/REPO_NAME --description "Release planning and coordination" --color 0E8A16
+gh label create testing --repo ORG/REPO_NAME --description "Test coverage or testing infrastructure" --color BFD4F2
+gh label create security --repo ORG/REPO_NAME --description "Security-related issues" --color D93F0B
+gh label create breaking-change --repo ORG/REPO_NAME --description "Changes requiring migration or version bump" --color B60205
 ```
 
 ## Required Files
@@ -164,19 +164,19 @@ gh label create breaking-change --repo homestak-dev/REPO_NAME --description "Cha
 
 ```bash
 # 1. Create repo
-gh repo create homestak-dev/NEW_REPO --public --description "Description here"
+gh repo create ORG/NEW_REPO --public --description "Description here"
 
 # 2. Add topics
-gh repo edit homestak-dev/NEW_REPO \
+gh repo edit ORG/NEW_REPO \
   --add-topic homelab \
   --add-topic infrastructure-as-code \
   --add-topic proxmox
 
 # 3. Disable wiki
-gh repo edit homestak-dev/NEW_REPO --enable-wiki=false
+gh repo edit ORG/NEW_REPO --enable-wiki=false
 
 # 4. Clone and add required files
-git clone https://github.com/homestak-dev/NEW_REPO
+git clone https://github.com/ORG/NEW_REPO
 cd NEW_REPO
 cp ../tofu/LICENSE .
 # Create README.md, CLAUDE.md, CHANGELOG.md
@@ -187,7 +187,7 @@ git commit -m "Initial commit"
 git push
 
 # 6. Add branch protection (ruleset)
-gh api repos/homestak-dev/NEW_REPO/rulesets --method POST --input - <<'EOF'
+gh api repos/ORG/NEW_REPO/rulesets --method POST --input - <<'EOF'
 {
   "name": "master-protection",
   "target": "branch",
@@ -199,10 +199,10 @@ gh api repos/homestak-dev/NEW_REPO/rulesets --method POST --input - <<'EOF'
 EOF
 
 # 6b. Enable auto-merge
-gh api repos/homestak-dev/NEW_REPO --method PATCH --field allow_auto_merge=true
+gh api repos/ORG/NEW_REPO --method PATCH --field allow_auto_merge=true
 
 # 7. Enable security
-gh api repos/homestak-dev/NEW_REPO/vulnerability-alerts -X PUT
+gh api repos/ORG/NEW_REPO/vulnerability-alerts -X PUT
 ```
 
 ### Pull Requests
@@ -222,7 +222,7 @@ gh api repos/homestak-dev/NEW_REPO/vulnerability-alerts -X PUT
 
 **CLI to configure merge methods:**
 ```bash
-gh api -X PATCH repos/homestak-dev/REPO_NAME \
+gh api -X PATCH repos/ORG/REPO_NAME \
   -f allow_squash_merge=true \
   -f allow_merge_commit=true \
   -f allow_rebase_merge=false \

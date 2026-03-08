@@ -205,7 +205,7 @@ No automated mechanism today. Each root host is an island.
 
 With the authored/generated separation, the problem shrinks: authored config syncs via git (already works). Generated state stays local (no sync needed). The remaining gap is operational visibility — knowing what generated state exists across hosts.
 
-See [homestak-dev#298](https://github.com/homestak-dev/homestak-dev/issues/298) for the full analysis and possible directions.
+See [homestak-dev#298](https://github.com/homestak-dev/meta/issues/298) for the full analysis and possible directions.
 
 ## Related
 
@@ -219,6 +219,6 @@ See [homestak-dev#298](https://github.com/homestak-dev/homestak-dev/issues/298) 
 
 | Issue | Relationship |
 |-------|-------------|
-| [iac-driver#248](https://github.com/homestak-dev/iac-driver/issues/248) | `/config` endpoint for pull-mode distribution (building block) |
-| [iac-driver#275](https://github.com/homestak-dev/iac-driver/issues/275) | Operator simplification, PVE lifecycle rebalancing (phase 3) |
-| [homestak-dev#298](https://github.com/homestak-dev/homestak-dev/issues/298) | Config reconciliation for distributed site-config |
+| [iac-driver#248](https://github.com/homestak-iac/iac-driver/issues/248) | `/config` endpoint for pull-mode distribution (building block) |
+| [iac-driver#275](https://github.com/homestak-iac/iac-driver/issues/275) | Operator simplification, PVE lifecycle rebalancing (phase 3) |
+| [homestak-dev#298](https://github.com/homestak-dev/meta/issues/298) | Config reconciliation for distributed site-config |
