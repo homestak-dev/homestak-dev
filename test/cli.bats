@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 #
-# cli.bats - Tests for scripts/release.sh CLI routing
+# cli.bats - Tests for scripts/release CLI routing
 #
 
 load 'test_helper/common'
@@ -8,10 +8,10 @@ load 'test_helper/common'
 setup() {
     setup_test_env
 
-    # Export env vars so release.sh subprocess uses test environment
+    # Export env vars so release subprocess uses test environment
     export WORKSPACE_DIR STATE_FILE AUDIT_LOG
 
-    RELEASE_SH="${BATS_TEST_DIRNAME}/../scripts/release.sh"
+    RELEASE_SH="${BATS_TEST_DIRNAME}/../scripts/release"
 }
 
 teardown() {
@@ -26,7 +26,7 @@ teardown() {
     run "$RELEASE_SH" help
     [ "$status" -eq 0 ]
     assert_output_contains "Usage:"
-    assert_output_contains "release.sh"
+    assert_output_contains "release"
 }
 
 @test "--help flag shows usage" {

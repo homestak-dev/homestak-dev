@@ -84,7 +84,7 @@ verify_release_exists() {
     local version="$2"
 
     local release_info
-    release_info=$(gh release view "v${version}" --repo "homestak-dev/${repo}" --json tagName,isDraft 2>/dev/null)
+    release_info=$(gh release view "v${version}" --repo "$(repo_full_name "$repo")" --json tagName,isDraft 2>/dev/null)
 
     if [[ -z "$release_info" ]]; then
         echo "missing"
@@ -101,7 +101,7 @@ verify_packer_assets() {
     # Check 'latest' release for packer assets (latest-centric approach)
     # Versioned releases are typically tag-only; images live in 'latest'
     local assets
-    assets=$(gh release view "latest" --repo "homestak-dev/packer" --json assets --jq '.assets[].name' 2>/dev/null)
+    assets=$(gh release view "latest" --repo "$(repo_full_name packer)" --json assets --jq '.assets[].name' 2>/dev/null)
 
     local found=()
     local found_split=()
@@ -244,7 +244,7 @@ EOF
         echo ""
         echo "Packer Assets (from 'latest' release):"
         local assets
-        assets=$(gh release view "latest" --repo "homestak-dev/packer" --json assets --jq '.assets[].name' 2>/dev/null)
+        assets=$(gh release view "latest" --repo "$(repo_full_name packer)" --json assets --jq '.assets[].name' 2>/dev/null)
 
         if [[ "$found_count" -eq "${#EXPECTED_PACKER_ASSETS[@]}" ]]; then
             if [[ "$split_count" -gt 0 ]]; then
@@ -290,7 +290,7 @@ EOF
                 echo "  Missing tags: ${tag_missing_list}"
             fi
             if [[ "$has_drafts" == "true" ]]; then
-                echo "  Some releases are still drafts (run: release.sh publish --finalize)"
+                echo "  Some releases are still drafts (run: release publish --finalize)"
             elif [[ "$tag_missing_count" -eq 0 ]]; then
                 echo "  Some releases or assets are missing"
             fi

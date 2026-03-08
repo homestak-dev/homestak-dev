@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Changed
+- Add multi-org support to release.sh (#308)
+  - `REPO_ORGS` mapping and `repo_full_name()` in `state.sh`
+  - All `gh release/api` calls use per-repo org lookup
+  - `ISSUE_REPO` constant for release issue operations
+  - Replace ~20 hardcoded `homestak-dev/` prefixes across 5 lib files
+- Drop `.sh` extension from executable scripts (#313)
+  - `scripts/release.sh` → `scripts/release`
+
 ## v0.53 - 2026-03-06
 
 No changes.

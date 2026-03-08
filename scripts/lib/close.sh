@@ -42,8 +42,8 @@ close_check_phases() {
         done
         echo ""
         echo -e "  ${YELLOW}Retrospective not complete.${NC}"
-        echo "  Mark complete: release.sh retrospective --done"
-        echo "  Or skip with: release.sh close --force"
+        echo "  Mark complete: release retrospective --done"
+        echo "  Or skip with: release close --force"
         return 1
     fi
 
@@ -85,7 +85,7 @@ close_generate_summary() {
 All ${#REPOS[@]} repos tagged and released at v${version}.
 
 ---
-*Closed by release.sh close command*
+*Closed by release close command*
 EOF
 }
 
@@ -107,14 +107,14 @@ close_post_and_close() {
 
     # Post summary comment
     log_info "Posting summary to issue #${issue}..."
-    if ! gh issue comment "$issue" --repo homestak-dev/homestak-dev --body "$summary"; then
+    if ! gh issue comment "$issue" --repo $ISSUE_REPO --body "$summary"; then
         log_error "Failed to post comment to issue #${issue}"
         return 1
     fi
 
     # Close the issue
     log_info "Closing issue #${issue}..."
-    if ! gh issue close "$issue" --repo homestak-dev/homestak-dev; then
+    if ! gh issue close "$issue" --repo $ISSUE_REPO; then
         log_error "Failed to close issue #${issue}"
         return 1
     fi

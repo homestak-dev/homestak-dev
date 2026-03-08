@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 #
-# release.sh - homestak-dev release automation CLI
+# release - homestak-dev release automation CLI
 #
 # Usage:
-#   release.sh init --version X.Y
-#   release.sh status
-#   release.sh resume
-#   release.sh preflight
-#   release.sh validate --scenario <name> --host <host>
-#   release.sh tag [--dry-run|--execute]
-#   release.sh publish [--dry-run|--execute]
-#   release.sh verify
-#   release.sh audit [--lines N]
+#   release init --version X.Y
+#   release status
+#   release resume
+#   release preflight
+#   release validate --scenario <name> --host <host>
+#   release tag [--dry-run|--execute]
+#   release publish [--dry-run|--execute]
+#   release verify
+#   release audit [--lines N]
 #
 
 set -euo pipefail
@@ -148,7 +148,7 @@ main() {
             cmd_help
             ;;
         --version)
-            echo "release.sh $(get_version)"
+            echo "release $(get_version)"
             ;;
         *)
             log_error "Unknown command: $command"
