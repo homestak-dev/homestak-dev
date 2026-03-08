@@ -7,36 +7,55 @@
 #
 
 # State file location (set by main script)
-STATE_FILE="${STATE_FILE:-${WORKSPACE_DIR:-.}/.release-state.json}"
+STATE_FILE="${STATE_FILE:-${META_DIR:-.}/.release-state.json}"
 SCHEMA_VERSION=1
 
 # All repos in dependency order
-REPOS=(.github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver)
+REPOS=(.github .claude meta config tofu ansible bootstrap packer iac-driver)
 
 # Repo-to-org mapping for multi-org support (#308)
 # Maps repo names to their GitHub org/repo full path.
-# During migration, repos may still be in homestak-dev (redirects work).
 declare -A REPO_ORGS=(
     [.github]="homestak-dev/.github"
     [.claude]="homestak-dev/.claude"
-    [homestak-dev]="homestak-dev/homestak-dev"
-    [site-config]="homestak-dev/site-config"
-    [tofu]="homestak-dev/tofu"
-    [ansible]="homestak-dev/ansible"
-    [bootstrap]="homestak-dev/bootstrap"
-    [packer]="homestak-dev/packer"
-    [iac-driver]="homestak-dev/iac-driver"
+    [meta]="homestak-dev/meta"
+    [config]="homestak/config"
+    [tofu]="homestak-iac/tofu"
+    [ansible]="homestak-iac/ansible"
+    [bootstrap]="homestak/bootstrap"
+    [packer]="homestak-iac/packer"
+    [iac-driver]="homestak-iac/iac-driver"
+)
+
+# Local directory mapping: repo name → path relative to WORKSPACE_DIR
+declare -A REPO_DIRS=(
+    [meta]="dev/meta"
+    [.claude]="dev/.claude"
+    [.github]="dev/.github"
+    [config]="config"
+    [bootstrap]="bootstrap"
+    [tofu]="iac/tofu"
+    [ansible]="iac/ansible"
+    [packer]="iac/packer"
+    [iac-driver]="iac/iac-driver"
 )
 
 # Get the full GitHub org/repo name for a repo
-# Usage: repo_full_name "ansible" => "homestak-dev/ansible"
+# Usage: repo_full_name "ansible" => "homestak-iac/ansible"
 repo_full_name() {
     local repo="$1"
     echo "${REPO_ORGS[$repo]:-homestak-dev/$repo}"
 }
 
+# Get the local directory path for a repo relative to workspace root
+# Usage: repo_dir "ansible" => "ansible"
+repo_dir() {
+    local repo="$1"
+    echo "${REPO_DIRS[$repo]:-$repo}"
+}
+
 # The issue tracker repo (release issues always live here)
-ISSUE_REPO="homestak-dev/homestak-dev"
+ISSUE_REPO="homestak-dev/meta"
 
 # -----------------------------------------------------------------------------
 # State File Operations

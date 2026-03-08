@@ -1,74 +1,49 @@
-# homestak-dev
+# homestak meta
 
-Polyrepo workspace for homestak infrastructure-as-code.
+Release scripts, documentation, and development process for the homestak project.
 
 For end-user documentation, see the [organization profile](https://github.com/homestak-dev).
 
 ## Quick Start (Contributors)
 
 ```bash
-# Clone the parent repo
-git clone https://github.com/homestak-dev/homestak-dev.git
-cd homestak-dev
+# Create workspace root and clone meta
+mkdir -p ~/homestak/dev
+git clone https://github.com/homestak-dev/meta.git ~/homestak/dev/meta
+cd ~/homestak/dev/meta
 
-# Full workspace setup
+# Full workspace setup (clones all repos into ~/homestak/)
 make setup
 ```
 
-This clones all child repos, registers them with gita, checks dependencies, and configures git hooks for secrets management.
+This clones all repos into the correct directory structure, registers them with gita, checks dependencies, and configures git hooks for secrets management.
 
-If dependencies are missing, you'll see:
-```
-Checking dependencies...
-  gita:       OK
-  packer:     MISSING
-  shellcheck: MISSING
-  ...
-
-Missing dependencies: packer shellcheck
-Run: sudo make install-deps-all
-```
-
-Install missing dependencies and verify:
-```bash
-sudo make install-deps-all
-gita ll
-```
-
-## Project Structure
+## Workspace Structure
 
 ```
-homestak-dev/              # This repo (workspace parent)
-├── .claude/               # Claude Code configuration and skills
-├── .github/               # GitHub org config (PR templates, CI)
-├── ansible/               # Playbooks for host configuration
-├── bootstrap/             # Entry point - curl|bash installer
-├── iac-driver/            # Orchestration engine
-├── packer/                # Image templates
-├── site-config/           # Secrets and configuration
-└── tofu/                  # VM provisioning modules
+~/homestak/
+├── bootstrap/             # homestak/bootstrap - installer, CLI
+├── config/                # homestak/config - secrets, manifests
+├── iac/
+│   ├── ansible/           # homestak-iac/ansible - playbooks
+│   ├── iac-driver/        # homestak-iac/iac-driver - orchestration
+│   ├── packer/            # homestak-iac/packer - image templates
+│   └── tofu/              # homestak-iac/tofu - VM provisioning
+└── dev/
+    ├── meta/              # homestak-dev/meta - this repo
+    ├── .claude/           # homestak-dev/.claude - Claude Code config
+    └── .github/           # homestak-dev/.github - org config
 ```
 
-## Workspace Management
-
-This workspace uses [gita](https://github.com/nosarthur/gita) to manage multiple repos.
-
-### Makefile Targets
+## Makefile Targets
 
 | Target | Description |
 |--------|-------------|
 | `make setup` | Full workspace setup (clone, register, check deps, configure hooks) |
 | `make check-deps` | Check if all dependencies are installed |
 | `make install-deps-all` | Install dependencies across all repos (requires sudo) |
-
-### Gita Commands
-
-| Command | Description |
-|---------|-------------|
-| `gita ll` | Status of all repos |
-| `gita fetch` | Fetch all repos |
-| `gita pull` | Pull all repos |
-| `gita shell <cmd>` | Run command in all repos |
+| `make test` | Run release CLI bats tests |
+| `make lint` | Run shellcheck on release CLI |
 
 ## Documentation
 
@@ -89,7 +64,7 @@ This workspace uses [gita](https://github.com/nosarthur/gita) to manage multiple
 | `/session` | save, resume, checkpoint | Context preservation across compactions |
 | `/issues` | - | Gather GitHub issues across all repos |
 
-See [.claude/CLAUDE.md](.claude/CLAUDE.md) for complete skill documentation.
+See [.claude/CLAUDE.md](../.claude/CLAUDE.md) for complete skill documentation.
 
 ## License
 

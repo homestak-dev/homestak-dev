@@ -45,7 +45,7 @@ Test bootstrap installation:
 
 ```bash
 # On a clean system or VM
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/v0.45/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/v0.45/install.sh | sudo bash
 sudo -iu homestak
 homestak --version  # Should show v0.45
 ```
@@ -56,7 +56,7 @@ Check all scope issues from completed sprints are closed:
 
 ```bash
 # Review release issue for sprint links
-gh issue view <release-issue> --repo homestak-dev/homestak-dev
+gh issue view <release-issue> --repo homestak-dev/meta
 
 # Verify each scope issue is closed
 gh issue view <issue-num> --repo homestak-dev/<repo> --json state

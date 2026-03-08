@@ -1,4 +1,4 @@
-# homestak-dev
+# homestak
 
 This file provides guidance to Claude Code when working with this project.
 
@@ -10,7 +10,10 @@ This file provides guidance to Claude Code when working with this project.
 
 | Organization | Purpose |
 |--------------|---------|
-| **homestak-dev** | Open-source IaC components (this repo) |
+| **homestak** | Core: bootstrap installer, config |
+| **homestak-iac** | IaC components: ansible, iac-driver, tofu, packer |
+| **homestak-dev** | Meta: release scripts, docs, process, Claude Code config |
+| **homestak-apps** | Application deployment (future) |
 | **homestak-com** | Commercial offering: verified releases, remote monitoring/management, cloud backup, high availability, community and live support |
 
 The open-source foundation enables the commercial layer, not the other way around.
@@ -40,35 +43,45 @@ Current focus is VM provisioning and PVE host configuration. Future scope includ
 This is a polyrepo workspace managed with [gita](https://github.com/nosarthur/gita).
 
 ```
-homestak-dev/              # This repo (workspace parent)
-├── .claude/               # Claude Code configuration and skills (SEPARATE REPO)
-├── .github/               # GitHub org config (SEPARATE REPO)
-├── scripts/               # Release automation CLI
-│   ├── release            # Main CLI entry point
-│   └── lib/               # Modular library functions
-├── ansible/               # Playbooks for host configuration
-├── bootstrap/             # Entry point - curl|bash installer, homestak CLI
-├── iac-driver/            # Orchestration engine - scenario-based workflows
-├── packer/                # Custom Debian cloud images (optional)
-├── site-config/           # Site-specific secrets and configuration
-└── tofu/                  # OpenTofu modules for VM provisioning
+~/homestak/                    # Workspace root (HOMESTAK_ROOT)
+├── bootstrap/                 # homestak/bootstrap - curl|bash installer, homestak CLI
+├── config/                    # homestak/config - secrets, manifests, site-specific config
+│
+├── iac/                       # homestak-iac org
+│   ├── ansible/               # Playbooks for host configuration
+│   ├── iac-driver/            # Orchestration engine - scenario-based workflows
+│   ├── packer/                # Custom Debian cloud images (optional)
+│   └── tofu/                  # OpenTofu modules for VM provisioning
+│
+├── dev/                       # homestak-dev org
+│   ├── meta/                  # This repo - release scripts, docs, process
+│   │   ├── scripts/           # Release automation CLI
+│   │   │   ├── release        # Main CLI entry point
+│   │   │   └── lib/           # Modular library functions
+│   │   └── docs/              # Lifecycle, designs, guidelines
+│   ├── .claude/               # Claude Code configuration and skills (SEPARATE REPO)
+│   └── .github/               # GitHub org config (SEPARATE REPO)
+│
+├── bare-metal/                # homestak/bare-metal - bare metal installer (future)
+├── apps/                      # homestak-apps org (future)
+└── com/                       # homestak-com org (future)
 ```
 
-**Important:** `.claude/` and `.github/` are **separate git repositories**, not subdirectories of homestak-dev. They have their own branches, commits, and release tags. When making changes to skills or org config, remember to:
-- Create sprint branches in these repos separately
+**Important:** Each subdirectory is its own git repository. `.claude/` and `.github/` under `dev/` are **separate repos** from `meta/`. When making changes across repos:
+- Create sprint branches in each repo separately
 - Commit and push to their own remotes
 - Include them in multi-repo PRs
 
 Each component has its own `CLAUDE.md` with detailed context (auto-loaded via imports):
 
-@.claude/CLAUDE.md
-@.github/CLAUDE.md
-@ansible/CLAUDE.md
-@bootstrap/CLAUDE.md
-@iac-driver/CLAUDE.md
-@packer/CLAUDE.md
-@site-config/CLAUDE.md
-@tofu/CLAUDE.md
+@../.claude/CLAUDE.md
+@../.github/CLAUDE.md
+@../../iac/ansible/CLAUDE.md
+@../../bootstrap/CLAUDE.md
+@../../iac/iac-driver/CLAUDE.md
+@../../iac/packer/CLAUDE.md
+@../../config/CLAUDE.md
+@../../iac/tofu/CLAUDE.md
 
 ## Workspace Management
 
@@ -105,7 +118,7 @@ gita shell make install-deps  # Install deps in all repos
 | `/session` | save, resume, checkpoint | Context preservation across compactions |
 | `/issues` | - | Gather GitHub issues across all repos |
 
-See [.claude/CLAUDE.md](.claude/CLAUDE.md) for full skill documentation.
+See [.claude/CLAUDE.md](../.claude/CLAUDE.md) for full skill documentation.
 
 ## Value Propositions
 
@@ -116,10 +129,10 @@ See [.claude/CLAUDE.md](.claude/CLAUDE.md) for full skill documentation.
 
 ## Configuration Flow
 
-site-config is the single source of truth:
+config (homestak/config) is the single source of truth:
 
 ```
-site-config/
+config/
 ├── site.yaml       # Site-wide defaults (timezone, packages)
 ├── secrets.yaml    # API tokens, SSH keys, passwords
 ├── defs/           # JSON Schema definitions
@@ -137,7 +150,7 @@ ConfigResolver (iac-driver)
         └── resolve_ansible_vars() → ansible-vars → ansible
 ```
 
-This eliminates configuration drift between components - all settings flow from site-config.
+This eliminates configuration drift between components - all settings flow from config.
 
 ## Design Principles
 
@@ -145,7 +158,7 @@ This eliminates configuration drift between components - all settings flow from 
 - **Repeatability over flexibility** - Prefer conventions that "just work" over infinite configurability
 - **Local-first execution** - Run on the host being configured to avoid SSH connection issues
 - **Idempotent operations** - Safe to run multiple times
-- **Secrets in code, encrypted** - SOPS + age in site-config repo, git hooks for auto-encrypt/decrypt
+- **Secrets in code, encrypted** - SOPS + age in config repo, git hooks for auto-encrypt/decrypt
 - **Component independence** - Each repo installs its own dependencies via `make install-deps`
 - **Process consistency** - When presenting options to the user, flag any option that deviates from established processes (lifecycle docs, RELEASE.md). Do not present process-inconsistent options as equal alternatives without noting the inconsistency.
 
@@ -194,7 +207,7 @@ Consistent terminology across all repos:
 | integration test | E2E test, end-to-end test | Our tests validate component integration, not user journeys |
 | scenario | workflow, pipeline | Scenarios are iac-driver's unit of orchestration |
 | action | task, step | Actions are reusable primitives in iac-driver |
-| site-config | config, secrets | Specific repo name; "config" is ambiguous |
+| config (repo) | site-config | Repo was renamed from site-config to config (homestak/config) |
 | tofu | terraform | We use OpenTofu, not Terraform |
 
 ## Conventions
@@ -225,7 +238,7 @@ The `bootstrap` repo provides capability installation via `homestak install <mod
 
 ```bash
 # Initial setup (on any Debian host)
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install | sudo bash
+curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/master/install | sudo bash
 
 # Switch to homestak user, then add capabilities as needed
 sudo -iu homestak
@@ -238,25 +251,22 @@ This pattern enables any Debian host to become a build/deploy host without manua
 
 ### Installation Paths (User-Owned Model)
 
-All files are owned by the dedicated `homestak` user under `~homestak/`:
+All files are owned by the dedicated `homestak` user under `~homestak/`. The layout mirrors the dev workstation structure:
 
 ```
 ~homestak/                     # /home/homestak/
-├── bin/
-│   └── homestak → ../lib/bootstrap/homestak
-├── etc/                       # site-config (configuration)
-│   └── state/                 # Runtime state (specs, markers)
-├── lib/                       # code repos
-│   ├── bootstrap/
+├── bootstrap/                 # CLI and installer (in PATH)
+├── config/                    # Secrets, manifests, site-specific config
+├── iac/                       # IaC repos
 │   ├── ansible/
 │   ├── iac-driver/
 │   ├── tofu/
 │   └── packer/                # (optional)
-├── log/                       # Server and config logs
-└── cache/                     # Downloaded images
+├── .cache/                    # Downloaded images, temp files
+└── logs/                      # Server and config logs
 ```
 
-Access via: `sudo -iu homestak` (Debian's default `~/.profile` adds `~/bin` to PATH).
+Access via: `sudo -iu homestak` (bootstrap adds `~/bootstrap` to PATH via `~/.profile`).
 
 ## Release Automation CLI (v0.14+)
 
@@ -380,14 +390,14 @@ The `resume` command outputs:
 | File | Focus |
 |------|-------|
 | [CLAUDE.md](CLAUDE.md) | This file - vision, architecture, conventions |
-| [.claude/CLAUDE.md](.claude/CLAUDE.md) | Skills configuration |
-| [.github/CLAUDE.md](.github/CLAUDE.md) | GitHub platform config (CI/CD, branch protection) |
-| [ansible/CLAUDE.md](ansible/CLAUDE.md) | Playbooks, roles, collections |
-| [bootstrap/CLAUDE.md](bootstrap/CLAUDE.md) | CLI, installation |
-| [iac-driver/CLAUDE.md](iac-driver/CLAUDE.md) | Scenarios, actions, testing |
-| [packer/CLAUDE.md](packer/CLAUDE.md) | Templates, build workflow |
-| [site-config/CLAUDE.md](site-config/CLAUDE.md) | Config schema, secrets |
-| [tofu/CLAUDE.md](tofu/CLAUDE.md) | Modules, environments |
+| [.claude/CLAUDE.md](../.claude/CLAUDE.md) | Skills configuration |
+| [.github/CLAUDE.md](../.github/CLAUDE.md) | GitHub platform config (CI/CD, branch protection) |
+| [ansible/CLAUDE.md](../../iac/ansible/CLAUDE.md) | Playbooks, roles, collections |
+| [bootstrap/CLAUDE.md](../../bootstrap/CLAUDE.md) | CLI, installation |
+| [iac-driver/CLAUDE.md](../../iac/iac-driver/CLAUDE.md) | Scenarios, actions, testing |
+| [packer/CLAUDE.md](../../iac/packer/CLAUDE.md) | Templates, build workflow |
+| [config/CLAUDE.md](../../config/CLAUDE.md) | Config schema, secrets |
+| [tofu/CLAUDE.md](../../iac/tofu/CLAUDE.md) | Modules, environments |
 
 ### Development Lifecycle
 

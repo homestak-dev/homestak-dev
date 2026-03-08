@@ -1,6 +1,6 @@
 # Node Lifecycle
 
-**Epic:** [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125), [iac-driver#140](https://github.com/homestak-dev/iac-driver/issues/140)
+**Epic:** [iac-driver#125](https://github.com/homestak-iac/iac-driver/issues/125), [iac-driver#140](https://github.com/homestak-iac/iac-driver/issues/140)
 **Status:** Active
 **Date:** 2026-02-02
 **Related:** [node-orchestration.md](node-orchestration.md)
@@ -421,7 +421,7 @@ iac-driver/
 
 ## Implementation Status
 
-Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) (Node Lifecycle Architecture epic). See the epic's release plan and acceptance criteria for current progress.
+Implementation is tracked in [iac-driver#125](https://github.com/homestak-iac/iac-driver/issues/125) (Node Lifecycle Architecture epic). See the epic's release plan and acceptance criteria for current progress.
 
 ## Related Documents
 
@@ -432,7 +432,7 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-dev/ia
 - [node-orchestration.md](node-orchestration.md) — Multi-node orchestration
 - [requirements-catalog.md](requirements-catalog.md) — Structured requirements with IDs
 - [test-strategy.md](test-strategy.md) — Test hierarchy and system test catalog
-- [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) — Architecture evolution epic (detailed discussion)
+- [iac-driver#125](https://github.com/homestak-iac/iac-driver/issues/125) — Architecture evolution epic (detailed discussion)
 
 ## Changelog
 

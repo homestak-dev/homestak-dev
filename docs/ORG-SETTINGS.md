@@ -8,10 +8,10 @@ Companion to [REPO-SETTINGS.md](REPO-SETTINGS.md) (per-repo configuration) and [
 
 | Org | Purpose | Repos |
 |-----|---------|-------|
-| `homestak` | User-facing product | bare-metal, bootstrap, site-config |
+| `homestak` | User-facing product | bare-metal, bootstrap, config |
 | `homestak-apps` | Self-hosted applications | pihole, jellyfin, home-assistant, ... |
 | `homestak-iac` | Infrastructure automation | iac-driver, tofu, ansible, packer |
-| `homestak-dev` | Developer experience (existing) | homestak-dev, .claude, .github |
+| `homestak-dev` | Developer experience | meta, .claude, .github |
 | `homestak-com` | Commercial layer (future) | TBD |
 
 ## Org Creation Checklist

@@ -172,7 +172,7 @@ teardown() {
 
 @test "packer --upload rejects unknown template" {
     # Create the images dir so validation reaches template checking
-    mkdir -p "${WORKSPACE_DIR}/packer/images"
+    mkdir -p "${WORKSPACE_DIR}/iac/packer/images"
     run "$RELEASE_SH" packer --upload --execute bad-template
     [ "$status" -eq 1 ]
     assert_output_contains "Unknown template: bad-template"

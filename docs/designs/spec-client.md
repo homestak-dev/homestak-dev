@@ -271,5 +271,5 @@ cat ~/etc/state/spec.yaml
 ## Related Documents
 
 - [server-daemon.md](server-daemon.md) - Server daemon design (iac-driver#177)
-- [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125) - Architecture evolution epic
-- [homestak-dev#153](https://github.com/homestak-dev/homestak-dev/issues/153) - v0.44 Release Planning
+- [iac-driver#125](https://github.com/homestak-iac/iac-driver/issues/125) - Architecture evolution epic
+- [homestak-dev#153](https://github.com/homestak-dev/meta/issues/153) - v0.44 Release Planning

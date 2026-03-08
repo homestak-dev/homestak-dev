@@ -7,7 +7,7 @@
 #
 
 # Audit log location (set by main script)
-AUDIT_LOG="${AUDIT_LOG:-${WORKSPACE_DIR:-.}/.release-audit.log}"
+AUDIT_LOG="${AUDIT_LOG:-${META_DIR:-.}/.release-audit.log}"
 
 # -----------------------------------------------------------------------------
 # Core Logging

@@ -13,7 +13,7 @@ Internal validation checklist for verifying homestak on a fresh Debian 13 host.
 
 ```bash
 # 1. Bootstrap (creates homestak user, clones repos)
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/master/install.sh | sudo bash
 
 # 2. Switch to homestak user (all subsequent commands run as homestak)
 sudo -iu homestak

@@ -186,7 +186,7 @@ EOF
     echo "═══════════════════════════════════════════════════════════════"
     echo "  Release v${version} - Status: ${status}"
     if [[ -n "$issue" ]]; then
-        echo "  Tracking: https://github.com/homestak-dev/homestak-dev/issues/${issue}"
+        echo "  Tracking: https://github.com/homestak-dev/meta/issues/${issue}"
     else
         echo -e "  Tracking: ${YELLOW}(no issue linked)${NC}"
     fi

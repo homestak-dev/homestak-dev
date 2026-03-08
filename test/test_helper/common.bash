@@ -23,6 +23,7 @@ setup_test_env() {
     # Create isolated temp directory for each test
     TEST_TEMP_DIR="$(mktemp -d)"
     export WORKSPACE_DIR="$TEST_TEMP_DIR"
+    export META_DIR="$TEST_TEMP_DIR"
     export STATE_FILE="${TEST_TEMP_DIR}/.release-state.json"
     export AUDIT_LOG="${TEST_TEMP_DIR}/.release-audit.log"
 
@@ -169,8 +170,8 @@ create_test_state() {
   "repos": {
     ".github": {"tag": "pending", "release": "pending"},
     ".claude": {"tag": "pending", "release": "pending"},
-    "homestak-dev": {"tag": "pending", "release": "pending"},
-    "site-config": {"tag": "pending", "release": "pending"},
+    "meta": {"tag": "pending", "release": "pending"},
+    "config": {"tag": "pending", "release": "pending"},
     "tofu": {"tag": "pending", "release": "pending"},
     "ansible": {"tag": "pending", "release": "pending"},
     "bootstrap": {"tag": "pending", "release": "pending"},
@@ -204,8 +205,8 @@ create_test_state_with_progress() {
   "repos": {
     ".github": {"tag": "pending", "release": "pending"},
     ".claude": {"tag": "pending", "release": "pending"},
-    "homestak-dev": {"tag": "pending", "release": "pending"},
-    "site-config": {"tag": "pending", "release": "pending"},
+    "meta": {"tag": "pending", "release": "pending"},
+    "config": {"tag": "pending", "release": "pending"},
     "tofu": {"tag": "pending", "release": "pending"},
     "ansible": {"tag": "pending", "release": "pending"},
     "bootstrap": {"tag": "pending", "release": "pending"},

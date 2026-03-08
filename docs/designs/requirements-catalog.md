@@ -1,8 +1,8 @@
 # Requirements Catalog
 
 **Sprint:** 0 (Lifecycle Decomposition)
-**Issue:** [iac-driver#141](https://github.com/homestak-dev/iac-driver/issues/141)
-**Source:** [iac-driver#125 Comment #5](https://github.com/homestak-dev/iac-driver/issues/125#issuecomment-2621234567)
+**Issue:** [iac-driver#141](https://github.com/homestak-iac/iac-driver/issues/141)
+**Source:** [iac-driver#125 Comment #5](https://github.com/homestak-iac/iac-driver/issues/125#issuecomment-2621234567)
 **Status:** Active
 **Last Updated:** 2026-02-06
 

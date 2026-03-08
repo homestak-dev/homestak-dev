@@ -72,7 +72,7 @@ git branch -r | grep sprint-
 Prompt for sunset if count exceeds 5:
 
 ```bash
-count=$(gh release list --repo homestak-dev/homestak-dev --limit 100 | wc -l)
+count=$(gh release list --repo homestak-dev/meta --limit 100 | wc -l)
 if [[ $count -gt 5 ]]; then
   echo "Consider: ./scripts/release.sh sunset --below-version X.Y --dry-run"
 fi

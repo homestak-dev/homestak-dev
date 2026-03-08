@@ -24,7 +24,7 @@ Preflight checks verify release prerequisites and validation evidence before pro
 
 ```bash
 # Find release issue
-gh issue list --repo homestak-dev/homestak-dev --label release --state open
+gh issue list --repo homestak-dev/meta --label release --state open
 
 # Initialize release state
 ./scripts/release.sh init --version 0.45 --issue 157
@@ -38,7 +38,7 @@ Review sprint issues for validation results:
 
 ```bash
 # Check each completed sprint issue
-gh issue view 152 --repo homestak-dev/homestak-dev
+gh issue view 152 --repo homestak-dev/meta
 
 # Look for validation sections with PASSED results
 ```

@@ -1,9 +1,13 @@
-# homestak-dev workspace Makefile
+# homestak workspace Makefile
+# Run from: ~/homestak/dev/meta/
+# HOMESTAK_ROOT defaults to ../.. (~/homestak/)
+
+HOMESTAK_ROOT ?= $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
 
 .PHONY: help install-deps setup check-deps install-deps-all test lint
 
 help:
-	@echo "homestak-dev - polyrepo workspace"
+	@echo "homestak - polyrepo workspace (root: $(HOMESTAK_ROOT))"
 	@echo ""
 	@echo "Targets:"
 	@echo "  make setup            - Full workspace setup (clone, register, check deps)"
@@ -63,17 +67,35 @@ install-deps-all:
 	@gita shell make install-deps
 
 setup: install-deps
-	@echo "Cloning child repos..."
-	@for repo in .claude .github ansible bootstrap iac-driver packer site-config tofu; do \
-		[ -d "$$repo" ] || git clone https://github.com/homestak-dev/$$repo.git; \
-	done
+	@echo "Cloning repos into $(HOMESTAK_ROOT)..."
+	@# homestak org (top-level)
+	@[ -d "$(HOMESTAK_ROOT)/bootstrap" ] || git clone https://github.com/homestak/bootstrap.git "$(HOMESTAK_ROOT)/bootstrap"
+	@[ -d "$(HOMESTAK_ROOT)/config" ]    || git clone https://github.com/homestak/config.git "$(HOMESTAK_ROOT)/config"
+	@# homestak-iac org
+	@mkdir -p "$(HOMESTAK_ROOT)/iac"
+	@[ -d "$(HOMESTAK_ROOT)/iac/ansible" ]    || git clone https://github.com/homestak-iac/ansible.git "$(HOMESTAK_ROOT)/iac/ansible"
+	@[ -d "$(HOMESTAK_ROOT)/iac/iac-driver" ] || git clone https://github.com/homestak-iac/iac-driver.git "$(HOMESTAK_ROOT)/iac/iac-driver"
+	@[ -d "$(HOMESTAK_ROOT)/iac/packer" ]     || git clone https://github.com/homestak-iac/packer.git "$(HOMESTAK_ROOT)/iac/packer"
+	@[ -d "$(HOMESTAK_ROOT)/iac/tofu" ]       || git clone https://github.com/homestak-iac/tofu.git "$(HOMESTAK_ROOT)/iac/tofu"
+	@# homestak-dev org
+	@[ -d "$(HOMESTAK_ROOT)/dev/.claude" ] || git clone https://github.com/homestak-dev/.claude.git "$(HOMESTAK_ROOT)/dev/.claude"
+	@[ -d "$(HOMESTAK_ROOT)/dev/.github" ] || git clone https://github.com/homestak-dev/.github.git "$(HOMESTAK_ROOT)/dev/.github"
 	@echo "Registering repos with gita..."
-	@gita add .claude .github ansible bootstrap iac-driver packer site-config tofu homestak-dev
+	@gita add \
+		"$(HOMESTAK_ROOT)/bootstrap" \
+		"$(HOMESTAK_ROOT)/config" \
+		"$(HOMESTAK_ROOT)/iac/ansible" \
+		"$(HOMESTAK_ROOT)/iac/iac-driver" \
+		"$(HOMESTAK_ROOT)/iac/packer" \
+		"$(HOMESTAK_ROOT)/iac/tofu" \
+		"$(HOMESTAK_ROOT)/dev/.claude" \
+		"$(HOMESTAK_ROOT)/dev/.github" \
+		"$(HOMESTAK_ROOT)/dev/meta"
 	@echo ""
 	@$(MAKE) check-deps || true
 	@echo ""
-	@echo "Configuring site-config git hooks..."
-	@cd site-config && make setup
+	@echo "Configuring config git hooks..."
+	@cd "$(HOMESTAK_ROOT)/config" && make setup
 	@echo ""
 	@echo "Setup complete. Run 'gita ll' to verify."
 

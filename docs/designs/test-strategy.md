@@ -1,7 +1,7 @@
 # Test Strategy
 
 **Sprint:** 0 (Lifecycle Decomposition)
-**Issue:** [iac-driver#141](https://github.com/homestak-dev/iac-driver/issues/141)
+**Issue:** [iac-driver#141](https://github.com/homestak-iac/iac-driver/issues/141)
 **Status:** Active
 **Date:** 2026-02-03
 

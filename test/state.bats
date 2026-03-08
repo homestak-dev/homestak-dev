@@ -68,7 +68,7 @@ teardown() {
 @test "state_init creates all repos with pending status" {
     state_init "0.25"
 
-    for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
+    for repo in .github .claude meta config tofu ansible bootstrap packer iac-driver; do
         assert_json_field "$STATE_FILE" ".repos[\"${repo}\"].tag" "pending"
         assert_json_field "$STATE_FILE" ".repos[\"${repo}\"].release" "pending"
     done
@@ -251,7 +251,7 @@ teardown() {
     # First should be meta repos
     [ "${REPOS[0]}" = ".github" ]
     [ "${REPOS[1]}" = ".claude" ]
-    [ "${REPOS[2]}" = "homestak-dev" ]
+    [ "${REPOS[2]}" = "meta" ]
 
     # Last should be iac-driver (depends on all others)
     [ "${REPOS[8]}" = "iac-driver" ]

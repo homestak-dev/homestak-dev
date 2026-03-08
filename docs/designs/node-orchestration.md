@@ -2,8 +2,8 @@
 
 **Status:** Active
 **Date:** 2026-02-02
-**Epic:** [iac-driver#140](https://github.com/homestak-dev/iac-driver/issues/140) — Manifest-based Orchestration Architecture
-**Related:** [node-lifecycle.md](node-lifecycle.md), [iac-driver#125](https://github.com/homestak-dev/iac-driver/issues/125)
+**Epic:** [iac-driver#140](https://github.com/homestak-iac/iac-driver/issues/140) — Manifest-based Orchestration Architecture
+**Related:** [node-lifecycle.md](node-lifecycle.md), [iac-driver#125](https://github.com/homestak-iac/iac-driver/issues/125)
 
 **Reading order:** Read [node-lifecycle.md](node-lifecycle.md) first for single-node lifecycle concepts, then this document for multi-node patterns and coordination.
 
@@ -603,7 +603,7 @@ This design document represents a significant architectural evolution. Related i
 
 ### iac-driver#139: Move spec server from bootstrap to iac-driver
 
-[Issue #139](https://github.com/homestak-dev/iac-driver/issues/139) moves the spec server and FK resolution logic from bootstrap to iac-driver. This is a prerequisite for the architecture described here:
+[Issue #139](https://github.com/homestak-iac/iac-driver/issues/139) moves the spec server and FK resolution logic from bootstrap to iac-driver. This is a prerequisite for the architecture described here:
 
 | #139 Deliverable | Enables |
 |------------------|---------|
@@ -792,7 +792,7 @@ Assertions:
 
 **Validates:** #140 (N-level), tiered depth
 
-**Status:** Available — `--self-addr` propagates routable address at depth 2+ ([iac-driver#200](https://github.com/homestak-dev/iac-driver/issues/200)).
+**Status:** Available — `--self-addr` propagates routable address at depth 2+ ([iac-driver#200](https://github.com/homestak-iac/iac-driver/issues/200)).
 
 ```
 Manifest:

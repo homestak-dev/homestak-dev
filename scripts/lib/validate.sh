@@ -10,7 +10,7 @@
 #
 
 # Default values
-IAC_DRIVER_DIR="${WORKSPACE_DIR}/iac-driver"
+IAC_DRIVER_DIR="${WORKSPACE_DIR}/$(repo_dir iac-driver)"
 DEFAULT_MANIFEST="n1-push"
 DEFAULT_SCENARIO=""
 DEFAULT_HOST=""

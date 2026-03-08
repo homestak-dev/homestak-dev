@@ -47,7 +47,7 @@ git checkout master
 git reset --hard origin/master
 
 # 3. Close sprint issue
-gh issue close 152 --repo homestak-dev/homestak-dev
+gh issue close 152 --repo homestak-dev/meta
 ```
 
 ## Release Quick Start
@@ -237,7 +237,7 @@ for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer sit
 done
 
 # View issue
-gh issue view 123 --repo homestak-dev/homestak-dev
+gh issue view 123 --repo homestak-dev/meta
 
 # Create PR
 gh pr create --title "Title" --body "Body" --base master

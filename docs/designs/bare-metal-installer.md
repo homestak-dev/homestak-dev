@@ -1,6 +1,6 @@
 # Bare-Metal ISO Installer
 
-**Epic:** [bootstrap#5](https://github.com/homestak-dev/bootstrap/issues/5)
+**Epic:** [bootstrap#5](https://github.com/homestak/bootstrap/issues/5)
 **Status:** Design
 **Date:** 2026-02-14
 **Related:** [node-lifecycle.md](node-lifecycle.md), [spec-client.md](spec-client.md), [config-phase.md](config-phase.md)
@@ -216,7 +216,7 @@ The build script takes a Debian netinst ISO, injects the preseed configuration a
 
 | ID | Title | Issue | Deps | Description |
 |----|-------|-------|------|-------------|
-| AB | Add URL-based resource fetching to site-init | [#60](https://github.com/homestak-dev/bootstrap/issues/60) | — | Refactor spec get (any URL, contextual auth), add `--ssh-key-url`, `--spec`, `--posture` to site-init |
+| AB | Add URL-based resource fetching to site-init | [#60](https://github.com/homestak/bootstrap/issues/60) | — | Refactor spec get (any URL, contextual auth), add `--ssh-key-url`, `--spec`, `--posture` to site-init |
 | C | Create Debian preseed template | — | AB | Automate Debian installer: ZFS root, hostname, disk, network, password |
 | D | Inject homestak bootstrap into preseed late_command | — | C | late_command runs install.sh + site-init with collected values |
 | E | Build ISO packaging script | — | D | xorriso-based remaster of Debian netinst |
