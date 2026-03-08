@@ -140,7 +140,14 @@ Claude Code resolves `@` paths relative to the importing file's location. Max de
 | `bin/` directory | `$HOME/bootstrap` added to PATH | Only held one symlink |
 | `HOMESTAK_LIB` env var | Repos at known paths relative to `$HOME` | `lib/` indirection gone |
 | `HOMESTAK_ETC` env var | `HOMESTAK_SITE_CONFIG` ($HOME/config) | Already the primary discovery path |
-| `.sh` extension on CLI | `bootstrap/homestak` (no extension) | Executables in PATH should not have extensions |
+| `.sh` extension on executables | No extension on files with shebangs | Shebanged scripts drop extension; sourced libraries keep `.sh` |
+
+## Shell Script Naming Convention
+
+- **Executable scripts** (have a shebang `#!/usr/bin/env bash`): **no extension**. Examples: `homestak`, `release`, `build`, `publish`.
+- **Sourced libraries** (loaded via `source` or `.`): **keep `.sh`**. Examples: `scripts/lib/state.sh`, `scripts/lib/publish.sh`.
+
+This applies across all repos.
 
 ## Impact on Dependent Work
 
