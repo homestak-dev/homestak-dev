@@ -44,7 +44,7 @@ homestak-dev/              # This repo (workspace parent)
 ├── .claude/               # Claude Code configuration and skills (SEPARATE REPO)
 ├── .github/               # GitHub org config (SEPARATE REPO)
 ├── scripts/               # Release automation CLI
-│   ├── release.sh         # Main CLI entry point
+│   ├── release            # Main CLI entry point
 │   └── lib/               # Modular library functions
 ├── ansible/               # Playbooks for host configuration
 ├── bootstrap/             # Entry point - curl|bash installer, homestak CLI
@@ -214,9 +214,9 @@ Not all hosts have the same capabilities. Key distinctions:
 | srv2 | Yes | Yes | Secondary PVE host |
 | dev machines | Maybe | No | May lack nested virtualization |
 
-**Packer builds require QEMU/KVM.** Build on capable hosts using `packer/build.sh` directly or via SSH:
+**Packer builds require QEMU/KVM.** Build on capable hosts using `packer/build` directly or via SSH:
 ```bash
-ssh srv1 'cd ~/lib/packer && ./build.sh'
+ssh srv1 'cd ~/lib/packer && ./build'
 ```
 
 ## Bootstrap Pattern
@@ -225,7 +225,7 @@ The `bootstrap` repo provides capability installation via `homestak install <mod
 
 ```bash
 # Initial setup (on any Debian host)
-curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/homestak-dev/bootstrap/master/install | sudo bash
 
 # Switch to homestak user, then add capabilities as needed
 sudo -iu homestak
@@ -243,7 +243,7 @@ All files are owned by the dedicated `homestak` user under `~homestak/`:
 ```
 ~homestak/                     # /home/homestak/
 ├── bin/
-│   └── homestak → ../lib/bootstrap/homestak.sh
+│   └── homestak → ../lib/bootstrap/homestak
 ├── etc/                       # site-config (configuration)
 │   └── state/                 # Runtime state (specs, markers)
 ├── lib/                       # code repos
@@ -260,7 +260,7 @@ Access via: `sudo -iu homestak` (Debian's default `~/.profile` adds `~/bin` to P
 
 ## Release Automation CLI (v0.14+)
 
-The `scripts/release.sh` CLI automates multi-repo release operations.
+The `scripts/release` CLI automates multi-repo release operations.
 
 ### Commands
 
@@ -293,27 +293,27 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 
 ```bash
 # Manual workflow
-./scripts/release.sh init --version 0.31 --issue 115
-./scripts/release.sh preflight
-./scripts/release.sh validate --host srv1
+./scripts/release init --version 0.31 --issue 115
+./scripts/release preflight
+./scripts/release validate --host srv1
 # Or use --stage to validate via installed CLI (requires bootstrap on remote)
-./scripts/release.sh validate --stage --remote srv1
-./scripts/release.sh tag --dry-run
-./scripts/release.sh tag --execute --yes
-./scripts/release.sh publish --execute --yes
-./scripts/release.sh verify
+./scripts/release validate --stage --remote srv1
+./scripts/release tag --dry-run
+./scripts/release tag --execute --yes
+./scripts/release publish --execute --yes
+./scripts/release verify
 # ... complete AAR, housekeeping ...
-./scripts/release.sh retrospective --done
-./scripts/release.sh close --execute --yes
+./scripts/release retrospective --done
+./scripts/release close --execute --yes
 
 # Or use full command for end-to-end automation
-./scripts/release.sh full --dry-run
-./scripts/release.sh full --execute --host srv1
+./scripts/release full --dry-run
+./scripts/release full --execute --host srv1
 ```
 
 ### Release Issue Tracking
 
-**Important:** When executing a release, always identify the release tracking issue at session start. Use `gh issue list --label release` or check for open issues titled "Release: vX.Y - <Theme>". Include `--issue N` when running `release.sh init` to link the release state to the tracking issue.
+**Important:** When executing a release, always identify the release tracking issue at session start. Use `gh issue list --label release` or check for open issues titled "Release: vX.Y - <Theme>". Include `--issue N` when running `release init` to link the release state to the tracking issue.
 
 ### State Files
 
@@ -334,8 +334,8 @@ The `scripts/release.sh` CLI automates multi-repo release operations.
 The release CLI has bats test coverage:
 
 ```bash
-make test    # Run release.sh bats tests
-make lint    # Run shellcheck on release.sh
+make test    # Run release CLI bats tests
+make lint    # Run shellcheck on release CLI
 ```
 
 Test structure:
@@ -351,13 +351,13 @@ When resuming a release after context loss (session timeout, context compaction)
 
 ```bash
 # Get markdown-formatted recovery context (recommended for AI)
-./scripts/release.sh resume
+./scripts/release resume
 
 # Check current release progress (human-readable)
-./scripts/release.sh status
+./scripts/release status
 
 # View timestamped action history
-./scripts/release.sh audit
+./scripts/release audit
 ```
 
 The `resume` command outputs:
@@ -448,7 +448,7 @@ See [docs/lifecycle/60-release.md](docs/lifecycle/60-release.md) for the release
 - 10-phase release workflow
 - After action reports and retrospectives
 
-**Automated releases (v0.14+):** Use `scripts/release.sh` CLI - see [Release Automation CLI](#release-automation-cli-v014) section above.
+**Automated releases (v0.14+):** Use `scripts/release` CLI - see [Release Automation CLI](#release-automation-cli-v014) section above.
 
 ## Issue Management
 
