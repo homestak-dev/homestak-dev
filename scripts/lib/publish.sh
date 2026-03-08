@@ -18,7 +18,8 @@ PACKER_IMAGES=(
 
 packer_templates_changed() {
     local version="$1"
-    local packer_dir="${WORKSPACE_DIR}/packer"
+    local packer_dir
+    packer_dir="${WORKSPACE_DIR}/$(repo_dir packer)"
 
     # If no previous release, templates are "changed"
     local latest_tag
@@ -336,11 +337,7 @@ publish_check_preconditions() {
     # Check all repos have tags
     for repo in "${REPOS[@]}"; do
         local repo_path
-        if [[ "$repo" == "meta" ]]; then
-            repo_path="${WORKSPACE_DIR}"
-        else
-            repo_path="${WORKSPACE_DIR}/${repo}"
-        fi
+        repo_path="${WORKSPACE_DIR}/$(repo_dir "$repo")"
 
         if [[ ! -d "$repo_path" ]]; then
             errors+=("Repo not found: $repo")
@@ -427,11 +424,7 @@ publish_create_single() {
 
     # Get changelog excerpt if available
     local repo_path
-    if [[ "$repo" == "meta" ]]; then
-        repo_path="${WORKSPACE_DIR}"
-    else
-        repo_path="${WORKSPACE_DIR}/${repo}"
-    fi
+    repo_path="${WORKSPACE_DIR}/$(repo_dir "$repo")"
 
     local changelog="${repo_path}/CHANGELOG.md"
     if [[ -f "$changelog" ]]; then

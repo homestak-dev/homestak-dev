@@ -9,7 +9,8 @@ cmd_packer() {
     local action="check"
     local dry_run=true
     local version=""
-    local images_dir="${WORKSPACE_DIR}/packer/images"
+    local images_dir
+    images_dir="${WORKSPACE_DIR}/$(repo_dir packer)/images"
     local force=false
     local use_all=false
     local -a template_args=()
@@ -332,8 +333,8 @@ cmd_selftest() {
     local failed=0
 
     # Use exported variables for cleanup trap (local vars not accessible in trap)
-    export SELFTEST_STATE_FILE="${WORKSPACE_DIR}/.release-selftest-state.json"
-    export SELFTEST_AUDIT_LOG="${WORKSPACE_DIR}/.release-selftest-audit.log"
+    export SELFTEST_STATE_FILE="${META_DIR}/.release-selftest-state.json"
+    export SELFTEST_AUDIT_LOG="${META_DIR}/.release-selftest-audit.log"
     export SELFTEST_HAD_STATE=false
 
     # Backup real state if exists
@@ -425,11 +426,7 @@ cmd_selftest() {
     local has_uncommitted=false
     for repo in meta bootstrap iac-driver; do
         local repo_path
-        if [[ "$repo" == "meta" ]]; then
-            repo_path="${WORKSPACE_DIR}"
-        else
-            repo_path="${WORKSPACE_DIR}/${repo}"
-        fi
+        repo_path="${WORKSPACE_DIR}/$(repo_dir "$repo")"
         if [[ -d "$repo_path" ]] && [[ -n "$(git -C "$repo_path" status --porcelain 2>/dev/null)" ]]; then
             has_uncommitted=true
             break

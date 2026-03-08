@@ -7,7 +7,7 @@
 #
 
 # State file location (set by main script)
-STATE_FILE="${STATE_FILE:-${WORKSPACE_DIR:-.}/.release-state.json}"
+STATE_FILE="${STATE_FILE:-${META_DIR:-.}/.release-state.json}"
 SCHEMA_VERSION=1
 
 # All repos in dependency order
@@ -27,18 +27,17 @@ declare -A REPO_ORGS=(
     [iac-driver]="homestak-iac/iac-driver"
 )
 
-# Local directory mapping: repo name → local directory path
-# Repos that changed directory names from their original names
+# Local directory mapping: repo name → path relative to WORKSPACE_DIR
 declare -A REPO_DIRS=(
-    [meta]="."
+    [meta]="dev/meta"
+    [.claude]="dev/.claude"
+    [.github]="dev/.github"
     [config]="config"
-    [.github]=".github"
-    [.claude]=".claude"
-    [tofu]="tofu"
-    [ansible]="ansible"
     [bootstrap]="bootstrap"
-    [packer]="packer"
-    [iac-driver]="iac-driver"
+    [tofu]="iac/tofu"
+    [ansible]="iac/ansible"
+    [packer]="iac/packer"
+    [iac-driver]="iac/iac-driver"
 )
 
 # Get the full GitHub org/repo name for a repo

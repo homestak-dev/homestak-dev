@@ -26,11 +26,7 @@ tag_check_preconditions() {
     # Check all repos are clean
     for repo in "${REPOS[@]}"; do
         local repo_path
-        if [[ "$repo" == "meta" ]]; then
-            repo_path="${WORKSPACE_DIR}"
-        else
-            repo_path="${WORKSPACE_DIR}/${repo}"
-        fi
+        repo_path="${WORKSPACE_DIR}/$(repo_dir "$repo")"
 
         if [[ ! -d "$repo_path" ]]; then
             errors+=("Repo not found: $repo")
@@ -47,11 +43,7 @@ tag_check_preconditions() {
     # Check no existing tags
     for repo in "${REPOS[@]}"; do
         local repo_path
-        if [[ "$repo" == "meta" ]]; then
-            repo_path="${WORKSPACE_DIR}"
-        else
-            repo_path="${WORKSPACE_DIR}/${repo}"
-        fi
+        repo_path="${WORKSPACE_DIR}/$(repo_dir "$repo")"
 
         if [[ ! -d "$repo_path" ]]; then
             continue
@@ -84,11 +76,7 @@ tag_create_single() {
     local dry_run="${3:-true}"
 
     local repo_path
-    if [[ "$repo" == "meta" ]]; then
-        repo_path="${WORKSPACE_DIR}"
-    else
-        repo_path="${WORKSPACE_DIR}/${repo}"
-    fi
+    repo_path="${WORKSPACE_DIR}/$(repo_dir "$repo")"
 
     local tag_cmd="git -C ${repo_path} tag -a v${version} -m \"Release v${version}\""
     local push_cmd="git -C ${repo_path} push origin v${version}"
@@ -124,11 +112,7 @@ tag_rollback_single() {
     local version="$2"
 
     local repo_path
-    if [[ "$repo" == "meta" ]]; then
-        repo_path="${WORKSPACE_DIR}"
-    else
-        repo_path="${WORKSPACE_DIR}/${repo}"
-    fi
+    repo_path="${WORKSPACE_DIR}/$(repo_dir "$repo")"
 
     # Delete local tag
     local local_cmd="git -C ${repo_path} tag -d v${version}"
@@ -150,11 +134,7 @@ tag_reset_single() {
     local dry_run="${3:-true}"
 
     local repo_path
-    if [[ "$repo" == "meta" ]]; then
-        repo_path="${WORKSPACE_DIR}"
-    else
-        repo_path="${WORKSPACE_DIR}/${repo}"
-    fi
+    repo_path="${WORKSPACE_DIR}/$(repo_dir "$repo")"
 
     local delete_local="git -C ${repo_path} tag -d v${version}"
     local delete_remote="git -C ${repo_path} push origin :refs/tags/v${version}"
@@ -407,11 +387,7 @@ run_tag_reset() {
     local errors=()
     for repo in "${repos_to_reset[@]}"; do
         local repo_path
-        if [[ "$repo" == "meta" ]]; then
-            repo_path="${WORKSPACE_DIR}"
-        else
-            repo_path="${WORKSPACE_DIR}/${repo}"
-        fi
+        repo_path="${WORKSPACE_DIR}/$(repo_dir "$repo")"
 
         if [[ ! -d "$repo_path" ]]; then
             errors+=("Repo not found: $repo")

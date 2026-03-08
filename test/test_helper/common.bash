@@ -23,6 +23,7 @@ setup_test_env() {
     # Create isolated temp directory for each test
     TEST_TEMP_DIR="$(mktemp -d)"
     export WORKSPACE_DIR="$TEST_TEMP_DIR"
+    export META_DIR="$TEST_TEMP_DIR"
     export STATE_FILE="${TEST_TEMP_DIR}/.release-state.json"
     export AUDIT_LOG="${TEST_TEMP_DIR}/.release-audit.log"
 

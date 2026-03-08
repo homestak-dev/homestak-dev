@@ -26,12 +26,13 @@ get_version() {
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_DIR="${WORKSPACE_DIR:-$(dirname "$SCRIPT_DIR")}"
-STATE_FILE="${STATE_FILE:-${WORKSPACE_DIR}/.release-state.json}"
-AUDIT_LOG="${AUDIT_LOG:-${WORKSPACE_DIR}/.release-audit.log}"
+META_DIR="$(dirname "$SCRIPT_DIR")"
+WORKSPACE_DIR="${WORKSPACE_DIR:-$(cd "$META_DIR/../.." && pwd)}"
+STATE_FILE="${STATE_FILE:-${META_DIR}/.release-state.json}"
+AUDIT_LOG="${AUDIT_LOG:-${META_DIR}/.release-audit.log}"
 
 # Export for sourced scripts
-export SCRIPT_DIR WORKSPACE_DIR STATE_FILE AUDIT_LOG
+export SCRIPT_DIR META_DIR WORKSPACE_DIR STATE_FILE AUDIT_LOG
 
 # -----------------------------------------------------------------------------
 # Colors and Logging
