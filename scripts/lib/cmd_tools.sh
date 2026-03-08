@@ -230,7 +230,7 @@ cmd_sunset() {
 
         # Get all releases for this repo (use tab delimiter for correct parsing)
         local releases
-        releases=$(gh release list --repo "homestak-dev/$repo" --limit 100 2>/dev/null | awk -F'\t' '{print $3}' || echo "")
+        releases=$(gh release list --repo "$(repo_full_name "$repo")" --limit 100 2>/dev/null | awk -F'\t' '{print $3}' || echo "")
 
         if [[ -z "$releases" ]]; then
             echo "  No releases found"
@@ -271,7 +271,7 @@ cmd_sunset() {
                     echo -e "  ${YELLOW}Would delete:${NC} $tag"
                 else
                     echo -e "  ${RED}Deleting:${NC} $tag"
-                    if gh release delete "$tag" --repo "homestak-dev/$repo" --yes 2>/dev/null; then
+                    if gh release delete "$tag" --repo "$(repo_full_name "$repo")" --yes 2>/dev/null; then
                         ((++total_deleted))
                     else
                         log_warn "Failed to delete $tag from $repo"

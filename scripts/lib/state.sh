@@ -13,6 +13,31 @@ SCHEMA_VERSION=1
 # All repos in dependency order
 REPOS=(.github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver)
 
+# Repo-to-org mapping for multi-org support (#308)
+# Maps repo names to their GitHub org/repo full path.
+# During migration, repos may still be in homestak-dev (redirects work).
+declare -A REPO_ORGS=(
+    [.github]="homestak-dev/.github"
+    [.claude]="homestak-dev/.claude"
+    [homestak-dev]="homestak-dev/homestak-dev"
+    [site-config]="homestak-dev/site-config"
+    [tofu]="homestak-dev/tofu"
+    [ansible]="homestak-dev/ansible"
+    [bootstrap]="homestak-dev/bootstrap"
+    [packer]="homestak-dev/packer"
+    [iac-driver]="homestak-dev/iac-driver"
+)
+
+# Get the full GitHub org/repo name for a repo
+# Usage: repo_full_name "ansible" => "homestak-dev/ansible"
+repo_full_name() {
+    local repo="$1"
+    echo "${REPO_ORGS[$repo]:-homestak-dev/$repo}"
+}
+
+# The issue tracker repo (release issues always live here)
+ISSUE_REPO="homestak-dev/homestak-dev"
+
 # -----------------------------------------------------------------------------
 # State File Operations
 # -----------------------------------------------------------------------------
@@ -280,7 +305,7 @@ ${body}
 *Posted by release.sh v${version}*"
 
     # Post to GitHub issue
-    if ! gh issue comment "$issue" --repo homestak-dev/homestak-dev --body "$comment" &>/dev/null; then
+    if ! gh issue comment "$issue" --repo "$ISSUE_REPO" --body "$comment" &>/dev/null; then
         log_warn "Failed to post update to issue #${issue}"
         return 1
     fi

@@ -107,14 +107,14 @@ close_post_and_close() {
 
     # Post summary comment
     log_info "Posting summary to issue #${issue}..."
-    if ! gh issue comment "$issue" --repo homestak-dev/homestak-dev --body "$summary"; then
+    if ! gh issue comment "$issue" --repo $ISSUE_REPO --body "$summary"; then
         log_error "Failed to post comment to issue #${issue}"
         return 1
     fi
 
     # Close the issue
     log_info "Closing issue #${issue}..."
-    if ! gh issue close "$issue" --repo homestak-dev/homestak-dev; then
+    if ! gh issue close "$issue" --repo $ISSUE_REPO; then
         log_error "Failed to close issue #${issue}"
         return 1
     fi

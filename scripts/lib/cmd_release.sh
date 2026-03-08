@@ -537,7 +537,7 @@ cmd_full() {
             packer)
                 # Check packer latest release has images
                 local packer_assets
-                packer_assets=$(gh release view latest --repo homestak-dev/packer --json assets --jq '.assets | length' 2>/dev/null || echo "0")
+                packer_assets=$(gh release view latest --repo "$(repo_full_name packer)" --json assets --jq '.assets | length' 2>/dev/null || echo "0")
                 if [[ "$packer_assets" -gt 0 ]]; then
                     echo -e "${GREEN}Packer images: $packer_assets asset(s) on latest${NC}"
                 else

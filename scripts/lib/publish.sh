@@ -93,12 +93,12 @@ packer_upload_to_latest() {
     fi
 
     # Ensure latest release exists
-    if ! gh release view latest --repo homestak-dev/packer &>/dev/null; then
+    if ! gh release view latest --repo "$(repo_full_name packer)" &>/dev/null; then
         if [[ "$dry_run" == "true" ]]; then
             log_info "[would create] 'latest' release in packer"
         else
             log_info "Creating 'latest' release in packer..."
-            if ! gh release create latest --repo homestak-dev/packer \
+            if ! gh release create latest --repo "$(repo_full_name packer)" \
                 --title "Latest Images" --notes "Packer images" --prerelease; then
                 log_error "Failed to create 'latest' release"
                 return 1
@@ -132,7 +132,7 @@ packer_upload_to_latest() {
             local remote_checksum=""
             local tmp_remote
             tmp_remote=$(mktemp)
-            if gh release download latest --repo homestak-dev/packer \
+            if gh release download latest --repo "$(repo_full_name packer)" \
                 --pattern "${tmpl}.qcow2.sha256" \
                 --output "$tmp_remote" --clobber 2>/dev/null; then
                 remote_checksum=$(awk '{print $1}' "$tmp_remote")
@@ -148,7 +148,7 @@ packer_upload_to_latest() {
 
         # Clean up existing remote assets for this template before uploading
         local existing_assets
-        existing_assets=$(gh release view latest --repo homestak-dev/packer \
+        existing_assets=$(gh release view latest --repo "$(repo_full_name packer)" \
             --json assets --jq ".assets[].name" 2>/dev/null | grep "^${tmpl}\.qcow2" || true)
 
         if [[ -n "$existing_assets" ]]; then
@@ -159,7 +159,7 @@ packer_upload_to_latest() {
             else
                 echo "$existing_assets" | while read -r asset; do
                     log_info "Deleting old asset: $asset"
-                    gh release delete-asset latest "$asset" --repo homestak-dev/packer --yes 2>/dev/null || true
+                    gh release delete-asset latest "$asset" --repo "$(repo_full_name packer)" --yes 2>/dev/null || true
                 done
             fi
         fi
@@ -188,7 +188,7 @@ packer_upload_to_latest() {
                     local part_name
                     part_name=$(basename "$part")
                     log_info "Uploading $part_name..."
-                    if ! gh release upload latest "$part" --repo homestak-dev/packer --clobber; then
+                    if ! gh release upload latest "$part" --repo "$(repo_full_name packer)" --clobber; then
                         log_error "Failed to upload $part_name"
                         rm -rf "$tmp_split"
                         return 1
@@ -205,7 +205,7 @@ packer_upload_to_latest() {
                 log_info "[would upload] ${tmpl}.qcow2 (${human_size}) + .sha256"
             else
                 log_info "Uploading ${tmpl}.qcow2..."
-                if ! gh release upload latest "$image_path" --repo homestak-dev/packer --clobber; then
+                if ! gh release upload latest "$image_path" --repo "$(repo_full_name packer)" --clobber; then
                     log_error "Failed to upload ${tmpl}.qcow2"
                     return 1
                 fi
@@ -215,7 +215,7 @@ packer_upload_to_latest() {
         # Upload checksum
         if [[ "$dry_run" != "true" ]]; then
             log_info "Uploading ${tmpl}.qcow2.sha256..."
-            if ! gh release upload latest "$checksum_path" --repo homestak-dev/packer --clobber; then
+            if ! gh release upload latest "$checksum_path" --repo "$(repo_full_name packer)" --clobber; then
                 log_error "Failed to upload ${tmpl}.qcow2.sha256"
                 return 1
             fi
@@ -249,14 +249,14 @@ packer_remove_from_latest() {
     local -a prefixes=("$@")
 
     # Check latest release exists
-    if ! gh release view latest --repo homestak-dev/packer &>/dev/null; then
+    if ! gh release view latest --repo "$(repo_full_name packer)" &>/dev/null; then
         log_error "No 'latest' release found in packer"
         return 1
     fi
 
     # Get all asset names from the release
     local all_assets
-    all_assets=$(gh release view latest --repo homestak-dev/packer \
+    all_assets=$(gh release view latest --repo "$(repo_full_name packer)" \
         --json assets --jq ".assets[].name" 2>/dev/null || true)
 
     if [[ -z "$all_assets" ]]; then
@@ -297,7 +297,7 @@ packer_remove_from_latest() {
             log_info "[would delete] $asset from latest"
         else
             log_info "Deleting: $asset"
-            if ! gh release delete-asset latest "$asset" --repo homestak-dev/packer --yes; then
+            if ! gh release delete-asset latest "$asset" --repo "$(repo_full_name packer)" --yes; then
                 log_error "Failed to delete $asset"
             fi
         fi
@@ -384,13 +384,14 @@ publish_create_single() {
 
     # Check if release already exists
     local release_info
-    release_info=$(gh release view "v${version}" --repo "homestak-dev/${repo}" --json isDraft 2>/dev/null || true)
+    release_info=$(gh release view "v${version}" --repo "$(repo_full_name "$repo")" --json isDraft 2>/dev/null || true)
 
     if [[ -n "$release_info" ]]; then
         # Release exists - check if it's a draft
         if echo "$release_info" | grep -q '"isDraft":true'; then
             # Finalize the draft release
-            local finalize_cmd="gh release edit v${version} --repo homestak-dev/${repo} --draft=false"
+            local finalize_cmd
+            finalize_cmd="gh release edit v${version} --repo $(repo_full_name "$repo") --draft=false"
             if [[ "$dry_run" == "true" ]]; then
                 echo "    (draft release v${version} exists, would finalize)"
                 echo "    ${finalize_cmd}"
@@ -437,7 +438,8 @@ publish_create_single() {
         notes="See CHANGELOG.md for details"
     fi
 
-    local cmd="gh release create v${version} --repo homestak-dev/${repo} --title \"${title}\" --notes \"${notes}\" ${prerelease_flag}"
+    local cmd
+    cmd="gh release create v${version} --repo $(repo_full_name "$repo") --title \"${title}\" --notes \"${notes}\" ${prerelease_flag}"
 
     if [[ "$dry_run" == "true" ]]; then
         echo "    ${cmd}"
@@ -514,7 +516,7 @@ run_publish() {
 
     # Check packer latest release has images
     local packer_asset_count
-    packer_asset_count=$(gh release view latest --repo homestak-dev/packer --json assets --jq '.assets | length' 2>/dev/null || echo "0")
+    packer_asset_count=$(gh release view latest --repo "$(repo_full_name packer)" --json assets --jq '.assets | length' 2>/dev/null || echo "0")
     if [[ "$packer_asset_count" -gt 0 ]]; then
         echo -e "Packer images: ${GREEN}${packer_asset_count} asset(s) on latest${NC}"
     else
