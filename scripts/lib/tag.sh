@@ -258,7 +258,7 @@ run_tag() {
         done
 
         echo "Rollback command (if needed):"
-        echo "  release.sh tag --rollback"
+        echo "  release tag --rollback"
         echo ""
         echo "═══════════════════════════════════════════════════════════════"
         echo "  DRY-RUN COMPLETE - No changes made"

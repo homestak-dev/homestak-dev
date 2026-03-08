@@ -107,7 +107,7 @@ validate_run_remote() {
     fi
 
     # Build the remote command: manifest-first, scenario as fallback
-    local remote_cmd="cd ~/homestak-dev && ./scripts/release.sh validate"
+    local remote_cmd="cd ~/homestak-dev && ./scripts/release validate"
     if [[ -n "$manifest" ]]; then
         remote_cmd+=" --manifest ${manifest}"
     elif [[ -n "$scenario" ]]; then

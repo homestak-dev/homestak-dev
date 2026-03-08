@@ -32,13 +32,13 @@ cmd_init() {
     done
 
     if [[ -z "$version" ]]; then
-        log_error "Version required: release.sh init --version X.Y"
+        log_error "Version required: release init --version X.Y"
         exit 1
     fi
 
     # Require --issue unless --no-issue is explicitly set (v0.31+)
     if [[ -z "$issue" && "$no_issue" != "true" ]]; then
-        log_error "Release issue required: release.sh init --version X.Y --issue N"
+        log_error "Release issue required: release init --version X.Y --issue N"
         echo ""
         echo "The release issue is the tracking hub for the entire release."
         echo "Create it first: gh issue create --title 'vX.Y Release Planning - Theme' --label release"
@@ -57,7 +57,7 @@ cmd_init() {
 
         if [[ "$existing_status" == "in_progress" ]]; then
             log_error "Release v${existing_version} is already in progress"
-            log_error "Use 'release.sh status' to check progress"
+            log_error "Use 'release status' to check progress"
             log_error "Or remove ${STATE_FILE} to start fresh"
             exit 1
         fi
@@ -87,13 +87,13 @@ cmd_init() {
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
     echo "Next steps:"
-    echo "  1. release.sh preflight"
+    echo "  1. release preflight"
     echo "  2. Update CHANGELOGs"
-    echo "  3. release.sh validate --manifest n1-push --host srv1"
-    echo "  4. release.sh tag --dry-run"
-    echo "  5. release.sh tag --execute"
-    echo "  6. release.sh publish --execute"
-    echo "  7. release.sh verify"
+    echo "  3. release validate --manifest n1-push --host srv1"
+    echo "  4. release tag --dry-run"
+    echo "  5. release tag --execute"
+    echo "  6. release publish --execute"
+    echo "  7. release verify"
     echo ""
 }
 
@@ -119,7 +119,7 @@ cmd_status() {
             exit 0
         fi
         log_info "No release in progress"
-        log_info "Start with: release.sh init --version X.Y"
+        log_info "Start with: release init --version X.Y"
         exit 0
     fi
 
@@ -265,7 +265,7 @@ cmd_resume() {
         echo "**Status:** No release in progress"
         echo ""
         echo "### Next Steps"
-        echo "1. Run \`release.sh init --version X.Y\` to start a new release"
+        echo "1. Run \`release init --version X.Y\` to start a new release"
         exit 0
     fi
 
@@ -276,7 +276,7 @@ cmd_resume() {
         echo ""
         echo "### Next Steps"
         echo "1. Check \`.release-state.json\` for corruption"
-        echo "2. Remove file and run \`release.sh init\` to start fresh"
+        echo "2. Remove file and run \`release init\` to start fresh"
         exit 3
     fi
 
@@ -352,27 +352,27 @@ cmd_resume() {
 
     case "$next_phase" in
         preflight)
-            echo "1. Run \`release.sh preflight\` to check repos"
+            echo "1. Run \`release preflight\` to check repos"
             echo "2. Fix any issues found"
-            echo "3. Run \`release.sh validate --manifest n1-push --host <host>\`"
+            echo "3. Run \`release validate --manifest n1-push --host <host>\`"
             ;;
         validation)
-            echo "1. Run \`release.sh validate --manifest n1-push --host <host>\`"
+            echo "1. Run \`release validate --manifest n1-push --host <host>\`"
             echo "2. Attach validation report to release issue"
-            echo "3. Run \`release.sh tag --dry-run\` to preview tags"
+            echo "3. Run \`release tag --dry-run\` to preview tags"
             ;;
         tags)
-            echo "1. Run \`release.sh tag --dry-run\` to preview tags"
-            echo "2. Run \`release.sh tag --execute\` to create tags"
-            echo "3. Run \`release.sh publish --dry-run\` to preview releases"
+            echo "1. Run \`release tag --dry-run\` to preview tags"
+            echo "2. Run \`release tag --execute\` to create tags"
+            echo "3. Run \`release publish --dry-run\` to preview releases"
             ;;
         releases)
-            echo "1. Run \`release.sh publish --dry-run\` to preview releases"
-            echo "2. Run \`release.sh publish --execute\` to create releases"
-            echo "3. Run \`release.sh verify\` to check completion"
+            echo "1. Run \`release publish --dry-run\` to preview releases"
+            echo "2. Run \`release publish --execute\` to create releases"
+            echo "3. Run \`release verify\` to check completion"
             ;;
         verification)
-            echo "1. Run \`release.sh verify\` to check all releases"
+            echo "1. Run \`release verify\` to check all releases"
             echo "2. Complete Housekeeping, AAR and Retrospective"
             echo "3. Close release issue"
             ;;
@@ -383,9 +383,9 @@ cmd_resume() {
                 echo "Post-release tasks:"
                 echo "1. Complete Housekeeping, AAR and Retrospective (if not done)"
                 echo "2. Close release issue"
-                echo "3. Run \`release.sh init --version X.Y\` for next release"
+                echo "3. Run \`release init --version X.Y\` for next release"
             else
-                echo "All phases complete. Run \`release.sh status\` for details."
+                echo "All phases complete. Run \`release status\` for details."
             fi
             ;;
     esac
@@ -417,7 +417,7 @@ cmd_retrospective() {
         audit_log "RETROSPECTIVE" "cli" "Retrospective marked complete for v${version}"
         log_success "Retrospective marked complete for v${version}"
         echo ""
-        echo "You can now close the release with: release.sh close --execute"
+        echo "You can now close the release with: release close --execute"
         exit 0
     fi
 
@@ -432,7 +432,7 @@ cmd_retrospective() {
     echo "  - Updated docs/lifecycle/75-lessons-learned.md if applicable"
     echo "  - Captured any process improvements for future releases"
     echo ""
-    echo "Mark complete with: release.sh retrospective --done"
+    echo "Mark complete with: release retrospective --done"
     exit 0
 }
 

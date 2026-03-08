@@ -302,7 +302,7 @@ post_issue_update() {
 ${body}
 
 ---
-*Posted by release.sh v${version}*"
+*Posted by release v${version}*"
 
     # Post to GitHub issue
     if ! gh issue comment "$issue" --repo "$ISSUE_REPO" --body "$comment" &>/dev/null; then

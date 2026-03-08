@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# cmd_release.sh - Core release pipeline commands
+# cmd_release - Core release pipeline commands
 #
 # Commands: cmd_preflight, cmd_validate, cmd_tag, cmd_publish, cmd_verify, cmd_full
 #
@@ -37,8 +37,8 @@ cmd_preflight() {
             version=$(state_get_version)
         else
             log_error "No version specified and no release in progress"
-            log_error "Use: release.sh preflight --version X.Y"
-            log_error "Or: release.sh init --version X.Y"
+            log_error "Use: release preflight --version X.Y"
+            log_error "Or: release init --version X.Y"
             exit 1
         fi
     fi
@@ -329,7 +329,7 @@ cmd_verify() {
             version=$(state_get_version)
         else
             log_error "No version specified and no release in progress"
-            log_error "Use: release.sh verify --version X.Y"
+            log_error "Use: release verify --version X.Y"
             exit 1
         fi
     fi
@@ -542,7 +542,7 @@ cmd_full() {
                     echo -e "${GREEN}Packer images: $packer_assets asset(s) on latest${NC}"
                 else
                     echo -e "${YELLOW}No packer images on latest release.${NC}"
-                    echo "Upload with: release.sh packer --upload --execute --all"
+                    echo "Upload with: release packer --upload --execute --all"
                 fi
                 ;;
 

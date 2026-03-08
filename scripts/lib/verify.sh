@@ -290,7 +290,7 @@ EOF
                 echo "  Missing tags: ${tag_missing_list}"
             fi
             if [[ "$has_drafts" == "true" ]]; then
-                echo "  Some releases are still drafts (run: release.sh publish --finalize)"
+                echo "  Some releases are still drafts (run: release publish --finalize)"
             elif [[ "$tag_missing_count" -eq 0 ]]; then
                 echo "  Some releases or assets are missing"
             fi

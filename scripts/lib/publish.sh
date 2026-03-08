@@ -520,7 +520,7 @@ run_publish() {
     if [[ "$packer_asset_count" -gt 0 ]]; then
         echo -e "Packer images: ${GREEN}${packer_asset_count} asset(s) on latest${NC}"
     else
-        echo -e "Packer images: ${YELLOW}No assets on latest — run 'release.sh packer --upload' to upload${NC}"
+        echo -e "Packer images: ${YELLOW}No assets on latest — run 'release packer --upload' to upload${NC}"
     fi
     echo ""
 

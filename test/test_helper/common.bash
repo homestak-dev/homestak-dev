@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# common.bash - Shared test helper for release.sh bats tests
+# common.bash - Shared test helper for release bats tests
 #
 # Provides:
 # - Test environment setup/teardown

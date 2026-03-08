@@ -7,7 +7,7 @@
 require_release_state() {
     if ! state_exists; then
         log_error "No release in progress"
-        log_error "Start with: release.sh init --version X.Y"
+        log_error "Start with: release init --version X.Y"
         exit 1
     fi
     if ! state_validate; then

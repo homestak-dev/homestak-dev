@@ -42,8 +42,8 @@ close_check_phases() {
         done
         echo ""
         echo -e "  ${YELLOW}Retrospective not complete.${NC}"
-        echo "  Mark complete: release.sh retrospective --done"
-        echo "  Or skip with: release.sh close --force"
+        echo "  Mark complete: release retrospective --done"
+        echo "  Or skip with: release close --force"
         return 1
     fi
 
@@ -85,7 +85,7 @@ close_generate_summary() {
 All ${#REPOS[@]} repos tagged and released at v${version}.
 
 ---
-*Closed by release.sh close command*
+*Closed by release close command*
 EOF
 }
 

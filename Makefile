@@ -10,8 +10,8 @@ help:
 	@echo "  make check-deps       - Check if all dependencies are installed"
 	@echo "  make install-deps     - Install workspace dependencies (gita)"
 	@echo "  make install-deps-all - Install all repo dependencies (requires sudo)"
-	@echo "  make test             - Run release.sh bats tests"
-	@echo "  make lint             - Run shellcheck on release.sh"
+	@echo "  make test             - Run release bats tests"
+	@echo "  make lint             - Run shellcheck on release"
 	@echo ""
 	@echo "Gita Commands:"
 	@echo "  gita ll                      - Show status of all repos"
@@ -83,10 +83,10 @@ setup: install-deps
 
 test:
 	@command -v bats >/dev/null 2>&1 || { echo "Error: bats not installed. Run: sudo apt install bats"; exit 1; }
-	@echo "Running release.sh tests..."
+	@echo "Running release tests..."
 	@bats test/
 
 lint:
 	@command -v shellcheck >/dev/null 2>&1 || { echo "Error: shellcheck not installed. Run: sudo make install-deps"; exit 1; }
-	@echo "Running shellcheck on release.sh..."
-	@shellcheck --severity=warning scripts/release.sh scripts/lib/*.sh
+	@echo "Running shellcheck on release..."
+	@shellcheck --severity=warning scripts/release scripts/lib/*.sh

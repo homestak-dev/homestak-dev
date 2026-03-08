@@ -77,7 +77,7 @@ cmd_packer() {
                 version=$(state_get_version)
             else
                 log_error "No version specified and no release in progress"
-                log_error "Use: release.sh packer --check --version X.Y"
+                log_error "Use: release packer --check --version X.Y"
                 exit 1
             fi
         fi
@@ -115,7 +115,7 @@ cmd_packer() {
             if [[ "$changed" == "true" ]]; then
                 echo -e "${YELLOW}Templates have changed.${NC}"
                 echo "Build new images: cd packer && ./build.sh"
-                echo "Then upload: release.sh packer --upload --execute --all"
+                echo "Then upload: release packer --upload --execute --all"
             else
                 echo -e "${GREEN}No template changes.${NC}"
                 echo "Images on 'latest' release are current."
@@ -203,7 +203,7 @@ cmd_sunset() {
     done
 
     if [[ -z "$below_version" ]]; then
-        log_error "Version required: release.sh sunset --below-version X.Y"
+        log_error "Version required: release sunset --below-version X.Y"
         exit 1
     fi
 
@@ -495,10 +495,10 @@ cmd_selftest() {
 
 cmd_help() {
     cat << EOF
-release.sh $(get_version) - homestak-dev release automation CLI
+release $(get_version) - homestak-dev release automation CLI
 
 Usage:
-  release.sh <command> [options]
+  release <command> [options]
 
 Commands:
   init          Initialize a new release
@@ -543,56 +543,56 @@ Options:
   --json             Machine-readable JSON output (status, verify, preflight)
 
 Examples:
-  release.sh init --version 0.31 --issue 115
-  release.sh init --version 0.31-hotfix --no-issue   # Hotfix without tracking issue
-  release.sh status
-  release.sh preflight
-  release.sh preflight --host srv1
-  release.sh preflight --host srv1 --host srv2
-  release.sh validate --manifest n1-push --host srv1
-  release.sh validate --manifest n1-push --host srv1 --remote srv1
-  release.sh validate --manifest n2-tiered --host srv1
-  release.sh validate --scenario push-vm-roundtrip --host srv1  # Scenario fallback
-  release.sh validate --stage --remote srv1              # Stage mode via homestak CLI
-  release.sh validate --skip
-  release.sh tag --dry-run
-  release.sh tag --execute
-  release.sh tag --execute --yes                   # Skip confirmation prompt
-  release.sh tag --execute --force
-  release.sh tag --rollback
-  release.sh tag --reset --dry-run
-  release.sh tag --reset --execute
-  release.sh tag --reset-repo packer --execute
-  release.sh publish --dry-run
-  release.sh publish --execute
-  release.sh publish --execute --yes               # Skip confirmation prompt
-  release.sh packer --check
-  release.sh packer --check --version 0.45
-  release.sh packer --upload --all                         # Preview all uploads
-  release.sh packer --upload --execute --all               # Upload all, skip unchanged
-  release.sh packer --upload --force --all                 # Upload all, force overwrite
-  release.sh packer --upload --execute debian-12 pve-9     # Upload specific templates
-  release.sh packer --upload --execute --all --images /tmp/images  # Custom images dir
-  release.sh packer --remove --all                         # Preview removal of all assets
-  release.sh packer --remove --execute debian-12           # Remove assets matching prefix
-  release.sh packer --remove --execute --all               # Remove ALL assets from latest
-  release.sh retrospective                       # Show retrospective status
-  release.sh retrospective --done                # Mark retrospective complete
-  release.sh close --dry-run
-  release.sh close --execute
-  release.sh close --execute --yes               # Skip confirmation prompt
-  release.sh close --execute --force             # Skip phase validation
-  release.sh full --dry-run
-  release.sh full --execute --host srv1
-  release.sh full --execute --skip-validate
-  release.sh selftest
-  release.sh selftest --verbose
-  release.sh sunset --below-version 0.20 --dry-run
-  release.sh sunset --below-version 0.20 --execute
-  release.sh audit --lines 50
-  release.sh --version                             # Show CLI version
-  release.sh status --json                         # Machine-readable status
-  release.sh verify --json                         # Machine-readable verification
+  release init --version 0.31 --issue 115
+  release init --version 0.31-hotfix --no-issue   # Hotfix without tracking issue
+  release status
+  release preflight
+  release preflight --host srv1
+  release preflight --host srv1 --host srv2
+  release validate --manifest n1-push --host srv1
+  release validate --manifest n1-push --host srv1 --remote srv1
+  release validate --manifest n2-tiered --host srv1
+  release validate --scenario push-vm-roundtrip --host srv1  # Scenario fallback
+  release validate --stage --remote srv1              # Stage mode via homestak CLI
+  release validate --skip
+  release tag --dry-run
+  release tag --execute
+  release tag --execute --yes                   # Skip confirmation prompt
+  release tag --execute --force
+  release tag --rollback
+  release tag --reset --dry-run
+  release tag --reset --execute
+  release tag --reset-repo packer --execute
+  release publish --dry-run
+  release publish --execute
+  release publish --execute --yes               # Skip confirmation prompt
+  release packer --check
+  release packer --check --version 0.45
+  release packer --upload --all                         # Preview all uploads
+  release packer --upload --execute --all               # Upload all, skip unchanged
+  release packer --upload --force --all                 # Upload all, force overwrite
+  release packer --upload --execute debian-12 pve-9     # Upload specific templates
+  release packer --upload --execute --all --images /tmp/images  # Custom images dir
+  release packer --remove --all                         # Preview removal of all assets
+  release packer --remove --execute debian-12           # Remove assets matching prefix
+  release packer --remove --execute --all               # Remove ALL assets from latest
+  release retrospective                       # Show retrospective status
+  release retrospective --done                # Mark retrospective complete
+  release close --dry-run
+  release close --execute
+  release close --execute --yes               # Skip confirmation prompt
+  release close --execute --force             # Skip phase validation
+  release full --dry-run
+  release full --execute --host srv1
+  release full --execute --skip-validate
+  release selftest
+  release selftest --verbose
+  release sunset --below-version 0.20 --dry-run
+  release sunset --below-version 0.20 --execute
+  release audit --lines 50
+  release --version                             # Show CLI version
+  release status --json                         # Machine-readable status
+  release verify --json                         # Machine-readable verification
 
 State Files:
   .release-state.json   Release progress state
