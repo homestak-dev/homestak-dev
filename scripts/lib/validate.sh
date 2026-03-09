@@ -255,16 +255,15 @@ run_validation() {
     fi
 
     # Handle skip
-    if [[ "$skip" == "true" ]]; then
+    if [[ -n "$skip" ]]; then
         echo ""
         echo "═══════════════════════════════════════════════════════════════"
-        echo -e "  ${YELLOW}WARNING: Validation skipped${NC}"
+        echo -e "  ${YELLOW}VALIDATION SKIPPED${NC}"
         echo "═══════════════════════════════════════════════════════════════"
         echo ""
-        echo "  Validation was skipped with --skip flag."
-        echo "  This should only be used for emergency releases."
+        echo "  Reason: $skip"
         echo ""
-        audit_log "SKIP" "human" "Validation skipped (emergency)"
+        audit_log "SKIP" "human" "Validation skipped: $skip"
         return 0
     fi
 

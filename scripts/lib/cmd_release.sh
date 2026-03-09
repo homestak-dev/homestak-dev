@@ -67,7 +67,7 @@ cmd_preflight() {
 cmd_validate() {
     local scenario=""
     local host=""
-    local skip=false
+    local skip=""
     local verbose=false
     local remote=""
     local packer_release=""
@@ -99,8 +99,8 @@ cmd_validate() {
                 shift 2
                 ;;
             --skip)
-                skip=true
-                shift
+                skip="${2:?--skip requires a reason}"
+                shift 2
                 ;;
             --stage)
                 stage=true
@@ -117,14 +117,32 @@ cmd_validate() {
         esac
     done
 
+    # Mutual exclusion: --skip vs execution flags
+    if [[ -n "$skip" ]] && [[ -n "$host" || -n "$scenario" || -n "$remote" || "$stage" == "true" ]]; then
+        log_error "--skip cannot be combined with --host, --scenario, --remote, or --stage"
+        exit 1
+    fi
+
     # Update state
     if state_exists; then
         state_set_phase_status "validation" "in_progress"
     fi
 
+    # Handle skip with reason
+    if [[ -n "$skip" ]]; then
+        if run_validation "$scenario" "$host" "$skip" "$verbose" "$remote" "$packer_release" "$stage" "$manifest"; then
+            if state_exists; then
+                state_set_phase_status "validation" "complete"
+                issue_update_validation_skipped "$skip"
+            fi
+            exit 0
+        fi
+        exit 5
+    fi
+
     # Run validation
     local validation_passed=false
-    if run_validation "$scenario" "$host" "$skip" "$verbose" "$remote" "$packer_release" "$stage" "$manifest"; then
+    if run_validation "$scenario" "$host" "" "$verbose" "$remote" "$packer_release" "$stage" "$manifest"; then
         validation_passed=true
     fi
 
