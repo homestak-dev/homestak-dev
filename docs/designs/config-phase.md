@@ -118,9 +118,9 @@ class ConfigApply:
 **Path discovery:** `config_apply.py` discovers paths via environment variables or user-owned defaults:
 
 - **State dir:** `$HOMESTAK_ROOT/.state/config/`
-- **Ansible dir:** `$HOMESTAK_LIB/ansible/` or `~/lib/ansible/`
+- **Ansible dir:** `$HOMESTAK_ROOT/iac/ansible/`
 
-**Dev environment:** Set `HOMESTAK_LIB` to point to your workspace (e.g., `HOMESTAK_LIB=~/homestak-dev`). There is no sibling directory discovery — the config command is designed for bootstrapped hosts where user-owned paths exist.
+**Dev environment:** Set `HOMESTAK_ROOT` to point to your workspace (e.g., `HOMESTAK_ROOT=~/homestak`). There is no sibling directory discovery — the config command is designed for bootstrapped hosts where user-owned paths exist.
 
 ### Spec-to-Ansible Vars Mapping
 
