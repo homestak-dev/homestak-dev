@@ -1,12 +1,19 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.53. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.54. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.54
+
+- **`gh pr create` infers head org from CWD** — When creating PRs from outside the target repo's directory, `gh` assumes the head branch belongs to whatever org owns the CWD repo. Always use `--head <branch>` explicitly in multi-org workflows.
+- **Multi-org release.sh shakedown was clean** — The Sprint 1 refactor (#308) adding `REPO_ORGS`, `repo_full_name()`, `REPO_DIRS`, and `repo_dir()` held up across all release phases (preflight, tag, publish, verify) on first real use. The code-before-transfers strategy (update tooling while repos are still in `homestak-dev`) paid off.
+- **`.github/` gitignore + CI workflow conflict** — When `.github/` is gitignored (because a separate `.github` repo sits alongside), CI workflows in `.github/workflows/` become invisible to git. Fix with `!.github/workflows/` negation in `.gitignore`. The prior `git update-index --cacheinfo` workaround was fragile and caused phantom "deleted" status.
+- **Write CHANGELOG entries with the PR, not retroactively** — 5 of 9 repos had empty Unreleased sections despite having merged changes from two sprints. Catching up before release works but is avoidable overhead.
 
 ## v0.53
 
