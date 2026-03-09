@@ -1,6 +1,7 @@
 # Child repos managed by gita
 .claude/
 .github/
+!.github/workflows/
 ansible/
 bootstrap/
 iac-driver/
