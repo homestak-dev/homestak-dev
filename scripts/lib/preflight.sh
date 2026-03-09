@@ -124,9 +124,9 @@ preflight_check_secrets() {
 }
 
 preflight_check_provider_cache() {
-    # Check for stale provider caches in iac-driver/.states/
+    # Check for stale provider caches in $HOMESTAK_ROOT/.state/tofu/
     local states_dir
-    states_dir="${WORKSPACE_DIR}/$(repo_dir iac-driver)/.states"
+    states_dir="${WORKSPACE_DIR}/.state/tofu"
     local lockfile
     lockfile="${WORKSPACE_DIR}/$(repo_dir tofu)/envs/generic/.terraform.lock.hcl"
 
@@ -180,9 +180,9 @@ preflight_check_provider_cache() {
 }
 
 preflight_clear_provider_cache() {
-    # Clear all provider caches in iac-driver/.states/
+    # Clear all provider caches in $HOMESTAK_ROOT/.state/tofu/
     local states_dir
-    states_dir="${WORKSPACE_DIR}/$(repo_dir iac-driver)/.states"
+    states_dir="${WORKSPACE_DIR}/.state/tofu"
 
     if [[ ! -d "$states_dir" ]]; then
         return 0
@@ -679,7 +679,7 @@ EOF
                     local cached_ver="${entry#*:}"
                     echo -e "      - ${state_name}: cached v${cached_ver}"
                 done
-                echo -e "      Run: rm -rf iac-driver/.states/*/data to clear"
+                echo -e "      Run: rm -rf .state/tofu/*/data to clear"
                 ;;
         esac
 

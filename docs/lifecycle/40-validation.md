@@ -258,7 +258,7 @@ cat /sys/module/kvm_intel/parameters/nested | grep -q Y && echo "OK: nested virt
 | `API token not found` | Generate with `pveum`, add to secrets.yaml |
 | `node config missing` | Run `make node-config` on PVE host |
 | `packer images missing` | Run `./publish.sh` or download from release |
-| `provider version conflict` | Clear: `rm -rf iac-driver/.states/*/data/providers/` |
+| `provider version conflict` | Clear: `rm -rf $HOMESTAK_ROOT/.state/tofu/*/data/providers/` |
 
 ## Outputs
 

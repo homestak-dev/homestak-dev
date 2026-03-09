@@ -119,7 +119,7 @@ The create phase produces the infrastructure identity that destroy needs to remo
 
 ### State Location
 
-Create phase stores state in `.states/{manifest}/{node}-{host}/terraform.tfstate`. Destroy reads this state to identify resources. The manifest-level namespace prevents state lock contention when running multiple manifests in parallel.
+Create phase stores state in `.state/tofu/{manifest}/{node}-{host}/terraform.tfstate`. Destroy reads this state to identify resources. The manifest-level namespace prevents state lock contention when running multiple manifests in parallel.
 
 ### Discovery Pattern
 
@@ -166,7 +166,7 @@ The run phase may have active work that destroy should handle gracefully.
 
 | Phase | State Location | Persistence | Notes |
 |-------|---------------|-------------|-------|
-| **Create** | `.states/{manifest}/{node}-{host}/terraform.tfstate` | Required | Tofu state, needed for destroy |
+| **Create** | `.state/tofu/{manifest}/{node}-{host}/terraform.tfstate` | Required | Tofu state, needed for destroy |
 | **Config** | `~/etc/state/spec.yaml` | Optional | For drift detection in run |
 | **Run** | Application-specific | Application-specific | Varies by workload |
 | **Destroy** | Reads Create state | Cleans up | Removes state on success |
@@ -176,7 +176,7 @@ The run phase may have active work that destroy should handle gracefully.
 Each manifest-node combination has isolated state:
 
 ```
-.states/
+.state/tofu/
 └── n2-tiered/                    # Manifest namespace
     ├── execution.json              # Manifest execution state
     ├── root-pve-srv1/
@@ -199,12 +199,12 @@ Each manifest-node combination has isolated state:
 
 **Implementation:**
 - Manifest executor maintains in-memory state during execution
-- Progress written to `.states/{manifest}/execution.json` for recovery
+- Progress written to `.state/tofu/{manifest}/execution.json` for recovery
 - Each node's create/config state is independent
 - Manifest state tracks which nodes are complete, in-progress, failed
 
 ```json
-// .states/n2-tiered/execution.json
+// .state/tofu/n2-tiered/execution.json
 {
   "manifest": "n2-tiered",
   "started": "2026-02-03T10:00:00Z",

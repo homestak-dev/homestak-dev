@@ -429,8 +429,8 @@ Transient failure (retries exhausted):
 ```
 
 **Operator visibility:**
-- `WaitForFileAction` on `config-complete.json` times out → node marked failed in operator
-- SSH inspection: `cat ~/etc/state/config-failed.json`
+- `WaitForFileAction` on `complete.json` times out → node marked failed in operator
+- SSH inspection: `cat $HOMESTAK_ROOT/.state/config/failed.json`
 - Full log: `cat /var/log/homestak/config.log`
 - Server logs: failed requests logged with client IP and error code
 
@@ -446,7 +446,7 @@ ssh edge cat /var/log/homestak/config.log
 # Option 1: Re-mint and inject fresh token
 ssh edge "echo 'export HOMESTAK_TOKEN=<new-token>' > /etc/profile.d/homestak.sh"
 ssh edge "rm -f ~/etc/state/config-failed.json"
-ssh edge "~/lib/iac-driver/run.sh config --fetch --insecure"
+ssh edge "$HOMESTAK_ROOT/iac/iac-driver/run.sh config --fetch --insecure"
 
 # Option 2: Push config directly (bypass pull)
 ./run.sh config-push --host edge --spec base

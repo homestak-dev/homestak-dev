@@ -153,7 +153,7 @@ Parent (CLI caller)
 
 ### 4. PID File Management
 
-**Location:** `/var/run/homestak/server-{port}.pid`. No fallback — if the directory doesn't exist, fail with "host not bootstrapped."
+**Location:** `$HOMESTAK_ROOT/.run/server-{port}.pid`. No fallback — if the directory doesn't exist, fail with "host not bootstrapped."
 
 Port-qualified filename supports multiple servers on different ports (testing, delegated PVE nodes).
 
@@ -409,7 +409,7 @@ ssh $USER@srv1 "./run.sh server stop --port 44443"
 **Scenario 5: Stale process recovery**
 ```bash
 ./run.sh server start --port 44443
-kill -9 $(cat /var/run/homestak/server-44443.pid)  # Simulate crash
+kill -9 $(cat $HOMESTAK_ROOT/.run/server-44443.pid)  # Simulate crash
 ./run.sh server start --port 44443   # Should detect stale, clean up, start fresh
 ```
 
