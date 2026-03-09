@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- Add `--skip <reason>` to `release validate` — posts "Skipped: reason" to release issue instead of empty template (meta#336)
+
 ## v0.55 - 2026-03-08
 
 ### Added

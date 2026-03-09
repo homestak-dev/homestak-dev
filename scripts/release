@@ -7,7 +7,7 @@
 #   release status
 #   release resume
 #   release preflight
-#   release validate --scenario <name> --host <host>
+#   release validate {--host <host> [--scenario <name>] | --skip <reason>}
 #   release tag [--dry-run|--execute]
 #   release publish [--dry-run|--execute]
 #   release verify

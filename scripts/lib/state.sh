@@ -368,6 +368,14 @@ issue_update_validation() {
     post_issue_update "Validation" "$body"
 }
 
+issue_update_validation_skipped() {
+    local reason="$1"
+
+    local body="Integration validation **skipped** — ${reason}."
+
+    post_issue_update "Validation" "$body"
+}
+
 issue_update_tags() {
     local version="$1"
 

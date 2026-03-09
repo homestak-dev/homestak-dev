@@ -527,7 +527,7 @@ Options:
   --reset            Reset tags to HEAD (delete and recreate, v0.x only)
   --reset-repo REPO  Reset tag for single repo only
   --yes, -y          Skip confirmation prompt (tag, publish, close)
-  --skip             Skip validation (emergency releases only)
+  --skip REASON      Skip validation with reason (posted to release issue)
   --stage            Run via 'homestak scenario' CLI instead of ./run.sh (stage mode)
   --remote HOST      Run validation on remote host via SSH
   --packer-release   Packer release tag for image downloads (validate only)
