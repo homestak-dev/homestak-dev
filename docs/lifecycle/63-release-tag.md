@@ -46,25 +46,19 @@ With approval:
 ./scripts/release.sh tag --execute --yes
 ```
 
-Or manually per repo:
+Or manually per repo (must use correct org for each):
 
 ```bash
-VERSION=0.45
-for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
-  cd ~/homestak-dev/$repo
-  git tag -a v${VERSION} -m "Release v${VERSION}"
-  git push origin v${VERSION}
-done
+VERSION=0.54
+# release.sh handles org mapping and paths automatically
+./scripts/release tag --execute --yes
 ```
 
 ### 3. Verify Tags
 
 ```bash
-VERSION=0.45
-for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
-  echo "=== $repo ==="
-  gh api repos/homestak-dev/$repo/git/refs/tags/v${VERSION} --jq '.ref'
-done
+# Automated verification
+./scripts/release verify
 ```
 
 ## Tag Reset (Pre-1.0 Only)
@@ -82,12 +76,8 @@ This deletes and recreates tags at current HEAD. **Not available after v1.0.**
 If tags created incorrectly:
 
 ```bash
-VERSION=0.45
-for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
-  cd ~/homestak-dev/$repo
-  git tag -d v${VERSION}
-  git push origin :refs/tags/v${VERSION}
-done
+# release.sh handles org mapping and paths automatically
+./scripts/release tag --reset
 ```
 
 ## Outputs

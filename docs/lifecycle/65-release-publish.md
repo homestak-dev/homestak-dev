@@ -46,16 +46,10 @@ With approval:
 ./scripts/release.sh publish --execute --yes
 ```
 
-Or manually per repo:
+Manual fallback requires correct org per repo — prefer `release.sh` which handles the mapping:
 
 ```bash
-VERSION=0.45
-for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
-  gh release create v${VERSION} --prerelease \
-    --title "v${VERSION}" \
-    --notes "See CHANGELOG.md" \
-    --repo homestak-dev/$repo
-done
+./scripts/release publish --execute --yes
 ```
 
 **Note:** Use `--prerelease` flag until v1.0.
@@ -69,10 +63,7 @@ Indicate image status:
 ### 4. Verify Releases Created
 
 ```bash
-for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
-  echo "=== $repo ==="
-  gh release view v${VERSION} --repo homestak-dev/$repo --json tagName,name
-done
+./scripts/release verify
 ```
 
 ## Outputs

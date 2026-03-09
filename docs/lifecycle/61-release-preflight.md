@@ -67,47 +67,47 @@ gita shell "git status --porcelain"
 
 ### 5. Check No Existing Tags
 
+Automated by `release preflight`. Manual fallback:
+
 ```bash
-VERSION=0.45
-for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
-  gh api repos/homestak-dev/$repo/git/refs/tags/v${VERSION} 2>/dev/null && \
-    echo "WARNING: $repo has tag v${VERSION}" || echo "OK: $repo"
-done
+VERSION=0.54
+# release.sh checks all 9 repos across 3 orgs automatically
+./scripts/release preflight
 ```
 
 ### 6. Check Secrets Decrypted
 
 ```bash
-ls site-config/secrets.yaml && echo "OK: secrets decrypted" || \
-  echo "FAIL: run 'make decrypt' in site-config"
+ls config/secrets.yaml && echo "OK: secrets decrypted" || \
+  echo "FAIL: run 'make decrypt' in config"
 ```
 
 ### 7. CLAUDE.md Review
 
 Verify each repo's CLAUDE.md reflects current state:
 
-**Meta repos:**
+**homestak-dev:**
 - [ ] .github - org templates, PR defaults
 - [ ] .claude - skills, settings
-- [ ] homestak-dev - workspace structure, documentation index
+- [ ] meta - workspace structure, documentation index
 
-**Core repos:**
-- [ ] site-config - schema, defaults, file structure
+**homestak:**
+- [ ] config - schema, defaults, file structure
+- [ ] bootstrap - CLI, installation
+
+**homestak-iac:**
 - [ ] iac-driver - scenarios, actions, ConfigResolver
 - [ ] tofu - modules, variables, workflow
 - [ ] packer - templates, build workflow
 - [ ] ansible - playbooks, roles, collections
-- [ ] bootstrap - CLI, installation
 
 ### 8. Check CHANGELOGs
 
-Verify unreleased content exists:
+Automated by `release preflight`. Manual fallback:
 
 ```bash
-for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
-  echo "=== $repo ==="
-  head -20 $repo/CHANGELOG.md 2>/dev/null | grep -A5 "Unreleased"
-done
+# gita runs across all repos
+gita shell "head -10 CHANGELOG.md | grep -A3 Unreleased"
 ```
 
 ## Using release.sh

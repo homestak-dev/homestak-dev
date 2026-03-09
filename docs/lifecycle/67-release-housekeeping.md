@@ -16,36 +16,24 @@ Clean up development artifacts and prepare for next cycle.
 
 ### 1. Delete Merged Branches
 
-For each repo:
+Use gita or per-repo git commands:
 
 ```bash
-for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
-  echo "=== $repo ==="
-  cd ~/homestak-dev/$repo
-
-  # Delete merged local branches
-  git branch --merged | grep -v master | xargs -r git branch -d
-
-  # Prune stale remote tracking refs
-  git remote prune origin
-done
+# Prune all repos at once
+gita shell "git branch --merged | grep -v master | xargs -r git branch -d"
+gita shell "git remote prune origin"
 ```
 
 ### 2. Check for Unmerged Branches
 
-Branches may show as "ahead" even when merged via squash:
+Branches may show as "ahead" even when merged via squash — use `git diff` to verify actual unmerged content:
 
 ```bash
-for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
-  echo "=== $repo ==="
-  cd ~/homestak-dev/$repo
-
-  for branch in $(git branch -r | grep -v HEAD | grep -v master); do
-    if [[ -n "$(git diff master..$branch 2>/dev/null)" ]]; then
-      echo "UNMERGED: $branch"
-    fi
-  done
-done
+gita shell 'for branch in $(git branch -r | grep -v HEAD | grep -v master); do
+  if [ -n "$(git diff master..$branch 2>/dev/null)" ]; then
+    echo "UNMERGED: $branch"
+  fi
+done'
 ```
 
 Use `git diff` to verify actual unmerged content before deleting.
