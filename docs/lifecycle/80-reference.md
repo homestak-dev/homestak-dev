@@ -223,8 +223,8 @@ gita fetch
 gita pull
 
 # Check for unmerged branches
-for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
-  echo "=== $repo ===" && cd ~/homestak-dev/$repo && git branch -r --no-merged
+for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer config bare-metal tofu; do
+  echo "=== $repo ===" && cd ~/homestak/$repo && git branch -r --no-merged
 done
 ```
 
@@ -232,7 +232,7 @@ done
 
 ```bash
 # List open issues across org
-for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
+for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer config bare-metal tofu; do
   echo "=== $repo ===" && gh issue list --repo homestak-dev/$repo
 done
 
@@ -364,7 +364,7 @@ Types: `fix`, `feat`, `docs`, `test`, `refactor`, `chore`
 For releases and cross-repo operations:
 
 ```
-.github → .claude → homestak-dev → site-config → tofu → ansible → bootstrap → packer → iac-driver
+.github → .claude → homestak-dev → config → bare-metal → tofu → ansible → bootstrap → packer → iac-driver
 ```
 
 ## Related Documents

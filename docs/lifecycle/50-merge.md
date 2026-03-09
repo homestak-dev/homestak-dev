@@ -184,7 +184,7 @@ For sprints touching multiple repos:
 Follow [repository dependency order](00-overview.md#repository-dependency-order):
 
 ```
-site-config → tofu → ansible → bootstrap → packer → iac-driver
+config → bare-metal → tofu → ansible → bootstrap → packer → iac-driver
 ```
 
 Upstream repos merge first so downstream can reference their changes.

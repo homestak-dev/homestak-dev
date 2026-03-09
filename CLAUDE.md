@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working with this project.
 
 | Organization | Purpose |
 |--------------|---------|
-| **homestak** | Core: bootstrap installer, config |
+| **homestak** | Core: bare-metal installer, bootstrap, config |
 | **homestak-iac** | IaC components: ansible, iac-driver, tofu, packer |
 | **homestak-dev** | Meta: release scripts, docs, process, Claude Code config |
 | **homestak-apps** | Application deployment (future) |
@@ -62,7 +62,7 @@ This is a polyrepo workspace managed with [gita](https://github.com/nosarthur/gi
 │   ├── .claude/               # Claude Code configuration and skills (SEPARATE REPO)
 │   └── .github/               # GitHub org config (SEPARATE REPO)
 │
-├── bare-metal/                # homestak/bare-metal - bare metal installer (future)
+├── bare-metal/                # homestak/bare-metal - Debian preseed ISO remastering
 ├── apps/                      # homestak-apps org (future)
 └── com/                       # homestak-com org (future)
 ```
@@ -82,6 +82,7 @@ Each component has its own `CLAUDE.md` with detailed context (auto-loaded via im
 @../../iac/packer/CLAUDE.md
 @../../config/CLAUDE.md
 @../../iac/tofu/CLAUDE.md
+@../../bare-metal/CLAUDE.md
 
 ## Workspace Management
 
