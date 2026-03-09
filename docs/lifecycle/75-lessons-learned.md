@@ -1,12 +1,18 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.54. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.55. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.55
+
+- **Test CI assumptions locally before pushing** — If a test depends on external tools (xorriso, isolinux) or default file paths, those won't exist on ubuntu-latest. Either install deps in CI or make tests self-contained with temp files.
+- **Test ordering matters for preflight chains** — When a script checks A then B, a test for "B fails" must also satisfy A. Test 20 ("missing preseed") failed because the source ISO check (A) fired first.
+- **Auto-merge and incremental commits don't mix** — Enabling auto-merge on a PR means it merges as soon as CI passes + approval. If you plan additional commits on the same branch, don't enable auto-merge until all changes are pushed.
 
 ## v0.54
 
