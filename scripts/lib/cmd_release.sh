@@ -118,8 +118,8 @@ cmd_validate() {
     done
 
     # Mutual exclusion: --skip vs execution flags
-    if [[ -n "$skip" ]] && [[ -n "$host" || -n "$scenario" || -n "$remote" ]]; then
-        log_error "--skip cannot be combined with --host, --scenario, or --remote"
+    if [[ -n "$skip" ]] && [[ -n "$host" || -n "$scenario" || -n "$remote" || "$stage" == "true" ]]; then
+        log_error "--skip cannot be combined with --host, --scenario, --remote, or --stage"
         exit 1
     fi
 
