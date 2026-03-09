@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.54 - 2026-03-08
+
 ### Changed
 - Add multi-org support to release.sh (#308)
   - `REPO_ORGS` mapping and `repo_full_name()` in `state.sh`
