@@ -11,8 +11,8 @@ This file provides guidance to Claude Code when working with this project.
 | Organization | Purpose |
 |--------------|---------|
 | **homestak** | Core: bare-metal installer, bootstrap, config |
-| **homestak-iac** | IaC components: ansible, iac-driver, tofu, packer |
 | **homestak-dev** | Meta: release scripts, docs, process, Claude Code config |
+| **homestak-iac** | IaC components: ansible, iac-driver, tofu, packer |
 | **homestak-apps** | Application deployment (future) |
 | **homestak-com** | Commercial offering: verified releases, remote monitoring/management, cloud backup, high availability, community and live support |
 
@@ -44,14 +44,9 @@ This is a polyrepo workspace managed with [gita](https://github.com/nosarthur/gi
 
 ```
 ~/homestak/                    # Workspace root (HOMESTAK_ROOT)
+├── bare-metal/                # homestak/bare-metal - Debian preseed ISO remastering
 ├── bootstrap/                 # homestak/bootstrap - curl|bash installer, homestak CLI
 ├── config/                    # homestak/config - secrets, manifests, site-specific config
-│
-├── iac/                       # homestak-iac org
-│   ├── ansible/               # Playbooks for host configuration
-│   ├── iac-driver/            # Orchestration engine - scenario-based workflows
-│   ├── packer/                # Custom Debian cloud images (optional)
-│   └── tofu/                  # OpenTofu modules for VM provisioning
 │
 ├── dev/                       # homestak-dev org
 │   ├── meta/                  # This repo - release scripts, docs, process
@@ -62,7 +57,12 @@ This is a polyrepo workspace managed with [gita](https://github.com/nosarthur/gi
 │   ├── .claude/               # Claude Code configuration and skills (SEPARATE REPO)
 │   └── .github/               # GitHub org config (SEPARATE REPO)
 │
-├── bare-metal/                # homestak/bare-metal - Debian preseed ISO remastering
+├── iac/                       # homestak-iac org
+│   ├── ansible/               # Playbooks for host configuration
+│   ├── iac-driver/            # Orchestration engine - scenario-based workflows
+│   ├── packer/                # Custom Debian cloud images (optional)
+│   └── tofu/                  # OpenTofu modules for VM provisioning
+│
 ├── apps/                      # homestak-apps org (future)
 └── com/                       # homestak-com org (future)
 ```
@@ -74,15 +74,15 @@ This is a polyrepo workspace managed with [gita](https://github.com/nosarthur/gi
 
 Each component has its own `CLAUDE.md` with detailed context (auto-loaded via imports):
 
+@../../bare-metal/CLAUDE.md
+@../../bootstrap/CLAUDE.md
+@../../config/CLAUDE.md
 @../.claude/CLAUDE.md
 @../.github/CLAUDE.md
 @../../iac/ansible/CLAUDE.md
-@../../bootstrap/CLAUDE.md
 @../../iac/iac-driver/CLAUDE.md
 @../../iac/packer/CLAUDE.md
-@../../config/CLAUDE.md
 @../../iac/tofu/CLAUDE.md
-@../../bare-metal/CLAUDE.md
 
 ## Workspace Management
 
@@ -391,13 +391,14 @@ The `resume` command outputs:
 | File | Focus |
 |------|-------|
 | [CLAUDE.md](CLAUDE.md) | This file - vision, architecture, conventions |
+| [bare-metal/CLAUDE.md](../../bare-metal/CLAUDE.md) | Preseed ISO remastering |
+| [bootstrap/CLAUDE.md](../../bootstrap/CLAUDE.md) | CLI, installation |
+| [config/CLAUDE.md](../../config/CLAUDE.md) | Config schema, secrets |
 | [.claude/CLAUDE.md](../.claude/CLAUDE.md) | Skills configuration |
 | [.github/CLAUDE.md](../.github/CLAUDE.md) | GitHub platform config (CI/CD, branch protection) |
 | [ansible/CLAUDE.md](../../iac/ansible/CLAUDE.md) | Playbooks, roles, collections |
-| [bootstrap/CLAUDE.md](../../bootstrap/CLAUDE.md) | CLI, installation |
 | [iac-driver/CLAUDE.md](../../iac/iac-driver/CLAUDE.md) | Scenarios, actions, testing |
 | [packer/CLAUDE.md](../../iac/packer/CLAUDE.md) | Templates, build workflow |
-| [config/CLAUDE.md](../../config/CLAUDE.md) | Config schema, secrets |
 | [tofu/CLAUDE.md](../../iac/tofu/CLAUDE.md) | Modules, environments |
 
 ### Development Lifecycle
