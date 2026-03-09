@@ -2,11 +2,18 @@
 
 ## Unreleased
 
+## v0.56 - 2026-03-09
+
+### Theme: Runtime State Consolidation
+
 ### Changed
-- Add `--skip <reason>` to `release validate` — posts "Skipped: reason" to release issue instead of empty template (meta#336)
+- Add `--skip <reason>` to `release validate` — posts "Skipped: reason" to release issue instead of empty template (#336)
 
 ### Removed
 - Remove deprecated `--stage` flag from `release validate` — `homestak manifest test` CLI no longer exists
+
+### Documentation
+- Update 9 design/lifecycle docs for consolidated `$HOMESTAK_ROOT`-relative paths (#340)
 
 ## v0.55 - 2026-03-08
 
