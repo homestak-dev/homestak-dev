@@ -161,27 +161,30 @@ Release Issue Created (theme-first)
 
 ## Multi-Repo Structure
 
-homestak-dev is a polyrepo workspace containing 9 repositories:
+homestak is a polyrepo workspace containing 10 repositories across 3 orgs:
 
-**Meta repositories** (release process, documentation):
+**Meta repositories** (homestak-dev — release process, documentation):
 1. **.github** - Organization templates and PR defaults
 2. **.claude** - Claude Code configuration and skills
-3. **homestak-dev** - Workspace parent, release methodology
+3. **meta** - Release automation, lifecycle docs
 
-**Core repositories** (functional dependencies):
-4. **site-config** - Configuration and secrets
-5. **tofu** - VM provisioning modules
-6. **ansible** - Host configuration playbooks
-7. **bootstrap** - Installation and CLI
-8. **packer** - Custom images (requires build host)
-9. **iac-driver** - Orchestration (depends on all above)
+**Core repositories** (homestak — user-facing):
+4. **bare-metal** - Debian preseed ISO remastering
+5. **bootstrap** - Installation and CLI
+6. **config** - Configuration and secrets
+
+**IaC repositories** (homestak-iac — infrastructure components):
+7. **tofu** - VM provisioning modules
+8. **ansible** - Host configuration playbooks
+9. **packer** - Custom images (requires build host)
+10. **iac-driver** - Orchestration (depends on all above)
 
 ### Repository Dependency Order
 
 Releases follow dependency order (downstream depends on upstream):
 
 ```
-.github → .claude → homestak-dev → site-config → tofu → ansible → bootstrap → packer → iac-driver
+.github → .claude → homestak-dev → config → bare-metal → tofu → ansible → bootstrap → packer → iac-driver
 ```
 
 ### Unified Versioning
@@ -195,7 +198,7 @@ For sprints touching multiple repos, create the same branch name in each affecte
 ```bash
 # Create sprint branch in all affected repos
 for repo in iac-driver ansible tofu; do
-  cd ~/homestak-dev/$repo
+  cd ~/homestak/$repo
   git checkout -b sprint/recursive-pve
 done
 ```

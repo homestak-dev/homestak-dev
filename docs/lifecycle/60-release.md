@@ -76,7 +76,7 @@ The release process is divided into discrete phases:
 Releases follow dependency order:
 
 ```
-.github → .claude → homestak-dev → site-config → tofu → ansible → bootstrap → packer → iac-driver
+.github → .claude → homestak-dev → config → bare-metal → tofu → ansible → bootstrap → packer → iac-driver
 ```
 
 **Unified versioning:** All repos get the same version tag, even if unchanged.
