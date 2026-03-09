@@ -107,7 +107,7 @@ The mixing of authored and generated data in `secrets.yaml` causes:
 ├── manifests/
 └── defs/
 
-~/.state/config/                ← generated state (local, per-host, never in git)
+$HOMESTAK_ROOT/.state/config/   ← generated state (local, per-host, never in git)
 ├── spec.yaml
 └── complete.json
 ```
@@ -132,7 +132,7 @@ CREATE (orchestrator, anywhere)
 CONFIG (push or pull)
 ├── push: operator SSHes to VM, runs ansible with resolved authored config
 └── pull: VM fetches spec from server, applies locally
-└── result: ~/.state/config/complete.json (generated, local)
+└── result: $HOMESTAK_ROOT/.state/config/complete.json (generated, local)
 
 DESTROY (orchestrator, anywhere)
 ├── tofu destroys VM via PVE API

@@ -81,11 +81,11 @@ The layout works at any root path (`~homestak/`, `~/homestak/`, `/opt/homestak/`
 Bootstrap writes to `~/.profile`:
 
 ```bash
-export HOMESTAK_SITE_CONFIG="$HOME/config"
+export HOMESTAK_ROOT="$HOME"
 export PATH="$HOME/bootstrap:$PATH"
 ```
 
-Both resolve from `$HOME`, so they work at any install location.
+`HOMESTAK_ROOT` is the single anchor for all path discovery (replaced `HOMESTAK_SITE_CONFIG`, `HOMESTAK_LIB`, `HOMESTAK_ETC` in v0.54).
 
 ## Two Contexts, Same Structure
 
