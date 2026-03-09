@@ -1,6 +1,6 @@
 # Repository Settings Reference
 
-Standard settings for homestak repositories across all orgs (homestak, homestak-iac, homestak-dev). Use `ORG/REPO` in CLI commands below (e.g., `homestak-iac/ansible`, `homestak/bootstrap`).
+Standard settings for homestak repositories across all orgs (homestak, homestak-dev, homestak-iac). Use `ORG/REPO` in CLI commands below (e.g., `homestak-iac/ansible`, `homestak/bootstrap`).
 
 ## Repository Settings
 

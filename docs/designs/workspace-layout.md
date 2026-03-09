@@ -6,7 +6,7 @@
 
 ## Problem Statement
 
-The org split moves repos to different GitHub organizations (homestak, homestak-apps, homestak-iac, homestak-dev). The local filesystem layout needs a corresponding design that:
+The org split moves repos to different GitHub organizations (homestak, homestak-dev, homestak-iac, homestak-apps). The local filesystem layout needs a corresponding design that:
 
 1. Reflects the org structure without deep nesting
 2. Works identically on dev workstations and installed hosts
