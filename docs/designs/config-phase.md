@@ -168,7 +168,7 @@ New playbook `ansible/playbooks/config-apply.yml`:
 
 ### Platform-Ready Marker
 
-Path: `~/.state/config/complete.json`
+Path: `$HOMESTAK_ROOT/.state/config/complete.json`
 
 ```json
 {
@@ -211,7 +211,7 @@ def _wait_for_config_complete(self, exec_node, ip, context, timeout=300):
     wait_spec = WaitForFileAction(
         name=f'wait-spec-{exec_node.name}',
         host_key=f'{exec_node.name}_ip',
-        file_path='~/.state/config/spec.yaml',
+        file_path='$HOMESTAK_ROOT/.state/config/spec.yaml',
         timeout=timeout,
         interval=10,
     )
@@ -223,7 +223,7 @@ def _wait_for_config_complete(self, exec_node, ip, context, timeout=300):
     wait_config = WaitForFileAction(
         name=f'wait-config-{exec_node.name}',
         host_key=f'{exec_node.name}_ip',
-        file_path='~/.state/config/complete.json',
+        file_path='$HOMESTAK_ROOT/.state/config/complete.json',
         timeout=timeout,
         interval=10,
     )
@@ -286,11 +286,11 @@ Add `./run.sh config` to the existing runcmd block:
 %{if var.spec_server != ""}
       - |
         # Bootstrap from server + config on first boot (v0.48+)
-        if [ ! -f ~/.state/config/complete.json ]; then
+        if [ ! -f $HOMESTAK_ROOT/.state/config/complete.json ]; then
           . /etc/profile.d/homestak.sh
           curl -fsSk "$HOMESTAK_SERVER/bootstrap.git/install.sh" | \
             HOMESTAK_SOURCE="$HOMESTAK_SERVER" HOMESTAK_REF=_working HOMESTAK_INSECURE=1 SKIP_SITE_CONFIG=1 bash
-          ~/lib/iac-driver/run.sh config --fetch --insecure \
+          $HOMESTAK_ROOT/iac/iac-driver/run.sh config --fetch --insecure \
             >>/var/log/homestak/config.log 2>&1 || true
         fi
 %{endif}
@@ -337,14 +337,14 @@ site-config                  iac-driver                     ansible
 
 ### Path Mode Verification
 
-Config phase runs on bootstrapped VMs at user-owned paths (~homestak/):
-- Spec: `~/.state/config/spec.yaml`
-- Marker: `~/.state/config/complete.json`
-- iac-driver: `~/lib/iac-driver/`
-- Ansible: `~/lib/ansible/`
-- Playbook: `~/lib/ansible/playbooks/config-apply.yml`
+Config phase runs on bootstrapped VMs at user-owned paths (`$HOMESTAK_ROOT`):
+- Spec: `$HOMESTAK_ROOT/.state/config/spec.yaml`
+- Marker: `$HOMESTAK_ROOT/.state/config/complete.json`
+- iac-driver: `$HOMESTAK_ROOT/iac/iac-driver/`
+- Ansible: `$HOMESTAK_ROOT/iac/ansible/`
+- Playbook: `$HOMESTAK_ROOT/iac/ansible/playbooks/config-apply.yml`
 
-Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. User-owned paths (`~/lib/`) are the default.
+Dev environment: set `$HOMESTAK_ROOT` to point to your workspace. User-owned paths (`$HOMESTAK_ROOT/iac/`) are the default.
 
 ## Risk Assessment
 
@@ -453,7 +453,7 @@ nodes:
 - iac-driver already has ConfigResolver, ansible integration, and action patterns
 - Avoids duplicating YAML→ansible mapping logic in bootstrap
 - bootstrap stays as thin porcelain; iac-driver is the engine
-- Cloud-init calls iac-driver directly: `~/lib/iac-driver/run.sh config`
+- Cloud-init calls iac-driver directly: `$HOMESTAK_ROOT/iac/iac-driver/run.sh config`
 - `homestak spec get` (bootstrap) fetches the spec; `./run.sh config` (iac-driver) applies it — clean separation of concerns
 
 ## Implementation Status
