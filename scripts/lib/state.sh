@@ -11,7 +11,7 @@ STATE_FILE="${STATE_FILE:-${META_DIR:-.}/.release-state.json}"
 SCHEMA_VERSION=1
 
 # All repos in dependency order
-REPOS=(.github .claude meta config tofu ansible bootstrap packer iac-driver)
+REPOS=(.github .claude meta config bare-metal tofu ansible bootstrap packer iac-driver)
 
 # Repo-to-org mapping for multi-org support (#308)
 # Maps repo names to their GitHub org/repo full path.
@@ -20,6 +20,7 @@ declare -A REPO_ORGS=(
     [.claude]="homestak-dev/.claude"
     [meta]="homestak-dev/meta"
     [config]="homestak/config"
+    [bare-metal]="homestak/bare-metal"
     [tofu]="homestak-iac/tofu"
     [ansible]="homestak-iac/ansible"
     [bootstrap]="homestak/bootstrap"
@@ -33,6 +34,7 @@ declare -A REPO_DIRS=(
     [.claude]="dev/.claude"
     [.github]="dev/.github"
     [config]="config"
+    [bare-metal]="bare-metal"
     [bootstrap]="bootstrap"
     [tofu]="iac/tofu"
     [ansible]="iac/ansible"

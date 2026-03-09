@@ -243,8 +243,8 @@ teardown() {
 # REPOS array tests
 # -----------------------------------------------------------------------------
 
-@test "REPOS array has 9 repositories" {
-    [ "${#REPOS[@]}" -eq 9 ]
+@test "REPOS array has 10 repositories" {
+    [ "${#REPOS[@]}" -eq 10 ]
 }
 
 @test "REPOS array is in dependency order" {
@@ -253,6 +253,11 @@ teardown() {
     [ "${REPOS[1]}" = ".claude" ]
     [ "${REPOS[2]}" = "meta" ]
 
+    # bare-metal after config, before tofu
+    [ "${REPOS[3]}" = "config" ]
+    [ "${REPOS[4]}" = "bare-metal" ]
+    [ "${REPOS[5]}" = "tofu" ]
+
     # Last should be iac-driver (depends on all others)
-    [ "${REPOS[8]}" = "iac-driver" ]
+    [ "${REPOS[9]}" = "iac-driver" ]
 }
