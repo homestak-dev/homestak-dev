@@ -19,6 +19,11 @@
   - CLAUDE.md: org table, imports, terminology, bootstrap URL
   - Lifecycle and design docs: GitHub issue/command URLs updated
   - REPO-SETTINGS.md: template commands use `ORG/REPO_NAME`
+- Update UAT docs for multi-org paths and parameterized network config (#322)
+- Add org settings and roadmap documentation (#306, #307)
+
+### Fixed
+- Un-ignore `.github/workflows/` so CI workflow is properly tracked (#324)
 
 ## v0.53 - 2026-03-06
 
