@@ -80,7 +80,7 @@ Both paths apply the same ansible roles (base, users, security). Push mode runs 
 
 **Spec source resolution:**
 1. `--spec /path/to/spec.yaml` (explicit)
-2. `~/.state/config/spec.yaml` (default, from `homestak spec get`)
+2. `$HOMESTAK_ROOT/.state/config/spec.yaml` (default, from `homestak spec get`)
 
 **Exit codes:**
 - `0` — Success (platform ready)
