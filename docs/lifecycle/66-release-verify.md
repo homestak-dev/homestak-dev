@@ -20,16 +20,7 @@ Confirm releases exist, have correct tags, and assets are present.
 ./scripts/release.sh verify
 ```
 
-Or manually:
-
-```bash
-VERSION=0.45
-for repo in .github .claude homestak-dev site-config tofu ansible bootstrap packer iac-driver; do
-  echo "=== $repo ==="
-  gh release view v${VERSION} --repo homestak-dev/$repo \
-    --json tagName,assets --jq '{tag: .tagName, assets: (.assets | length)}'
-done
-```
+The CLI checks all 9 repos across 3 orgs automatically.
 
 ### 2. Expected Results
 
@@ -45,9 +36,9 @@ Test bootstrap installation:
 
 ```bash
 # On a clean system or VM
-curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/v0.45/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/v0.54/install | sudo bash
 sudo -iu homestak
-homestak --version  # Should show v0.45
+homestak --version  # Should show v0.54
 ```
 
 ### 4. Verify Scope Issues Closed
@@ -58,15 +49,15 @@ Check all scope issues from completed sprints are closed:
 # Review release issue for sprint links
 gh issue view <release-issue> --repo homestak-dev/meta
 
-# Verify each scope issue is closed
-gh issue view <issue-num> --repo homestak-dev/<repo> --json state
+# Verify each scope issue is closed (use correct org per repo)
+gh issue view <issue-num> --repo <org>/<repo> --json state
 ```
 
 Close any missed issues:
 
 ```bash
-gh issue close <issue-num> --repo homestak-dev/<repo> \
-  --comment "Implemented in v0.45"
+gh issue close <issue-num> --repo <org>/<repo> \
+  --comment "Implemented in vX.Y"
 ```
 
 ## Outputs

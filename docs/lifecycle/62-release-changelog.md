@@ -20,7 +20,7 @@ Move content from `## Unreleased` to versioned section in all repos.
 In dependency order:
 
 ```
-.github → .claude → homestak-dev → site-config → tofu → ansible → bootstrap → packer → iac-driver
+.github → .claude → meta → config → tofu → ansible → bootstrap → packer → iac-driver
 ```
 
 ### 2. CHANGELOG Format
@@ -74,34 +74,40 @@ No changes.
 
 ### 5. Commit CHANGELOG Updates
 
-```bash
-for repo in .claude .github ansible bootstrap homestak-dev iac-driver packer site-config tofu; do
-  cd ~/homestak-dev/$repo
-  git add CHANGELOG.md
-  git commit -m "docs: Update CHANGELOG for v0.45
+CHANGELOG stamps require PRs (rulesets block direct push). Create a branch, commit, and PR per repo:
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
-  git push origin master
-done
+```bash
+# For each repo: branch, commit, push, PR with --head flag
+git -C <repo-path> checkout -b release/vX.Y-changelog
+git -C <repo-path> add CHANGELOG.md
+git -C <repo-path> commit -m "docs: Stamp CHANGELOG for vX.Y"
+git -C <repo-path> push -u origin release/vX.Y-changelog
+
+# Create PR with explicit --head (required for multi-org)
+GH_TOKEN=$HOMESTAK_BOT_TOKEN gh pr create --repo <org>/<repo> \
+  --head release/vX.Y-changelog --title "docs: Stamp CHANGELOG for vX.Y" --body "..."
+gh pr merge --auto --squash <pr> --repo <org>/<repo>
 ```
+
+**CHANGELOG-only PRs** may be approved by the operator without manual review since they contain only version header stamps.
 
 ## Outputs
 
 - All repos have versioned CHANGELOG entries
-- Changes committed and pushed
+- Changes committed and pushed via PRs
 
 ## Checklist: CHANGELOG Complete
 
 - [ ] .github CHANGELOG updated
 - [ ] .claude CHANGELOG updated
-- [ ] homestak-dev CHANGELOG updated
-- [ ] site-config CHANGELOG updated
+- [ ] meta CHANGELOG updated
+- [ ] config CHANGELOG updated
 - [ ] tofu CHANGELOG updated
 - [ ] ansible CHANGELOG updated
 - [ ] bootstrap CHANGELOG updated
 - [ ] packer CHANGELOG updated
 - [ ] iac-driver CHANGELOG updated
-- [ ] All changes committed and pushed
+- [ ] All PRs merged
 
 ## Next Phase
 

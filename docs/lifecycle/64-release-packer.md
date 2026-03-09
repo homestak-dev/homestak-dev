@@ -54,12 +54,12 @@ Images on `latest` are already current. No action needed.
 
 ```bash
 # Build on capable host
-ssh srv1 'cd ~/lib/packer && ./build.sh'
+ssh srv1 'cd ~/iac/packer && ./build'
 ```
 
 Or build locally if QEMU/KVM is available:
 ```bash
-cd packer && ./build.sh
+cd packer && ./build
 ```
 
 #### 2. Upload to Latest Release
