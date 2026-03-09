@@ -13,14 +13,14 @@ Internal validation checklist for verifying homestak on a fresh Debian 13 host.
 
 ```bash
 # 1. Bootstrap (creates homestak user, clones repos)
-curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/master/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/master/install | sudo bash
 
 # 2. Switch to homestak user (all subsequent commands run as homestak)
 sudo -iu homestak
 
 # 3. Configure site defaults for your network
-sed -i 's/gateway: ""/gateway: 192.168.1.1/' ~/etc/site.yaml
-sed -i 's/dns_servers: \[\]/dns_servers: [ 192.168.1.1 ]/' ~/etc/site.yaml
+sed -i 's/gateway: ""/gateway: <YOUR_GATEWAY>/' ~/config/site.yaml
+sed -i 's/dns_servers: \[\]/dns_servers: [ <YOUR_DNS> ]/' ~/config/site.yaml
 # Optional: defaults.domain (e.g., home.arpa)
 
 # 4. Initialize site configuration (generates host config, SSH key)
@@ -40,7 +40,7 @@ homestak images download all --publish
 Run from the host console:
 
 ```bash
-cd ~/lib/iac-driver
+cd ~/iac/iac-driver
 ./run.sh manifest test -M n1-push -H $(hostname -s) --verbose
 ./run.sh manifest test -M n1-pull -H $(hostname -s) --verbose
 ./run.sh manifest test -M n2-tiered -H $(hostname -s) --verbose
@@ -76,10 +76,10 @@ To reset and re-run on an existing host (e.g., after code changes):
 # Pull latest code
 homestak update
 
-# Reset site-config to clean state and re-initialize from templates
-rm -f ~/etc/site.yaml ~/etc/secrets.yaml
-rm -f ~/etc/hosts/*.yaml ~/etc/nodes/*.yaml
-make -C ~/etc init-site init-secrets
+# Reset config to clean state and re-initialize from templates
+rm -f ~/config/site.yaml ~/config/secrets.yaml
+rm -f ~/config/hosts/*.yaml ~/config/nodes/*.yaml
+make -C ~/config init-site init-secrets
 
 # Continue with Setup steps 3-6
 ```
