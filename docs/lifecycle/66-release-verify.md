@@ -36,9 +36,9 @@ Test bootstrap installation:
 
 ```bash
 # On a clean system or VM
-curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/v0.54/install | sudo bash
+curl -fsSL https://raw.githubusercontent.com/homestak/bootstrap/vX.Y/install | sudo bash
 sudo -iu homestak
-homestak --version  # Should show v0.54
+homestak --version  # Should show vX.Y
 ```
 
 ### 4. Verify Scope Issues Closed
