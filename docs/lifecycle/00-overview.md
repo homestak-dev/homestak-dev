@@ -169,9 +169,9 @@ homestak is a polyrepo workspace containing 10 repositories across 3 orgs:
 3. **meta** - Release automation, lifecycle docs
 
 **Core repositories** (homestak — user-facing):
-4. **config** - Configuration and secrets
-5. **bare-metal** - Debian preseed ISO remastering
-6. **bootstrap** - Installation and CLI
+4. **bare-metal** - Debian preseed ISO remastering
+5. **bootstrap** - Installation and CLI
+6. **config** - Configuration and secrets
 
 **IaC repositories** (homestak-iac — infrastructure components):
 7. **tofu** - VM provisioning modules
