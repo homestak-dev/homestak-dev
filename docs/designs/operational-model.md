@@ -72,7 +72,7 @@ site-config mixes two fundamentally different types of data in a single director
 - `nodes/*.yaml` (from `make node-config` or pve-setup)
 - `hosts/*.yaml` (from `make host-config`)
 - `secrets.yaml` generated entries (API tokens, signing key)
-- `state/config-complete.json` (config phase marker)
+- `.state/config/complete.json` (config phase marker)
 
 ### Current layout (mixed)
 
@@ -86,8 +86,8 @@ site-config mixes two fundamentally different types of data in a single director
 ├── manifests/                  ← authored
 ├── nodes/hostname.yaml         ← generated (gitignored)
 ├── hosts/hostname.yaml         ← generated (gitignored)
-└── state/
-    └── config-complete.json    ← generated
+└── .state/config/
+    └── complete.json           ← generated
 ```
 
 The mixing of authored and generated data in `secrets.yaml` causes:
@@ -107,11 +107,9 @@ The mixing of authored and generated data in `secrets.yaml` causes:
 ├── manifests/
 └── defs/
 
-~/etc/state/                    ← generated state (local, per-host, never in git)
-├── nodes/hostname.yaml
-├── hosts/hostname.yaml
-├── secrets.yaml                ← generated secrets (API tokens, signing key)
-└── config-complete.json
+~/.state/config/                ← generated state (local, per-host, never in git)
+├── spec.yaml
+└── complete.json
 ```
 
 - **Authored config** syncs via `git pull`. Same everywhere. No merge conflicts.
@@ -134,7 +132,7 @@ CREATE (orchestrator, anywhere)
 CONFIG (push or pull)
 ├── push: operator SSHes to VM, runs ansible with resolved authored config
 └── pull: VM fetches spec from server, applies locally
-└── result: ~/etc/state/config-complete.json (generated, local)
+└── result: ~/.state/config/complete.json (generated, local)
 
 DESTROY (orchestrator, anywhere)
 ├── tofu destroys VM via PVE API

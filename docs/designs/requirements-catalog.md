@@ -94,7 +94,7 @@ Requirements for the config phase: sources, resolution, state management.
 | REQ-CFG-006 | YAML manipulation must use proper libraries (not sed/echo) | P1 | Accepted | test | - | - |
 | REQ-CFG-007 | Boolean extra-vars need `| bool` filter in Ansible | P1 | Validated | test | - | - |
 | REQ-CFG-008 | Node config filename must match PVE node name | P0 | Validated | impl | - | - |
-| REQ-CFG-009 | State isolation per manifest+node+host (`.states/{manifest}/{node}-{host}/`) | P0 | Validated | impl | - | test_actions.py |
+| REQ-CFG-009 | State isolation per manifest+node+host (`.state/tofu/{manifest}/{node}-{host}/`) | P0 | Validated | impl | - | test_actions.py |
 | REQ-CFG-010 | State file must be outside TF_DATA_DIR (OpenTofu bug workaround) | P0 | Validated | impl | - | - |
 | REQ-CFG-011 | Provider lockfiles can become stale (preflight auto-clears) | P1 | Validated | test | - | - |
 | REQ-CFG-012 | Context must be serializable for persistence (JSON) | P1 | Validated | impl | - | test_cli.py |
@@ -131,7 +131,7 @@ Requirements for the unified server daemon (specs + repos serving). Previously n
 | REQ-CTL-015 | Exec chain: `run.sh` execs python3 directly (no bash wrapper in PID chain) | P0 | Accepted | design | server-daemon.md | `server start` + `server stop` |
 | REQ-CTL-016 | Double-fork daemonization: setsid, detach from terminal/SSH | P0 | Accepted | design | server-daemon.md | `server start` via SSH |
 | REQ-CTL-017 | Health-check startup gate: parent blocks until /health responds | P0 | Accepted | design | server-daemon.md | `server start` |
-| REQ-CTL-018 | Port-qualified PID file (`/var/run/homestak/server-{port}.pid`) | P0 | Accepted | design | server-daemon.md | `server start` |
+| REQ-CTL-018 | Port-qualified PID file (`$HOMESTAK_ROOT/.run/server-{port}.pid`) | P0 | Accepted | design | server-daemon.md | `server start` |
 | REQ-CTL-019 | Stale PID detection: dead process → clean up and restart | P1 | Accepted | design | server-daemon.md | Scenario 5 |
 | REQ-CTL-020 | `server stop`: SIGTERM → 5s wait → SIGKILL escalation | P0 | Accepted | design | server-daemon.md | `server stop` |
 | REQ-CTL-021 | `server status`: JSON output, exit codes (0=healthy, 1=not running, 2=unhealthy) | P1 | Accepted | design | server-daemon.md | `server status --json` |

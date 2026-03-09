@@ -429,8 +429,8 @@ Transient failure (retries exhausted):
 ```
 
 **Operator visibility:**
-- `WaitForFileAction` on `config-complete.json` times out → node marked failed in operator
-- SSH inspection: `cat ~/etc/state/config-failed.json`
+- `WaitForFileAction` on `complete.json` times out → node marked failed in operator
+- SSH inspection: `cat ~/.state/config/failed.json`
 - Full log: `cat /var/log/homestak/config.log`
 - Server logs: failed requests logged with client IP and error code
 

@@ -32,14 +32,14 @@ Driver             1. tofu apply (no spec injection)      1. tofu apply (with HO
                    2. start VM                            2. start VM
                    3. wait IP                             3. wait IP
                    4. wait SSH                            4. wait SSH
-                   5. refresh apt cache                   5. poll for config-complete
+                   5. refresh apt cache                   5. poll for config complete
                    6. ansible-playbook over SSH
-                   7. write config-complete marker
+                   7. write config complete marker
                       ↓                                      ↓
 VM                                                        5a. cloud-init runcmd:
                                                               ./run.sh config fetch --insecure
                                                           5b. fetches spec, applies config
-                                                          5c. writes config-complete
+                                                          5c. writes config complete
                       ↓                                      ↓
 Driver             8. verify marker                       6. marker found → done
 ```
@@ -80,7 +80,7 @@ Both paths apply the same ansible roles (base, users, security). Push mode runs 
 
 **Spec source resolution:**
 1. `--spec /path/to/spec.yaml` (explicit)
-2. `~/etc/state/spec.yaml` (default, from `homestak spec get`)
+2. `~/.state/config/spec.yaml` (default, from `homestak spec get`)
 
 **Exit codes:**
 - `0` — Success (platform ready)
@@ -117,7 +117,7 @@ class ConfigApply:
 
 **Path discovery:** `config_apply.py` discovers paths via environment variables or user-owned defaults:
 
-- **State dir:** `$HOMESTAK_ETC/state/` or `~/etc/state/`
+- **State dir:** `$HOMESTAK_ROOT/.state/config/`
 - **Ansible dir:** `$HOMESTAK_LIB/ansible/` or `~/lib/ansible/`
 
 **Dev environment:** Set `HOMESTAK_LIB` to point to your workspace (e.g., `HOMESTAK_LIB=~/homestak-dev`). There is no sibling directory discovery — the config command is designed for bootstrapped hosts where user-owned paths exist.
@@ -168,7 +168,7 @@ New playbook `ansible/playbooks/config-apply.yml`:
 
 ### Platform-Ready Marker
 
-Path: `~/etc/state/config-complete.json`
+Path: `~/.state/config/complete.json`
 
 ```json
 {
@@ -211,7 +211,7 @@ def _wait_for_config_complete(self, exec_node, ip, context, timeout=300):
     wait_spec = WaitForFileAction(
         name=f'wait-spec-{exec_node.name}',
         host_key=f'{exec_node.name}_ip',
-        file_path='~/etc/state/spec.yaml',
+        file_path='~/.state/config/spec.yaml',
         timeout=timeout,
         interval=10,
     )
@@ -219,11 +219,11 @@ def _wait_for_config_complete(self, exec_node, ip, context, timeout=300):
     if not result.success:
         return result
 
-    # 2. Wait for config-complete marker
+    # 2. Wait for config complete marker
     wait_config = WaitForFileAction(
         name=f'wait-config-{exec_node.name}',
         host_key=f'{exec_node.name}_ip',
-        file_path='~/etc/state/config-complete.json',
+        file_path='~/.state/config/complete.json',
         timeout=timeout,
         interval=10,
     )
@@ -286,7 +286,7 @@ Add `./run.sh config` to the existing runcmd block:
 %{if var.spec_server != ""}
       - |
         # Bootstrap from server + config on first boot (v0.48+)
-        if [ ! -f ~/etc/state/config-complete.json ]; then
+        if [ ! -f ~/.state/config/complete.json ]; then
           . /etc/profile.d/homestak.sh
           curl -fsSk "$HOMESTAK_SERVER/bootstrap.git/install.sh" | \
             HOMESTAK_SOURCE="$HOMESTAK_SERVER" HOMESTAK_REF=_working HOMESTAK_INSECURE=1 SKIP_SITE_CONFIG=1 bash
@@ -332,14 +332,14 @@ site-config                  iac-driver                     ansible
 | Controller → spec_client | Resolved spec | JSON over HTTPS |
 | spec_client → disk | spec.yaml | YAML file |
 | config_apply.py → ansible | Generated vars | JSON vars file |
-| config_apply.py → marker | config-complete | JSON file |
+| config_apply.py → marker | config complete | JSON file |
 | Operator → VM | File existence check | SSH + `test -f` |
 
 ### Path Mode Verification
 
 Config phase runs on bootstrapped VMs at user-owned paths (~homestak/):
-- Spec: `~/etc/state/spec.yaml`
-- Marker: `~/etc/state/config-complete.json`
+- Spec: `~/.state/config/spec.yaml`
+- Marker: `~/.state/config/complete.json`
 - iac-driver: `~/lib/iac-driver/`
 - Ansible: `~/lib/ansible/`
 - Playbook: `~/lib/ansible/playbooks/config-apply.yml`
@@ -387,7 +387,7 @@ Dev environment: `$HOMESTAK_LIB` must be set to locate ansible. User-owned paths
 2. Provision VM with `execution.mode: pull` manifest
 3. Wait for cloud-init to run `spec get` + `./run.sh config`
 4. Verify spec.yaml exists on VM
-5. Verify config-complete.json exists on VM
+5. Verify complete.json exists on VM
 6. Verify packages installed (spot check)
 7. Verify user created with SSH key
 8. Destroy VM and stop server
