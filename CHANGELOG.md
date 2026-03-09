@@ -2,12 +2,15 @@
 
 ## Unreleased
 
+## v0.55 - 2026-03-08
+
 ### Added
 - Add bare-metal as 10th managed repo (#330)
   - `state.sh`: REPOS, REPO_ORGS, REPO_DIRS entries
   - Dependency order: config → bare-metal → tofu
   - Update lifecycle docs (00-overview, 50-merge, 60-release, 80-reference)
   - Fix stale `site-config` naming in dependency chains
+  - Adopt alphabetical org ordering convention
 
 ## v0.54 - 2026-03-08
 
