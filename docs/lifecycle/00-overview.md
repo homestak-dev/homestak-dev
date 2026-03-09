@@ -161,19 +161,21 @@ Release Issue Created (theme-first)
 
 ## Multi-Repo Structure
 
-homestak-dev is a polyrepo workspace containing 10 repositories:
+homestak is a polyrepo workspace containing 10 repositories across 3 orgs:
 
-**Meta repositories** (release process, documentation):
+**Meta repositories** (homestak-dev — release process, documentation):
 1. **.github** - Organization templates and PR defaults
 2. **.claude** - Claude Code configuration and skills
-3. **homestak-dev** - Workspace parent, release methodology
+3. **meta** - Release automation, lifecycle docs
 
-**Core repositories** (functional dependencies):
+**Core repositories** (homestak — user-facing):
 4. **config** - Configuration and secrets
 5. **bare-metal** - Debian preseed ISO remastering
-6. **tofu** - VM provisioning modules
-7. **ansible** - Host configuration playbooks
-8. **bootstrap** - Installation and CLI
+6. **bootstrap** - Installation and CLI
+
+**IaC repositories** (homestak-iac — infrastructure components):
+7. **tofu** - VM provisioning modules
+8. **ansible** - Host configuration playbooks
 9. **packer** - Custom images (requires build host)
 10. **iac-driver** - Orchestration (depends on all above)
 
