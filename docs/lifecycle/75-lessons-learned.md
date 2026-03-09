@@ -1,12 +1,16 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.55. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.56
+
+- **CHANGELOG entries must ship with the PR, not retroactively** — Third consecutive release (v0.54, v0.55, v0.56) where repos had empty Unreleased sections despite merged work. config had a merged PR (#98) with no CHANGELOG entry. This is a recurring pattern that adds avoidable overhead during release CHANGELOG stamping.
 
 ## v0.55
 
