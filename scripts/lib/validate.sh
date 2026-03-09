@@ -4,19 +4,12 @@
 #
 # Runs integration tests via iac-driver and captures reports
 #
-# Execution modes:
-#   dev (default) - runs ./iac-driver/run.sh from dev checkout
-#   stage         - runs via installed 'homestak scenario' CLI
-#
 
 # Default values
 IAC_DRIVER_DIR="${WORKSPACE_DIR}/$(repo_dir iac-driver)"
 DEFAULT_MANIFEST="n1-push"
 DEFAULT_SCENARIO=""
 DEFAULT_HOST=""
-
-# Paths for stage mode
-HOMESTAK_IAC_DRIVER="$HOME/lib/iac-driver"
 
 # -----------------------------------------------------------------------------
 # Validation Functions
@@ -136,106 +129,6 @@ validate_run_remote() {
 }
 
 # -----------------------------------------------------------------------------
-# Stage Mode Functions (validate via installed CLI)
-# -----------------------------------------------------------------------------
-
-validate_check_homestak_cli() {
-    if ! id homestak &>/dev/null; then
-        log_error "homestak user not found — bootstrap required"
-        log_error "Use --remote <host> to run on a bootstrapped host"
-        return 1
-    fi
-    return 0
-}
-
-validate_run_stage_local() {
-    local scenario="$1"
-    local host="$2"
-    local verbose="${3:-false}"
-    local packer_release="${4:-}"
-    local manifest="${5:-}"
-
-    # Build the command
-    # Manifest-first, scenario as fallback
-    local cmd
-    if [[ -n "$manifest" ]]; then
-        cmd="sudo -iu homestak homestak manifest test -M ${manifest} -H ${host}"
-    elif [[ -n "$scenario" ]]; then
-        cmd="sudo -iu homestak homestak scenario run ${scenario} --host ${host}"
-    else
-        log_error "Either --manifest or --scenario must be specified"
-        return 1
-    fi
-    if [[ "$verbose" == "true" ]]; then
-        cmd+=" --verbose"
-    fi
-    if [[ -n "$packer_release" ]]; then
-        cmd+=" --packer-release ${packer_release}"
-    fi
-
-    log_info "Running (stage): $cmd"
-    audit_cmd "$cmd" "homestak"
-
-    # Run and capture exit code
-    set +e
-    eval "$cmd"
-    local exit_code=$?
-    set -e
-
-    return $exit_code
-}
-
-validate_run_stage_remote() {
-    local remote_host="$1"
-    local scenario="$2"
-    local host="$3"
-    local verbose="${4:-false}"
-    local packer_release="${5:-}"
-    local manifest="${6:-}"
-
-    local verbose_flag=""
-    if [[ "$verbose" == "true" ]]; then
-        verbose_flag="--verbose"
-    fi
-
-    local packer_release_flag=""
-    if [[ -n "$packer_release" ]]; then
-        packer_release_flag="--packer-release ${packer_release}"
-    fi
-
-    # Build the remote command - runs as homestak user
-    # Manifest-first, scenario as fallback
-    local remote_cmd
-    if [[ -n "$manifest" ]]; then
-        remote_cmd="sudo -iu homestak homestak manifest test -M ${manifest} -H ${host} ${verbose_flag} ${packer_release_flag}"
-    elif [[ -n "$scenario" ]]; then
-        remote_cmd="sudo -iu homestak homestak scenario run ${scenario} --host ${host} ${verbose_flag} ${packer_release_flag}"
-    else
-        log_error "Either --manifest or --scenario must be specified"
-        return 1
-    fi
-
-    log_info "Running stage validation on ${remote_host}..."
-    log_info "Remote command: ${remote_cmd}"
-    audit_cmd "ssh ${remote_host} '${remote_cmd}'" "ssh"
-
-    # Run on remote and capture exit code
-    set +e
-    ssh "${remote_host}" "${remote_cmd}"
-    local exit_code=$?
-    set -e
-
-    # Copy reports back from FHS location
-    local report_dir="${IAC_DRIVER_DIR}/reports"
-    mkdir -p "$report_dir"
-
-    log_info "Copying reports from ${remote_host}..."
-    scp -q "${remote_host}:${HOMESTAK_IAC_DRIVER}/reports/*.md" "${report_dir}/" 2>/dev/null || true
-
-    return $exit_code
-}
-
-# -----------------------------------------------------------------------------
 # Main Validation Runner
 # -----------------------------------------------------------------------------
 
@@ -246,8 +139,7 @@ run_validation() {
     local verbose="${4:-false}"
     local remote_host="${5:-}"
     local packer_release="${6:-}"
-    local stage="${7:-false}"
-    local manifest="${8:-$DEFAULT_MANIFEST}"
+    local manifest="${7:-$DEFAULT_MANIFEST}"
 
     # If no scenario and no manifest, use default manifest
     if [[ -z "$scenario" && -z "$manifest" ]]; then
@@ -273,19 +165,9 @@ run_validation() {
         return 1
     fi
 
-    # Determine mode and check prerequisites
-    local mode="dev"
-    if [[ "$stage" == "true" ]]; then
-        mode="stage"
-        # Stage mode: check homestak CLI exists (local) or trust remote has it
-        if [[ -z "$remote_host" ]] && ! validate_check_homestak_cli; then
-            return 1
-        fi
-    else
-        # Dev mode: check iac-driver exists (only for local execution)
-        if [[ -z "$remote_host" ]] && ! validate_check_iac_driver; then
-            return 1
-        fi
+    # Check prerequisites (local execution only)
+    if [[ -z "$remote_host" ]] && ! validate_check_iac_driver; then
+        return 1
     fi
 
     # Determine display label
@@ -308,7 +190,6 @@ run_validation() {
         echo "  Scenario: ${scenario}"
     fi
     echo "  Host:     ${host}"
-    echo "  Mode:     ${mode}"
     if [[ -n "$remote_host" ]]; then
         echo "  Remote:   ${remote_host}"
     fi
@@ -318,29 +199,15 @@ run_validation() {
     local start_time
     start_time=$(date +%s)
 
-    # Run the scenario based on mode
+    # Run the scenario
     local scenario_passed=false
-    if [[ "$stage" == "true" ]]; then
-        # Stage mode: use homestak CLI
-        if [[ -n "$remote_host" ]]; then
-            if validate_run_stage_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
-                scenario_passed=true
-            fi
-        else
-            if validate_run_stage_local "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
-                scenario_passed=true
-            fi
+    if [[ -n "$remote_host" ]]; then
+        if validate_run_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
+            scenario_passed=true
         fi
     else
-        # Dev mode: use iac-driver directly
-        if [[ -n "$remote_host" ]]; then
-            if validate_run_remote "$remote_host" "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
-                scenario_passed=true
-            fi
-        else
-            if validate_run_scenario "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
-                scenario_passed=true
-            fi
+        if validate_run_scenario "$scenario" "$host" "$verbose" "$packer_release" "$manifest"; then
+            scenario_passed=true
         fi
     fi
 

@@ -528,7 +528,6 @@ Options:
   --reset-repo REPO  Reset tag for single repo only
   --yes, -y          Skip confirmation prompt (tag, publish, close)
   --skip REASON      Skip validation with reason (posted to release issue)
-  --stage            Run via 'homestak scenario' CLI instead of ./run.sh (stage mode)
   --remote HOST      Run validation on remote host via SSH
   --packer-release   Packer release tag for image downloads (validate only)
   --manifest NAME    Manifest name for manifest-based tests (default: n1-push)

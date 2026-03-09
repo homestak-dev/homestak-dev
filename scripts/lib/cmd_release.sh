@@ -71,7 +71,6 @@ cmd_validate() {
     local verbose=false
     local remote=""
     local packer_release=""
-    local stage=false
     local manifest="n1-push"
 
     while [[ $# -gt 0 ]]; do
@@ -102,10 +101,6 @@ cmd_validate() {
                 skip="${2:?--skip requires a reason}"
                 shift 2
                 ;;
-            --stage)
-                stage=true
-                shift
-                ;;
             --verbose|-v)
                 verbose=true
                 shift
@@ -118,8 +113,8 @@ cmd_validate() {
     done
 
     # Mutual exclusion: --skip vs execution flags
-    if [[ -n "$skip" ]] && [[ -n "$host" || -n "$scenario" || -n "$remote" || "$stage" == "true" ]]; then
-        log_error "--skip cannot be combined with --host, --scenario, --remote, or --stage"
+    if [[ -n "$skip" ]] && [[ -n "$host" || -n "$scenario" || -n "$remote" ]]; then
+        log_error "--skip cannot be combined with --host, --scenario, or --remote"
         exit 1
     fi
 
@@ -130,7 +125,7 @@ cmd_validate() {
 
     # Handle skip with reason
     if [[ -n "$skip" ]]; then
-        if run_validation "$scenario" "$host" "$skip" "$verbose" "$remote" "$packer_release" "$stage" "$manifest"; then
+        if run_validation "$scenario" "$host" "$skip" "$verbose" "$remote" "$packer_release" "$manifest"; then
             if state_exists; then
                 state_set_phase_status "validation" "complete"
                 issue_update_validation_skipped "$skip"
@@ -142,7 +137,7 @@ cmd_validate() {
 
     # Run validation
     local validation_passed=false
-    if run_validation "$scenario" "$host" "" "$verbose" "$remote" "$packer_release" "$stage" "$manifest"; then
+    if run_validation "$scenario" "$host" "" "$verbose" "$remote" "$packer_release" "$manifest"; then
         validation_passed=true
     fi
 
@@ -523,7 +518,7 @@ cmd_full() {
                 ;;
 
             validate)
-                if ! run_validation "$scenario" "$host" "false" "false" "" "" "false" "$manifest"; then
+                if ! run_validation "$scenario" "$host" "false" "false" "" "" "$manifest"; then
                     log_error "Validation failed"
                     return 1
                 fi
