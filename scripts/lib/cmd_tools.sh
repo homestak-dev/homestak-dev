@@ -503,6 +503,7 @@ Commands:
   resume        Show AI-friendly recovery context (markdown output)
   preflight     Run pre-flight checks
   validate      Run integration tests
+  changelog     Stamp CHANGELOG version headers
   tag           Create git tags
   publish       Create GitHub releases
   packer        Handle packer image automation
@@ -551,6 +552,9 @@ Examples:
   release validate --scenario push-vm-roundtrip --host srv1  # Scenario fallback
   release validate --stage --remote srv1              # Stage mode via homestak CLI
   release validate --skip
+  release changelog --dry-run
+  release changelog --execute
+  release changelog --execute --yes              # Skip confirmation prompt
   release tag --dry-run
   release tag --execute
   release tag --execute --yes                   # Skip confirmation prompt

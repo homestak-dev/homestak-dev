@@ -13,6 +13,17 @@ Move content from `## Unreleased` to versioned section in all repos.
 - Phase 61 (Preflight) complete
 - All repos have unreleased content (or explicitly no changes)
 
+## Automation
+
+The `release changelog` command automates this phase:
+
+```bash
+./scripts/release changelog --dry-run       # Preview stamps across all repos
+./scripts/release changelog --execute --yes # Stamp, branch, commit, PR, merge per repo
+```
+
+`--execute` requires `HOMESTAK_BOT_TOKEN` for PR creation.
+
 ## Activities
 
 ### 1. Update Each Repo's CHANGELOG
@@ -20,7 +31,7 @@ Move content from `## Unreleased` to versioned section in all repos.
 In dependency order:
 
 ```
-.github → .claude → meta → config → tofu → ansible → bootstrap → packer → iac-driver
+.github → .claude → meta → config → bare-metal → tofu → ansible → bootstrap → packer → iac-driver
 ```
 
 ### 2. CHANGELOG Format
@@ -102,6 +113,7 @@ gh pr merge --auto --squash <pr> --repo <org>/<repo>
 - [ ] .claude CHANGELOG updated
 - [ ] meta CHANGELOG updated
 - [ ] config CHANGELOG updated
+- [ ] bare-metal CHANGELOG updated
 - [ ] tofu CHANGELOG updated
 - [ ] ansible CHANGELOG updated
 - [ ] bootstrap CHANGELOG updated

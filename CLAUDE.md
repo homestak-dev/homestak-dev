@@ -284,6 +284,8 @@ The `scripts/release` CLI automates multi-repo release operations.
 | `resume` | Show AI-friendly recovery context (markdown) |
 | `preflight` | Check repos ready (clean, no tags, CHANGELOGs) |
 | `validate [--skip REASON]` | Run iac-driver integration tests (--skip posts reason to issue) |
+| `changelog --dry-run` | Preview CHANGELOG version header stamps |
+| `changelog --execute [--yes]` | Stamp CHANGELOGs (branch, commit, PR, merge per repo) |
 | `tag --dry-run` | Preview tag creation |
 | `tag --execute [--yes]` | Create and push tags (--yes skips confirmation) |
 | `tag --reset` | Reset tags to HEAD (v0.x only) |
@@ -307,6 +309,7 @@ The `scripts/release` CLI automates multi-repo release operations.
 ./scripts/release init --version 0.31 --issue 115
 ./scripts/release preflight
 ./scripts/release validate --host srv1
+./scripts/release changelog --execute --yes
 ./scripts/release tag --dry-run
 ./scripts/release tag --execute --yes
 ./scripts/release publish --execute --yes

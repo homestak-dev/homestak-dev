@@ -54,27 +54,27 @@ gh issue close 152 --repo homestak-dev/meta
 
 ```bash
 # Initialize release
-./scripts/release.sh init --version 0.45 --issue 157
+./scripts/release init --version 0.45 --issue 157
 
 # Preflight checks
-./scripts/release.sh preflight
+./scripts/release preflight
 
 # Validation (choose based on scope)
-./scripts/release.sh validate --host srv1
+./scripts/release validate --host srv1
 
 # Tags [GATE]
-./scripts/release.sh tag --dry-run
-./scripts/release.sh tag --execute --yes
+./scripts/release tag --dry-run
+./scripts/release tag --execute --yes
 
 # Publish [GATE]
-./scripts/release.sh publish --dry-run
-./scripts/release.sh publish --execute --yes
+./scripts/release publish --dry-run
+./scripts/release publish --execute --yes
 
 # Verify
-./scripts/release.sh verify
+./scripts/release verify
 
 # Close
-./scripts/release.sh close --execute --yes
+./scripts/release close --execute --yes
 ```
 
 ## Phase Checklists
@@ -143,7 +143,7 @@ gh issue close 152 --repo homestak-dev/meta
 
 ### Release Preflight (61)
 
-- [ ] `release.sh init` run first
+- [ ] `release init` run first
 - [ ] Git fetch on all repos
 - [ ] Working trees clean
 - [ ] No existing tags for version
@@ -259,23 +259,23 @@ gh pr status
 ./run.sh --preflight -H srv1
 ```
 
-### release.sh
+### release
 
 ```bash
 # Full workflow
-./scripts/release.sh init --version 0.45 --issue 157
-./scripts/release.sh preflight
-./scripts/release.sh validate --host srv1
-./scripts/release.sh tag --dry-run
-./scripts/release.sh tag --execute
-./scripts/release.sh publish --execute
-./scripts/release.sh verify
-./scripts/release.sh close --execute
+./scripts/release init --version 0.45 --issue 157
+./scripts/release preflight
+./scripts/release validate --host srv1
+./scripts/release tag --dry-run
+./scripts/release tag --execute
+./scripts/release publish --execute
+./scripts/release verify
+./scripts/release close --execute
 
 # Recovery
-./scripts/release.sh resume   # AI-friendly context
-./scripts/release.sh status   # Human-readable
-./scripts/release.sh audit    # Action log
+./scripts/release resume   # AI-friendly context
+./scripts/release status   # Human-readable
+./scripts/release audit    # Action log
 ```
 
 ## Templates

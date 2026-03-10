@@ -163,6 +163,7 @@ create_test_state() {
   "phases": {
     "preflight": {"status": "pending", "started_at": null, "completed_at": null},
     "validation": {"status": "pending", "started_at": null, "completed_at": null, "report": null},
+    "changelog": {"status": "pending", "started_at": null, "completed_at": null},
     "tags": {"status": "pending", "started_at": null, "completed_at": null},
     "releases": {"status": "pending", "started_at": null, "completed_at": null},
     "verification": {"status": "pending", "started_at": null, "completed_at": null}
@@ -172,6 +173,7 @@ create_test_state() {
     ".claude": {"tag": "pending", "release": "pending"},
     "meta": {"tag": "pending", "release": "pending"},
     "config": {"tag": "pending", "release": "pending"},
+    "bare-metal": {"tag": "pending", "release": "pending"},
     "tofu": {"tag": "pending", "release": "pending"},
     "ansible": {"tag": "pending", "release": "pending"},
     "bootstrap": {"tag": "pending", "release": "pending"},
@@ -198,6 +200,7 @@ create_test_state_with_progress() {
   "phases": {
     "preflight": {"status": "complete", "started_at": "2026-01-16T10:01:00Z", "completed_at": "2026-01-16T10:02:00Z"},
     "validation": {"status": "complete", "started_at": "2026-01-16T10:03:00Z", "completed_at": "2026-01-16T10:10:00Z", "report": "reports/test.passed.md"},
+    "changelog": {"status": "pending", "started_at": null, "completed_at": null},
     "tags": {"status": "pending", "started_at": null, "completed_at": null},
     "releases": {"status": "pending", "started_at": null, "completed_at": null},
     "verification": {"status": "pending", "started_at": null, "completed_at": null}
@@ -207,6 +210,7 @@ create_test_state_with_progress() {
     ".claude": {"tag": "pending", "release": "pending"},
     "meta": {"tag": "pending", "release": "pending"},
     "config": {"tag": "pending", "release": "pending"},
+    "bare-metal": {"tag": "pending", "release": "pending"},
     "tofu": {"tag": "pending", "release": "pending"},
     "ansible": {"tag": "pending", "release": "pending"},
     "bootstrap": {"tag": "pending", "release": "pending"},

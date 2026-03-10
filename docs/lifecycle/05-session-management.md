@@ -234,13 +234,13 @@ For releases specifically, additional recovery tools exist:
 
 ```bash
 # Get AI-friendly recovery context
-./scripts/release.sh resume
+./scripts/release resume
 
 # Check release progress
-./scripts/release.sh status
+./scripts/release status
 
 # View action history
-./scripts/release.sh audit
+./scripts/release audit
 ```
 
 See [60-release.md](60-release.md) for release-specific session management.

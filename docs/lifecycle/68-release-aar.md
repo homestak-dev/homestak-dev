@@ -26,7 +26,7 @@ Use the [AAR Template](../templates/aar.md):
 | Phase | Started | Completed | Notes |
 |-------|---------|-----------|-------|
 | Preflight | 14:00 | 14:15 | Clean |
-| CHANGELOG | 14:15 | 14:30 | 9 repos |
+| CHANGELOG | 14:15 | 14:30 | 10 repos |
 | Tags | 14:30 | 14:35 | No issues |
 | Packer | 14:35 | 14:36 | Skipped (no changes) |
 | Publish | 14:36 | 14:45 | Used workflow |
@@ -45,7 +45,7 @@ None.
 - Found typo in bootstrap --help (created #158)
 
 ### Artifacts
-- 9 repos tagged and released
+- 10 repos tagged and released
 - Packer images: No changes (using latest)
 - Validation: manifest test -M n1-push on srv1 (from Sprint 152)
 ```

@@ -52,7 +52,7 @@ Use the [Retrospective Template](../templates/retrospective.md):
 - Packer decision tree wasn't clear
 
 ### Suggestions
-- Add CHANGELOG helper to release.sh
+- Add CHANGELOG helper to release CLI
 - Document packer decision more clearly
 
 ### Open Questions
@@ -73,10 +73,10 @@ Update `docs/lifecycle/75-lessons-learned.md`:
 
 ### 3. Close Release Issue
 
-Use `release.sh close`:
+Use `release close`:
 
 ```bash
-./scripts/release.sh close --execute --yes
+./scripts/release close --execute --yes
 ```
 
 This:
@@ -108,7 +108,7 @@ The release issue is the record of completion.
 Retrospective has been skipped in multiple releases. This is a common process error.
 
 **Prevention:**
-- `release.sh close` displays reminder
+- `release close` displays reminder
 - Complete same day as release
 - AI can draft to reduce burden
 

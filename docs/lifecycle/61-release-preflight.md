@@ -14,7 +14,7 @@ Preflight checks verify release prerequisites and validation evidence before pro
 
 - Release issue exists
 - All planned sprints completed
-- `release.sh init` executed
+- `release init` executed
 
 ## Activities
 
@@ -27,7 +27,7 @@ Preflight checks verify release prerequisites and validation evidence before pro
 gh issue list --repo homestak-dev/meta --label release --state open
 
 # Initialize release state
-./scripts/release.sh init --version 0.45 --issue 157
+./scripts/release init --version 0.45 --issue 157
 ```
 
 **Why first:** The state file tracks validation status. Running init mid-release causes "validation not complete" errors.
@@ -48,7 +48,7 @@ Evidence needed:
 - Result (PASSED)
 - Report link or summary
 
-**Note:** Release validation is evidence-based. Sprints run the tests; release checks they were run. Additionally, `release.sh validate` must run during the release itself — the state file tracks this, and tag creation (Phase 63) is blocked until validation is marked complete.
+**Note:** Release validation is evidence-based. Sprints run the tests; release checks they were run. Additionally, `release validate` must run during the release itself — the state file tracks this, and tag creation (Phase 63) is blocked until validation is marked complete.
 
 ### 3. Git Fetch All Repos
 
@@ -71,7 +71,7 @@ Automated by `release preflight`. Manual fallback:
 
 ```bash
 VERSION=0.54
-# release.sh checks all 9 repos across 3 orgs automatically
+# release checks all 10 repos across 3 orgs automatically
 ./scripts/release preflight
 ```
 
@@ -93,6 +93,7 @@ Verify each repo's CLAUDE.md reflects current state:
 
 **homestak:**
 - [ ] config - schema, defaults, file structure
+- [ ] bare-metal - preseed, build, reinstall
 - [ ] bootstrap - CLI, installation
 
 **homestak-iac:**
@@ -110,10 +111,10 @@ Automated by `release preflight`. Manual fallback:
 gita shell "head -10 CHANGELOG.md | grep -A3 Unreleased"
 ```
 
-## Using release.sh
+## Using release CLI
 
 ```bash
-./scripts/release.sh preflight
+./scripts/release preflight
 ```
 
 Performs automated checks and reports status.
@@ -126,7 +127,7 @@ Performs automated checks and reports status.
 
 ## Checklist: Preflight Complete
 
-- [ ] `release.sh init` executed
+- [ ] `release init` executed
 - [ ] Validation evidence reviewed
 - [ ] Git fetch on all repos
 - [ ] Working trees clean

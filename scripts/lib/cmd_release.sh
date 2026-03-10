@@ -2,7 +2,7 @@
 #
 # cmd_release - Core release pipeline commands
 #
-# Commands: cmd_preflight, cmd_validate, cmd_tag, cmd_publish, cmd_verify, cmd_full
+# Commands: cmd_preflight, cmd_validate, cmd_changelog, cmd_tag, cmd_publish, cmd_verify, cmd_full
 #
 
 cmd_preflight() {
@@ -158,6 +158,55 @@ cmd_validate() {
             state_set_phase_status "validation" "failed"
         fi
         exit 5
+    fi
+}
+
+cmd_changelog() {
+    local dry_run=true
+    local yes_flag=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                dry_run=true
+                shift
+                ;;
+            --execute)
+                dry_run=false
+                shift
+                ;;
+            --yes|-y)
+                yes_flag=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    require_release_state
+
+    local version
+    version=$(state_get_version)
+
+    # Update state
+    state_set_phase_status "changelog" "in_progress"
+
+    # Run changelog stamping
+    if run_changelog "$version" "$dry_run" "$yes_flag"; then
+        if [[ "$dry_run" == "false" ]]; then
+            state_set_phase_status "changelog" "complete"
+            audit_log "CHANGELOG" "cli" "CHANGELOGs stamped for v${version} in ${#REPOS[@]} repos"
+            issue_update_changelog "$version"
+        fi
+        exit 0
+    else
+        if [[ "$dry_run" == "false" ]]; then
+            state_set_phase_status "changelog" "failed"
+        fi
+        exit 10
     fi
 }
 
@@ -445,6 +494,11 @@ cmd_full() {
         fi
     fi
 
+    phase_status=$(state_get_phase_status "changelog")
+    if [[ "$phase_status" != "complete" ]]; then
+        phases+=("changelog")
+    fi
+
     phase_status=$(state_get_phase_status "tags")
     if [[ "$phase_status" != "complete" ]]; then
         phases+=("tag")
@@ -525,6 +579,16 @@ cmd_full() {
                 local validation_label="${manifest:-$scenario}"
                 state_set_phase_status "validation" "complete"
                 issue_update_validation "$validation_label" "$host" ""
+                ;;
+
+            changelog)
+                if ! run_changelog "$version" "false" "true"; then
+                    log_error "CHANGELOG stamping failed"
+                    return 1
+                fi
+                state_set_phase_status "changelog" "complete"
+                audit_log "CHANGELOG" "cli" "CHANGELOGs stamped for v${version}"
+                issue_update_changelog "$version"
                 ;;
 
             tag)

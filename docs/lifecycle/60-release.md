@@ -94,25 +94,25 @@ Releases follow dependency order:
 
 ## Release CLI
 
-The `scripts/release.sh` CLI automates release operations:
+The `scripts/release` CLI automates release operations:
 
 ```bash
 # Initialize
-./scripts/release.sh init --version 0.45 --issue 157
+./scripts/release init --version 0.45 --issue 157
 
 # Run phases
-./scripts/release.sh preflight
-./scripts/release.sh validate --host srv1
-./scripts/release.sh tag --dry-run
-./scripts/release.sh tag --execute --yes
-./scripts/release.sh publish --execute --yes
-./scripts/release.sh verify
-./scripts/release.sh close --execute --yes
+./scripts/release preflight
+./scripts/release validate --host srv1
+./scripts/release tag --dry-run
+./scripts/release tag --execute --yes
+./scripts/release publish --execute --yes
+./scripts/release verify
+./scripts/release close --execute --yes
 
 # Recovery
-./scripts/release.sh resume   # AI-friendly context
-./scripts/release.sh status   # Human-readable status
-./scripts/release.sh audit    # Action log
+./scripts/release resume   # AI-friendly context
+./scripts/release status   # Human-readable status
+./scripts/release audit    # Action log
 ```
 
 ## Multi-Session Releases
@@ -124,14 +124,14 @@ If spanning multiple sessions:
 1. **Post phase completion comments:**
    ```markdown
    ✅ Phase 62: CHANGELOGs complete
-   - All 9 repos updated
+   - All 10 repos updated
    - Ready for tags
    ```
 
 2. **Use recovery commands:**
    ```bash
-   ./scripts/release.sh resume  # AI-friendly
-   ./scripts/release.sh status  # Human-readable
+   ./scripts/release resume  # AI-friendly
+   ./scripts/release status  # Human-readable
    ```
 
 3. **Review state files:**
@@ -164,7 +164,7 @@ Keep 5 most recent releases. After each release:
 # Check count
 count=$(gh release list --repo homestak-dev/meta --limit 100 | wc -l)
 if [[ $count -gt 5 ]]; then
-  echo "Consider: ./scripts/release.sh sunset --below-version X.Y"
+  echo "Consider: ./scripts/release sunset --below-version X.Y"
 fi
 ```
 

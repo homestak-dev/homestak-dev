@@ -14,7 +14,7 @@ close_check_phases() {
     local warnings=()
 
     # Check all tracked phases are complete
-    for phase in preflight validation tags releases verification; do
+    for phase in preflight validation changelog tags releases verification; do
         local phase_status
         phase_status=$(state_get_phase_status "$phase")
         if [[ "$phase_status" != "complete" ]]; then

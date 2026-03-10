@@ -270,6 +270,11 @@ state_init() {
       "completed_at": null,
       "report": null
     },
+    "changelog": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null
+    },
     "tags": {
       "status": "pending",
       "started_at": null,
@@ -374,6 +379,16 @@ issue_update_validation_skipped() {
     local body="Integration validation **skipped** — ${reason}."
 
     post_issue_update "Validation" "$body"
+}
+
+issue_update_changelog() {
+    local version="$1"
+
+    local body="CHANGELOGs stamped with **v${version}** version header.
+
+All ${#REPOS[@]} repositories updated and merged to master."
+
+    post_issue_update "CHANGELOG" "$body"
 }
 
 issue_update_tags() {
