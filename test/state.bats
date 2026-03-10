@@ -77,7 +77,7 @@ teardown() {
 @test "state_init creates all phases with pending status" {
     state_init "0.25"
 
-    for phase in preflight validation tags releases verification; do
+    for phase in preflight validation changelog tags releases verification; do
         assert_json_field "$STATE_FILE" ".phases.${phase}.status" "pending"
     done
 }

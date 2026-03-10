@@ -8,6 +8,7 @@
 #   release resume
 #   release preflight
 #   release validate {--host <host> [--scenario <name>] | --skip <reason>}
+#   release changelog [--dry-run|--execute]
 #   release tag [--dry-run|--execute]
 #   release publish [--dry-run|--execute]
 #   release verify
@@ -76,6 +77,7 @@ source "${SCRIPT_DIR}/lib/state.sh"
 source "${SCRIPT_DIR}/lib/common.sh"
 source "${SCRIPT_DIR}/lib/preflight.sh"
 source "${SCRIPT_DIR}/lib/validate.sh"
+source "${SCRIPT_DIR}/lib/changelog.sh"
 source "${SCRIPT_DIR}/lib/tag.sh"
 source "${SCRIPT_DIR}/lib/publish.sh"
 source "${SCRIPT_DIR}/lib/verify.sh"
@@ -117,6 +119,9 @@ main() {
             ;;
         validate)
             cmd_validate "$@"
+            ;;
+        changelog)
+            cmd_changelog "$@"
             ;;
         tag)
             cmd_tag "$@"

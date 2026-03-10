@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Added
+- Add `changelog` subcommand to release CLI (#347)
+  - `release changelog --dry-run` previews CHANGELOG version header stamps
+  - `release changelog --execute [--yes]` stamps, branches, commits, PRs, merges
+  - Handles both content and empty `## Unreleased` sections ("No changes.")
+  - Processes all 10 repos in dependency order
+  - Posts phase completion to release tracking issue
+  - Integrated into `release full`, `release status`, `release resume`, `release close`
+  - New `changelog` phase in release state tracking
+
 ## v0.56 - 2026-03-09
 
 ### Theme: Runtime State Consolidation

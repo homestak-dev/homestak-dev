@@ -142,7 +142,7 @@ cmd_status() {
         # Build JSON output
         local phases_json="{"
         local first=true
-        for phase in preflight validation tags releases verification; do
+        for phase in preflight validation changelog tags releases verification; do
             local phase_status
             phase_status=$(state_get_phase_status "$phase")
             if [[ "$first" == "true" ]]; then
@@ -195,7 +195,7 @@ EOF
     echo "Started: ${started_at}"
     echo ""
     echo "Phases:"
-    for phase in preflight validation tags releases verification; do
+    for phase in preflight validation changelog tags releases verification; do
         local phase_status
         phase_status=$(state_get_phase_status "$phase")
         case "$phase_status" in
@@ -303,7 +303,7 @@ cmd_resume() {
     echo ""
     echo "| Phase | Status | Completed |"
     echo "|-------|--------|-----------|"
-    for phase in preflight validation tags releases verification; do
+    for phase in preflight validation changelog tags releases verification; do
         local phase_status completed_at
         phase_status=$(state_get_phase_status "$phase")
         completed_at=$(state_read ".phases.${phase}.completed_at")
@@ -341,7 +341,7 @@ cmd_resume() {
     echo "### Next Steps"
     echo ""
     local next_phase=""
-    for phase in preflight validation tags releases verification; do
+    for phase in preflight validation changelog tags releases verification; do
         local phase_status
         phase_status=$(state_get_phase_status "$phase")
         if [[ "$phase_status" != "complete" ]]; then
