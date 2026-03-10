@@ -30,7 +30,7 @@ Create GitHub releases for all repos in dependency order.
 Preview release creation:
 
 ```bash
-./scripts/release.sh publish --dry-run
+./scripts/release publish --dry-run
 ```
 
 Review:
@@ -43,10 +43,10 @@ Review:
 With approval:
 
 ```bash
-./scripts/release.sh publish --execute --yes
+./scripts/release publish --execute --yes
 ```
 
-Manual fallback requires correct org per repo — prefer `release.sh` which handles the mapping:
+Manual fallback requires correct org per repo — prefer `release` which handles the mapping:
 
 ```bash
 ./scripts/release publish --execute --yes

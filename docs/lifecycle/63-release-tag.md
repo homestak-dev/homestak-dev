@@ -30,7 +30,7 @@ Create annotated tags on all repositories in dependency order.
 Preview tag creation:
 
 ```bash
-./scripts/release.sh tag --dry-run
+./scripts/release tag --dry-run
 ```
 
 Review output:
@@ -43,14 +43,14 @@ Review output:
 With approval:
 
 ```bash
-./scripts/release.sh tag --execute --yes
+./scripts/release tag --execute --yes
 ```
 
 Or manually per repo (must use correct org for each):
 
 ```bash
 VERSION=0.54
-# release.sh handles org mapping and paths automatically
+# release handles org mapping and paths automatically
 ./scripts/release tag --execute --yes
 ```
 
@@ -66,7 +66,7 @@ VERSION=0.54
 If tags need correction during pre-release:
 
 ```bash
-./scripts/release.sh tag --reset
+./scripts/release tag --reset
 ```
 
 This deletes and recreates tags at current HEAD. **Not available after v1.0.**
@@ -76,7 +76,7 @@ This deletes and recreates tags at current HEAD. **Not available after v1.0.**
 If tags created incorrectly:
 
 ```bash
-# release.sh handles org mapping and paths automatically
+# release handles org mapping and paths automatically
 ./scripts/release tag --reset
 ```
 

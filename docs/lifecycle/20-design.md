@@ -241,7 +241,7 @@ Before writing code, know how you'll prove it works.
 | Ansible role | Run playbook on test VM, verify behavior |
 | CLI command | Full command flow, including edge cases |
 | Boot/startup change | Measure actual timing before AND after |
-| release.sh command | `release.sh selftest` + manual verification |
+| release command | `release selftest` + manual verification |
 
 ### Document Your Test Plan
 

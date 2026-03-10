@@ -17,7 +17,7 @@ Confirm releases exist, have correct tags, and assets are present.
 ### 1. Verify All Releases
 
 ```bash
-./scripts/release.sh verify
+./scripts/release verify
 ```
 
 The CLI checks all 10 repos across 3 orgs automatically.

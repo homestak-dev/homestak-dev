@@ -42,7 +42,7 @@ Packer templates changed?
 Most releases skip image handling:
 
 ```bash
-./scripts/release.sh packer --check
+./scripts/release packer --check
 # Output: No template changes detected
 ```
 
@@ -66,19 +66,19 @@ cd packer && ./build
 
 ```bash
 # Preview what would be uploaded
-./scripts/release.sh packer --upload --all
+./scripts/release packer --upload --all
 
 # Upload all images (skips unchanged)
-./scripts/release.sh packer --upload --execute --all
+./scripts/release packer --upload --execute --all
 
 # Force re-upload all images (ignore checksums, implies --execute)
-./scripts/release.sh packer --upload --force --all
+./scripts/release packer --upload --force --all
 
 # Upload specific templates only
-./scripts/release.sh packer --upload --execute debian-12 pve-9
+./scripts/release packer --upload --execute debian-12 pve-9
 
 # Upload from custom images directory
-./scripts/release.sh packer --upload --execute --all --images /tmp/packer-images
+./scripts/release packer --upload --execute --all --images /tmp/packer-images
 ```
 
 ### 3. Image Checklist (When Rebuilding)
@@ -95,13 +95,13 @@ Remove individual image assets from `latest` if needed:
 
 ```bash
 # Preview
-./scripts/release.sh packer --remove debian-12
+./scripts/release packer --remove debian-12
 
 # Execute
-./scripts/release.sh packer --remove --execute debian-12
+./scripts/release packer --remove --execute debian-12
 
 # Remove all
-./scripts/release.sh packer --remove --execute --all
+./scripts/release packer --remove --execute --all
 ```
 
 ## Related

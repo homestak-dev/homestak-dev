@@ -21,7 +21,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 ## v0.54
 
 - **`gh pr create` infers head org from CWD** — When creating PRs from outside the target repo's directory, `gh` assumes the head branch belongs to whatever org owns the CWD repo. Always use `--head <branch>` explicitly in multi-org workflows.
-- **Multi-org release.sh shakedown was clean** — The Sprint 1 refactor (#308) adding `REPO_ORGS`, `repo_full_name()`, `REPO_DIRS`, and `repo_dir()` held up across all release phases (preflight, tag, publish, verify) on first real use. The code-before-transfers strategy (update tooling while repos are still in `homestak-dev`) paid off.
+- **Multi-org release CLI shakedown was clean** — The Sprint 1 refactor (#308) adding `REPO_ORGS`, `repo_full_name()`, `REPO_DIRS`, and `repo_dir()` held up across all release phases (preflight, tag, publish, verify) on first real use. The code-before-transfers strategy (update tooling while repos are still in `homestak-dev`) paid off.
 - **`.github/` gitignore + CI workflow conflict** — When `.github/` is gitignored (because a separate `.github` repo sits alongside), CI workflows in `.github/workflows/` become invisible to git. Fix with `!.github/workflows/` negation in `.gitignore`. The prior `git update-index --cacheinfo` workaround was fragile and caused phantom "deleted" status.
 - **Write CHANGELOG entries with the PR, not retroactively** — 5 of 9 repos had empty Unreleased sections despite having merged changes from two sprints. Catching up before release works but is avoidable overhead.
 
@@ -32,8 +32,8 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 
 ## v0.52
 
-- **Scoped releases need cherry-pick CHANGELOG stamps** — When releasing a subset of commits on master (e.g., sprint #292 but not #296), create a temporary branch from the boundary commit, stamp the CHANGELOG there, tag that commit, then delete the branch. The tag points to a commit off master's lineage, but `release.sh publish` handles it fine since it creates releases from tags regardless of branch.
-- **Manual tagging requires state file updates** — `release.sh` tracks tag phase completion in `.release-state.json`. When tagging manually (bypassing `release.sh tag`), update the state file before running `publish`. A Python one-liner works: set `phases.tags.status` to `complete` and each repo's `tag` to `complete`.
+- **Scoped releases need cherry-pick CHANGELOG stamps** — When releasing a subset of commits on master (e.g., sprint #292 but not #296), create a temporary branch from the boundary commit, stamp the CHANGELOG there, tag that commit, then delete the branch. The tag points to a commit off master's lineage, but `release publish` handles it fine since it creates releases from tags regardless of branch.
+- **Manual tagging requires state file updates** — `release` tracks tag phase completion in `.release-state.json`. When tagging manually (bypassing `release tag`), update the state file before running `publish`. A Python one-liner works: set `phases.tags.status` to `complete` and each repo's `tag` to `complete`.
 - **Clean sprint demarcation enables scoped releases** — Sprint #292 and #296 had zero commit interleaving on master because all #292 PRs merged before #296 work began. This made historical tagging feasible. Overlapping sprints would make scoped releases impractical.
 - **Next release must consolidate CHANGELOGs** — Master's CHANGELOGs still say "Unreleased" for both #292 and #296 entries. v0.53 CHANGELOG stamping must handle two version sections: stamp #292 content as v0.52, #296 content as v0.53.
 
@@ -54,12 +54,12 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 ## v0.45
 
 - **Release execute must continue through AAR and Retrospective** - The `/release execute` skill should automatically generate AAR and Retrospective after Housekeeping, not stop and prompt the user to complete them manually. The user reviews and approves, but doesn't generate. This release initially stopped after Phase 67, requiring correction.
-- **Sprint validation doesn't satisfy release validation gate** - Even when all sprints have validation evidence (spec-vm-roundtrip, vm-roundtrip), the release.sh state file tracks its own validation phase. Running `release.sh validate` is required during release execution to satisfy the tag precondition.
+- **Sprint validation doesn't satisfy release validation gate** - Even when all sprints have validation evidence (spec-vm-roundtrip, vm-roundtrip), the release state file tracks its own validation phase. Running `release validate` is required during release execution to satisfy the tag precondition.
 - **Phase reordering (67↔68) improves AAR completeness** - Moving Housekeeping before AAR (implemented in v0.45) allows the AAR to include branch cleanup results and any issues discovered during housekeeping. This is a process improvement from v0.44 lesson.
 
 ## v0.44
 
-- **Closed release before retrospective - fourth occurrence** - Despite prior lessons (v0.25, v0.26, v0.29), same error repeated. The `release.sh close --force` bypasses validation check but doesn't verify retrospective completion. Need stronger guardrail: either block close until retrospective posted, or require explicit `--skip-retrospective` flag.
+- **Closed release before retrospective - fourth occurrence** - Despite prior lessons (v0.25, v0.26, v0.29), same error repeated. The `release close --force` bypasses validation check but doesn't verify retrospective completion. Need stronger guardrail: either block close until retrospective posted, or require explicit `--skip-retrospective` flag.
 - **Housekeeping should precede AAR** - Current phase order (67-AAR, 68-Housekeeping) means AAR is written before cleanup completes. Reordering to Housekeeping→AAR would let the report include cleanup results and any issues discovered.
 
 ## v0.43
@@ -70,7 +70,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 
 ## v0.42
 
-- **Pre-merge validation is useful but disconnected from release state** - Running integration tests during implementation phase (via iac-driver directly) validates the code but does not satisfy the release.sh validation gate. Either standardize on `release.sh validate` for all validation, or document that pre-merge validation requires re-running through release.sh.
+- **Pre-merge validation is useful but disconnected from release state** - Running integration tests during implementation phase (via iac-driver directly) validates the code but does not satisfy the release validation gate. Either standardize on `release validate` for all validation, or document that pre-merge validation requires re-running through release.
 
 ## v0.41
 
@@ -99,7 +99,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 ## v0.37
 
 - **Sync local branches after squash-merge** - After GitHub squash-merges a PR, local feature branches diverge because the merge commit SHA differs from the local branch. Run `git reset --hard origin/master` immediately after merge to avoid branch state confusion during release. This was the third occurrence of this friction point.
-- **Initialize release state at phase start** - Run `release.sh init --version X.Y --issue N` as the very first step of the release phase, before preflight. The state file tracks validation status and enables phase gating. Running init mid-release causes "validation not complete" errors even when tests passed.
+- **Initialize release state at phase start** - Run `release init --version X.Y --issue N` as the very first step of the release phase, before preflight. The state file tracks validation status and enables phase gating. Running init mid-release causes "validation not complete" errors even when tests passed.
 
 ## v0.33
 
@@ -122,7 +122,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 ## v0.30
 
 - **Create release planning issue FIRST** - The release issue must be created at the start of Phase 1 (Pre-flight), not retroactively after release completion. The issue is the tracking hub for the entire release: it receives status updates, hosts the AAR, and documents deviations. Without it from the start, phase tracking via `--issue N` doesn't work, and AAR has no home. This is fundamental to the lifecycle process.
-- **AI assistants skip implicit steps** - Claude proceeded with `release.sh init` without creating the release issue because the plan summary didn't explicitly list "create release issue" as a step. Lesson: critical process steps that seem obvious to humans need explicit mention in plans, especially when delegating to AI.
+- **AI assistants skip implicit steps** - Claude proceeded with `release init` without creating the release issue because the plan summary didn't explicitly list "create release issue" as a step. Lesson: critical process steps that seem obvious to humans need explicit mention in plans, especially when delegating to AI.
 
 ## v0.29
 
@@ -149,7 +149,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 
 ## v0.26
 
-- **Pipe "yes" for non-interactive tag execution** - `echo "yes" | ./scripts/release.sh tag --execute` bypasses confirmation when running non-interactively. The tag command lacks a `--yes` flag, so piping to stdin is the workaround.
+- **Pipe "yes" for non-interactive tag execution** - `echo "yes" | ./scripts/release tag --execute` bypasses confirmation when running non-interactively. The tag command lacks a `--yes` flag, so piping to stdin is the workaround.
 - **Verify release issue is open before AAR** - Check issue status before posting AAR; premature closure happened in both v0.25 and v0.26. The release issue should remain open until Phase 10 (Retrospective) is complete and lessons are codified.
 - **Same mistake twice = needs automation** - When the same process error happens in consecutive releases, it's a signal that the process needs a guardrail (automation, checklist item, or tooling change), not just documentation.
 
@@ -158,12 +158,12 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 - **Always use `--workflow github` for publish** - The `publish --execute` command defaults to `--workflow local` which triggers a slow ~13GB download/upload for packer images. Always specify `--workflow github` to use the server-side GHA workflow (~2min vs ~30min). This was the first release to use the new `--workflow` option (implemented in #99).
 - **Don't close release issue until checklist complete** - Prematurely closed release issue #100 after AAR, forgetting Phases 9 (Housekeeping) and 10 (Retrospective). Had to reopen and complete remaining phases. Follow the full checklist in 60-release.md.
 - **Bats tests need isolated state** - Release.sh tests initially ran against real workspace state files. Fixed by honoring `STATE_FILE` env var to enable test isolation without modifying production state.
-- **Use the tools you build** - Implemented context loss mitigation (#98) but didn't use `release.sh resume` or `status` to verify all phases were complete before closing the release issue. The tools only help if you use them.
+- **Use the tools you build** - Implemented context loss mitigation (#98) but didn't use `release resume` or `status` to verify all phases were complete before closing the release issue. The tools only help if you use them.
 
 ## v0.24
 
-- **Initialize release state before validation** - Ran nested-pve-roundtrip before `release.sh init`, so validation status wasn't tracked. Tag command failed with "Validation not complete (status: pending)" despite test passing. Always run `release.sh init --version X.Y` before `release.sh validate`, or the validation results won't be recorded in the release state.
-- **Session continuations lose release context** - Context compaction during multi-session releases causes confusion about what's done vs pending. The release.sh audit log (`.release-audit.log`) and status command help recover state, but it's better to complete releases in a single session when possible.
+- **Initialize release state before validation** - Ran nested-pve-roundtrip before `release init`, so validation status wasn't tracked. Tag command failed with "Validation not complete (status: pending)" despite test passing. Always run `release init --version X.Y` before `release validate`, or the validation results won't be recorded in the release state.
+- **Session continuations lose release context** - Context compaction during multi-session releases causes confusion about what's done vs pending. The release audit log (`.release-audit.log`) and status command help recover state, but it's better to complete releases in a single session when possible.
 - **Housekeeping before Retrospective** - Branch cleanup should happen before the retrospective so any issues discovered during cleanup can be captured. Reordered phases: Phase 9 is now Housekeeping, Phase 10 is now Retrospective (which closes the release issue).
 
 ## v0.23
@@ -173,7 +173,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 ## v0.22
 
 - **Always use `--prerelease` for v0.x releases** - Early releases (v0.7-v0.13) were created without `--prerelease`, causing GitHub's "Latest Release" badge to show stale versions. Required retroactive fix of 27 releases.
-- **Update release tooling when patterns change** - release.sh verify assumed versioned packer releases have assets, but latest-centric approach puts images only in `latest`. Tooling must evolve with process changes.
+- **Update release tooling when patterns change** - release verify assumed versioned packer releases have assets, but latest-centric approach puts images only in `latest`. Tooling must evolve with process changes.
 - **Wait for explicit user confirmation** - AI assistant acted on a recommendation without user confirmation. When presenting options, always wait for explicit selection before executing.
 - **Audit historical release metadata periodically** - Prerelease flags, release notes, and asset attachments can drift from intended state over time.
 - **Check for open PRs before tagging** - site-config#35 was missed during merge phase and required post-release tag reset. Run `gh pr list --state open` across all repos before creating tags.
@@ -181,7 +181,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 ## v0.21
 
 - **Cross-repo ripple effects from restructuring** - Packer's per-template directory change (#19) broke ansible's nested-pve role which expected the old path structure. When restructuring one repo, test the full chain of dependent repos before release.
-- **`latest` release requires manual handling** - release.sh adds "v" prefix (causing "vlatest"), and GHA workflow validation rejects non-vX.Y targets. The `latest` packer release must be updated manually after each release.
+- **`latest` release requires manual handling** - release adds "v" prefix (causing "vlatest"), and GHA workflow validation rejects non-vX.Y targets. The `latest` packer release must be updated manually after each release.
 - **Run benchmarks during release** - Executing homestak-dev#75 during v0.21 release provided actionable data immediately. Infrastructure is already set up, context is fresh, and results inform the current release decision.
 - **Validation as hard gate confirmed** - v0.21 caught two bugs (packer#32, ansible role) during validation phase before any tags were created. Reinforces v0.12 lesson: always validate before tagging.
 
@@ -201,7 +201,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 
 ## v0.18
 
-- **Test the actual CLI flow end-to-end** - `packer --copy` was tested in isolation but not via `release.sh packer --copy`. Four hotfixes required during release execution.
+- **Test the actual CLI flow end-to-end** - `packer --copy` was tested in isolation but not via `release packer --copy`. Four hotfixes required during release execution.
 - **Verify external tool behavior, don't assume** - `gh release list --json` doesn't exist; assumed it did based on other `gh` commands. Always test against actual CLI behavior.
 - **Bootstrap ≠ validation-ready** - A bootstrapped host needs additional setup (node config, packer images, API token) before validation.
 - **Provider upgrades need cache clearing** - When tofu lockfiles are updated, stale provider caches cause version conflicts.
@@ -214,7 +214,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 
 ## v0.16
 
-- **Tag collision requires manual reset** - When tags exist at older commits, `release.sh tag` fails. Manual deletion required.
+- **Tag collision requires manual reset** - When tags exist at older commits, `release tag` fails. Manual deletion required.
 - **Verify `latest` packer release completeness** - Always verify all expected assets before copying to new release.
 - **Tag inventory check before closing** - Verify all repos are tagged before closing release issue.
 - **Unified versioning requires constant awareness** - Easy to slip into "single-repo release" thinking.
@@ -226,7 +226,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codi
 
 ## v0.14
 
-- **Release CLI available** - Use `scripts/release.sh` for automated release workflow.
+- **Release CLI available** - Use `scripts/release` for automated release workflow.
 - **Validation requires PVE API access** - Run validation on a PVE host or ensure credentials are exported.
 - **Secrets must be decrypted before validation** - Preflight passes but validation fails without decrypted secrets.
 - **Design-first for complex features** - Pause to write implementation spec before coding.
