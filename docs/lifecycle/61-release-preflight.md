@@ -71,7 +71,7 @@ Automated by `release preflight`. Manual fallback:
 
 ```bash
 VERSION=0.54
-# release.sh checks all 9 repos across 3 orgs automatically
+# release checks all 10 repos across 3 orgs automatically
 ./scripts/release preflight
 ```
 
@@ -93,6 +93,7 @@ Verify each repo's CLAUDE.md reflects current state:
 
 **homestak:**
 - [ ] config - schema, defaults, file structure
+- [ ] bare-metal - preseed, build, reinstall
 - [ ] bootstrap - CLI, installation
 
 **homestak-iac:**
