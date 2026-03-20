@@ -87,7 +87,7 @@ Response:
 PVE lifecycle changes:
 - `copy_secrets` phase replaced by `fetch_config` — target pulls from parent's server
 - `inject_ssh_key` folded into scoped secrets response (driver's key in `ssh_keys`)
-- `copy_private_key` remains as push (private keys don't belong on HTTP endpoints)
+- `copy_private_key` folded into `/config` response (see [pve-self-configure.md — Private Key Decision](pve-self-configure.md#private-key-decision))
 - Force-adding `site.yaml` to `_working` no longer needed (served via endpoint)
 
 Client side: extend `./run.sh config fetch` to call `/config/{identity}` using `HOMESTAK_TOKEN`, write `site.yaml` and `secrets.yaml` locally.
@@ -139,7 +139,7 @@ Since specs default to `ssh_keys: all`, every VM authorizes the full accumulated
 | copy_secrets | **Push (SCP, scoped)** | **Pull** (`/config` endpoint) | Pull (`/config` endpoint) |
 | copy_site_config | **Push (SCP)** — new | **Pull** (`/config` endpoint) | Pull (`/config` endpoint) |
 | inject_ssh_key | Push (SCP) | **Pull** (in `/config` response) | Pull (in `/config` response) |
-| copy_private_key | Push (SCP, shared key) | Push (SCP, shared key) | **Posture-driven** (dev: shared, prod: eliminated) |
+| copy_private_key | Push (SCP, shared key) | **Pull** (in `/config` response) | **Posture-driven** (dev: pull, prod: self-generated) |
 | pve-setup | Push (SSH) | Push (SSH) | Push (SSH) |
 | configure_bridge | Push (SSH) | Push (SSH) | Push (SSH) |
 | generate_node_config | Push (SSH) | Push (SSH) | Push (SSH) |

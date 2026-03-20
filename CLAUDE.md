@@ -449,6 +449,7 @@ Reusable templates in [docs/templates/](docs/templates/):
 | [docs/designs/node-lifecycle.md](docs/designs/node-lifecycle.md) | Single-node lifecycle (create/config/run/destroy) |
 | [docs/designs/node-orchestration.md](docs/designs/node-orchestration.md) | Topology patterns, execution models, system test catalog |
 | [docs/designs/packer-pipeline.md](docs/designs/packer-pipeline.md) | Naming conventions, build workflow, caching, release integration |
+| [docs/designs/pve-self-configure.md](docs/designs/pve-self-configure.md) | 2-phase PVE self-configure model, pve-config scenario |
 | [docs/designs/provisioning-token.md](docs/designs/provisioning-token.md) | HMAC token format, signing, verification |
 | [docs/designs/scenario-consolidation.md](docs/designs/scenario-consolidation.md) | Scenario migration, PVE lifecycle phases |
 | [docs/designs/server-daemon.md](docs/designs/server-daemon.md) | Daemon architecture, PID management, operator integration |
