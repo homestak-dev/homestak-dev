@@ -121,6 +121,14 @@ gita shell make install-deps  # Install deps in all repos
 
 See [.claude/CLAUDE.md](../.claude/CLAUDE.md) for full skill documentation.
 
+### Agent Boundaries
+
+This agent operates within the following constraints:
+
+- Opens PRs via `homestak-bot`; never merges without human approval
+- Coordinates cross-repo work via GitHub issues; never executes infrastructure directly
+- Never runs release execution phases (`--execute`); release gates require human approval
+
 ## Value Propositions
 
 1. **Integrated workflow** - Unified tooling across packer->tofu->ansible with orchestration
