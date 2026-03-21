@@ -277,7 +277,7 @@ Manifests define topology, execution model, and node instances:
 ```yaml
 # Manifest defines topology + execution + instances
 schema_version: 2
-name: n2-tiered
+name: n2-push
 pattern: tiered
 
 execution:
@@ -307,20 +307,20 @@ With topology and execution mode externalized to the manifest, the CLI uses verb
 
 ```bash
 # Legacy: scenario name encodes action + topology style
-./run.sh --scenario recursive-pve-constructor --manifest n2-tiered --host srv1
-./run.sh --scenario recursive-pve-destructor --manifest n2-tiered --host srv1
+./run.sh --scenario recursive-pve-constructor --manifest n2-push --host srv1
+./run.sh --scenario recursive-pve-destructor --manifest n2-push --host srv1
 
 # Current: verb-based subcommands
-./run.sh create -M n2-tiered -H srv1
-./run.sh destroy -M n2-tiered -H srv1
-./run.sh test -M n2-tiered -H srv1    # create + verify + destroy
+./run.sh create -M n2-push -H srv1
+./run.sh destroy -M n2-push -H srv1
+./run.sh test -M n2-push -H srv1    # create + verify + destroy
 ```
 
 **Benefits:**
 - No scenario proliferation (retired `vm-constructor`, `nested-pve-constructor`, etc. collapsed to `create`)
 - Topology and execution mode are externalized, not encoded in scenario names
 - CLI is more intuitive: verb is the operation, manifest is the target
-- Mode can be overridden at CLI if needed: `./run.sh create -M n2-tiered -H srv1 --mode push`
+- Mode can be overridden at CLI if needed: `./run.sh create -M n2-push -H srv1 --mode push`
 
 ### Execution Mode Inheritance
 
@@ -353,7 +353,7 @@ With manifests owning topology + execution, what role does `site-config/v2/nodes
 **Recommendation:** Eliminate standalone node files. Manifests reference specs and presets directly:
 
 ```yaml
-# manifests/n2-tiered.yaml
+# manifests/n2-push.yaml
 nodes:
   - name: root-pve            # Instance identity (unique per manifest)
     type: vm
@@ -482,7 +482,7 @@ The OSS foundation should support both models. The commercial layer builds on pu
 | "nested" (as scenario prefix) | Implies specific topology | Pattern name + execution model |
 | "hierarchical" (topology) | Awkward, verbose | "tiered" |
 | "constellation" (topology) | Awkward, unclear | "federated" |
-| "N=2" | Abstract, not descriptive | Pattern name (e.g., "n2-tiered") |
+| "N=2" | Abstract, not descriptive | Pattern name (e.g., "n2-push") |
 | "specify" / "apply" (phases) | Verbose 6-phase model | "config" (merged) |
 | "operate" / "sustain" (phases) | Verbose 6-phase model | "run" (merged) |
 
@@ -515,7 +515,7 @@ The lifecycle document describes what happens to a **single node**. This documen
 ```
 Orchestration (this doc)          Node Lifecycle (other doc)
 ────────────────────────          ──────────────────────────
-"Build a n2-tiered pattern"  →  Each node goes through:
+"Build a n2-push pattern"  →  Each node goes through:
 with tiered topology              create → config → run → destroy
 using pull execution
 ```
@@ -563,10 +563,10 @@ Execution mode is defined in the manifest with optional CLI override:
 
 ```bash
 # Use manifest's defined mode
-./run.sh create -M n2-tiered -H srv1
+./run.sh create -M n2-push -H srv1
 
 # Override manifest's mode
-./run.sh create -M n2-tiered -H srv1 --mode push
+./run.sh create -M n2-push -H srv1 --mode push
 ```
 
 **Mode mixing:** Different nodes can use different modes (defined in manifest). A node created via push can later operate in pull mode for the run phase. The mode is a property of the operation, not the node itself.
@@ -753,7 +753,7 @@ Assertions:
 ```
 Preconditions:
 - specs/pve.yaml and specs/base.yaml defined
-- manifests/n2-tiered.yaml exists
+- manifests/n2-push.yaml exists
 
 Manifest:
   pattern: tiered
@@ -773,12 +773,12 @@ Manifest:
       parent: root-pve
 
 Steps:
-1. ./run.sh create -M n2-tiered -H srv1
+1. ./run.sh create -M n2-push -H srv1
 2. Driver creates root-pve on srv1
 3. root-pve reaches platform ready (PVE installed)
 4. Driver creates edge on root-pve
 5. edge reaches platform ready
-6. ./run.sh destroy -M n2-tiered -H srv1
+6. ./run.sh destroy -M n2-push -H srv1
 7. Destroy order: edge first, then root-pve
 
 Assertions:
@@ -820,11 +820,11 @@ Assertions:
 
 **Validates:** #140 (push/pull coexistence), mode inheritance
 
-**Manifest:** `site-config/manifests/n2-mixed.yaml`
+**Manifest:** `site-config/manifests/n2-pull.yaml`
 
 ```yaml
 schema_version: 2
-name: n2-mixed
+name: n2-pull
 description: "Mixed-mode: PVE node (push) + pull-mode leaf VM (ST-5)"
 pattern: tiered
 execution:
@@ -850,7 +850,7 @@ nodes:
 
 ```
 Steps:
-1. ./run.sh test -M n2-mixed -H srv1
+1. ./run.sh test -M n2-pull -H srv1
 2. root-pve created and configured via push (operator runs ansible over SSH)
 3. edge provisioned with provisioning token (minted at create time)
 4. edge boots, presents token, fetches spec via pull (autonomous)
@@ -946,9 +946,9 @@ Assertions:
 |-------------|-------------------|-----|
 | ST-1 | `pull-vm-roundtrip` | **Available** (Sprint homestak-dev#201) |
 | ST-2 | `./run.sh test -M n1-push` | **Available** |
-| ST-3 | `./run.sh test -M n2-tiered` | **Available** |
+| ST-3 | `./run.sh test -M n2-push` | **Available** |
 | ST-4 | `./run.sh test -M n3-deep` | **Available** — `--self-addr` propagates routable address (iac-driver#200) |
-| ST-5 | `./run.sh test -M n2-mixed` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, site-config#67) |
+| ST-5 | `./run.sh test -M n2-pull` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, site-config#67) |
 | ST-6 | None | New capability (parallel peers) |
 | ST-7 | `./run.sh manifest validate -M <name> -H <host>` | **Available** — validates manifest FKs against site-config (iac-driver#207) |
 | ST-8 | Partial (scenarios are mostly idempotent) | Formal validation |
@@ -967,7 +967,7 @@ Assertions:
 
 | Date | Change |
 |------|--------|
-| 2026-02-14 | Sprint #249 (Config Phase Completion): ST-5 available — n2-mixed manifest (iac-driver#206, site-config#67); ST-7 available — manifest validate verb (iac-driver#207) |
+| 2026-02-14 | Sprint #249 (Config Phase Completion): ST-5 available — n2-pull manifest (iac-driver#206, site-config#67); ST-7 available — manifest validate verb (iac-driver#207) |
 | 2026-02-13 | Sprint #243 (Branch Propagation): ST-4 unblocked — `--self-addr` fix (iac-driver#200); update status and gap table |
 | 2026-02-11 | Sprint #231 (Provisioning Token): Update pull/hybrid execution sequences for token flow; update ST-1 steps for HMAC token auth; update ST-5 for token minting; update config phase row in execution model table; add provisioning-token.md to related docs |
 | 2026-02-08 | Terminology: controller → server in architecture diagram (aligns with server-daemon.md); add server-daemon.md to Related Documents |

@@ -41,7 +41,7 @@ Update sprint log with validation outcome:
 ## Sprint Log
 
 ### YYYY-MM-DD - Validation Complete
-**Scenario:** `./run.sh manifest test -M n2-tiered -H srv1`
+**Scenario:** `./run.sh manifest test -M n2-push -H srv1`
 **Host:** srv1
 **Result:** PASSED
 
@@ -96,7 +96,7 @@ If sprint is linked to a release issue, add a completion comment:
 - ansible#18 - SSH key handling
 
 **Validation:**
-- Scenario: `./run.sh manifest test -M n2-tiered -H srv1`
+- Scenario: `./run.sh manifest test -M n2-push -H srv1`
 - Result: PASSED
 - Report: [link]
 

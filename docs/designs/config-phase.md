@@ -492,7 +492,7 @@ nodes:
 |-----------|--------|-------|
 | Push-mode config (`_push_config`) | Done | Operator runs ansible from controller over SSH (iac-driver#206) |
 | Manifest validate verb | Done | `./run.sh manifest validate -M <name> -H <host>` (iac-driver#207) |
-| n2-mixed manifest (ST-5) | Done | Push-mode PVE + pull-mode VM (site-config#67) |
+| n2-pull manifest (ST-5) | Done | Push-mode PVE + pull-mode VM (site-config#67) |
 | Push-mode cloud-init race fix | Done | Skip spec injection for push-mode nodes |
 | Packer apt cache fix | Done | Stop removing apt lists in cleanup (packer#47) |
 

@@ -235,7 +235,7 @@ Before writing code, know how you'll prove it works.
 
 | Change Type | Validation Approach |
 |-------------|---------------------|
-| Packer template | Build image → `./run.sh manifest test -M n1-push` or `n2-tiered` |
+| Packer template | Build image → `./run.sh manifest test -M n1-push` or `n2-push` |
 | Tofu module | `./run.sh manifest test -M n1-push -H <host>` |
 | iac-driver action | Scenario that exercises the action |
 | Ansible role | Run playbook on test VM, verify behavior |

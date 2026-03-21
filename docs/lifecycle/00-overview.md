@@ -224,7 +224,7 @@ Integration testing uses iac-driver scenarios:
 | Scenario | Purpose | Duration |
 |----------|---------|----------|
 | `./run.sh manifest test -M n1-push -H <host>` | Quick validation (provision → boot → verify → destroy) | ~2 min |
-| `./run.sh manifest test -M n2-tiered -H <host>` | Tiered validation (PVE + nested VM) | ~9 min |
+| `./run.sh manifest test -M n2-push -H <host>` | Tiered validation (PVE + nested VM) | ~9 min |
 
 ## Related Documents
 

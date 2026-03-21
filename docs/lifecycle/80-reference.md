@@ -253,7 +253,7 @@ gh pr status
 ./run.sh manifest test -M n1-push -H srv1
 
 # Tiered validation
-./run.sh manifest test -M n2-tiered -H srv1
+./run.sh manifest test -M n2-push -H srv1
 
 # Preflight only
 ./run.sh --preflight -H srv1
@@ -356,7 +356,7 @@ Types: `fix`, `feat`, `docs`, `test`, `refactor`, `chore`
 | Scenario | Use When | Duration |
 |----------|----------|----------|
 | `./run.sh manifest test -M n1-push -H <host>` | Standard changes, docs, CLI | ~2 min |
-| `./run.sh manifest test -M n2-tiered -H <host>` | Tiered/PVE/packer changes | ~9 min |
+| `./run.sh manifest test -M n2-push -H <host>` | Tiered/PVE/packer changes | ~9 min |
 | `./run.sh manifest test -M n3-deep -H <host>` | Full 3-level nesting | ~15 min |
 
 ## Repository Order

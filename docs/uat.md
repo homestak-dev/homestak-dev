@@ -43,8 +43,8 @@ Run from the host console:
 cd ~/iac/iac-driver
 ./run.sh manifest test -M n1-push -H $(hostname -s) --verbose
 ./run.sh manifest test -M n1-pull -H $(hostname -s) --verbose
-./run.sh manifest test -M n2-tiered -H $(hostname -s) --verbose
-./run.sh manifest test -M n2-mixed -H $(hostname -s) --verbose
+./run.sh manifest test -M n2-push -H $(hostname -s) --verbose
+./run.sh manifest test -M n2-pull -H $(hostname -s) --verbose
 ./run.sh manifest test -M n3-deep -H $(hostname -s) --verbose
 ```
 
@@ -54,8 +54,8 @@ cd ~/iac/iac-driver
 |----------|---------|-------------|
 | n1-push | flat | Single VM, push-mode config |
 | n1-pull | flat | Single VM, pull-mode config (cloud-init self-configures) |
-| n2-tiered | tiered | PVE VM + leaf VM (push mode) |
-| n2-mixed | tiered | PVE VM (push) + leaf VM (pull) |
+| n2-push | tiered | PVE VM + leaf VM (push mode) |
+| n2-pull | tiered | PVE VM (push) + leaf VM (pull) |
 | n3-deep | tiered | 3-level nesting: PVE → PVE → VM |
 
 ## Preflight Checks

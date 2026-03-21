@@ -140,14 +140,14 @@ Select based on sprint scope:
 |--------------|----------|-------------|
 | Documentation, CLI, process | `./run.sh manifest test -M n1-push -H <host>` | No IaC code changes |
 | Tofu/ansible changes | `./run.sh manifest test -M n1-push -H <host>` | Standard VM provisioning |
-| Manifest/operator changes | `./run.sh manifest test -M n2-tiered -H <host>` | Tiered topology code |
-| PVE/nested/packer changes | `./run.sh manifest test -M n2-tiered -H <host>` | Full stack validation |
+| Manifest/operator changes | `./run.sh manifest test -M n2-push -H <host>` | Tiered topology code |
+| PVE/nested/packer changes | `./run.sh manifest test -M n2-push -H <host>` | Full stack validation |
 
 Document in sprint issue:
 
 ```markdown
 ## Validation
-**Scenario:** `./run.sh manifest test -M n2-tiered -H srv1`
+**Scenario:** `./run.sh manifest test -M n2-push -H srv1`
 **Host:** srv1
 **Rationale:** Sprint includes PVE lifecycle changes
 ```

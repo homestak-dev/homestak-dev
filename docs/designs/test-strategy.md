@@ -358,9 +358,9 @@ Manifest:
 |-------------|-------------------|-----|------------|
 | ST-1 | `pull-vm-roundtrip` | **Available** — full pull mode with provisioning token (iac-driver#187) | - |
 | ST-2 | `./run.sh test -M n1-push` | **Available** — operator handles flat VM lifecycle | - |
-| ST-3 | `./run.sh test -M n2-tiered` | **Available** — operator handles tiered PVE+VM | - |
+| ST-3 | `./run.sh test -M n2-push` | **Available** — operator handles tiered PVE+VM | - |
 | ST-4 | `./run.sh test -M n3-deep` | **Available** — `--self-addr` propagates routable address at depth 2+ (iac-driver#200) | - |
-| ST-5 | `./run.sh test -M n2-mixed` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, site-config#67) | - |
+| ST-5 | `./run.sh test -M n2-pull` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, site-config#67) | - |
 | ST-6 | None | New capability (parallel peer creation) | Future |
 | ST-7 | `./run.sh manifest validate -M <name> -H <host>` | **Available** — validates manifest FKs against site-config (iac-driver#207) | - |
 | ST-8 | Partial | Scenarios are mostly idempotent but not formally tested | Core |
@@ -434,10 +434,10 @@ pytest tests/test_config_resolver.py -k "test_resolve_inline_vm"  # Specific tes
 ./run.sh test -M single-node -H srv1
 
 # Create only (leave running for debugging)
-./run.sh create -M n2-tiered -H srv1
+./run.sh create -M n2-push -H srv1
 
 # Destroy after debugging
-./run.sh destroy -M n2-tiered -H srv1
+./run.sh destroy -M n2-push -H srv1
 ```
 
 ## Changelog

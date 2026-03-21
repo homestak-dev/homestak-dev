@@ -191,8 +191,8 @@ Requirements for SSH patterns, multi-level access, and API connectivity.
 | REQ-NET-004 | VMs use automation_user (default: homestak) | P0 | Validated | design | - | - |
 | REQ-NET-005 | Jump host chains use nested SSH (not ProxyJump - PVE issue) | P1 | Validated | test | - | - |
 | REQ-NET-006 | ConnectTimeout must be per-call | P0 | Validated | impl | - | test_common.py |
-| REQ-NET-007 | Each nesting level needs parent node's SSH key (for jump chains) | P0 | Validated | test | - | `test -M n2-tiered` |
-| REQ-NET-008 | Each nesting level needs its own key (for child VM access) | P0 | Validated | test | - | `test -M n2-tiered` |
+| REQ-NET-007 | Each nesting level needs parent node's SSH key (for jump chains) | P0 | Validated | test | - | `test -M n2-push` |
+| REQ-NET-008 | Each nesting level needs its own key (for child VM access) | P0 | Validated | test | - | `test -M n2-push` |
 | REQ-NET-009 | SSH chain verification required (VerifySSHChainAction) | P1 | Validated | impl | - | - |
 | REQ-NET-010 | PVE API via SSH commands (qm, pvesh) | P0 | Validated | impl | - | - |
 | REQ-NET-011 | API token must be valid before scenarios (preflight check) | P0 | Validated | impl | - | test_validation.py |
@@ -360,7 +360,7 @@ Mapping test coverage to requirements.
 | `test -M n1-push` | REQ-CRE-001, 002, 004, 005, 006, 010 |
 | `push-vm-roundtrip` | REQ-CRE-003, REQ-LIF-008, REQ-CTL-001 |
 | `controller-repos` | REQ-CTL-004, 006, 007 |
-| `test -M n2-tiered` | REQ-NET-007, 008, REQ-CFG-013, 014, 015 |
+| `test -M n2-push` | REQ-NET-007, 008, REQ-CFG-013, 014, 015 |
 | ST-1 | REQ-LIF-001, 002, 005, REQ-CTL-001 |
 | ST-2 | REQ-LIF-001, REQ-ORC-003, REQ-CTL-004, 006 |
 | ST-3, ST-4 | REQ-ORC-005 |

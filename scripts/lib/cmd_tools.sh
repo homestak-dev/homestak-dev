@@ -548,7 +548,7 @@ Examples:
   release preflight --host srv1 --host srv2
   release validate --manifest n1-push --host srv1
   release validate --manifest n1-push --host srv1 --remote srv1
-  release validate --manifest n2-tiered --host srv1
+  release validate --manifest n2-push --host srv1
   release validate --scenario push-vm-roundtrip --host srv1  # Scenario fallback
   release validate --stage --remote srv1              # Stage mode via homestak CLI
   release validate --skip
