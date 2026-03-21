@@ -3,7 +3,7 @@
 **Sprint:** 0 (Lifecycle Decomposition)
 **Issue:** [iac-driver#141](https://github.com/homestak-iac/iac-driver/issues/141)
 **Related:** [node-lifecycle.md](node-lifecycle.md), [node-orchestration.md](node-orchestration.md)
-**Status:** Active
+**Status:** Complete
 **Date:** 2026-02-03
 
 ## Overview
@@ -84,7 +84,7 @@ If the spec defines `run.trigger` and `run.interval`, config phase records this 
 
 ```yaml
 # ~/etc/state/convergence.yaml
-spec_server: https://srv1:44443
+server_url: https://srv1:44443
 trigger: schedule
 interval: 1h
 last_check: 2026-02-03T10:00:00Z

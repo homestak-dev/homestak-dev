@@ -3,7 +3,7 @@
 **Sprint:** 0 (Lifecycle Decomposition)
 **Issue:** [iac-driver#141](https://github.com/homestak-iac/iac-driver/issues/141)
 **Source:** [iac-driver#125 Comment #5](https://github.com/homestak-iac/iac-driver/issues/125#issuecomment-2621234567)
-**Status:** Active
+**Status:** Complete
 **Last Updated:** 2026-02-06
 
 ## Overview
@@ -73,7 +73,7 @@ Requirements for the create phase: VM allocation, identity injection, image mana
 | REQ-CRE-009 | 'latest' tag requires API resolution (not usable in direct URLs) | P1 | Validated | test | - | DownloadGitHubReleaseAction |
 | REQ-CRE-010 | Image must exist before VM creation | P0 | Validated | impl | - | `create -M n1-push` |
 | REQ-CRE-011 | Create constraints (cores, memory, disk) bound future purpose | P2 | Proposed | design | node-lifecycle.md | - |
-| REQ-CRE-012 | VM IDs should use 5-digit convention (10000+ dev, 99900+ test) | P2 | Validated | design | - | site-config |
+| REQ-CRE-012 | VM IDs should use 5-digit convention (10000+ dev, 99900+ test) | P2 | Validated | design | - | config |
 | REQ-CRE-013 | Cloud-init runcmd chains `spec get` → `./run.sh config` on first boot | P0 | Accepted | design | config-phase.md | `test -M n1-pull` |
 | REQ-CRE-014 | Provisioning token minted at create time by ConfigResolver | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
 | REQ-CRE-015 | Token injected via cloud-init as `HOMESTAK_TOKEN` env var | P0 | Accepted | design | provisioning-token.md | `test -M n1-pull` |
@@ -86,9 +86,9 @@ Requirements for the config phase: sources, resolution, state management.
 
 | ID | Requirement | Priority | Status | Source | Design Doc | Test |
 |----|-------------|----------|--------|--------|------------|------|
-| REQ-CFG-001 | site-config is single source of truth | P0 | Validated | design | - | test_config_resolver.py |
-| REQ-CFG-002 | Secrets must be decrypted before use (SOPS + age) | P0 | Validated | design | - | site-config hooks |
-| REQ-CFG-003 | ConfigResolver must auto-discover site-config (env → sibling → user-owned) | P0 | Validated | impl | - | test_config_resolver.py |
+| REQ-CFG-001 | config is single source of truth | P0 | Validated | design | - | test_config_resolver.py |
+| REQ-CFG-002 | Secrets must be decrypted before use (SOPS + age) | P0 | Validated | design | - | config hooks |
+| REQ-CFG-003 | ConfigResolver must auto-discover config (env → sibling → user-owned) | P0 | Validated | impl | - | test_config_resolver.py |
 | REQ-CFG-004 | Config merge order: preset → template → env → overrides | P0 | Validated | design | - | test_config_resolver.py |
 | REQ-CFG-005 | All inheritance resolved in Python (consumers get flat config) | P0 | Validated | design | - | test_config_resolver.py |
 | REQ-CFG-006 | YAML manipulation must use proper libraries (not sed/echo) | P1 | Accepted | test | - | - |
@@ -126,7 +126,7 @@ Requirements for the unified server daemon (specs + repos serving). Previously n
 | REQ-CTL-010 | Spec caching with SIGHUP invalidation | P1 | Validated | design | server-daemon.md | test_ctrl_specs.py |
 | REQ-CTL-011 | TLS required for all connections | P0 | Validated | design | server-daemon.md | test_ctrl_server.py |
 | REQ-CTL-012 | Self-signed cert auto-generation | P0 | Validated | design | server-daemon.md | test_ctrl_tls.py |
-| REQ-CTL-013 | site-config cert support | P1 | Proposed | design | server-daemon.md | - (design only) |
+| REQ-CTL-013 | config cert support | P1 | Proposed | design | server-daemon.md | - (design only) |
 | REQ-CTL-014 | Cert fingerprint logging on startup | P2 | Validated | design | server-daemon.md | test_ctrl_server.py |
 | REQ-CTL-015 | Exec chain: `run.sh` execs python3 directly (no bash wrapper in PID chain) | P0 | Accepted | design | server-daemon.md | `server start` + `server stop` |
 | REQ-CTL-016 | Double-fork daemonization: setsid, detach from terminal/SSH | P0 | Accepted | design | server-daemon.md | `server start` via SSH |
@@ -188,7 +188,7 @@ Requirements for SSH patterns, multi-level access, and API connectivity.
 | REQ-NET-001 | Relaxed host key checking required (`StrictHostKeyChecking=no`) | P0 | Validated | test | - | test_common.py |
 | REQ-NET-002 | `UserKnownHostsFile=/dev/null` (PVE symlink workaround) | P0 | Validated | test | - | test_common.py |
 | REQ-NET-003 | PVE hosts use root user for SSH | P0 | Validated | design | - | - |
-| REQ-NET-004 | VMs use automation_user (default: homestak) | P0 | Validated | design | - | - |
+| REQ-NET-004 | VMs use vm_user (default: homestak) | P0 | Validated | design | - | - |
 | REQ-NET-005 | Jump host chains use nested SSH (not ProxyJump - PVE issue) | P1 | Validated | test | - | - |
 | REQ-NET-006 | ConnectTimeout must be per-call | P0 | Validated | impl | - | test_common.py |
 | REQ-NET-007 | Each nesting level needs parent node's SSH key (for jump chains) | P0 | Validated | test | - | `test -M n2-push` |
@@ -276,7 +276,7 @@ Requirements for the 4-phase lifecycle model from node-lifecycle.md.
 | REQ-LIF-003 | Run phase supports drift detection | P1 | Proposed | design | phase-interfaces.md | - |
 | REQ-LIF-004 | Destroy phase handles graceful shutdown | P1 | Proposed | design | phase-interfaces.md | - |
 | REQ-LIF-005 | Push, pull, and hybrid are co-equal execution models | P0 | Accepted | design | node-lifecycle.md | ST-1, ST-2, ST-5 |
-| REQ-LIF-006 | Spec schema defines "what to become" (packages, services, users) | P0 | Validated | design | node-lifecycle.md | `make validate` (site-config) |
+| REQ-LIF-006 | Spec schema defines "what to become" (packages, services, users) | P0 | Validated | design | node-lifecycle.md | `make validate` (config) |
 | REQ-LIF-007 | ~~Auth model: network/site_token/node_token by posture~~ Deprecated: replaced by provisioning token (REQ-CTL-025, REQ-SEC-011) | P0 | Deprecated | design | node-lifecycle.md | push-vm-roundtrip |
 | REQ-LIF-008 | Provisioning token injected via cloud-init as `HOMESTAK_TOKEN` env var (replaces `HOMESTAK_IDENTITY` + `HOMESTAK_AUTH_TOKEN`) | P0 | Validated | design | node-lifecycle.md, provisioning-token.md | `test -M n1-pull` |
 
@@ -383,7 +383,7 @@ Mapping test coverage to requirements.
 | 2026-02-11 | Sprint #231 (Provisioning Token): Deprecated REQ-CTL-003, REQ-LIF-007 (replaced by token auth); updated REQ-LIF-008 (HOMESTAK_TOKEN); added REQ-CRE-014–015, REQ-CTL-025–027, REQ-SEC-011–013, REQ-REC-009–010, REQ-OBS-013; updated traceability matrix |
 | 2026-02-08 | iac-driver#177 overlay: Renamed CTL category (Controller → Server); updated CTL-001–014 status to `validated` with server-daemon.md refs; added CTL-015–024 (exec chain, daemonization, PID management, server stop/status, logging, operator lifecycle, idempotency); updated NFR-009/010 abbreviations (ctrl → srv); updated traceability matrix |
 | 2026-02-06 | Sprint #201 (Config Phase): Added REQ-CRE-013, REQ-CFG-016–019, REQ-EXE-011, REQ-ORC-010–011; updated REQ-LIF-002 to `accepted` with config-phase.md ref; cleaned `-v2` manifest suffixes; added `test -M n1-pull` traceability |
-| 2026-02-06 | Sprint #199 overlay: REQ-LIF-006 test ref updated (`spec validate` → `make validate` in site-config); REQ-NFR-005 satisfied (serve.py, spec_resolver.py deleted) |
+| 2026-02-06 | Sprint #199 overlay: REQ-LIF-006 test ref updated (`spec validate` → `make validate` in config); REQ-NFR-005 satisfied (serve.py, spec_resolver.py deleted) |
 | 2026-02-05 | Updated REQ-ORC-003 to verb-based CLI pattern |
 | 2026-02-05 | Added TLS requirements (REQ-CTL-011 to 014); updated traceability matrix |
 | 2026-02-05 | Added CTL category (unified controller) with REQ-CTL-001 through 010; updated traceability matrix |

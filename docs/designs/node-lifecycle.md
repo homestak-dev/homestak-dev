@@ -237,12 +237,12 @@ Load posture → get auth.method
                      against secrets.auth.node_tokens.{identity}
 ```
 
-## site-config Structure
+## config Structure
 
-Lifecycle entities are at the top level of site-config (consolidated from former `v2/` subdirectory):
+Lifecycle entities are at the top level of config (consolidated from former `v2/` subdirectory):
 
 ```
-site-config/
+config/
 ├── secrets.yaml              # Shared (site-wide)
 ├── defs/                     # Schema definitions
 │   ├── spec.schema.json
@@ -364,11 +364,11 @@ parent: srv1               # Parent node (for VMs)
 homestak spec get                 # Fetch spec from server (pull model)
 ```
 
-**Developer CLI** (site-config, runs in workspace):
+**Developer CLI** (config, runs in workspace):
 
 ```bash
-cd site-config && make validate                    # Validate YAML + schemas
-cd site-config && ./scripts/validate-schemas.sh    # Schema validation only
+cd config && make validate                    # Validate YAML + schemas
+cd config && ./scripts/validate-schemas.sh    # Schema validation only
 ```
 
 ## Scope & Relationship
@@ -439,11 +439,11 @@ Implementation is tracked in [iac-driver#125](https://github.com/homestak-iac/ia
 | Date | Change |
 |------|--------|
 | 2026-02-22 | Note Auth Model superseded by provisioning tokens; replace `nested-pve` with `root-pve` in topology examples; fix stale env var names |
-| 2026-02-22 | Add config-distribution.md reference; config distribution tracked in iac-driver#245 (push, complete) and iac-driver#248 (pull, open) |
+| 2026-02-22 | Add config-distribution.md reference; config distribution tracked in iac-driver#245 (push, complete) and iac-driver#248 (pull, complete) |
 | 2026-02-14 | Sprint #249: Push-mode config implemented (iac-driver#206); both push and pull modes now available |
 | 2026-02-08 | Terminology: controller → server (aligns with server-daemon.md rename) |
 | 2026-02-07 | Align with updated epics: pull model step 5 no longer "(future)"; replace aspirational `lifecycle/` directory with actual implementation structure |
-| 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |
+| 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per config#53 |
 | 2026-02-07 | Status → Active; replace Implementation Status section with epic reference (avoid staleness) |
 | 2026-02-05 | Update CLI Pattern section: distinguish driver CLI (`./run.sh`) from target CLI (`homestak`); remove premature `homestak config` porcelain reference |
 | 2026-02-03 | Rename to node-lifecycle.md; normalize execution models as co-equal (push/hybrid/pull all first-class); add terminology framework; remove "In Progress" section |

@@ -208,7 +208,7 @@ The build script takes a Debian netinst ISO, injects the preseed configuration a
 | `add-ssh-key.py` | bootstrap/scripts | Done |
 | `spec get` (server daemon) | bootstrap/lib/spec_client.py | Done (needs refactoring for any-URL) |
 | Pull-mode self-config | iac-driver | Done |
-| Specs + postures | site-config | Done |
+| Specs + postures | config | Done |
 | Server daemon | iac-driver | Done |
 | Provisioning tokens | iac-driver/config_resolver | Done |
 

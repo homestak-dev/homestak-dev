@@ -340,7 +340,7 @@ This allows mixed-mode deployments: push for infrastructure nodes, pull for appl
 
 ### Relationship to v2/nodes/
 
-With manifests owning topology + execution, what role does `site-config/v2/nodes/` play?
+With manifests owning topology + execution, what role does `config/v2/nodes/` play?
 
 **The identity problem:** A node's filename is its primary key (`pve.yaml` → `pve`). This makes nodes instances, not templates. You can't instantiate "pve" twice — you'd need `root-pve.yaml`, `leaf-pve.yaml`, defeating reusability.
 
@@ -373,7 +373,7 @@ nodes:
 
 **Resulting structure:**
 ```
-site-config/
+config/
 ├── defs/
 │   ├── manifest.schema.json   # Absorbs node.schema.json properties
 │   ├── spec.schema.json
@@ -581,7 +581,7 @@ Execution mode is defined in the manifest with optional CLI override:
 
 2. **Mixed execution:** Addressed in "Mode Selection" section. Per-level mode overrides enable mixed execution.
 
-4. **Manifest FK resolution:** Same FK pattern used throughout site-config. Manifests reference specs, presets, postures by name; resolution happens at runtime.
+4. **Manifest FK resolution:** Same FK pattern used throughout config. Manifests reference specs, presets, postures by name; resolution happens at runtime.
 
 5. **Scenario consolidation:** Most scenarios collapse to verb subcommands (`create`, `destroy`, `test`). Apply-phase scenarios (`pve-setup`, `user-setup`) deferred to Apply phase design.
 
@@ -630,19 +630,19 @@ Several open issues are affected by this design:
 
 | Issue | Title | Disposition |
 |-------|-------|-------------|
-| #93 | Per-host SSH key authorization | **Independent** — SSH access control, not superseded by auth.node_tokens (API auth) |
+| #93 | Per-host SSH key authorization | **CLOSED** — SSH access control, not superseded by auth.node_tokens (API auth) |
 | #113 | Retire legacy remote execution | **Complete** — retired in #153 (Sprint homestak-dev#195) |
 | #115 | Manifest schema v2: Tree structure | **Closed** — this design delivers `nodes` with `parent` references |
 | #120 | Deprecate nested-pve scenarios | **Complete** — all `*-constructor`, `*-destructor`, `*-roundtrip` replaced by verb commands (`create`/`destroy`/`test`) |
-| #124 | Simplify SSH key injection | **Still relevant** — push execution coexists with pull; push still needs clean SSH handling |
+| #124 | Simplify SSH key injection | **CLOSED** — push execution coexists with pull; push still needs clean SSH handling |
 
 **Disposition:**
 
 - **#115**: Closed — superseded by manifest schema v2
 - **#120**: **Complete** — absorbed by #145 (scenario consolidation)
 - **#113**: **Complete** — retired in #153 (Sprint homestak-dev#195)
-- **#124**: Remains open — push execution path still needs clean SSH handling
-- **#93**: Remains open — different concern from auth.node_tokens (SSH access vs API auth)
+- **#124**: **CLOSED** — push execution path SSH handling addressed
+- **#93**: **CLOSED** — SSH access control addressed
 
 ### Architecture Alignment
 
@@ -820,7 +820,7 @@ Assertions:
 
 **Validates:** #140 (push/pull coexistence), mode inheritance
 
-**Manifest:** `site-config/manifests/n2-pull.yaml`
+**Manifest:** `config/manifests/n2-pull.yaml`
 
 ```yaml
 schema_version: 2
@@ -904,9 +904,9 @@ Steps:
 2. `./run.sh manifest validate -M invalid-fk -H srv1` → exit 1 (unresolved FK)
 
 Assertions:
-- Valid manifests pass (all FKs resolve to existing site-config entities)
+- Valid manifests pass (all FKs resolve to existing config entities)
 - Unresolved FKs caught (spec: nonexistent, preset: unknown)
-- Schema validation via site-config's validate-schemas.sh
+- Schema validation via config's validate-schemas.sh
 ```
 
 ### ST-8: Action Idempotency
@@ -948,9 +948,9 @@ Assertions:
 | ST-2 | `./run.sh test -M n1-push` | **Available** |
 | ST-3 | `./run.sh test -M n2-push` | **Available** |
 | ST-4 | `./run.sh test -M n3-deep` | **Available** — `--self-addr` propagates routable address (iac-driver#200) |
-| ST-5 | `./run.sh test -M n2-pull` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, site-config#67) |
+| ST-5 | `./run.sh test -M n2-pull` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, config#67) |
 | ST-6 | None | New capability (parallel peers) |
-| ST-7 | `./run.sh manifest validate -M <name> -H <host>` | **Available** — validates manifest FKs against site-config (iac-driver#207) |
+| ST-7 | `./run.sh manifest validate -M <name> -H <host>` | **Available** — validates manifest FKs against config (iac-driver#207) |
 | ST-8 | Partial (scenarios are mostly idempotent) | Formal validation |
 
 ## Related Documents
@@ -967,12 +967,12 @@ Assertions:
 
 | Date | Change |
 |------|--------|
-| 2026-02-14 | Sprint #249 (Config Phase Completion): ST-5 available — n2-pull manifest (iac-driver#206, site-config#67); ST-7 available — manifest validate verb (iac-driver#207) |
+| 2026-02-14 | Sprint #249 (Config Phase Completion): ST-5 available — n2-pull manifest (iac-driver#206, config#67); ST-7 available — manifest validate verb (iac-driver#207) |
 | 2026-02-13 | Sprint #243 (Branch Propagation): ST-4 unblocked — `--self-addr` fix (iac-driver#200); update status and gap table |
 | 2026-02-11 | Sprint #231 (Provisioning Token): Update pull/hybrid execution sequences for token flow; update ST-1 steps for HMAC token auth; update ST-5 for token minting; update config phase row in execution model table; add provisioning-token.md to related docs |
 | 2026-02-08 | Terminology: controller → server in architecture diagram (aligns with server-daemon.md); add server-daemon.md to Related Documents |
 | 2026-02-07 | Align with updated epics: Status → Active; manifest v1/v2 framing updated (v2 is current, v1 is legacy); phased implementation adds release status; #113/#120 marked complete; ST-1/ST-2 assertions updated (config phase implemented) |
-| 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per site-config#53 |
+| 2026-02-07 | Update paths: v2/ consolidated to top-level (specs/, postures/, presets/, defs/) per config#53 |
 | 2026-02-07 | ST-1 available (Sprint #201 delivered config phase); update pull mode text |
 | 2026-02-06 | Update for scenario consolidation (#195): mark `TofuApply/DestroyRemoteAction` retired; update legacy scenarios table to current verb commands |
 | 2026-02-05 | Update CLI examples to verb-based pattern (`./run.sh create -M X -H host`); remove `--manifest X --action Y` references; rename "manifest executor" to "operator" |
