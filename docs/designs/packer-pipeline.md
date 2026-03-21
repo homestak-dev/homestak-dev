@@ -52,7 +52,7 @@ variable "images" {
 
 Manifests reference images by tofu key:
 ```yaml
-# site-config/manifests/n2-tiered.yaml
+# site-config/manifests/n2-push.yaml
 nodes:
   - name: root-pve
     image: pve-9        # matches tofu key directly

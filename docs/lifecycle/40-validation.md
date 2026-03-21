@@ -67,8 +67,8 @@ Not every change needs full integration testing. Match validation effort to chan
 | CLI with new behavior | Manual command test | ~1 min |
 | Documentation, CLI, process | `./run.sh manifest test -M n1-push -H <host>` | ~2 min |
 | Tofu/ansible changes | `./run.sh manifest test -M n1-push -H <host>` | ~2 min |
-| Manifest/operator code | `./run.sh manifest test -M n2-tiered -H <host>` | ~9 min |
-| PVE/nested/packer changes | `./run.sh manifest test -M n2-tiered -H <host>` | ~9 min |
+| Manifest/operator code | `./run.sh manifest test -M n2-push -H <host>` | ~9 min |
+| PVE/nested/packer changes | `./run.sh manifest test -M n2-push -H <host>` | ~9 min |
 
 **Size to Fit principle:** Use the lightest validation that proves the change works. Don't run 9-minute tiered PVE scenarios for a CLI help text fix.
 
@@ -90,7 +90,7 @@ Certain changes require validation **before merge**:
 
 | Change Type | Required Validation |
 |-------------|---------------------|
-| Packer template changes | Build image, run `./run.sh manifest test -M n1-push` or `n2-tiered` |
+| Packer template changes | Build image, run `./run.sh manifest test -M n1-push` or `n2-push` |
 | Boot/startup optimizations | Measure actual timing before and after |
 | Cloud-init modifications | Full VM lifecycle test |
 | Tofu module changes | `./run.sh manifest test -M n1-push -H <host>` |
@@ -157,7 +157,7 @@ cd ~/homestak-dev/iac-driver
 ./run.sh manifest test -M n1-push -H srv1
 
 # Tiered validation (~9 min)
-./run.sh manifest test -M n2-tiered -H srv1
+./run.sh manifest test -M n2-push -H srv1
 
 # Full 3-level validation (~15 min)
 ./run.sh manifest test -M n3-deep -H srv1
@@ -166,9 +166,9 @@ cd ~/homestak-dev/iac-driver
 **Apply/destroy separately (for debugging):**
 
 ```bash
-./run.sh manifest apply -M n2-tiered -H srv1
+./run.sh manifest apply -M n2-push -H srv1
 # ... inspect PVE node ...
-./run.sh manifest destroy -M n2-tiered -H srv1 --yes
+./run.sh manifest destroy -M n2-push -H srv1 --yes
 ```
 
 ### 6. Document Results

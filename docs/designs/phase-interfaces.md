@@ -177,7 +177,7 @@ Each manifest-node combination has isolated state:
 
 ```
 .state/tofu/
-└── n2-tiered/                    # Manifest namespace
+└── n2-push/                    # Manifest namespace
     ├── execution.json              # Manifest execution state
     ├── root-pve-srv1/
     │   ├── data/                   # TF_DATA_DIR (plugins, modules)
@@ -204,9 +204,9 @@ Each manifest-node combination has isolated state:
 - Manifest state tracks which nodes are complete, in-progress, failed
 
 ```json
-// .state/tofu/n2-tiered/execution.json
+// .state/tofu/n2-push/execution.json
 {
-  "manifest": "n2-tiered",
+  "manifest": "n2-push",
   "started": "2026-02-03T10:00:00Z",
   "status": "in_progress",
   "nodes": {
@@ -238,16 +238,16 @@ Each manifest-node combination has isolated state:
 **Implementation:**
 ```bash
 # Default: stop on failure
-./run.sh create -M n2-tiered -H srv1
+./run.sh create -M n2-push -H srv1
 
 # Explicit stop (same as default)
-./run.sh create -M n2-tiered -H srv1 --on-error=stop
+./run.sh create -M n2-push -H srv1 --on-error=stop
 
 # Rollback on failure
-./run.sh create -M n2-tiered -H srv1 --on-error=rollback
+./run.sh create -M n2-push -H srv1 --on-error=rollback
 
 # Continue despite failures
-./run.sh create -M n2-tiered -H srv1 --on-error=continue
+./run.sh create -M n2-push -H srv1 --on-error=continue
 ```
 
 ### Q3: Run Phase Triggers

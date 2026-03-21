@@ -116,7 +116,7 @@ ConfigResolver merges YAML layers and outputs tfvars.json for tofu.
 tofu plan -var-file=/tmp/tfvars.json
 
 # Run integration tests
-./run.sh test -M n2-tiered -H srv1
+./run.sh test -M n2-push -H srv1
 ```
 
 *Why it works:* Shows the recommended path first, alternatives second. Comments explain when to use each.
