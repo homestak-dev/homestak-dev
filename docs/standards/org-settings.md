@@ -2,7 +2,7 @@
 
 Standard settings for homestak GitHub organizations. Use this as a checklist when creating new orgs.
 
-Companion to [REPO-SETTINGS.md](REPO-SETTINGS.md) (per-repo configuration) and [REPO-PROTOTYPE.md](REPO-PROTOTYPE.md) (repo internal structure).
+Companion to [repo-settings.md](repo-settings.md) (per-repo configuration) and [repo-prototype.md](repo-prototype.md) (repo internal structure).
 
 ## Target Organizations
 
@@ -149,8 +149,8 @@ Install the Claude Code GitHub App on the org for CI/CD integration:
 
 For each repo in the org, follow:
 
-1. [REPO-PROTOTYPE.md](REPO-PROTOTYPE.md) — Internal structure (files, Makefile, CI)
-2. [REPO-SETTINGS.md](REPO-SETTINGS.md) — GitHub configuration (rulesets, labels, merge settings)
+1. [repo-prototype.md](repo-prototype.md) — Internal structure (files, Makefile, CI)
+2. [repo-settings.md](repo-settings.md) — GitHub configuration (rulesets, labels, merge settings)
 
 ### Quick Reference: New Repo in Existing Org
 
@@ -222,7 +222,7 @@ gh label create testing --repo $ORG/$REPO --description "Test coverage" --color 
 gh label create security --repo $ORG/$REPO --description "Security-related" --color D93F0B
 gh label create breaking-change --repo $ORG/$REPO --description "Breaking change" --color B60205
 
-# 8. Clone and scaffold (see REPO-PROTOTYPE.md)
+# 8. Clone and scaffold (see repo-prototype.md)
 git clone https://github.com/$ORG/$REPO
 cd $REPO
 # Add README.md, CLAUDE.md, CHANGELOG.md, LICENSE, Makefile, .github/workflows/ci.yml
@@ -272,6 +272,6 @@ When moving existing repos during the org split:
 
 ## Related Documents
 
-- [REPO-SETTINGS.md](REPO-SETTINGS.md) — Per-repo GitHub configuration
-- [REPO-PROTOTYPE.md](REPO-PROTOTYPE.md) — Repo internal structure
+- [repo-settings.md](repo-settings.md) — Per-repo GitHub configuration
+- [repo-prototype.md](repo-prototype.md) — Repo internal structure
 - [roadmap.md](roadmap.md) — Org architecture and maturity path

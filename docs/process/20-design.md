@@ -116,8 +116,8 @@ Where to put design documentation depends on its intended lifespan:
 | Design Type | Location | Rationale |
 |-------------|----------|-----------|
 | Ephemeral (single issue) | Issue comment | Self-contained, no git clutter |
-| Long-lasting (reference) | `docs/designs/` | Discoverable, versioned |
-| Cross-release (architecture) | `docs/designs/` + ADR | Permanent record |
+| Long-lasting (reference) | `docs/arch/` | Discoverable, versioned |
+| Cross-release (architecture) | `docs/arch/` + ADR | Permanent record |
 
 **Guidelines by tier:**
 
@@ -125,14 +125,14 @@ Where to put design documentation depends on its intended lifespan:
 |------|---------------------|
 | Simple | Issue comment (if any design needed) |
 | Standard | Issue comment or sprint issue |
-| Complex | `docs/designs/` if others will reference |
-| Exploratory | Always `docs/designs/` + ADR |
+| Complex | `docs/arch/` if others will reference |
+| Exploratory | Always `docs/arch/` + ADR |
 
-**File naming for `docs/designs/`:**
+**File naming for `docs/arch/`:**
 - Pattern: `vX.Y-<feature-name>.md`
 - Examples: `v0.45-specify-server.md`, `v0.45-specify-client.md`
 
-**When to use `docs/designs/`:**
+**When to use `docs/arch/`:**
 - Design will be referenced beyond the current sprint
 - Multiple sprints build on the same architecture
 - Design decisions affect multiple repos

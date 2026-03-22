@@ -294,5 +294,5 @@ When updating existing scripts:
 ## Related Documentation
 
 - [CLAUDE.md](../CLAUDE.md) - Project overview and conventions
-- [docs/lifecycle/60-release.md](lifecycle/60-release.md) - Release process
-- [docs/ISSUE-GUIDELINES.md](ISSUE-GUIDELINES.md) - Issue creation standards
+- [docs/process/60-release.md](../process/60-release.md) - Release process
+- [docs/standards/issues.md](issues.md) - Issue creation standards

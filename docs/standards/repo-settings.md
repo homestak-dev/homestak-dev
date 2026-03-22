@@ -157,7 +157,7 @@ gh label create breaking-change --repo ORG/REPO_NAME --description "Changes requ
 |------|---------|
 | `LICENSE` | Apache 2.0 (copy from existing repo) |
 | `README.md` | User-facing documentation |
-| `CLAUDE.md` | AI/developer context (see CLAUDE-GUIDELINES.md) |
+| `CLAUDE.md` | AI/developer context (see claude-guidelines.md) |
 | `CHANGELOG.md` | Version history |
 
 ## Creating a New Repo
@@ -212,7 +212,7 @@ gh api repos/ORG/NEW_REPO/vulnerability-alerts -X PUT
 | Allow squash merging | Enabled | Default for trunk PRs |
 | Allow merge commits | Enabled | For sprint branch PRs |
 | Allow rebase merging | Disabled | Avoid history complications |
-| Default merge method | Squash | Matches [50-merge.md](lifecycle/50-merge.md) guidance |
+| Default merge method | Squash | Matches [50-merge.md](../process/50-merge.md) guidance |
 | Allow auto-merge | Enabled | PRs merge automatically after approval |
 | Auto-delete head branches | Enabled | Prevents stale branch accumulation (v0.21+) |
 

@@ -173,7 +173,7 @@ This eliminates configuration drift between components - all settings flow from 
 
 ## Process Discipline
 
-When assisting with development, follow the lifecycle process defined in `docs/lifecycle/`:
+When assisting with development, follow the lifecycle process defined in `docs/process/`:
 
 ### Phase Sequence is Mandatory
 
@@ -412,19 +412,19 @@ The `resume` command outputs:
 
 ### Development Lifecycle
 
-7-phase development process in [docs/lifecycle/](docs/lifecycle/):
+7-phase development process in [docs/process/](docs/process/):
 
 | File | Purpose |
 |------|---------|
-| [00-overview.md](docs/lifecycle/00-overview.md) | Work types, phase matrix, multi-repo structure |
-| [10-sprint-planning.md](docs/lifecycle/10-sprint-planning.md) | Sprint scoping and backlog formation |
-| [20-design.md](docs/lifecycle/20-design.md) | Pre-implementation design and validation planning |
-| [30-implementation.md](docs/lifecycle/30-implementation.md) | Development, testing, CHANGELOG updates |
-| [40-validation.md](docs/lifecycle/40-validation.md) | Integration testing requirements |
-| [50-merge.md](docs/lifecycle/50-merge.md) | PR process and documentation updates |
-| [60-release.md](docs/lifecycle/60-release.md) | Release coordination and tagging |
-| [69-release-retro.md](docs/lifecycle/69-release-retro.md) | Retrospective and lessons learned codification |
-| [75-lessons-learned.md](docs/lifecycle/75-lessons-learned.md) | Accumulated release insights (v0.8-v0.33) |
+| [00-overview.md](docs/process/00-overview.md) | Work types, phase matrix, multi-repo structure |
+| [10-sprint-planning.md](docs/process/10-sprint-planning.md) | Sprint scoping and backlog formation |
+| [20-design.md](docs/process/20-design.md) | Pre-implementation design and validation planning |
+| [30-implementation.md](docs/process/30-implementation.md) | Development, testing, CHANGELOG updates |
+| [40-validation.md](docs/process/40-validation.md) | Integration testing requirements |
+| [50-merge.md](docs/process/50-merge.md) | PR process and documentation updates |
+| [60-release.md](docs/process/60-release.md) | Release coordination and tagging |
+| [69-release-retro.md](docs/process/69-release-retro.md) | Retrospective and lessons learned codification |
+| [75-lessons-learned.md](docs/process/75-lessons-learned.md) | Accumulated release insights (v0.8-v0.33) |
 
 ### Templates
 
@@ -442,30 +442,36 @@ Reusable templates in [docs/templates/](docs/templates/):
 
 | File | Purpose |
 |------|---------|
-| [docs/CLI-CONVENTIONS.md](docs/CLI-CONVENTIONS.md) | CLI flag and naming standards |
-| [docs/ISSUE-GUIDELINES.md](docs/ISSUE-GUIDELINES.md) | Issue creation and labeling standards |
-| [docs/CLAUDE-GUIDELINES.md](docs/CLAUDE-GUIDELINES.md) | CLAUDE.md documentation standards |
-| [docs/REPO-SETTINGS.md](docs/REPO-SETTINGS.md) | Repository configuration standards |
-| [docs/uat.md](docs/uat.md) | UAT validation checklist |
+| [docs/standards/cli.md](docs/standards/cli.md) | CLI flag and naming standards |
+| [docs/standards/issues.md](docs/standards/issues.md) | Issue creation and labeling standards |
+| [docs/standards/claude-guidelines.md](docs/standards/claude-guidelines.md) | CLAUDE.md documentation standards |
+| [docs/standards/repo-settings.md](docs/standards/repo-settings.md) | Repository configuration standards |
+| [docs/process/uat.md](docs/process/uat.md) | UAT validation checklist |
 
-### Design Documents
+### Architecture Documents
+
+Cross-repo architecture docs in [docs/arch/](docs/arch/):
 
 | File | Purpose |
 |------|---------|
-| [docs/designs/config-distribution.md](docs/designs/config-distribution.md) | Config distribution to delegated PVE nodes |
-| [docs/designs/config-phase.md](docs/designs/config-phase.md) | Push/pull execution, spec-to-ansible mapping |
-| [docs/designs/node-lifecycle.md](docs/designs/node-lifecycle.md) | Single-node lifecycle (create/config/run/destroy) |
-| [docs/designs/node-orchestration.md](docs/designs/node-orchestration.md) | Topology patterns, execution models, system test catalog |
-| [docs/designs/packer-pipeline.md](docs/designs/packer-pipeline.md) | Naming conventions, build workflow, caching, release integration |
-| [docs/designs/pve-self-configure.md](docs/designs/pve-self-configure.md) | 2-phase PVE self-configure model, pve-config scenario |
-| [docs/designs/provisioning-token.md](docs/designs/provisioning-token.md) | HMAC token format, signing, verification |
-| [docs/designs/scenario-consolidation.md](docs/designs/scenario-consolidation.md) | Scenario migration, PVE lifecycle phases |
-| [docs/designs/server-daemon.md](docs/designs/server-daemon.md) | Daemon architecture, PID management, operator integration |
-| [docs/designs/test-strategy.md](docs/designs/test-strategy.md) | Test hierarchy, system test catalog (ST-1 through ST-8) |
+| [docs/arch/node-lifecycle.md](docs/arch/node-lifecycle.md) | Single-node lifecycle (create/config/run/destroy) |
+| [docs/arch/node-orchestration.md](docs/arch/node-orchestration.md) | Topology patterns, execution models, system test catalog |
+| [docs/arch/test-strategy.md](docs/arch/test-strategy.md) | Test hierarchy, system test catalog (ST-1 through ST-8) |
+
+Repo-specific design docs (moved from meta to their respective repos):
+
+| File | Purpose |
+|------|---------|
+| [iac-driver/docs/config-distribution.md](../../iac/iac-driver/docs/config-distribution.md) | Config distribution to delegated PVE nodes |
+| [iac-driver/docs/config-phase.md](../../iac/iac-driver/docs/config-phase.md) | Push/pull execution, spec-to-ansible mapping |
+| [packer/docs/packer-pipeline.md](../../iac/packer/docs/packer-pipeline.md) | Naming conventions, build workflow, caching, release integration |
+| [iac-driver/docs/pve-self-configure.md](../../iac/iac-driver/docs/pve-self-configure.md) | 2-phase PVE self-configure model, pve-config scenario |
+| [iac-driver/docs/provisioning-token.md](../../iac/iac-driver/docs/provisioning-token.md) | HMAC token format, signing, verification |
+| [iac-driver/docs/server-daemon.md](../../iac/iac-driver/docs/server-daemon.md) | Daemon architecture, PID management, operator integration |
 
 ## Release Process
 
-See [docs/lifecycle/60-release.md](docs/lifecycle/60-release.md) for the release methodology, including:
+See [docs/process/60-release.md](docs/process/60-release.md) for the release methodology, including:
 - Repository dependency order
 - 10-phase release workflow
 - After action reports and retrospectives
@@ -474,7 +480,7 @@ See [docs/lifecycle/60-release.md](docs/lifecycle/60-release.md) for the release
 
 ## Issue Management
 
-When creating GitHub issues, follow [docs/ISSUE-GUIDELINES.md](docs/ISSUE-GUIDELINES.md):
+When creating GitHub issues, follow [docs/standards/issues.md](docs/standards/issues.md):
 
 - **Title format:** `<Verb> <what>` (e.g., "Add --dry-run flag", "Fix timeout error")
 - **Work type label:** Apply exactly one of `bug`, `enhancement`, or `epic`

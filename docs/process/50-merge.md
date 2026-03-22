@@ -25,7 +25,7 @@ Merge integrates validated changes into the protected `master` branch through pu
 
 Create pull request with:
 
-**Title:** `<type>(<scope>): <summary>` (conventional commit format for all PRs — see [ISSUE-GUIDELINES.md](../ISSUE-GUIDELINES.md#title-format))
+**Title:** `<type>(<scope>): <summary>` (conventional commit format for all PRs — see [issues.md](../standards/issues.md#title-format))
 
 **Description template:**
 

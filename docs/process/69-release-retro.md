@@ -65,7 +65,7 @@ Use the [Retrospective Template](../templates/retrospective.md):
 
 ### 2. Codify Lessons Learned
 
-Update `docs/lifecycle/75-lessons-learned.md`:
+Update `75-lessons-learned.md`:
 
 1. Add new lessons under current version heading
 2. Update category sections if adding cross-cutting lessons
