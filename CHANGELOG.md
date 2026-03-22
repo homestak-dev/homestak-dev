@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.57 - 2026-03-22
+
 ### Added
 - Add `changelog` subcommand to release CLI (#347)
   - `release changelog --dry-run` previews CHANGELOG version header stamps
