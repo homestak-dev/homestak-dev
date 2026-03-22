@@ -30,8 +30,9 @@ export HOMESTAK_ROOT=~/homestak
 Clone all repos using gita:
 
 ```bash
-mkdir -p ~/homestak
-cd ~/homestak
+export HOMESTAK_ROOT=~/homestak
+mkdir -p $HOMESTAK_ROOT
+cd $HOMESTAK_ROOT
 
 # Clone repos into the workspace layout
 # homestak org (top-level)
@@ -56,16 +57,16 @@ git clone git@github.com:homestak-dev/.github.git dev/.github
 Register all repos with gita so workspace-wide commands work:
 
 ```bash
-gita add ~/homestak/bootstrap ~/homestak/config ~/homestak/bare-metal
-gita add ~/homestak/iac/iac-driver ~/homestak/iac/tofu
-gita add ~/homestak/iac/ansible ~/homestak/iac/packer
-gita add ~/homestak/dev/meta ~/homestak/dev/.claude ~/homestak/dev/.github
+gita add $HOMESTAK_ROOT/bootstrap ~/homestak/config ~/homestak/bare-metal
+gita add $HOMESTAK_ROOT/iac/iac-driver ~/homestak/iac/tofu
+gita add $HOMESTAK_ROOT/iac/ansible ~/homestak/iac/packer
+gita add $HOMESTAK_ROOT/dev/meta ~/homestak/dev/.claude ~/homestak/dev/.github
 ```
 
 ## Understand the Layout
 
 ```
-~/homestak/
+$HOMESTAK_ROOT/
 ├── bare-metal/          # Debian preseed ISO remastering
 ├── bootstrap/           # curl|bash installer, homestak CLI
 ├── config/              # Secrets, manifests, site-specific config
@@ -117,7 +118,7 @@ gita shell make lint            # run linting in all repos
 For iac-driver specifically, set up the Python virtual environment first:
 
 ```bash
-cd ~/homestak/iac/iac-driver
+cd $HOMESTAK_ROOT/iac/iac-driver
 make install-dev    # creates .venv, installs deps
 ```
 
