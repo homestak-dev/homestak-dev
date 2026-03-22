@@ -36,22 +36,22 @@ cd $HOMESTAK_ROOT
 
 # Clone repos into the workspace layout
 # homestak org (top-level)
-git clone git@github.com:homestak/bootstrap.git
-git clone git@github.com:homestak/config.git
-git clone git@github.com:homestak/bare-metal.git
+git clone https://github.com/homestak/bootstrap.git
+git clone https://github.com/homestak/config.git
+git clone https://github.com/homestak/bare-metal.git
 
 # homestak-iac org (under iac/)
 mkdir -p iac
-git clone git@github.com:homestak-iac/iac-driver.git iac/iac-driver
-git clone git@github.com:homestak-iac/tofu.git iac/tofu
-git clone git@github.com:homestak-iac/ansible.git iac/ansible
-git clone git@github.com:homestak-iac/packer.git iac/packer
+git clone https://github.com/homestak-iac/iac-driver.git iac/iac-driver
+git clone https://github.com/homestak-iac/tofu.git iac/tofu
+git clone https://github.com/homestak-iac/ansible.git iac/ansible
+git clone https://github.com/homestak-iac/packer.git iac/packer
 
 # homestak-dev org (under dev/)
 mkdir -p dev
-git clone git@github.com:homestak-dev/meta.git dev/meta
-git clone git@github.com:homestak-dev/.claude.git dev/.claude
-git clone git@github.com:homestak-dev/.github.git dev/.github
+git clone https://github.com/homestak-dev/meta.git dev/meta
+git clone https://github.com/homestak-dev/.claude.git dev/.claude
+git clone https://github.com/homestak-dev/.github.git dev/.github
 ```
 
 Register all repos with gita so workspace-wide commands work:

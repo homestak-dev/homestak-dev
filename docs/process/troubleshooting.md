@@ -41,10 +41,12 @@ cd ~/iac/iac-driver
 **Cause:** Stale provider binaries or lockfiles in `.state/tofu/*/data/providers/`
 after Dependabot bumps or manual version changes.
 
-**Fix:** Clear cached providers and re-run:
+**Fix:** The `validate_readiness()` preflight auto-fixes stale lockfiles, so
+this usually resolves itself on the next run. If it persists, manually clear
+cached providers as a last resort:
 
 ```bash
-rm -rf ~/.state/tofu/*/data/providers/
+rm -rf $HOMESTAK_ROOT/.state/tofu/*/data/providers/
 ```
 
 ### State Version 4 Error
