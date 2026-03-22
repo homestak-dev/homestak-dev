@@ -17,11 +17,11 @@ Track multi-issue efforts requiring breakdown (see [epic-issue.md](templates/epi
 - Use `epic` label
 - Track phased implementation, sub-tasks, design decisions
 - Reference sprint tracking issues by number, not ordinal (e.g., `#146` not "Sprint 1")
-- Link to design docs in `docs/designs/`
+- Link to design docs in `docs/arch/`
 
 ### Sprint Issues
 
-Track multi-issue coordinated work (see [10-sprint-planning.md](lifecycle/10-sprint-planning.md)):
+Track multi-issue coordinated work (see [10-sprint-planning.md](../process/10-sprint-planning.md)):
 - Created via `/sprint plan` command (in any repo)
 - Use `sprint` label
 - Track branch, repos, scope, and sprint log
@@ -29,7 +29,7 @@ Track multi-issue coordinated work (see [10-sprint-planning.md](lifecycle/10-spr
 
 ### Release Issues
 
-Track release planning and execution (see [60-release.md](lifecycle/60-release.md)):
+Track release planning and execution (see [60-release.md](../process/60-release.md)):
 - Created via `/release plan init` command
 - Use `release` label
 - Accumulate sprint outcomes, track release readiness
@@ -100,7 +100,7 @@ Classify issues by complexity to guide session management and documentation requ
 | Complex | Multi-repo, design decisions | Issue + decision log |
 | Exploratory | Unknown scope, research needed | Issue + ADR + dead-ends |
 
-See [05-session-management.md](lifecycle/05-session-management.md) for tier-based workflows.
+See [05-session-management.md](../process/05-session-management.md) for tier-based workflows.
 
 ## Labels
 
@@ -180,7 +180,7 @@ For issues affecting multiple repos:
    - Sprint issue tracks all repos and scope issues
    - PRs link back to sprint issue
 
-See [00-overview.md](lifecycle/00-overview.md) for when to use each path.
+See [00-overview.md](../process/00-overview.md) for when to use each path.
 
 ## Issue Placement
 
@@ -214,7 +214,7 @@ Missing: node config, API token, packer images.
 - [ ] Clear error messages with remediation steps
 
 ## Related
-See docs/lifecycle/40-validation.md "Validation Host Prerequisites" section.
+See docs/process/40-validation.md "Validation Host Prerequisites" section.
 ```
 
 ### Good Sprint Issue
@@ -233,7 +233,7 @@ Created via `/sprint plan "Unified Controller Daemon" --release 157`
 
 **Labels:** (none — PRs don't need labels)
 
-**Description:** (sprint scope, validation evidence, linked sprint issue — see [50-merge.md](lifecycle/50-merge.md))
+**Description:** (sprint scope, validation evidence, linked sprint issue — see [50-merge.md](../process/50-merge.md))
 
 ### Poor Issue
 

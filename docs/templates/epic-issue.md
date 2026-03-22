@@ -54,5 +54,5 @@ Tips:
 - Use sprint issues (Sprint: <Theme>) for coordinated execution
 - Cross-reference sprint tracking issues by number, not ordinal (e.g., "#146" not "Sprint 1")
 - Keep the Phased Implementation table updated as work progresses
-- Link to design docs in docs/designs/ for architectural context
+- Link to design docs in docs/arch/ for architectural context
 -->

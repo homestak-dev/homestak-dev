@@ -4,7 +4,7 @@ Strategic direction for homestak-dev, established after v0.53.
 
 See also:
 - [user-journey.md](../../homestak/user-journey.md) — Full user journey and org architecture vision
-- [REPO-PROTOTYPE.md](REPO-PROTOTYPE.md) — Standard repo structure for new repos
+- [repo-prototype.md](standards/repo-prototype.md) — Standard repo structure for new repos
 
 ## Current State (v0.53)
 
@@ -112,7 +112,7 @@ The "walk" step creates all three orgs at once — the marginal cost of standing
 
 **Trigger:** Do the org split when we're ready to create the first app repo. That way bare-metal, pihole, and all new repos are born in the right place.
 
-See [REPO-PROTOTYPE.md](REPO-PROTOTYPE.md) for standard repo structure across all orgs.
+See [repo-prototype.md](standards/repo-prototype.md) for standard repo structure across all orgs.
 
 ## Phase 0: Foundation (before first app)
 
@@ -121,7 +121,7 @@ Decisions and setup work required before building apps:
 | Item | Type | Description |
 |------|------|-------------|
 | Container strategy | Design decision | Docker Compose per VM, native packages, or hybrid? Blocks spec schema and role design. |
-| App repo contract | Design decision | What's inside an app repo? How does iac-driver discover and consume it? See [REPO-PROTOTYPE.md](REPO-PROTOTYPE.md). |
+| App repo contract | Design decision | What's inside an app repo? How does iac-driver discover and consume it? See [repo-prototype.md](standards/repo-prototype.md). |
 | Static IP verification | Smoke test | Verify `ip`/`gateway` fields work end-to-end in manifests. Pihole needs a known address. |
 | Org split | Administrative | Create `homestak`, `homestak-apps`, `homestak-iac` orgs. Migrate existing repos. Push `bare-metal`. |
 | Release tooling | Engineering | Update `release.sh` for multi-org releases (or per-org release independence). |

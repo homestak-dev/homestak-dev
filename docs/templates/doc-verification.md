@@ -60,7 +60,7 @@ grep -r '{old_name}' ~/.claude/projects/*/memory/
 
 ### 5. Meta design docs
 
-If the sprint touched architecture documented in meta/docs/designs/ or meta/docs/architecture/, verify those docs reflect the new state.
+If the sprint touched architecture documented in meta/docs/arch/, verify those docs reflect the new state.
 
 - [ ] No stale references in meta design docs (or N/A)
 

@@ -10,10 +10,10 @@
 
 This document catalogs requirements extracted from ~40 releases (v0.3-v0.45) of homestak development. Requirements are sourced from:
 
-1. **Lessons Learned** (docs/lifecycle/75-lessons-learned.md)
+1. **Lessons Learned** (docs/process/75-lessons-learned.md)
 2. **Action Implementations** (iac-driver/src/actions/*.py)
 3. **Known Issues** (CLAUDE.md files)
-4. **Design Documents** (docs/designs/*.md)
+4. **Design Documents** (docs/arch/*.md)
 
 ## ID Schema
 

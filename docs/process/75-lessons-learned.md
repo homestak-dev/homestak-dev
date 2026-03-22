@@ -118,7 +118,7 @@ Accumulated insights from homestak-dev releases v0.8-v0.57. Each lesson was codi
 
 ## v0.32
 
-- **Git-derived versions eliminate release maintenance** - Using `git describe --tags --abbrev=0` to derive version at runtime means scripts never need VERSION constant updates during releases. Zero maintenance, always accurate. Pattern documented in `docs/CLI-CONVENTIONS.md`.
+- **Git-derived versions eliminate release maintenance** - Using `git describe --tags --abbrev=0` to derive version at runtime means scripts never need VERSION constant updates during releases. Zero maintenance, always accurate. Pattern documented in `docs/standards/cli.md`.
 - **Pre-existing lint warnings can block new PRs** - Shellcheck warnings in `build.sh` (existing code) blocked the CLI standardization PR even though the new code was clean. Consider adding shellcheck to local dev workflow (`make lint`) to catch issues early.
 - **CHANGELOGs should be in feature PRs** - Updating CHANGELOGs separately during release is error-prone. Include CHANGELOG entries in feature PRs so they're reviewed together and committed atomically.
 

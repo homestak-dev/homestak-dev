@@ -41,7 +41,7 @@ Notes about workflow, tooling, collaboration, or other process-related observati
 
 ### Lessons Learned
 
-Insights to carry forward. These should be codified in `docs/lifecycle/60-release.md` after the retrospective.
+Insights to carry forward. These should be codified in `docs/process/60-release.md` after the retrospective.
 
 - Lesson 1: Description
 - Lesson 2: Description

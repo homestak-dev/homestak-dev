@@ -97,7 +97,7 @@ Required documentation:
 
 ## CLAUDE.md Guidelines
 
-See [CLAUDE-GUIDELINES.md](../CLAUDE-GUIDELINES.md) for detailed standards.
+See [claude-guidelines.md](../standards/claude-guidelines.md) for detailed standards.
 
 Key points:
 - Keep AI-focused (commands, structure, workflows)
@@ -157,4 +157,4 @@ Document lessons in 75-lessons-learned.md:
 
 - [00-overview.md](00-overview.md) - Tier definitions
 - [30-implementation.md](30-implementation.md) - Code documentation
-- [../CLAUDE-GUIDELINES.md](../CLAUDE-GUIDELINES.md) - CLAUDE.md standards
+- [../standards/claude-guidelines.md](../standards/claude-guidelines.md) - CLAUDE.md standards

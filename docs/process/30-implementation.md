@@ -74,7 +74,7 @@ For sprint-path work, update scope issues and the sprint issue at milestones —
 **Cross-reference guidance:**
 - Use the most granular issue reference available: "fixed in iac-driver#176" not "fixed in sprint" or "fixed in release v0.50"
 - Don't reference releases that haven't shipped — a release in planning is not a fact
-- When updating scope issues, check if `docs/designs/` has a related design doc that needs updating
+- When updating scope issues, check if `docs/arch/` has a related design doc that needs updating
 
 ### 3. Unit Testing
 

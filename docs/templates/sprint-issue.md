@@ -62,5 +62,5 @@ Note: Sprint PRs in component repos use `Sprint {issue#}: {Theme}` to reference 
 
 <!--
 Retrospective goes in closing comment, not body.
-See docs/lifecycle/55-sprint-close.md for format.
+See docs/process/55-sprint-close.md for format.
 -->

@@ -50,10 +50,10 @@ This clones all repos into the correct directory structure, registers them with 
 | File | Purpose |
 |------|---------|
 | [CLAUDE.md](CLAUDE.md) | Architecture, conventions, development guide |
-| [docs/lifecycle/](docs/lifecycle/) | 7-phase development lifecycle |
-| [docs/REPO-SETTINGS.md](docs/REPO-SETTINGS.md) | Repository configuration standards |
-| [docs/CLAUDE-GUIDELINES.md](docs/CLAUDE-GUIDELINES.md) | Documentation standards |
-| [docs/ISSUE-GUIDELINES.md](docs/ISSUE-GUIDELINES.md) | Issue creation and labeling standards |
+| [docs/process/](docs/process/) | 7-phase development lifecycle |
+| [docs/standards/repo-settings.md](docs/standards/repo-settings.md) | Repository configuration standards |
+| [docs/standards/claude-guidelines.md](docs/standards/claude-guidelines.md) | Documentation standards |
+| [docs/standards/issues.md](docs/standards/issues.md) | Issue creation and labeling standards |
 
 ## Claude Code Skills
 

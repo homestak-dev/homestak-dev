@@ -1,6 +1,6 @@
 # Repository Prototype
 
-Standard internal structure for homestak repositories. Companion to [REPO-SETTINGS.md](REPO-SETTINGS.md) which covers GitHub configuration.
+Standard internal structure for homestak repositories. Companion to [repo-settings.md](repo-settings.md) which covers GitHub configuration.
 
 ## Universal Structure
 
@@ -45,11 +45,11 @@ Every repo must have `install-deps`, `test`, and `lint` — even if `test` is in
 ### Removed
 ```
 
-Entries go under "Unreleased" during implementation. Version header added during release phase. See [lifecycle/30-implementation.md](lifecycle/30-implementation.md).
+Entries go under "Unreleased" during implementation. Version header added during release phase. See [process/30-implementation.md](../process/30-implementation.md).
 
 ### CLAUDE.md Conventions
 
-See [CLAUDE-GUIDELINES.md](CLAUDE-GUIDELINES.md) for content standards. Every CLAUDE.md should include:
+See [claude-guidelines.md](claude-guidelines.md) for content standards. Every CLAUDE.md should include:
 
 - Project overview and purpose
 - Quick reference (common commands)
@@ -219,13 +219,13 @@ Adjust for repo-specific needs (Python setup, Node setup, etc.).
 
 1. Start with the universal structure (README, CLAUDE.md, CHANGELOG, LICENSE, Makefile, CI)
 2. Apply org-specific prototype (app repo structure for homestak-apps, etc.)
-3. Configure GitHub settings per [REPO-SETTINGS.md](REPO-SETTINGS.md)
+3. Configure GitHub settings per [repo-settings.md](repo-settings.md)
 4. Add to gita workspace: `gita add <path>`
 5. Add to release.sh repo list (if participating in unified versioning)
 
 ## Related Documents
 
-- [REPO-SETTINGS.md](REPO-SETTINGS.md) — GitHub repository configuration
-- [CLAUDE-GUIDELINES.md](CLAUDE-GUIDELINES.md) — CLAUDE.md content standards
-- [ISSUE-GUIDELINES.md](ISSUE-GUIDELINES.md) — Issue creation and labeling
-- [CLI-CONVENTIONS.md](CLI-CONVENTIONS.md) — CLI flag and naming standards
+- [repo-settings.md](repo-settings.md) — GitHub repository configuration
+- [claude-guidelines.md](claude-guidelines.md) — CLAUDE.md content standards
+- [issues.md](issues.md) — Issue creation and labeling
+- [cli.md](cli.md) — CLI flag and naming standards

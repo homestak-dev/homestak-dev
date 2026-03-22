@@ -173,7 +173,7 @@ run_close() {
     echo "  - [ ] Housekeeping completed"
     echo "  - [ ] After Action Report posted to release issue"
     echo "  - [ ] Retrospective completed"
-    echo "  - [ ] Lessons learned updated in docs/lifecycle/75-lessons-learned.md"
+    echo "  - [ ] Lessons learned updated in docs/process/75-lessons-learned.md"
     echo ""
 
     # Generate summary

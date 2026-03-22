@@ -257,5 +257,5 @@ approves the result.
 
 - `iac-driver/.claude/settings.json` — Reference implementation for permissions
 - `dev/.claude/` — Workspace skills and configuration
-- `docs/lifecycle/` — 7-phase development process (agents follow the same process)
+- `docs/process/` — 7-phase development process (agents follow the same process)
 - `agentification-sprint1.md` — Sprint 1 implementation details
