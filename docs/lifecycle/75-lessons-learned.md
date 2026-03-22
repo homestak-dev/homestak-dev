@@ -1,12 +1,20 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.56. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.57. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.57
+
+- **Search before "fixing"** — Before reclassifying working code as a bug, search closed issues for the design decision that made it that way. Sprint 1 misidentified 4 correct `automation_user` usages as bugs because we didn't search for iac-driver#133 (which deliberately moved SSH from root to homestak). A 30-second `gh search issues` prevents multi-sprint regressions.
+- **Validate at the right depth** — n1-* tests flat provisioning only. Changes to provider SSH, delegation, or PVE VM behavior require n2-push minimum. Sprint 1's design specified n2-push validation but only n1-* was run; the regression went undetected for one sprint.
+- **Test workarounds in their target environment** — If a workaround exists for PVE VMs, test on PVE VMs, not just the bare-metal host. The IPv6 toggle around `pvecm updatecerts` works without the toggle on bare-metal but fails on PVE VMs.
+- **Design docs on scope issues** — Post design comments on individual scope issues, not just the sprint issue. Someone reading an issue months later should find the design rationale right there.
+- **Run `tofu fmt` before committing .tf changes** — tofu's canonical alignment differs from manual padding. CI catches it but an extra commit + re-run wastes time.
 
 ## v0.56
 
