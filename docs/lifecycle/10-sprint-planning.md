@@ -93,7 +93,7 @@ If root cause is uncertain, budget investigation time in the sprint and note it 
 
 **Why this matters:** iac-driver#176 was filed as "DNS resolution failure" but the actual root cause was a stale server process. Without triage, design work began on the wrong solution. See also: [Bug Validation](20-design.md#bug-validation) in the design phase.
 
-**Always include a doc cleanup issue.** Every sprint should have a Simple-tier "Update docs and cross-refs" issue in homestak-dev to cover CLAUDE.md updates, CHANGELOG entries, and cross-repo reference fixes. Create it during planning so it's not forgotten at the end. See [ISSUE-GUIDELINES.md](../ISSUE-GUIDELINES.md#issue-placement) for issue placement conventions.
+**Always include a doc verification issue.** Every sprint should have a "Verify docs for {Theme}" issue in homestak-dev using the [doc-verification.md](../templates/doc-verification.md) template. This verifies that documentation (CLAUDE.md, design docs, memory files) accurately reflects the sprint's final state. Create it during planning so it's not forgotten at the end. See [ISSUE-GUIDELINES.md](../ISSUE-GUIDELINES.md#issue-placement) for issue placement conventions.
 
 ### 4. Identify Affected Repos
 
