@@ -440,6 +440,11 @@ pytest tests/test_config_resolver.py -k "test_resolve_inline_vm"  # Specific tes
 ./run.sh destroy -M n2-push -H srv1
 ```
 
+## Implementation Details
+
+For implementation-specific documentation, see:
+- `$HOMESTAK_ROOT/iac/iac-driver/docs/cli.md` — CLI reference for test commands and verb-based subcommands
+
 ## Changelog
 
 | Date | Change |

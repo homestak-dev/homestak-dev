@@ -3,7 +3,7 @@
 Strategic direction for homestak-dev, established after v0.53.
 
 See also:
-- [user-journey.md](../../homestak/user-journey.md) — Full user journey and org architecture vision
+- `$HOMESTAK_ROOT/user-journey.md` — Full user journey and org architecture vision
 - [repo-prototype.md](standards/repo-prototype.md) — Standard repo structure for new repos
 
 ## Current State (v0.53)

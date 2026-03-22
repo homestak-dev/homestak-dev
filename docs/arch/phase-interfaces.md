@@ -423,6 +423,12 @@ Consistent error codes across phases for programmatic handling.
 
 ---
 
+## Implementation Details
+
+For implementation-specific documentation, see:
+- `$HOMESTAK_ROOT/iac/iac-driver/docs/config-phase.md` — Config-to-run interface implementation (push/pull execution, spec-to-ansible mapping)
+- `$HOMESTAK_ROOT/iac/iac-driver/docs/provisioning-token.md` — Create-to-config auth implementation (HMAC token format and verification)
+
 ## Changelog
 
 | Date | Change |

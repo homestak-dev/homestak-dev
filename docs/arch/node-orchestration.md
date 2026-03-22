@@ -953,6 +953,12 @@ Assertions:
 | ST-7 | `./run.sh manifest validate -M <name> -H <host>` | **Available** — validates manifest FKs against config (iac-driver#207) |
 | ST-8 | Partial (scenarios are mostly idempotent) | Formal validation |
 
+## Implementation Details
+
+For implementation-specific documentation, see:
+- `$HOMESTAK_ROOT/iac/iac-driver/docs/server-daemon.md` — Server daemon architecture, PID management, and operator integration
+- `$HOMESTAK_ROOT/iac/iac-driver/docs/config-distribution.md` — Config distribution to delegated PVE nodes
+
 ## Related Documents
 
 - [node-lifecycle.md](node-lifecycle.md) — Single-node lifecycle phases

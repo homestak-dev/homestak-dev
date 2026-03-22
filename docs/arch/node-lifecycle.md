@@ -423,6 +423,13 @@ iac-driver/
 
 Implementation is tracked in [iac-driver#125](https://github.com/homestak-iac/iac-driver/issues/125) (Node Lifecycle Architecture epic). See the epic's release plan and acceptance criteria for current progress.
 
+## Implementation Details
+
+For implementation-specific documentation, see:
+- `$HOMESTAK_ROOT/iac/iac-driver/docs/config-phase.md` — Config phase implementation (push/pull execution, spec-to-ansible mapping)
+- `$HOMESTAK_ROOT/iac/iac-driver/docs/pve-self-configure.md` — PVE self-configure model (2-phase pve-config scenario)
+- `$HOMESTAK_ROOT/iac/iac-driver/docs/provisioning-token.md` — Provisioning token format, signing, and verification
+
 ## Related Documents
 
 - [config-distribution.md](config-distribution.md) — How site config and secrets reach delegated PVE nodes

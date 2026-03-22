@@ -106,7 +106,7 @@ Remove individual image assets from `latest` if needed:
 
 ## Related
 
-See [packer-pipeline.md](../../../../iac/packer/docs/packer-pipeline.md) for naming conventions, build workflow, and caching strategy.
+See `$HOMESTAK_ROOT/iac/packer/docs/packer-pipeline.md` for naming conventions, build workflow, and caching strategy.
 
 ## Outputs
 
