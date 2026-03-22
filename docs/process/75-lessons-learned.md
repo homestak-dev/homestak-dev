@@ -1,12 +1,18 @@
 # Lessons Learned
 
-Accumulated insights from homestak-dev releases v0.8-v0.57. Each lesson was codified in the retrospective phase of its respective release.
+Accumulated insights from homestak-dev releases v0.8-v0.58. Each lesson was codified in the retrospective phase of its respective release.
 
 ## How to Use This Document
 
 - **Before release:** Scan recent lessons to avoid repeating mistakes
 - **During release:** Reference when encountering issues
 - **After release:** Add new lessons from retrospective, commit with `docs: Update 75-lessons-learned.md with vX.Y lessons`
+
+## v0.58
+
+- **$HOMESTAK_ROOT is the documentation anchor** — never hardcode `~/homestak` in docs. The workspace root varies by context (`/home/homestak/` on installed hosts, `~/homestak/` on dev workstations). Use `$HOMESTAK_ROOT` in all examples.
+- **Agent-generated docs reproduce stale patterns** — even when reading current code, agents output patterns from historical context (three-step config fallback removed in v0.54, `/var/log` paths). Every claim must be verified against source.
+- **Codify conventions as standards** — documentation conventions (file naming, cross-repo references, placeholder rules) belong in a standards doc, not in tribal knowledge or memory files. `docs/standards/documentation.md` prevents drift.
 
 ## v0.57
 
