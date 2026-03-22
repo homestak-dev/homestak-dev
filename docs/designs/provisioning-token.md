@@ -3,7 +3,7 @@
 **Issue:** iac-driver#185
 **Epic:** iac-driver#125 (Node Lifecycle Architecture)
 **Date:** 2026-02-11
-**Status:** Draft
+**Status:** Complete
 
 ## Problem Statement
 
@@ -138,11 +138,11 @@ The existing `site_token` and `node_tokens` fields are superseded by the provisi
 python3 -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-One key per site. Generated once during initial site-config setup (future: `make keygen` target). Stored in `secrets.yaml`, committed encrypted.
+One key per site. Generated once during initial config setup (future: `make keygen` target). Stored in `secrets.yaml`, committed encrypted.
 
 #### Distribution Chain
 
-The signing key reaches every host that needs it through the existing site-config distribution:
+The signing key reaches every host that needs it through the existing config distribution:
 
 ```
 secrets.yaml (operator workspace, decrypted)
@@ -155,7 +155,7 @@ secrets.yaml (operator workspace, decrypted)
     ├── ConfigResolver loads at `resolve_inline_vm()` time
     │   └── operator mints tokens during `tofu apply`
     │
-    └── delegated PVE node: ansible copy-files.yml syncs site-config to child PVE
+    └── delegated PVE node: ansible copy-files.yml syncs config to child PVE
         └── child PVE has signing_key ──► can verify tokens for its children
             └── child operator can mint tokens for subtree delegation
 ```
@@ -218,7 +218,7 @@ The minted token replaces the current `auth_token` field in the resolved VM conf
 write_files:
   - path: /etc/profile.d/homestak.sh
     content: |
-      export HOMESTAK_SERVER=${var.spec_server}
+      export HOMESTAK_SERVER=${var.server_url}
       export HOMESTAK_TOKEN=${vm.auth_token}
 ```
 
@@ -234,7 +234,7 @@ The VM presents the token when fetching its spec:
 hostname = socket.gethostname()  # "edge" — from cloud-init
 token = os.environ["HOMESTAK_TOKEN"]  # Required — error if missing
 
-url = f"{spec_server}/spec/{hostname}"
+url = f"{server_url}/spec/{hostname}"
 headers = {"Authorization": f"Bearer {token}"}
 
 response = urllib.request.urlopen(
@@ -468,7 +468,7 @@ ssh edge "$HOMESTAK_ROOT/iac/iac-driver/run.sh config --fetch --insecure"
 | iac-driver | `src/config_apply.py` | Update `--fetch` to use `HOMESTAK_TOKEN`, add structured logging, fail marker |
 | bootstrap | `lib/spec_client.py` | Read `HOMESTAK_TOKEN`, send as Bearer, add structured logging |
 | tofu | `envs/generic/main.tf` | Inject `HOMESTAK_TOKEN` only (remove `HOMESTAK_IDENTITY` and `HOMESTAK_AUTH_TOKEN`) |
-| site-config | `secrets.yaml` | Add `auth.signing_key`, remove `site_token` and `node_tokens` |
+| config | `secrets.yaml` | Add `auth.signing_key`, remove `site_token` and `node_tokens` |
 
 ### Design Doc Updates
 

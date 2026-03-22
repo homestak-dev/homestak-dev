@@ -57,7 +57,7 @@ Triggered by cloud-init on first boot (pull mode) or by the operator over SSH (p
 
 ### The problem: authored vs generated state
 
-site-config mixes two fundamentally different types of data in a single directory:
+config mixes two fundamentally different types of data in a single directory:
 
 **Authored state** — human-written, belongs in git, same across all hosts:
 - `site.yaml` (defaults: timezone, packages, DNS)
@@ -77,7 +77,7 @@ site-config mixes two fundamentally different types of data in a single director
 ### Current layout (mixed)
 
 ```
-~/etc/                          ← site-config repo clone
+~/etc/                          ← config repo clone
 ├── site.yaml                   ← authored (gitignored, from .example or .enc)
 ├── secrets.yaml                ← MIXED: authored keys + generated tokens
 ├── postures/                   ← authored
@@ -219,4 +219,4 @@ See [homestak-dev#298](https://github.com/homestak-dev/meta/issues/298) for the 
 |-------|-------------|
 | [iac-driver#248](https://github.com/homestak-iac/iac-driver/issues/248) | `/config` endpoint for pull-mode distribution (building block) |
 | [iac-driver#275](https://github.com/homestak-iac/iac-driver/issues/275) | Operator simplification, PVE lifecycle rebalancing (phase 3) |
-| [homestak-dev#298](https://github.com/homestak-dev/meta/issues/298) | Config reconciliation for distributed site-config |
+| [homestak-dev#298](https://github.com/homestak-dev/meta/issues/298) | Config reconciliation for distributed config |

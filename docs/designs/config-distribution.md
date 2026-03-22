@@ -42,14 +42,14 @@ Driver                          root-pve                        leaf-pve
 
 ### What works
 
-- **Code repos**: Served via `_working` branch on the parent's server. Bootstrapped nodes clone from `HOMESTAK_SOURCE`. Pull model.
+- **Code repos**: Served via `_working` branch on the parent's server. Bootstrapped nodes clone from `HOMESTAK_SERVER`. Pull model.
 - **Specs**: Served via `/spec/{identity}` endpoint, authenticated by provisioning token. Pull model.
 - **Secrets**: Pushed via SCP (`copy_secrets` phase). Entire `secrets.yaml` including all hosts' API tokens (over-sharing).
 - **Private key**: Pushed via SCP (`copy_private_key` phase). Shared key model — same key at every depth.
 
 ### What's broken
 
-- **site.yaml**: Was git-tracked, so it arrived via `_working` branch during bootstrap. After site-config#84 (gitignored for new-user onboarding), delegated PVE nodes get the blank template. DNS breaks at depth 2+ (n3-deep failure: `Could not resolve host: github.com` on leaf-pve).
+- **site.yaml**: Was git-tracked, so it arrived via `_working` branch during bootstrap. After config#84 (gitignored for new-user onboarding), delegated PVE nodes get the blank template. DNS breaks at depth 2+ (n3-deep failure: `Could not resolve host: github.com` on leaf-pve).
 
 ## Progression
 
@@ -152,7 +152,7 @@ Since specs default to `ssh_keys: all`, every VM authorizes the full accumulated
 | Issue | Scope | Status |
 |-------|-------|--------|
 | [iac-driver#245](https://github.com/homestak-iac/iac-driver/issues/245) | Short-term: push site config + scope secrets | Complete |
-| [iac-driver#248](https://github.com/homestak-iac/iac-driver/issues/248) | Mid-term: `/config` endpoint for pull-mode distribution | Open |
+| [iac-driver#248](https://github.com/homestak-iac/iac-driver/issues/248) | Mid-term: `/config` endpoint for pull-mode distribution | Closed/Complete |
 
 ## Related Documents
 

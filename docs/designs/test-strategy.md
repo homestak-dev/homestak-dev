@@ -2,7 +2,7 @@
 
 **Sprint:** 0 (Lifecycle Decomposition)
 **Issue:** [iac-driver#141](https://github.com/homestak-iac/iac-driver/issues/141)
-**Status:** Active
+**Status:** Complete
 **Date:** 2026-02-03
 
 ## Overview
@@ -360,9 +360,9 @@ Manifest:
 | ST-2 | `./run.sh test -M n1-push` | **Available** — operator handles flat VM lifecycle | - |
 | ST-3 | `./run.sh test -M n2-push` | **Available** — operator handles tiered PVE+VM | - |
 | ST-4 | `./run.sh test -M n3-deep` | **Available** — `--self-addr` propagates routable address at depth 2+ (iac-driver#200) | - |
-| ST-5 | `./run.sh test -M n2-pull` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, site-config#67) | - |
+| ST-5 | `./run.sh test -M n2-pull` | **Available** — push-mode PVE + pull-mode VM in tiered topology (iac-driver#206, config#67) | - |
 | ST-6 | None | New capability (parallel peer creation) | Future |
-| ST-7 | `./run.sh manifest validate -M <name> -H <host>` | **Available** — validates manifest FKs against site-config (iac-driver#207) | - |
+| ST-7 | `./run.sh manifest validate -M <name> -H <host>` | **Available** — validates manifest FKs against config (iac-driver#207) | - |
 | ST-8 | Partial | Scenarios are mostly idempotent but not formally tested | Core |
 
 ### Unified Controller (iac-driver#146) Contribution to System Tests
@@ -388,7 +388,7 @@ Requirements → Tests traceability. See [requirements-catalog.md](requirements-
 | REQ-ORC-003 (CLI --manifest) | - | - | All except ST-1, ST-7 |
 | REQ-CRE-001 (VM ID allocation) | test_config_resolver.py | `./run.sh test -M n1-push` | ST-2 |
 | REQ-CRE-002 (serial device) | - | `./run.sh test -M n1-push` | ST-2 |
-| REQ-CFG-001 (site-config source) | test_config_resolver.py | - | - |
+| REQ-CFG-001 (config source) | test_config_resolver.py | - | - |
 | REQ-EXE-001 (timeouts) | test_common.py | - | - |
 | REQ-EXE-003 (idempotency) | - | - | ST-8 |
 | REQ-SEC-011 (signing key in secrets) | test_config_resolver.py | `test -M n1-pull` | ST-1 |

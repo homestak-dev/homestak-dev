@@ -248,7 +248,7 @@ class WaitForFileAction:
         deadline = time.time() + self.timeout
         while time.time() < deadline:
             rc, out, _ = run_ssh(host, f'test -f {self.file_path} && echo EXISTS',
-                                 user=config.automation_user, timeout=10)
+                                 user=config.vm_user, timeout=10)
             if 'EXISTS' in out:
                 return ActionResult(success=True, ...)
             time.sleep(self.interval)
@@ -283,29 +283,29 @@ Add `./run.sh config` to the existing runcmd block:
     runcmd:
       - systemctl enable qemu-guest-agent
       - systemctl start qemu-guest-agent
-%{if var.spec_server != ""}
+%{if var.server_url != ""}
       - |
         # Bootstrap from server + config on first boot (v0.48+)
         if [ ! -f $HOMESTAK_ROOT/.state/config/complete.json ]; then
           . /etc/profile.d/homestak.sh
           curl -fsSk "$HOMESTAK_SERVER/bootstrap.git/install.sh" | \
-            HOMESTAK_SOURCE="$HOMESTAK_SERVER" HOMESTAK_REF=_working HOMESTAK_INSECURE=1 SKIP_SITE_CONFIG=1 bash
+            HOMESTAK_SERVER="$HOMESTAK_SERVER" HOMESTAK_REF=_working HOMESTAK_INSECURE=1 SKIP_SITE_CONFIG=1 bash
           $HOMESTAK_ROOT/iac/iac-driver/run.sh config --fetch --insecure \
             >>/var/log/homestak/config.log 2>&1 || true
         fi
 %{endif}
 ```
 
-**Note:** Cloud-init sources `/etc/profile.d/homestak.sh` which provides `HOMESTAK_SERVER` and `HOMESTAK_TOKEN` (a provisioning token minted at create time — see [provisioning-token.md](provisioning-token.md)). The runcmd bootstraps from the server (curls `install.sh`, clones repos via HTTPS with `HOMESTAK_REF=_working`). `SKIP_SITE_CONFIG=1` skips site-config clone since VMs receive pre-resolved specs via token. Then `./run.sh config --fetch --insecure` presents the token, fetches the spec, and applies config locally.
+**Note:** Cloud-init sources `/etc/profile.d/homestak.sh` which provides `HOMESTAK_SERVER` and `HOMESTAK_TOKEN` (a provisioning token minted at create time — see [provisioning-token.md](provisioning-token.md)). The runcmd bootstraps from the server (curls `install.sh`, clones repos via HTTPS with `HOMESTAK_REF=_working`). `SKIP_SITE_CONFIG=1` skips config clone since VMs receive pre-resolved specs via token. Then `./run.sh config --fetch --insecure` presents the token, fetches the spec, and applies config locally.
 
-**Depth 2+ override ([iac-driver#200](https://github.com/homestak-iac/iac-driver/issues/200)):** At depth 2+, `spec_server` in tfvars must point to the immediate parent's server, not the root host from site.yaml. `TofuApplyAction` overrides `spec_server` with `HOMESTAK_SOURCE` when set, so cloud-init bootstraps from the propagation chain (e.g., root-pve:44443 instead of srv1:44443).
+**Depth 2+ override ([iac-driver#200](https://github.com/homestak-iac/iac-driver/issues/200)):** At depth 2+, `server_url` in tfvars must point to the immediate parent's server, not the root host from site.yaml. `TofuApplyAction` overrides `server_url` with `HOMESTAK_SERVER` when set, so cloud-init bootstraps from the propagation chain (e.g., root-pve:44443 instead of srv1:44443).
 
 ## Integration Points
 
 ### Cross-Repo Data Flow
 
 ```
-site-config                  iac-driver                     ansible
+config                       iac-driver                     ansible
 ┌──────────────┐             ┌────────────────┐             ┌────────────────┐
 │ specs/       │──resolve──▶ │ server         │             │ roles:         │
 │ postures/    │             │                │             │ base, users,   │
@@ -401,7 +401,7 @@ Push mode regression — must still work.
 ### Operator Pull Mode Test (via manifest)
 
 ```yaml
-# site-config/manifests/n1-pull.yaml
+# config/manifests/n1-pull.yaml
 schema_version: 2
 name: n1-pull
 description: Single VM with pull execution mode
@@ -427,7 +427,7 @@ nodes:
 3. **iac-driver: Executor pull mode** — wires 1 + 2 together
 4. **ansible: `config-apply.yml` playbook** — used by config_apply.py
 5. **tofu: Cloud-init runcmd extension** — adds `./run.sh config` to first boot
-6. **site-config: n1-pull manifest** — test fixture
+6. **config: n1-pull manifest** — test fixture
 
 ## Deferred
 
@@ -467,9 +467,9 @@ nodes:
 | Operator pull mode | Done | iac-driver 73a9fc1 |
 | `config-apply.yml` playbook | Done | ansible d3407fe |
 | Cloud-init runcmd extension | Done | tofu 676f5bc |
-| `n1-pull.yaml` test manifest | Done | site-config 02c4108 |
+| `n1-pull.yaml` test manifest | Done | config 02c4108 |
 | `pull-vm-roundtrip` scenario | Done | iac-driver 3c2017b |
-| `edge.yaml` spec | Done | site-config 0b0faed |
+| `edge.yaml` spec | Done | config 0b0faed |
 
 **Post-merge fixes (iac-driver#163, v0.48+):**
 
@@ -481,7 +481,7 @@ nodes:
 | `tofu/envs/generic/main.tf` | Add `HOMESTAK_REF=_working` to cloud-init runcmd | tofu#40 |
 | `tofu/envs/generic/main.tf` | Fix SSH key indent (6→10) in cloud-init user-data | tofu#40 |
 | `users/defaults/main.yml` | Add `local_user_shell` default for users role | ansible#37 |
-| `specs/edge.yaml` | Fix SSH key FK (`jderose@father` not `jderose`) | site-config#55 |
+| `specs/edge.yaml` | Fix SSH key FK (`jderose@father` not `jderose`) | config#55 |
 
 **Known issues:**
 - ~~iac-driver#166: `StartSpecServerAction` SSH FD inheritance~~ — **Fixed** (Sprint #209): close inherited FDs > 2 before exec
@@ -492,7 +492,7 @@ nodes:
 |-----------|--------|-------|
 | Push-mode config (`_push_config`) | Done | Operator runs ansible from controller over SSH (iac-driver#206) |
 | Manifest validate verb | Done | `./run.sh manifest validate -M <name> -H <host>` (iac-driver#207) |
-| n2-pull manifest (ST-5) | Done | Push-mode PVE + pull-mode VM (site-config#67) |
+| n2-pull manifest (ST-5) | Done | Push-mode PVE + pull-mode VM (config#67) |
 | Push-mode cloud-init race fix | Done | Skip spec injection for push-mode nodes |
 | Packer apt cache fix | Done | Stop removing apt lists in cleanup (packer#47) |
 
