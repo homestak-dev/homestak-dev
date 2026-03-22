@@ -115,7 +115,7 @@ Before running integration tests (`manifest test`), verify:
 ### Running Tests
 
 ```bash
-ssh jderose@srv1 'sudo -u homestak bash -c "
+ssh user@srv1 'sudo -u homestak bash -c "
   cd ~/iac/iac-driver && ./run.sh manifest test -M n1-push -H srv1 --verbose
 "'
 ```

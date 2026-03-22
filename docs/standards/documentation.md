@@ -80,6 +80,7 @@ Post design comments on individual scope issues, not just the sprint issue. Some
 ## Examples and Placeholders
 
 When writing examples in documentation:
+- **Paths**: use `$HOMESTAK_ROOT` — never hardcode `~/homestak`. The workspace root varies by context (`/home/homestak/` on installed hosts, `~/homestak/` on dev workstations)
 - **Hostnames**: use `srv1`, `srv2` — never real hostnames
 - **Usernames**: use `user` — never real usernames (e.g., `ssh user@srv1`)
 - **IPs**: use RFC 5737 TEST-NET addresses (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24)

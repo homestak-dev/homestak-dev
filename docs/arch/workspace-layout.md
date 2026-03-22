@@ -71,7 +71,7 @@ The layout works at any root path (`~homestak/`, `~/homestak/`, `/opt/homestak/`
 | Mechanism | How | Position-independent |
 |-----------|-----|---------------------|
 | IaC sibling repos | `../` from current repo | Yes — siblings under `iac/` |
-| Config discovery | `$HOMESTAK_SITE_CONFIG` env var | Yes — absolute path from env |
+| Config discovery | `$HOMESTAK_ROOT/config` | Yes — anchored to workspace root |
 | CLI in PATH | `$HOME/bootstrap` added to `$PATH` | Yes — relative to `$HOME` |
 | gita | Registers repos by absolute path | Yes |
 | CLAUDE.md imports | Relative `@` paths from importing file | Yes |
@@ -91,7 +91,7 @@ export PATH="$HOME/bootstrap:$PATH"
 
 | | Dev workstation | Installed host |
 |-|-----------------|----------------|
-| User | Operator (e.g., `jderose`) | `homestak` |
+| User | Operator (e.g., `user`) | `homestak` |
 | Root | `~/homestak/` | `~homestak/` (= `/home/homestak/`) |
 | Has `dev/` | Yes | No |
 | Has `apps/` | Yes | When apps are deployed |
@@ -110,11 +110,9 @@ def get_sibling_dir(name: str) -> Path:
     return get_base_dir().parent / name  # iac/ -> sibling
 ```
 
-### Config discovery (env var)
+### Config discovery
 
-Config (was: site-config) moves from a sibling of iac-driver to a top-level directory. The `../config/` relative path no longer works from `iac/iac-driver/`.
-
-Resolution: `$HOMESTAK_SITE_CONFIG` is already the highest-priority discovery path in both `config.py` and `resolver/base.py`. Bootstrap sets it explicitly. No heuristic parent-walking needed.
+Config lives at `$HOMESTAK_ROOT/config`. The `get_site_config_dir()` function in `config.py` resolves this directly — no sibling-walking or env var fallbacks needed.
 
 ### CLAUDE.md imports
 
@@ -139,7 +137,7 @@ Claude Code resolves `@` paths relative to the importing file's location. Max de
 |---------|-------------|-----------|
 | `bin/` directory | `$HOME/bootstrap` added to PATH | Only held one symlink |
 | `HOMESTAK_LIB` env var | Repos at known paths relative to `$HOME` | `lib/` indirection gone |
-| `HOMESTAK_ETC` env var | `HOMESTAK_SITE_CONFIG` ($HOME/config) | Already the primary discovery path |
+| `HOMESTAK_ETC` env var | `$HOMESTAK_ROOT/config` | Single anchor via `HOMESTAK_ROOT` |
 | `.sh` extension on executables | No extension on files with shebangs | Shebanged scripts drop extension; sourced libraries keep `.sh` |
 
 ## Shell Script Naming Convention
