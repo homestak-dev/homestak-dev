@@ -104,9 +104,9 @@ Before running validation:
 
 | Prerequisite | Check Command |
 |--------------|---------------|
-| Node configuration | `ls site-config/nodes/$(hostname).yaml` |
-| API token | `grep api_tokens site-config/secrets.yaml` |
-| Secrets decrypted | `head -1 site-config/secrets.yaml` (must NOT start with `sops:`) |
+| Node configuration | `ls config/nodes/$(hostname).yaml` |
+| API token | `grep api_tokens config/secrets.yaml` |
+| Secrets decrypted | `head -1 config/secrets.yaml` (must NOT start with `sops:`) |
 | Packer images | `ls /var/lib/vz/template/iso/{debian-12,debian-13,pve-9}.img` |
 | Nested virtualization | `cat /sys/module/kvm_intel/parameters/nested` |
 
@@ -119,29 +119,29 @@ cd iac-driver
 
 ### 4a. Branch Alignment (Remote Hosts)
 
-When running integration tests against a remote host (e.g., srv1 at `~/lib/`), **all repos must be on the correct branch**. Sprint code on your dev machine won't take effect unless the remote host's repos also have the sprint changes.
+When running integration tests against a remote host (e.g., srv1 at `$HOMESTAK_ROOT/iac/`), **all repos must be on the correct branch**. Sprint code on your dev machine won't take effect unless the remote host's repos also have the sprint changes.
 
 **Verify branch alignment:**
 ```bash
 # Check which branches are checked out on the remote host
-ssh $USER@srv1 "for d in ~/lib/*/; do echo \"\$(basename \$d): \$(git -C \$d branch --show-current)\"; done"
+ssh $USER@srv1 "for d in $HOMESTAK_ROOT/iac/*/; do echo \"\$(basename \$d): \$(git -C \$d branch --show-current)\"; done"
 ```
 
 **Deploy sprint branches to remote host:**
 ```bash
 # For each repo with sprint changes:
-ssh $USER@srv1 "cd ~/lib/<repo> && git fetch origin sprint/<name> && git checkout sprint/<name>"
+ssh $USER@srv1 "cd $HOMESTAK_ROOT/iac/<repo> && git fetch origin sprint/<name> && git checkout sprint/<name>"
 
-# Don't forget site-config:
-ssh $USER@srv1 "cd ~/etc && git fetch origin sprint/<name> && git checkout sprint/<name>"
+# Don't forget config:
+ssh $USER@srv1 "cd $HOMESTAK_ROOT/config && git fetch origin sprint/<name> && git checkout sprint/<name>"
 ```
 
 **Common mistake:** Deploying 3 of 4 repos and forgetting the 4th. Always verify all affected repos are aligned before running scenarios.
 
 **After validation:** Restore the remote host to master:
 ```bash
-ssh $USER@srv1 "for d in ~/lib/*/; do git -C \$d checkout master 2>/dev/null; done"
-ssh $USER@srv1 "cd ~/etc && git checkout master"
+ssh $USER@srv1 "for d in $HOMESTAK_ROOT/iac/*/; do git -C \$d checkout master 2>/dev/null; done"
+ssh $USER@srv1 "cd $HOMESTAK_ROOT/config && git checkout master"
 ```
 
 Use `homestak update --branch <name>` to automate this (bootstrap#49).
@@ -235,13 +235,13 @@ Quick check for validation readiness:
 HOST=$(hostname)
 
 # 1. Check node config exists
-ls site-config/nodes/${HOST}.yaml 2>/dev/null || echo "MISSING: node config"
+ls config/nodes/${HOST}.yaml 2>/dev/null || echo "MISSING: node config"
 
 # 2. Check secrets decrypted (not SOPS-encrypted)
-head -1 site-config/secrets.yaml | grep -q "^sops:" && echo "ENCRYPTED: run 'make decrypt' in site-config" || echo "OK: secrets decrypted"
+head -1 config/secrets.yaml | grep -q "^sops:" && echo "ENCRYPTED: run 'make decrypt' in config" || echo "OK: secrets decrypted"
 
 # 3. Check API token exists
-grep -q "${HOST}:" site-config/secrets.yaml && echo "OK: API token" || echo "MISSING: API token"
+grep -q "${HOST}:" config/secrets.yaml && echo "OK: API token" || echo "MISSING: API token"
 
 # 4. Check packer images
 ls /var/lib/vz/template/iso/{debian-12,debian-13,pve-9}.img 2>/dev/null || echo "MISSING: packer images"
@@ -254,7 +254,7 @@ cat /sys/module/kvm_intel/parameters/nested | grep -q Y && echo "OK: nested virt
 
 | Issue | Solution |
 |-------|----------|
-| `secrets.yaml encrypted` | Run `make decrypt` in site-config (file exists but starts with `sops:`) |
+| `secrets.yaml encrypted` | Run `make decrypt` in config (file exists but starts with `sops:`) |
 | `API token not found` | Generate with `pveum`, add to secrets.yaml |
 | `node config missing` | Run `make node-config` on PVE host |
 | `packer images missing` | Run `./publish.sh` or download from release |
