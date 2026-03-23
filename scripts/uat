@@ -482,6 +482,10 @@ write_summary() {
 # Write partial results on SIGINT/SIGTERM
 handle_interrupt() {
     _INTERRUPTED=true
+
+    # Restore stderr to original terminal — tee may be dead from SIGINT
+    exec 2>&3 2>/dev/null || true
+
     echo "" >&2
     log_warn "Interrupted — writing partial results..."
 
@@ -598,9 +602,12 @@ main() {
     _RESULTS_JSON="[]"
 
     # --- Log to file ---
+    # Save original stderr (fd 3) before tee redirect — trap handler restores it
+    # when tee is killed by SIGINT
     mkdir -p "$LOG_DIR"
     local log_file="${LOG_DIR}/${_RUN_ID}.uat.log"
-    exec 2> >(tee -a "$log_file" >&2)
+    exec 3>&2
+    exec 2> >(tee -a "$log_file" >&3)
     log_info "Log file: ${log_file}"
 
     log_info "Matrix run ${_RUN_ID}: ${#assignments[@]} test(s), mode=${mode}, branch=${branch}"
