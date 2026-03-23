@@ -159,11 +159,12 @@ validate_manifests() {
 # -----------------------------------------------------------------------------
 
 # Run a command on a remote host as the homestak user
+# Uses bash -lc (login shell) so ~/.profile is sourced and PATH includes homestak CLI
 run_on_host() {
     local host="$1"
     local cmd="$2"
     # shellcheck disable=SC2086
-    ssh $SSH_OPTS "${USER}@${host}" "sudo -u homestak bash -c '${cmd}'"
+    ssh $SSH_OPTS "${USER}@${host}" "sudo -u homestak bash -lc '${cmd}'"
 }
 
 # Run a command on a remote host as the current user (for sudo operations)
