@@ -40,6 +40,7 @@ CONFIG_DIR="${WORKSPACE_DIR}/config"
 LOG_DIR="${WORKSPACE_DIR}/logs"
 DEFAULT_MATRIX="${META_DIR}/test-matrix.yaml"
 BOOTSTRAP_URL="https://raw.githubusercontent.com/homestak/bootstrap/master/install"
+REMOTE_USER="homestak"
 
 # Provisioning stage timeouts (seconds) — override via environment
 TIMEOUT_REINSTALL="${TIMEOUT_REINSTALL:-900}"     # 15 min
@@ -181,7 +182,7 @@ run_on_host() {
     local host="$1"
     local cmd="$2"
     # shellcheck disable=SC2086,SC2029,SC2087
-    ssh $SSH_OPTS "${USER}@${host}" "sudo -u homestak bash -l" <<REMOTECMD
+    ssh $SSH_OPTS "${USER}@${host}" "sudo -u ${REMOTE_USER} bash -l" <<REMOTECMD
 ${cmd}
 REMOTECMD
 }
