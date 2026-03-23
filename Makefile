@@ -111,4 +111,4 @@ test:
 lint:
 	@command -v shellcheck >/dev/null 2>&1 || { echo "Error: shellcheck not installed. Run: sudo make install-deps"; exit 1; }
 	@echo "Running shellcheck on release..."
-	@shellcheck --severity=warning scripts/release scripts/lib/*.sh
+	@shellcheck --severity=warning scripts/release scripts/uat scripts/lib/*.sh
