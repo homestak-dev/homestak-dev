@@ -5,7 +5,7 @@
 ### Added
 - Add `scripts/uat` — matrix-driven integration test runner (#387)
   - Reads `test-matrix.yaml` for host-to-manifest assignments
-  - Modes: `uat` (test verb, full lifecycle) and `sprint` (apply verb, stop on failure)
+  - Modes: `test` (full lifecycle with destroy) and `apply` (stop on failure)
   - `--branch` deploys sprint branches before testing
   - `--provision` runs full pipeline: reinstall -> bootstrap -> site-init -> pve-setup -> images
   - Aggregated JSON + console summary

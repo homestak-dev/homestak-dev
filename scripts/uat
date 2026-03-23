@@ -10,7 +10,7 @@
 #   uat [options]
 #
 # Options:
-#   --mode uat|sprint    uat = manifest test, sprint = manifest apply (default: uat)
+#   --mode test|apply    test = manifest test, apply = manifest apply (default: test)
 #   --branch NAME        Deploy sprint branches to target hosts before testing
 #   --provision          Full pipeline: reinstall -> bootstrap -> site-init ->
 #                        pve-setup -> images -> test matrix
@@ -87,9 +87,9 @@ Usage:
   uat [options]
 
 Options:
-  --mode uat|sprint    Execution mode (default: uat)
-                       uat    = manifest test (create -> verify -> destroy)
-                       sprint = manifest apply (create -> verify, stop on failure)
+  --mode test|apply    Execution mode (default: test)
+                       test  = manifest test (create -> verify -> destroy)
+                       apply = manifest apply (create -> verify, stop on failure)
   --branch NAME        Deploy sprint branches to target hosts before testing
   --provision          Full pipeline: reinstall -> bootstrap -> site-init ->
                        pve-setup -> images -> test matrix
@@ -107,7 +107,7 @@ Exit codes:
 
 Examples:
   uat                              # Run the full matrix
-  uat --mode sprint                # Apply mode (stop on failure)
+  uat --mode apply                 # Apply mode (stop on failure)
   uat --branch sprint/foo          # Deploy branches first
   uat --host srv1 --manifest n1-push  # Filter to one test
   uat --provision                  # Full pipeline from reinstall
@@ -336,7 +336,7 @@ run_manifest_test() {
     local verbose="$4"
 
     local verb="test"
-    [[ "$mode" == "sprint" ]] && verb="apply"
+    [[ "$mode" == "apply" ]] && verb="apply"
 
     local verbose_flag=""
     [[ "$verbose" == "true" ]] && verbose_flag="--verbose"
@@ -517,7 +517,7 @@ handle_interrupt() {
 # -----------------------------------------------------------------------------
 
 main() {
-    local mode="uat"
+    local mode="test"
     local branch=""
     local provision=false
     local matrix_file="$DEFAULT_MATRIX"
@@ -531,8 +531,8 @@ main() {
         case "$1" in
             --mode)
                 mode="$2"
-                if [[ "$mode" != "uat" && "$mode" != "sprint" ]]; then
-                    log_error "Invalid mode: $mode (must be 'uat' or 'sprint')"
+                if [[ "$mode" != "test" && "$mode" != "apply" ]]; then
+                    log_error "Invalid mode: $mode (must be 'test' or 'apply')"
                     exit 2
                 fi
                 shift 2
@@ -691,7 +691,7 @@ main() {
             '. + [{host: $host, manifest: $manifest, status: $status, duration: $duration, exit_code: $exit_code}]')
 
         # Sprint mode: stop on first failure
-        if [[ "$mode" == "sprint" && "$status" != "passed" ]]; then
+        if [[ "$mode" == "apply" && "$status" != "passed" ]]; then
             log_warn "Sprint mode — stopping after failure"
             break
         fi
