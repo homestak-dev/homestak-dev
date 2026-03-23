@@ -489,14 +489,16 @@ handle_interrupt() {
     echo "" >&2
     log_warn "Interrupted — writing partial results..."
 
-    if [[ -n "$_RUN_ID" && "$_RESULTS_JSON" != "[]" ]]; then
+    if [[ -n "$_RUN_ID" ]]; then
         local finished_at summary
         finished_at=$(date -Iseconds)
         summary=$(build_summary "$_MODE" "$_BRANCH" "$_RUN_ID" "$_STARTED_AT" "$finished_at" "$_RESULTS_JSON")
         print_summary "$summary"
         write_summary "$summary"
-    else
-        log_warn "No results to write"
+
+        # Append to log file directly (tee is dead)
+        local log_file="${LOG_DIR}/${_RUN_ID}.uat.log"
+        echo "[$(date +%H:%M:%S)] [WARN] Interrupted — partial results written" >> "$log_file" 2>/dev/null || true
     fi
 
     exit 130  # 128 + SIGINT(2)
