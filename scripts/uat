@@ -373,7 +373,7 @@ build_summary() {
     passed=$(echo "$results_json" | jq '[.[] | select(.status == "passed")] | length')
     failed=$(echo "$results_json" | jq '[.[] | select(.status != "passed")] | length')
     all_passed="false"
-    [[ "$failed" -eq 0 ]] && all_passed="true"
+    [[ "$failed" -eq 0 && "$_INTERRUPTED" == "false" ]] && all_passed="true"
 
     # Unique hosts
     hosts_json=$(echo "$results_json" | jq '[.[].host] | unique')
@@ -390,6 +390,7 @@ build_summary() {
         --argjson passed "$passed" \
         --argjson failed "$failed" \
         --argjson all_passed "$all_passed" \
+        --argjson interrupted "$_INTERRUPTED" \
         '{
             run_id: $run_id,
             mode: $mode,
@@ -401,7 +402,8 @@ build_summary() {
             total_duration: $total_duration,
             passed: $passed,
             failed: $failed,
-            all_passed: $all_passed
+            all_passed: $all_passed,
+            interrupted: $interrupted
         }'
 }
 
@@ -464,6 +466,11 @@ write_summary() {
     status="passed"
     if [[ "$(echo "$summary_json" | jq -r '.all_passed')" != "true" ]]; then
         status="failed"
+    fi
+
+    # Override status if interrupted
+    if $_INTERRUPTED; then
+        status="interrupted"
     fi
 
     # Sanitize branch for filename
