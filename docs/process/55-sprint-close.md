@@ -45,7 +45,7 @@ Update sprint log with validation outcome:
 **Host:** srv1
 **Result:** PASSED
 
-Report: [Link to report in iac-driver/reports/]
+Report: [Link to report in $HOMESTAK_ROOT/logs/]
 ```
 
 This creates the validation evidence needed for release.

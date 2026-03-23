@@ -24,96 +24,103 @@ discovered from `$HOMESTAK_ROOT/config/manifests/n*.yaml`:
 | n2-pull | tiered | ~8 min | medium (nested virt) |
 | n3-deep | tiered | ~16 min | heavy (3-level nesting) |
 
-### Test Matrix Command (planned)
+### Test Matrix Command
 
-A single command to run all manifests with aggregated reporting:
+Run the full matrix or specific manifests with aggregated reporting:
 
 ```bash
-# UAT mode (default): create → verify → destroy each manifest
-meta/scripts/uat test-matrix -H srv1
+# Test mode (default): create → verify → destroy each manifest
+meta/scripts/uat --host srv1
 
-# Sprint mode: create → verify, stop on first failure
-meta/scripts/uat test-matrix -H srv1 --mode sprint
+# Apply mode: create → verify, stop on first failure
+meta/scripts/uat --host srv1 --mode apply
 
-# Specific manifests only
-meta/scripts/uat test-matrix -H srv1 --manifests n1-push,n2-push
+# Specific manifest only
+meta/scripts/uat --host srv1 --manifest n1-push
 
-# Sprint branch validation
-meta/scripts/uat test-matrix -H srv1 --branch sprint/operator-simplify
+# Sprint branch validation (deploys branch to target before testing)
+meta/scripts/uat --host srv1 --branch sprint/operator-simplify
+
+# Preview planned execution
+meta/scripts/uat --host srv1 --dry-run
 ```
+
+Host-to-manifest assignments are configured in `meta/test-matrix.yaml`.
 
 ## Reporting
 
-**Report location:** `$HOMESTAK_ROOT/logs/reports/` on each target host
-(planned move from `iac-driver/reports/`)
+**Per-manifest reports:** `$HOMESTAK_ROOT/logs/` on each target host (written by iac-driver).
 
-### Per-Manifest Report (exists today)
+**Matrix summaries:** `$HOMESTAK_ROOT/logs/` on the orchestrator (written by `scripts/uat`).
+
+### Matrix Summary Format
 
 ```
-$HOMESTAK_ROOT/logs/reports/YYYYMMDD-HHMMSS.n1-push.passed.json
+$HOMESTAK_ROOT/logs/YYYYMMDD-HHMMSS.json   # structured results
+$HOMESTAK_ROOT/logs/YYYYMMDD-HHMMSS.log    # stderr capture
 ```
-
-### Matrix Summary (planned)
 
 ```json
 {
-  "run_id": "20260322-180000",
-  "host": "srv1",
-  "mode": "uat",
+  "run_id": "20260322-232123",
+  "mode": "test",
   "branch": "master",
-  "results": {
-    "n1-push": { "status": "passed", "duration": 58 },
-    "n1-pull": { "status": "passed", "duration": 150 },
-    "n2-push": { "status": "passed", "duration": 368 },
-    "n2-pull": { "status": "passed", "duration": 489 },
-    "n3-deep": { "status": "passed", "duration": 961 }
-  },
-  "total_duration": 2026,
-  "all_passed": true
+  "hosts": ["srv1"],
+  "started_at": "2026-03-22T23:21:23+00:00",
+  "finished_at": "2026-03-22T23:54:54+00:00",
+  "results": [
+    {"host": "srv1", "manifest": "n1-push", "status": "passed", "duration": 53, "exit_code": 0},
+    {"host": "srv1", "manifest": "n1-pull", "status": "passed", "duration": 154, "exit_code": 0}
+  ],
+  "total_duration": 2011,
+  "passed": 5,
+  "failed": 0,
+  "all_passed": true,
+  "interrupted": false
 }
 ```
 
-Reports include host identity and branch so multi-host aggregation works from
-Phase 1.
+Summaries include host identity and branch for multi-host aggregation (Phase 3).
 
-## Automated UAT Pipeline (planned)
+## UAT Pipeline
 
-### Single-Host Pipeline
+### Single-Host Pipeline (implemented)
 
 ```bash
-meta/scripts/uat --provision
+# Full virgin-to-validated: provision host, then run matrix
+meta/scripts/uat --host srv1 --provision
+
+# Just run the test matrix (host already provisioned)
+meta/scripts/uat --host srv1
 ```
 
-Orchestrates the full virgin-to-validated flow for each host in the matrix:
+The `--provision` flag orchestrates the full pipeline for each host:
 
 ```
-bare-metal/reinstall srv1 --yes          # Fresh Debian (~5-10 min)
-ssh user@srv1 'curl ... | sudo bash'     # Bootstrap (~3 min)
-sudo -iu homestak homestak site-init     # Auto-detect network (bootstrap#71)
-sudo -iu homestak homestak pve-setup     # PVE + reboot + re-run (~6 min)
-sudo -iu homestak homestak images download all --publish  # (~2 min)
+bare-metal/reinstall srv1 --yes               # Fresh Debian
+ssh user@srv1 'curl ... | sudo bash'          # Bootstrap
+homestak site-init                            # Auto-detect network
+homestak pve-setup                            # PVE + reboot + re-run
+homestak images download all --publish        # Packer images
 # then run assigned manifests from test-matrix.yaml
 ```
 
+Each step has a configurable timeout (env vars `TIMEOUT_REINSTALL`, etc.) and
+logs elapsed time on completion for baseline data collection.
+
 **Reboot handling:** `pve-setup` reboots after PVE kernel install. The orchestrator
-detects the SSH drop, polls for reconnection, and re-runs `pve-setup` to complete
-the packages phase.
+detects the SSH drop (exit code 255), polls for reconnection, and re-runs
+`pve-setup` to complete the packages phase.
 
 **Branch support:** `--branch sprint/foo` deploys sprint branches to the target
-host before running the matrix.
+host before running the matrix. `--branch master` explicitly resets targets.
 
-```bash
-meta/scripts/uat run -H srv1 --branch sprint/operator-simplify
-```
+**Interrupt handling:** SIGINT/SIGTERM writes partial results JSON and appends to
+the log file before exiting.
 
-### Multi-Host Pipeline
+### Multi-Host Pipeline (Phase 3, planned)
 
-```bash
-meta/scripts/uat run --hosts srv1,srv2,srv3
-```
-
-Provisions N hosts in parallel, distributes manifests by weight, runs tests
-concurrently, aggregates results:
+The current script runs hosts sequentially. Phase 3 (#390) adds parallel execution:
 
 ```
 Dev workstation (orchestrator)
@@ -123,7 +130,7 @@ Dev workstation (orchestrator)
 │   ├── srv2: reinstall → bootstrap → site-init → pve-setup → images
 │   └── srv3: reinstall → bootstrap → site-init → pve-setup → images
 │
-├── Test (parallel, distributed by weight)
+├── Test (parallel per host, sequential per manifest)
 │   ├── srv1: n1-push, n2-push
 │   ├── srv2: n1-pull, n2-pull
 │   └── srv3: n3-deep
@@ -132,31 +139,7 @@ Dev workstation (orchestrator)
     └── Matrix summary (all hosts, all manifests, single pass/fail)
 ```
 
-**Manifest distribution:** Configurable assignment of manifests to hosts.
-Default distributes by resource weight (n1-* light, n2-* medium, n3-deep heavy).
-
-**Agent-per-host model:** Each host can be managed by a separate Claude agent.
-The orchestrator dispatches work, host agents execute independently, results
-aggregate via structured JSON.
-
-**Multi-host matrix summary:**
-```json
-{
-  "run_id": "20260322-180000",
-  "hosts": ["srv1", "srv2", "srv3"],
-  "branch": "master",
-  "results": {
-    "n1-push": { "host": "srv1", "status": "passed", "duration": 58 },
-    "n1-pull": { "host": "srv2", "status": "passed", "duration": 150 },
-    "n2-push": { "host": "srv1", "status": "passed", "duration": 368 },
-    "n2-pull": { "host": "srv2", "status": "passed", "duration": 489 },
-    "n3-deep": { "host": "srv3", "status": "passed", "duration": 961 }
-  },
-  "total_wall_clock": 961,
-  "all_passed": true
-}
-```
-
+Host-to-manifest assignments are configured in `meta/test-matrix.yaml`.
 Wall-clock time limited by the slowest host, not the sum of all manifests.
 
 ## Prerequisites
@@ -167,18 +150,18 @@ The UAT pipeline depends on:
 |-----------|------|--------|
 | `bare-metal/reinstall` | bare-metal | Exists — fresh Debian via EFI boot-next |
 | `bootstrap/install` | bootstrap | Exists — curl\|bash installer |
-| `homestak site-init` | bootstrap | Planned (bootstrap#71) — auto-detect network |
+| `homestak site-init` | bootstrap | Exists — auto-detect network |
 | `homestak pve-setup` | iac-driver | Exists — PVE install with reboot re-entry |
 | `homestak images download all --publish` | bootstrap | Exists |
-| `meta/scripts/uat` | meta | Planned — orchestrator script |
+| `meta/scripts/uat` | meta | Exists — matrix-driven test orchestrator |
 
 ## Implementation Phases
 
-| Phase | Delivers | Enables |
-|-------|----------|---------|
-| 1: Foundation | Report relocation, test matrix command (sequential, single host) | One-command test runs, consistent reporting |
-| 2: Zero-touch | bootstrap#71 (site-init), `meta/scripts/uat` orchestrator | Virgin-to-validated in one command |
-| 3: Multi-host | Parallel provisioning, manifest distribution, agent-per-host | Full parallel validation across N hosts |
+| Phase | Delivers | Status |
+|-------|----------|--------|
+| 1: Foundation | Report relocation to `$HOMESTAK_ROOT/logs/`, `homestak site-init` | Complete (sprint #381) |
+| 2: Matrix-driven | `meta/scripts/uat` orchestrator, hardening, test-matrix.yaml | Complete (sprint #394) |
+| 3: Multi-host | Parallel provisioning, manifest distribution across N hosts | Planned (#390) |
 
 ### Design Principles
 
@@ -192,5 +175,6 @@ The UAT pipeline depends on:
 
 | Date | Change |
 |------|--------|
+| 2026-03-23 | Updated to reflect implemented state: Phase 1-2 complete, actual CLI and JSON formats, prerequisite statuses |
 | 2026-03-22 | Major revision: split iac-driver specifics to `iac-driver/docs/testing.md`, added UAT pipeline and multi-host vision |
 | 2026-02-03 | Initial document |
