@@ -11,4 +11,4 @@
 #   n3-deep  - 3-level nesting (~16 min)
 
 matrix:
-  srv1: [n1-push, n1-pull, n2-push, n2-pull, n3-deep]
+  mother: [n1-push, n1-pull, n2-push, n2-pull, n3-deep]
