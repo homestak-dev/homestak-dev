@@ -60,6 +60,7 @@ _BRANCH=""
 _STARTED_AT=""
 _RESULTS_JSON="[]"
 _INTERRUPTED=false
+_EXPLICIT_BRANCH=false
 
 # -----------------------------------------------------------------------------
 # Colors and Logging
@@ -538,7 +539,7 @@ main() {
                 fi
                 shift 2
                 ;;
-            --branch)     branch="$2"; shift 2 ;;
+            --branch)     branch="$2"; _EXPLICIT_BRANCH=true; shift 2 ;;
             --provision)  provision=true; shift ;;
             --matrix)     matrix_file="$2"; shift 2 ;;
             --host)       filter_host="$2"; shift 2 ;;
@@ -647,8 +648,8 @@ main() {
         done
     fi
 
-    # --- Deploy branches (if requested) ---
-    if [[ -n "$branch" && "$branch" != "master" ]]; then
+    # --- Deploy branches (if --branch was explicitly passed) ---
+    if [[ -n "$_EXPLICIT_BRANCH" ]]; then
         for host in "${unique_hosts[@]}"; do
             deploy_branch "$host" "$branch"
         done
