@@ -81,18 +81,18 @@ Phase 1.
 ### Single-Host Pipeline
 
 ```bash
-meta/scripts/uat run -H srv1
+meta/scripts/uat --provision
 ```
 
-Orchestrates the full virgin-to-validated flow:
+Orchestrates the full virgin-to-validated flow for each host in the matrix:
 
 ```
 bare-metal/reinstall srv1 --yes          # Fresh Debian (~5-10 min)
 ssh user@srv1 'curl ... | sudo bash'     # Bootstrap (~3 min)
-sudo -iu homestak homestak site-init --yes   # Auto-detect network (bootstrap#71)
+sudo -iu homestak homestak site-init     # Auto-detect network (bootstrap#71)
 sudo -iu homestak homestak pve-setup     # PVE + reboot + re-run (~6 min)
 sudo -iu homestak homestak images download all --publish  # (~2 min)
-meta/scripts/uat test-matrix -H srv1     # All 5 manifests (~30 min)
+# then run assigned manifests from test-matrix.yaml
 ```
 
 **Reboot handling:** `pve-setup` reboots after PVE kernel install. The orchestrator
@@ -167,7 +167,7 @@ The UAT pipeline depends on:
 |-----------|------|--------|
 | `bare-metal/reinstall` | bare-metal | Exists — fresh Debian via EFI boot-next |
 | `bootstrap/install` | bootstrap | Exists — curl\|bash installer |
-| `homestak site-init --yes` | bootstrap | Planned (bootstrap#71) — auto-detect network |
+| `homestak site-init` | bootstrap | Planned (bootstrap#71) — auto-detect network |
 | `homestak pve-setup` | iac-driver | Exists — PVE install with reboot re-entry |
 | `homestak images download all --publish` | bootstrap | Exists |
 | `meta/scripts/uat` | meta | Planned — orchestrator script |
@@ -177,7 +177,7 @@ The UAT pipeline depends on:
 | Phase | Delivers | Enables |
 |-------|----------|---------|
 | 1: Foundation | Report relocation, test matrix command (sequential, single host) | One-command test runs, consistent reporting |
-| 2: Zero-touch | bootstrap#71 (site-init --yes), `meta/scripts/uat` orchestrator | Virgin-to-validated in one command |
+| 2: Zero-touch | bootstrap#71 (site-init), `meta/scripts/uat` orchestrator | Virgin-to-validated in one command |
 | 3: Multi-host | Parallel provisioning, manifest distribution, agent-per-host | Full parallel validation across N hosts |
 
 ### Design Principles
