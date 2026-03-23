@@ -462,7 +462,6 @@ write_summary() {
     local run_id branch status filename
 
     run_id=$(echo "$summary_json" | jq -r '.run_id')
-    branch=$(echo "$summary_json" | jq -r '.branch')
     status="passed"
     if [[ "$(echo "$summary_json" | jq -r '.all_passed')" != "true" ]]; then
         status="failed"
@@ -473,11 +472,8 @@ write_summary() {
         status="interrupted"
     fi
 
-    # Sanitize branch for filename
-    branch=$(echo "$branch" | tr '/' '-')
-
     mkdir -p "$LOG_DIR"
-    filename="${LOG_DIR}/${run_id}.matrix.${branch}.${status}.json"
+    filename="${LOG_DIR}/${run_id}.matrix.${status}.json"
     echo "$summary_json" | jq '.' > "$filename"
     log_info "Summary: ${filename}"
 }
