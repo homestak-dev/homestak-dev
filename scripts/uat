@@ -464,7 +464,7 @@ write_summary() {
     run_id=$(echo "$summary_json" | jq -r '.run_id')
 
     mkdir -p "$LOG_DIR"
-    filename="${LOG_DIR}/${run_id}.matrix.json"
+    filename="${LOG_DIR}/${run_id}.json"
     echo "$summary_json" | jq '.' > "$filename"
     log_info "Summary: ${filename}"
 }
@@ -491,7 +491,7 @@ handle_interrupt() {
         write_summary "$summary"
 
         # Append to log file directly (tee is dead)
-        local log_file="${LOG_DIR}/${_RUN_ID}.uat.log"
+        local log_file="${LOG_DIR}/${_RUN_ID}.log"
         echo "[$(date +%H:%M:%S)] [WARN] Interrupted — partial results written" >> "$log_file" 2>/dev/null || true
     fi
 
@@ -601,7 +601,7 @@ main() {
     # Save original stderr (fd 3) before tee redirect — trap handler restores it
     # when tee is killed by SIGINT
     mkdir -p "$LOG_DIR"
-    local log_file="${LOG_DIR}/${_RUN_ID}.uat.log"
+    local log_file="${LOG_DIR}/${_RUN_ID}.log"
     exec 3>&2
     exec 2> >(tee -a "$log_file" >&3)
     log_info "Log file: ${log_file}"
