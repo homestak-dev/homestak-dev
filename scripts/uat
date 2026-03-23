@@ -41,8 +41,23 @@ LOG_DIR="${WORKSPACE_DIR}/logs"
 DEFAULT_MATRIX="${META_DIR}/test-matrix.yaml"
 BOOTSTRAP_URL="https://raw.githubusercontent.com/homestak/bootstrap/master/install"
 
+# Provisioning stage timeouts (seconds) — override via environment
+TIMEOUT_REINSTALL="${TIMEOUT_REINSTALL:-900}"     # 15 min
+TIMEOUT_BOOTSTRAP="${TIMEOUT_BOOTSTRAP:-600}"     # 10 min
+TIMEOUT_SITE_INIT="${TIMEOUT_SITE_INIT:-300}"     # 5 min
+TIMEOUT_PVE_SETUP="${TIMEOUT_PVE_SETUP:-600}"     # 10 min
+TIMEOUT_IMAGES="${TIMEOUT_IMAGES:-600}"           # 10 min
+
 # SSH options for automation (no host key prompts, quiet)
 SSH_OPTS="-o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR"
+
+# Global state for trap handler (populated in main)
+_RUN_ID=""
+_MODE=""
+_BRANCH=""
+_STARTED_AT=""
+_RESULTS_JSON="[]"
+_INTERRUPTED=false
 
 # -----------------------------------------------------------------------------
 # Colors and Logging
@@ -159,12 +174,15 @@ validate_manifests() {
 # -----------------------------------------------------------------------------
 
 # Run a command on a remote host as the homestak user
-# Uses bash -lc (login shell) so ~/.profile is sourced and PATH includes homestak CLI
+# Uses bash -l (login shell) so ~/.profile is sourced and PATH includes homestak CLI
+# Heredoc-over-SSH avoids quoting issues with single quotes in commands
 run_on_host() {
     local host="$1"
     local cmd="$2"
-    # shellcheck disable=SC2086
-    ssh $SSH_OPTS "${USER}@${host}" "sudo -u homestak bash -lc '${cmd}'"
+    # shellcheck disable=SC2086,SC2029,SC2087
+    ssh $SSH_OPTS "${USER}@${host}" "sudo -u homestak bash -l" <<REMOTECMD
+${cmd}
+REMOTECMD
 }
 
 # Run a command on a remote host as the current user (for sudo operations)
@@ -212,9 +230,9 @@ provision_host() {
     log_info "=== Provisioning ${host} ==="
 
     # Step 1: Reinstall via bare-metal
-    log_info "[1/5] Reinstalling ${host}..."
-    if ! "${WORKSPACE_DIR}/bare-metal/reinstall" "$host" --yes; then
-        log_error "Reinstall failed for ${host}"
+    log_info "[1/5] Reinstalling ${host} (timeout: ${TIMEOUT_REINSTALL}s)..."
+    if ! timeout "$TIMEOUT_REINSTALL" "${WORKSPACE_DIR}/bare-metal/reinstall" "$host" --yes; then
+        log_error "Reinstall failed or timed out for ${host}"
         return 1
     fi
 
@@ -228,44 +246,50 @@ provision_host() {
     fi
 
     # Step 2: Bootstrap
-    log_info "[2/5] Bootstrapping ${host}..."
+    log_info "[2/5] Bootstrapping ${host} (timeout: ${TIMEOUT_BOOTSTRAP}s)..."
     # shellcheck disable=SC2086
-    if ! ssh $SSH_OPTS "${USER}@${host}" \
+    if ! timeout "$TIMEOUT_BOOTSTRAP" ssh $SSH_OPTS "${USER}@${host}" \
         "curl -fsSL ${BOOTSTRAP_URL} | sudo bash -s -- --skip-apt-wait"; then
-        log_error "Bootstrap failed on ${host}"
+        log_error "Bootstrap failed or timed out on ${host}"
         return 1
     fi
 
     # Step 3: Site init
-    log_info "[3/5] Running site-init on ${host}..."
-    if ! run_on_host "$host" "homestak site-init"; then
-        log_error "site-init failed on ${host}"
+    log_info "[3/5] Running site-init on ${host} (timeout: ${TIMEOUT_SITE_INIT}s)..."
+    if ! timeout "$TIMEOUT_SITE_INIT" run_on_host "$host" "homestak site-init"; then
+        log_error "site-init failed or timed out on ${host}"
         return 1
     fi
 
     # Step 4: PVE setup (handles reboot)
-    log_info "[4/5] Running pve-setup on ${host}..."
+    log_info "[4/5] Running pve-setup on ${host} (timeout: ${TIMEOUT_PVE_SETUP}s)..."
     local rc=0
     set +e
-    run_on_host "$host" "homestak pve-setup"
+    timeout "$TIMEOUT_PVE_SETUP" run_on_host "$host" "homestak pve-setup"
     rc=$?
     set -e
 
-    if [[ $rc -eq 255 ]]; then
+    if [[ $rc -eq 124 ]]; then
+        log_error "pve-setup timed out on ${host}"
+        return 1
+    elif [[ $rc -eq 255 ]]; then
         # SSH disconnect likely means reboot
         log_info "SSH disconnected — waiting for reboot..."
         wait_for_ssh "$host" 600 15
         log_info "Re-running pve-setup after reboot..."
-        run_on_host "$host" "homestak pve-setup"
+        if ! timeout "$TIMEOUT_PVE_SETUP" run_on_host "$host" "homestak pve-setup"; then
+            log_error "pve-setup failed on ${host} after reboot"
+            return 1
+        fi
     elif [[ $rc -ne 0 ]]; then
         log_error "pve-setup failed on ${host} (exit ${rc})"
         return 1
     fi
 
     # Step 5: Download and publish packer images
-    log_info "[5/5] Downloading images on ${host}..."
-    if ! run_on_host "$host" "homestak images download all --publish"; then
-        log_error "Image download failed on ${host}"
+    log_info "[5/5] Downloading images on ${host} (timeout: ${TIMEOUT_IMAGES}s)..."
+    if ! timeout "$TIMEOUT_IMAGES" run_on_host "$host" "homestak images download all --publish"; then
+        log_error "Image download failed or timed out on ${host}"
         return 1
     fi
 
@@ -452,6 +476,29 @@ write_summary() {
 }
 
 # -----------------------------------------------------------------------------
+# Interrupt Handler
+# -----------------------------------------------------------------------------
+
+# Write partial results on SIGINT/SIGTERM
+handle_interrupt() {
+    _INTERRUPTED=true
+    echo "" >&2
+    log_warn "Interrupted — writing partial results..."
+
+    if [[ -n "$_RUN_ID" && "$_RESULTS_JSON" != "[]" ]]; then
+        local finished_at summary
+        finished_at=$(date -Iseconds)
+        summary=$(build_summary "$_MODE" "$_BRANCH" "$_RUN_ID" "$_STARTED_AT" "$finished_at" "$_RESULTS_JSON")
+        print_summary "$summary"
+        write_summary "$summary"
+    else
+        log_warn "No results to write"
+    fi
+
+    exit 130  # 128 + SIGINT(2)
+}
+
+# -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
 
@@ -520,6 +567,7 @@ main() {
     if [[ -z "$branch" ]]; then
         branch=$(git -C "$META_DIR" branch --show-current 2>/dev/null || echo "master")
     fi
+    _BRANCH="$branch"
 
     # --- Dry run ---
     if $dry_run; then
@@ -544,11 +592,21 @@ main() {
     fi
 
     # --- Run ID and timestamps ---
-    local run_id started_at
-    run_id=$(date '+%Y%m%d-%H%M%S')
-    started_at=$(date -Iseconds)
+    _RUN_ID=$(date '+%Y%m%d-%H%M%S')
+    _MODE="$mode"
+    _STARTED_AT=$(date -Iseconds)
+    _RESULTS_JSON="[]"
 
-    log_info "Matrix run ${run_id}: ${#assignments[@]} test(s), mode=${mode}, branch=${branch}"
+    # --- Log to file ---
+    mkdir -p "$LOG_DIR"
+    local log_file="${LOG_DIR}/${_RUN_ID}.uat.log"
+    exec 2> >(tee -a "$log_file" >&2)
+    log_info "Log file: ${log_file}"
+
+    log_info "Matrix run ${_RUN_ID}: ${#assignments[@]} test(s), mode=${mode}, branch=${branch}"
+
+    # Install interrupt handler (after globals are populated)
+    trap handle_interrupt INT TERM
 
     # --- Collect unique hosts ---
     local -A hosts_seen
@@ -579,7 +637,6 @@ main() {
     fi
 
     # --- Execute tests ---
-    local results_json="[]"
     local any_failed=false
 
     for entry in "${assignments[@]}"; do
@@ -607,8 +664,8 @@ main() {
             log_error "${manifest} on ${host}: FAILED (${duration}s)"
         fi
 
-        # Append result to array
-        results_json=$(echo "$results_json" | jq \
+        # Append result to global array (accessible to trap handler)
+        _RESULTS_JSON=$(echo "$_RESULTS_JSON" | jq \
             --arg host "$host" \
             --arg manifest "$manifest" \
             --arg status "$status" \
@@ -626,7 +683,7 @@ main() {
     # --- Build and write summary ---
     local finished_at summary
     finished_at=$(date -Iseconds)
-    summary=$(build_summary "$mode" "$branch" "$run_id" "$started_at" "$finished_at" "$results_json")
+    summary=$(build_summary "$_MODE" "$_BRANCH" "$_RUN_ID" "$_STARTED_AT" "$finished_at" "$_RESULTS_JSON")
 
     print_summary "$summary"
     write_summary "$summary"

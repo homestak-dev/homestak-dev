@@ -11,6 +11,13 @@
   - Aggregated JSON + console summary
 - Add `test-matrix.yaml` with default 5-manifest assignment
 
+### Changed
+- Harden UAT orchestrator for unattended operation (#389)
+  - Trap handler writes partial results on Ctrl-C / SIGTERM
+  - Per-stage timeouts for provisioning pipeline (env-configurable)
+  - Stderr teed to `$HOMESTAK_ROOT/logs/RUNID.uat.log`
+  - SSH quoting uses heredoc-over-SSH to handle single quotes
+
 ## v0.58 - 2026-03-22
 
 No changes.
