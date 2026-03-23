@@ -1,0 +1,14 @@
+# Test matrix: host-to-manifest assignments
+#
+# Each host runs the listed manifests sequentially.
+# Multi-host parallel execution planned for Phase 3 (meta#390).
+#
+# Available manifests (from config/manifests/n*.yaml):
+#   n1-push  - flat topology, push mode (~1 min)
+#   n1-pull  - flat topology, pull mode (~2.5 min)
+#   n2-push  - tiered topology, push mode (~6 min)
+#   n2-pull  - tiered topology, push PVE + pull leaf (~8 min)
+#   n3-deep  - 3-level nesting (~16 min)
+
+matrix:
+  srv1: [n1-push, n1-pull, n2-push, n2-pull, n3-deep]
