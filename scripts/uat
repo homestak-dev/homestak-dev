@@ -48,7 +48,8 @@ TIMEOUT_SITE_INIT="${TIMEOUT_SITE_INIT:-300}"     # 5 min
 TIMEOUT_PVE_SETUP="${TIMEOUT_PVE_SETUP:-600}"     # 10 min
 TIMEOUT_IMAGES="${TIMEOUT_IMAGES:-600}"           # 10 min
 
-# SSH options for automation (no host key prompts, quiet)
+# SSH options for automation: no host key verification (hosts are reinstalled
+# between runs, so keys change regularly), quiet output
 SSH_OPTS="-o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR"
 
 # Global state for trap handler (populated in main)
@@ -237,9 +238,6 @@ provision_host() {
         log_error "Reinstall failed or timed out for ${host}"
         return 1
     fi
-
-    # Remove stale host key after reinstall
-    ssh-keygen -R "$host" 2>/dev/null || true
 
     # Wait for fresh host SSH (included in reinstall timing)
     if ! wait_for_ssh "$host" 600 15; then
