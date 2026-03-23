@@ -226,11 +226,13 @@ wait_for_ssh() {
 
 provision_host() {
     local host="$1"
+    local step_start step_duration
 
     log_info "=== Provisioning ${host} ==="
 
     # Step 1: Reinstall via bare-metal
     log_info "[1/5] Reinstalling ${host} (timeout: ${TIMEOUT_REINSTALL}s)..."
+    step_start=$(date +%s)
     if ! timeout "$TIMEOUT_REINSTALL" "${WORKSPACE_DIR}/bare-metal/reinstall" "$host" --yes; then
         log_error "Reinstall failed or timed out for ${host}"
         return 1
@@ -239,30 +241,39 @@ provision_host() {
     # Remove stale host key after reinstall
     ssh-keygen -R "$host" 2>/dev/null || true
 
-    # Wait for fresh host SSH
+    # Wait for fresh host SSH (included in reinstall timing)
     if ! wait_for_ssh "$host" 600 15; then
         log_error "Host ${host} not reachable after reinstall"
         return 1
     fi
+    step_duration=$(( $(date +%s) - step_start ))
+    log_success "[1/5] Reinstall + SSH ready: ${step_duration}s"
 
     # Step 2: Bootstrap
     log_info "[2/5] Bootstrapping ${host} (timeout: ${TIMEOUT_BOOTSTRAP}s)..."
+    step_start=$(date +%s)
     # shellcheck disable=SC2086
     if ! timeout "$TIMEOUT_BOOTSTRAP" ssh $SSH_OPTS "${USER}@${host}" \
         "curl -fsSL ${BOOTSTRAP_URL} | sudo bash -s -- --skip-apt-wait"; then
         log_error "Bootstrap failed or timed out on ${host}"
         return 1
     fi
+    step_duration=$(( $(date +%s) - step_start ))
+    log_success "[2/5] Bootstrap: ${step_duration}s"
 
     # Step 3: Site init
     log_info "[3/5] Running site-init on ${host} (timeout: ${TIMEOUT_SITE_INIT}s)..."
+    step_start=$(date +%s)
     if ! timeout "$TIMEOUT_SITE_INIT" run_on_host "$host" "homestak site-init"; then
         log_error "site-init failed or timed out on ${host}"
         return 1
     fi
+    step_duration=$(( $(date +%s) - step_start ))
+    log_success "[3/5] Site-init: ${step_duration}s"
 
     # Step 4: PVE setup (handles reboot)
     log_info "[4/5] Running pve-setup on ${host} (timeout: ${TIMEOUT_PVE_SETUP}s)..."
+    step_start=$(date +%s)
     local rc=0
     set +e
     timeout "$TIMEOUT_PVE_SETUP" run_on_host "$host" "homestak pve-setup"
@@ -285,13 +296,18 @@ provision_host() {
         log_error "pve-setup failed on ${host} (exit ${rc})"
         return 1
     fi
+    step_duration=$(( $(date +%s) - step_start ))
+    log_success "[4/5] PVE-setup: ${step_duration}s"
 
     # Step 5: Download and publish packer images
     log_info "[5/5] Downloading images on ${host} (timeout: ${TIMEOUT_IMAGES}s)..."
+    step_start=$(date +%s)
     if ! timeout "$TIMEOUT_IMAGES" run_on_host "$host" "homestak images download all --publish"; then
         log_error "Image download failed or timed out on ${host}"
         return 1
     fi
+    step_duration=$(( $(date +%s) - step_start ))
+    log_success "[5/5] Images: ${step_duration}s"
 
     log_success "Provisioning complete for ${host}"
 }
