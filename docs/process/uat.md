@@ -2,6 +2,18 @@
 
 Internal validation checklist for verifying homestak on a fresh Debian 13 host.
 
+**Automated:** `meta/scripts/uat` runs the full test matrix with provisioning,
+branch deployment, and aggregated reporting. See `docs/arch/test-strategy.md`
+for details.
+
+```bash
+meta/scripts/uat --host srv1                    # Run matrix (host already provisioned)
+meta/scripts/uat --host srv1 --provision        # Full virgin-to-validated
+meta/scripts/uat --host srv1 --manifest n1-push # Single manifest
+```
+
+The manual steps below remain useful for debugging and first-time setup.
+
 ## Prerequisites
 
 - Fresh Debian 13 (Trixie) installation

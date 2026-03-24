@@ -57,7 +57,7 @@ Copy this template to the release issue after completing the release.
 <summary>Integration Test Results</summary>
 
 ```
-[Paste iac-driver/reports/YYYYMMDD-HHMMSS.passed.md content here]
+[Paste $HOMESTAK_ROOT/logs/YYYYMMDD-HHMMSS.json content here]
 ```
 
 </details>

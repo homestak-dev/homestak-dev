@@ -77,7 +77,10 @@ Sprint context goes in the description body, not the title.
 ## Validation Evidence
 - Scenario: `./run.sh manifest test -M n2-push -H srv1`
 - Result: PASSED
-- Report: [link]
+- Report:
+\`\`\`json
+[Paste $HOMESTAK_ROOT/logs/YYYYMMDD-HHMMSS.json content here]
+\`\`\`
 
 ## Sprint Issue
 Closes #152

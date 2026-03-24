@@ -144,7 +144,12 @@ ssh $USER@srv1 "for d in $HOMESTAK_ROOT/iac/*/; do git -C \$d checkout master 2>
 ssh $USER@srv1 "cd $HOMESTAK_ROOT/config && git checkout master"
 ```
 
-Use `homestak update --branch <name>` to automate this (bootstrap#49).
+Use `homestak update --branch <name>` to automate this, or use the UAT script
+which handles branch deployment automatically:
+
+```bash
+meta/scripts/uat --host srv1 --branch sprint/foo
+```
 
 ### 5. Execute Validation
 
@@ -188,7 +193,7 @@ Post validation results to the sprint issue:
 - Guest agent responsive
 - Cleanup complete
 
-**Report:** `iac-driver/reports/YYYYMMDD-HHMMSS.passed.md`
+**Report:** `$HOMESTAK_ROOT/logs/YYYYMMDD-HHMMSS.json`
 ```
 
 For failures, include:
