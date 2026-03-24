@@ -45,7 +45,10 @@ Update sprint log with validation outcome:
 **Host:** srv1
 **Result:** PASSED
 
-Report: [Link to report in $HOMESTAK_ROOT/logs/]
+Report:
+\`\`\`json
+[Paste $HOMESTAK_ROOT/logs/YYYYMMDD-HHMMSS.json content here]
+\`\`\`
 ```
 
 This creates the validation evidence needed for release.
@@ -98,7 +101,10 @@ If sprint is linked to a release issue, add a completion comment:
 **Validation:**
 - Scenario: `./run.sh manifest test -M n2-push -H srv1`
 - Result: PASSED
-- Report: [link]
+- Report:
+\`\`\`json
+[Paste $HOMESTAK_ROOT/logs/YYYYMMDD-HHMMSS.json content here]
+\`\`\`
 
 **Release readiness:** Ready for inclusion in release
 ```
